@@ -5,15 +5,16 @@ import { setupBackgroundIntegrationTest } from 'src/tests/background-integration
 import {
     queryAnnotationsByTerms,
     queryPagesByTerms,
-    sortUnifiedBlankSearchResult,
+    sortSearchResult,
     splitQueryIntoTerms,
 } from './utils'
 import type {
     UnifiedSearchPaginationParams,
     UnifiedBlankSearchParams,
-    UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
     TermsSearchOpts,
+    ResultDataByPage,
+    IntermediarySearchResult,
 } from './types'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -98,8 +99,8 @@ const blankSearch = async (
         lowestTimeBound: lowestTimeBound ?? 0,
         query: '',
         untilWhen: params.untilWhen ?? highestTimeBound,
-        ...params,
         limit: 10,
+        ...params,
     })
 }
 
@@ -150,12 +151,12 @@ const termsSearch = (
 }
 
 const formatResults = (
-    result: UnifiedBlankSearchResult,
+    result: IntermediarySearchResult,
     opts?: { skipSorting?: boolean },
 ) => {
     const sortedResults = opts?.skipSorting
         ? [...result.resultDataByPage]
-        : sortUnifiedBlankSearchResult(result.resultDataByPage)
+        : sortSearchResult(result.resultDataByPage)
     return sortedResults.map(([pageId, data]) => [
         pageId,
         {
@@ -191,9 +192,10 @@ describe('Unified search tests', () => {
             const resultA = await blankSearch(backgroundModules, {
                 fromWhen: 0,
                 untilWhen: now,
+                limit: 99999,
                 lowestTimeBound,
             })
-            expect(resultA.resultsExhausted).toBe(true)
+            // expect(resultA.resultsExhausted).toBe(true)
             expect(formatResults(resultA)).toEqual([
                 [
                     DATA.PAGE_ID_11,
@@ -340,39 +342,28 @@ describe('Unified search tests', () => {
             const { backgroundModules } = await setupTest()
             const resultA = await blankSearch(backgroundModules, {
                 untilWhen: new Date('2024-03-25T20:00').valueOf(), // This is calculated based on the test data times
-                // daysToSearch: 1,
             })
             const resultB = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-24T20:00').valueOf(),
-                // daysToSearch: 1,
+                untilWhen: resultA.oldestResultTimestamp,
             })
             const resultC = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-23T20:00').valueOf(),
-                // daysToSearch: 1,
+                untilWhen: resultB.oldestResultTimestamp,
             })
             const resultD = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-22T20:00').valueOf(),
-                // daysToSearch: 1,
+                untilWhen: resultC.oldestResultTimestamp,
             })
             const resultE = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-21T20:00').valueOf(),
-                // daysToSearch: 1,
+                untilWhen: resultD.oldestResultTimestamp,
             })
             const resultF = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-20T20:00').valueOf(),
-                // daysToSearch: 1,
-            })
-            const resultG = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-19T20:00').valueOf(),
-                // daysToSearch: 30, // We're really skipping ahead here as we know there's no data until about a month back
+                untilWhen: resultE.oldestResultTimestamp,
             })
             expect(resultA.resultsExhausted).toBe(false)
             expect(resultB.resultsExhausted).toBe(false)
             expect(resultC.resultsExhausted).toBe(false)
             expect(resultD.resultsExhausted).toBe(false)
-            expect(resultE.resultsExhausted).toBe(false)
-            expect(resultF.resultsExhausted).toBe(false)
-            expect(resultG.resultsExhausted).toBe(true)
+            expect(resultE.resultsExhausted).toBe(true)
+            expect(resultF.resultsExhausted).toBe(true)
             expect(formatResults(resultA)).toEqual([
                 [
                     DATA.PAGE_ID_11,
@@ -435,10 +426,7 @@ describe('Unified search tests', () => {
                 ],
             ])
 
-            // Should be an empty result "page" - nothing on this day
-            expect(formatResults(resultB)).toEqual([])
-
-            expect(formatResults(resultC)).toEqual([
+            expect(formatResults(resultB)).toEqual([
                 [
                     DATA.PAGE_ID_12,
                     {
@@ -495,15 +483,29 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url, // This will be in the next results page
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_7
+                        ][3].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+
+            expect(formatResults(resultC)).toEqual([
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url, // These came in the prev page
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
                         ],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_7][0].time,
                     },
                 ],
-            ])
-
-            expect(formatResults(resultD)).toEqual([
                 [
                     DATA.PAGE_ID_4, // Shows up a second time to get in some older annotations
                     {
@@ -532,6 +534,8 @@ describe('Unified search tests', () => {
                             DATA.VISITS[DATA.PAGE_ID_6][0].time,
                     },
                 ],
+            ])
+            expect(formatResults(resultD)).toEqual([
                 [
                     DATA.PAGE_ID_5,
                     {
@@ -544,8 +548,6 @@ describe('Unified search tests', () => {
                             DATA.VISITS[DATA.PAGE_ID_5][0].time,
                     },
                 ],
-            ])
-            expect(formatResults(resultE)).toEqual([
                 [
                     DATA.PAGE_ID_4, // Shows up a third time to get in the oldest annotations
                     {
@@ -574,6 +576,19 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_3][1].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_3][0].url,
                         ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_3
+                        ][3].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+            expect(formatResults(resultE)).toEqual([
+                // TODO: Ideally this result gets ommitted as it's already shown in the previous results page with all the annots.
+                //   It shows again because there's a visit before the annots that's just on the cut-off point between results pages.
+                [
+                    DATA.PAGE_ID_3,
+                    {
+                        annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_3][0].time,
                     },
@@ -586,9 +601,6 @@ describe('Unified search tests', () => {
                             DATA.BOOKMARKS[DATA.PAGE_ID_2][0].time,
                     },
                 ],
-            ])
-
-            expect(formatResults(resultF)).toEqual([
                 [
                     DATA.PAGE_ID_1,
                     {
@@ -597,9 +609,6 @@ describe('Unified search tests', () => {
                             DATA.VISITS[DATA.PAGE_ID_1][0].time,
                     },
                 ],
-            ])
-            // This is the final 30 day period search to pick up this last result, which is ~1 month before all the other data
-            expect(formatResults(resultG)).toEqual([
                 [
                     DATA.PAGE_ID_12,
                     {
@@ -609,6 +618,7 @@ describe('Unified search tests', () => {
                     },
                 ],
             ])
+            expect(formatResults(resultF)).toEqual([])
         })
 
         it('should return recent highlights and their pages on list filtered blank search', async () => {

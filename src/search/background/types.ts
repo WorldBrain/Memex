@@ -150,13 +150,24 @@ export type UnifiedSearchResult = {
     oldestResultTimestamp: number
 }
 
-export type UnifiedBlankSearchResult = {
+export type IntermediarySearchResult = {
     oldestResultTimestamp: number | null
     resultsExhausted: boolean
-    resultDataByPage: Map<string, UnifiedBlankSearchPageResultData>
+    resultDataByPage: ResultDataByPage
 }
 
-export type UnifiedBlankSearchPageResultData = {
-    latestPageTimestamp: number
+export type ResultDataByPage = Map<string, UnifiedSearchPageResultData>
+
+export type UnifiedSearchPageResultData = {
     annotations: Annotation[]
+    /**
+     * Contains the latest timestamp associated with the page bookmark or visits. Not annotation.
+     * Used primarily for sorting and display in UI.
+     */
+    latestPageTimestamp: number
+    /**
+     * Contains the oldest timestamp associated with the page, including bookmarks, visits, or annotations.
+     * Used for paging back through blank search results (oldest timestamp of batch N is the upper bound for batch N+1)
+     */
+    oldestTimestamp: number
 }
