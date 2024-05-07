@@ -145,11 +145,26 @@ export default class UpgradeModal extends UIElement<
                             {powerUp.powerUps.pro.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>
-                        {this.state.billingPeriod === 'monthly'
-                            ? powerUp.powerUps.pro.pricing['monthly']
-                            : powerUp.powerUps.pro.pricing['yearly']}
-                    </PowerUpPricing>
+                    <PowerUpPricingBox>
+                        <PowerUpPricing
+                            componentVariant={this.props.componentVariant}
+                        >
+                            {this.state.billingPeriod === 'monthly'
+                                ? powerUp.powerUps.pro.pricing['monthly']
+                                : powerUp.powerUps.pro.pricing['yearly']}
+                        </PowerUpPricing>
+                        {this.props.componentVariant === 'OnboardingStep' && (
+                            <AlternativePricing>
+                                {this.state.billingPeriod === 'monthly'
+                                    ? powerUp.powerUps.pro.pricingDiscounted[
+                                          'monthly'
+                                      ]
+                                    : powerUp.powerUps.pro.pricingDiscounted[
+                                          'yearly'
+                                      ]}
+                            </AlternativePricing>
+                        )}
+                    </PowerUpPricingBox>
                 </PowerUpItem>
                 <PowerUpItem
                     onClick={() => {
@@ -178,11 +193,26 @@ export default class UpgradeModal extends UIElement<
                             {powerUp.powerUps.ownKey.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>
-                        {this.state.billingPeriod === 'monthly'
-                            ? powerUp.powerUps.ownKey.pricing['monthly']
-                            : powerUp.powerUps.ownKey.pricing['yearly']}
-                    </PowerUpPricing>
+                    <PowerUpPricingBox>
+                        <PowerUpPricing
+                            componentVariant={this.props.componentVariant}
+                        >
+                            {this.state.billingPeriod === 'monthly'
+                                ? powerUp.powerUps.ownKey.pricing['monthly']
+                                : powerUp.powerUps.ownKey.pricing['yearly']}
+                        </PowerUpPricing>
+                        {this.props.componentVariant === 'OnboardingStep' && (
+                            <AlternativePricing>
+                                {this.state.billingPeriod === 'monthly'
+                                    ? powerUp.powerUps.ownKey.pricingDiscounted[
+                                          'monthly'
+                                      ]
+                                    : powerUp.powerUps.ownKey.pricingDiscounted[
+                                          'yearly'
+                                      ]}
+                            </AlternativePricing>
+                        )}
+                    </PowerUpPricingBox>
                 </PowerUpItem>
             </PowerUpOptions>
         )
@@ -293,11 +323,26 @@ export default class UpgradeModal extends UIElement<
                             {powerUp.powerUps.pro.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>
-                        {this.state.billingPeriod === 'monthly'
-                            ? powerUp.powerUps.pro.pricing['monthly']
-                            : powerUp.powerUps.pro.pricing['yearly']}
-                    </PowerUpPricing>
+                    <PowerUpPricingBox>
+                        <PowerUpPricing
+                            componentVariant={this.props.componentVariant}
+                        >
+                            {this.state.billingPeriod === 'monthly'
+                                ? powerUp.powerUps.pro.pricing['monthly']
+                                : powerUp.powerUps.pro.pricing['yearly']}
+                        </PowerUpPricing>
+                        {this.props.componentVariant === 'OnboardingStep' && (
+                            <AlternativePricing>
+                                {this.state.billingPeriod === 'monthly'
+                                    ? powerUp.powerUps.pro.pricingDiscounted[
+                                          'monthly'
+                                      ]
+                                    : powerUp.powerUps.pro.pricingDiscounted[
+                                          'yearly'
+                                      ]}
+                            </AlternativePricing>
+                        )}
+                    </PowerUpPricingBox>
                 </PowerUpItem>
             </PowerUpOptions>
         )
@@ -352,7 +397,16 @@ export default class UpgradeModal extends UIElement<
                             Upgrade now and never pay for Memex again
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>$500</PowerUpPricing>
+                    <PowerUpPricingBox>
+                        <PowerUpPricing
+                            componentVariant={this.props.componentVariant}
+                        >
+                            $500
+                        </PowerUpPricing>
+                        {this.props.componentVariant === 'OnboardingStep' && (
+                            <AlternativePricing>$400</AlternativePricing>
+                        )}
+                    </PowerUpPricingBox>
                 </PowerUpItem>
             </PowerUpOptions>
         )
@@ -478,6 +532,10 @@ const Powerups = [
                     monthly: '$4',
                     yearly: '$40',
                 },
+                pricingDiscounted: {
+                    monthly: '$3.20',
+                    yearly: '$32',
+                },
             },
         },
     },
@@ -500,6 +558,10 @@ const Powerups = [
                     monthly: '$6',
                     yearly: '$60',
                 },
+                pricingDiscounted: {
+                    monthly: '$4.80',
+                    yearly: '$48',
+                },
             },
             ownKey: {
                 title: 'Bring your own Key',
@@ -508,6 +570,10 @@ const Powerups = [
                 pricing: {
                     monthly: '$2.50',
                     yearly: '$25',
+                },
+                pricingDiscounted: {
+                    monthly: '$2.00',
+                    yearly: '$20',
                 },
             },
         },
@@ -625,7 +691,35 @@ const PowerUpSubTitle = styled.div`
     width: 100%;
     font-size: 13px;
 `
-const PowerUpPricing = styled.div`
+
+const PowerUpPricingBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    grid-gap: 3px;
+    align-items: flex-end;
+`
+
+const PowerUpPricing = styled.div<{
+    componentVariant?: string
+}>`
+    color: ${(props) => props.theme.colors.prime1};
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: right;
+
+    ${(props) =>
+        props.componentVariant === 'OnboardingStep' &&
+        css`
+            text-decoration: line-through;
+            color: ${(props) => props.theme.colors.greyScale5};
+            font-size: 15px;
+        `}
+`
+const AlternativePricing = styled.div<{
+    componentVariant?: string
+}>`
     color: ${(props) => props.theme.colors.prime1};
     font-size: 18px;
     font-weight: 700;

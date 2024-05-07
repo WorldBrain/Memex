@@ -14,7 +14,7 @@ export interface PromptTemplatesDependencies {
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => Promise<'error' | 'success'>
-    componentVariant: 'Modal' | 'PricingList' | 'AccountPage'
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
     getRootElement?: () => HTMLElement
     closeComponent?: () => void
     authBG: AuthRemoteFunctionsInterface

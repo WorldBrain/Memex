@@ -201,7 +201,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             </DescriptionText>
             <UpgradeModalContainer>
                 <UpgradeModal
-                    componentVariant="PricingList"
+                    componentVariant="OnboardingStep"
                     authBG={this.props.authBG}
                     powerUpType="Bookmarks"
                     createCheckOutLink={
