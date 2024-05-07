@@ -228,7 +228,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             }
         }
         // Logic for annotate button click
-        this.props.annotationsFunctions.createYoutubeTimestamp()
+        this.props.annotationsFunctions.createYoutubeTimestamp(timestampToSend)
     }
 
     createAhref = (videoURLWithTime, humanTimestamp) => {
@@ -247,18 +247,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     }
 
     handleSummarizeButtonClick = async (event) => {
-        // Logic for summarize button click
-        if (
-            (await this.props.syncSettings?.openAI?.get(
-                'videoPromptSetting',
-            )) != this.state.summarizePrompt
-        ) {
-            await this.props.syncSettings?.openAI?.set(
-                'videoPromptSetting',
-                this.state.summarizePrompt,
-            )
-        }
-
         const from = this.state.fromSecondsPosition
         const to = this.state.toSecondsPosition
 
