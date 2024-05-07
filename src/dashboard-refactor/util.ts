@@ -141,37 +141,3 @@ export const stateToSearchParams = (
         ...termsSearchOpts,
     }
 }
-
-/**
- * NOTE: This function results in the loss of data. Only use in special cases.
- */
-export const flattenNestedResults = ({
-    searchResults,
-}: Pick<RootState, 'searchResults'>): NormalizedState<PageResult> => {
-    const allPageResults = Object.values(searchResults.results).map(
-        (a) => a.pages,
-    )
-    const result = initNormalizedState<PageResult>()
-
-    for (const pages of allPageResults) {
-        result.allIds = [...new Set([...result.allIds, ...pages.allIds])]
-        for (const pageId in pages.byId) {
-            const existing = result.byId[pageId] ?? ({} as PageResult)
-            result.byId[pageId] = {
-                ...pages.byId[pageId],
-                noteIds: {
-                    followed: [],
-                    search: [],
-                    user: [
-                        ...new Set([
-                            ...(existing?.noteIds?.user ?? []),
-                            ...pages.byId[pageId].noteIds.user,
-                        ]),
-                    ],
-                },
-            }
-        }
-    }
-
-    return result
-}

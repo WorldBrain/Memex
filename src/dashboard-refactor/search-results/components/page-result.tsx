@@ -912,8 +912,6 @@ export default class PageResultView extends PureComponent<Props> {
     }
 
     render() {
-        const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
-
         return (
             <ItemBox
                 onMouseEnter={this.props.onMainContentHover}
