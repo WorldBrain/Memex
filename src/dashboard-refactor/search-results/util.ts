@@ -1,14 +1,12 @@
 import type {
     StandardSearchResponse,
-    AnnotsByPageUrl,
     AnnotPage,
+    UnifiedSearchPaginationParams,
 } from 'src/search/background/types'
 import type {
     PageData,
     PageResult,
-    PageResultsByDay,
     NoteData,
-    SearchResultToState,
     NoteResult,
     NoteFormState,
     RootState,
@@ -103,11 +101,12 @@ export const bindFunctionalProps = <
 }
 
 export const getInitialPageResultState = (
-    id: string,
+    pageId: string,
+    pageResultId: string,
     noteIds: string[] = [],
-    extra: Partial<PageResult> = {},
 ): PageResult => ({
-    id,
+    pageId,
+    pageResultId,
     notesType: 'user',
     activePage: undefined,
     areNotesShown: false,
@@ -121,7 +120,6 @@ export const getInitialPageResultState = (
     hoverState: null,
     copyLoadingState: 'pristine',
     editTitleState: null,
-    ...extra,
 })
 
 export const getInitialNoteResultState = (
@@ -202,29 +200,42 @@ const annotationToNoteData = (
     }
 }
 
-export const pageSearchResultToState: SearchResultToState<StandardSearchResponse> = (
-    result,
-    cache,
-    extraPageResultState,
-) => {
+export const formPageSearchResultId = (
+    pageId: string,
+    resultsPage: number,
+): string => `${resultsPage}-${pageId}`
+
+export const pageSearchResultToState = (
+    result: StandardSearchResponse,
+    params: UnifiedSearchPaginationParams,
+    cache: PageAnnotationsCacheInterface,
+): Pick<
+    RootState,
+    'results' | 'noteData' | 'pageData' | 'pageIdToResultIds'
+> => {
     const pageData = initNormalizedState<PageData>()
     const noteData = initNormalizedState<NoteData & NoteResult>()
     const pageResults = initNormalizedState<PageResult>()
+    const pageIdToResultIds: RootState['pageIdToResultIds'] = {}
 
     for (const pageResult of result.docs) {
-        const id = pageResult.url
+        const pageId = pageResult.url
+        const resultId = formPageSearchResultId(pageId, params.skip)
+        const existingResultIds = pageIdToResultIds[pageId] ?? []
+        pageIdToResultIds[pageId] = [...existingResultIds, resultId]
+
         const sortedAnnots = pageResult.annotations.sort(sortByPagePosition)
         const noteIds = sortedAnnots.map((a) => a.url)
 
-        pageData.byId[id] = pageResultToPageData(pageResult, cache)
-        pageResults.byId[id] = getInitialPageResultState(
-            pageResult.url,
+        pageData.byId[pageId] = pageResultToPageData(pageResult, cache)
+        pageResults.byId[resultId] = getInitialPageResultState(
+            pageId,
+            resultId,
             noteIds,
-            extraPageResultState,
         )
 
-        pageData.allIds.push(id)
-        pageResults.allIds.push(id)
+        pageData.allIds.push(pageId)
+        pageResults.allIds.push(resultId)
 
         for (const annotation of sortedAnnots) {
             noteData.allIds.push(annotation.url)
@@ -238,6 +249,7 @@ export const pageSearchResultToState: SearchResultToState<StandardSearchResponse
     return {
         noteData,
         pageData,
+        pageIdToResultIds,
         results: {
             [PAGE_SEARCH_DUMMY_DAY]: {
                 day: PAGE_SEARCH_DUMMY_DAY,

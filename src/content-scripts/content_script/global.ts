@@ -650,14 +650,7 @@ export async function main(
             }
 
             let anchor: Anchor
-            const quote = getSelectionHtml(selection)
-            const descriptor = await anchoring.selectionToDescriptor({
-                _document: this.document,
-                _window: this.window,
-                isPdf: this.pdfViewer != null,
-                selection,
-            })
-            anchor = { quote, descriptor }
+            let quote: string
 
             if (
                 !(await pageActionAllowed(
@@ -711,6 +704,15 @@ export async function main(
                 annotationId = results.annotationId
                 await results.createPromise
             } else if (selection) {
+                quote = getSelectionHtml(selection)
+                const descriptor = await anchoring.selectionToDescriptor({
+                    _document: this.document,
+                    _window: this.window,
+                    isPdf: this.pdfViewer != null,
+                    selection,
+                })
+                anchor = { quote, descriptor }
+
                 const results = await saveHighlight(
                     shouldShare,
                     shouldCopyShareLink,
