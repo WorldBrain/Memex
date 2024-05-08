@@ -438,6 +438,17 @@ class BackgroundScript {
         doNotOpen: boolean,
     ) => {
         const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
+        const creationTime = currentUser?.creationTime
+        const currentTime = Date.now()
+        const thirtyDaysInMilliseconds = 30 * 24 * 60 * 60 * 1000
+
+        // Check if the creation time is less than 30 days ago
+        let upgradeWithinTrial = false
+        upgradeWithinTrial =
+            creationTime &&
+            currentTime - new Date(creationTime).getTime() <
+                thirtyDaysInMilliseconds
+
         const currentUserEmail = currentUser.email
         const currentBillingPeriod = billingPeriod
         const baseLink = CLOUDFLARE_WORKER_URLS[process.env.NODE_ENV]
@@ -449,12 +460,12 @@ class BackgroundScript {
             selectedPremiumPlansString = 'lifetime'
             checkoutLink = `${baseLink}/create-checkout?billingPeriod=lifetime&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
                 currentUserEmail,
-            )}`
+            )}&uwt=${upgradeWithinTrial}`
         } else {
             selectedPremiumPlansString = selectedPremiumPlans.join(',')
             checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
                 currentUserEmail,
-            )}`
+            )}&uwt=${upgradeWithinTrial}`
         }
 
         if (doNotOpen) {

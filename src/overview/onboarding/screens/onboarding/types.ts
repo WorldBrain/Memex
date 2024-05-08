@@ -5,6 +5,7 @@ import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background
 import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -13,6 +14,7 @@ export interface Dependencies {
     navToGuidedTutorial: () => void
     contentScriptsBG: ContentScriptsInterface<'caller'>
     analyticsBG?: AnalyticsCoreInterface
+    bgScriptsBG: RemoteBGScriptInterface
 }
 
 export interface State {

@@ -194,7 +194,7 @@ export default class Logic extends UILogic<State, Event> {
                 window.close()
             } else {
                 this.emitMutation({
-                    welcomeStep: { $set: 'basicIntro' },
+                    welcomeStep: { $set: 'pricingStep' },
                 })
                 // // check if user has been coming from Google or Twitter login & if they account creation was in the last 10s
                 // if (!newSignUp) {
