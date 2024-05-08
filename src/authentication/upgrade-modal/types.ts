@@ -23,7 +23,7 @@ export interface PromptTemplatesDependencies {
 export interface PromptTemplatesState {
     billingPeriod: 'monthly' | 'yearly'
     checkoutLoading: UITaskState
-    componentVariant: 'Modal' | 'PricingList' | 'AccountPage'
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
     powerUpType: PowerUpModalVersion
     activatedPowerUps?: Record<PremiumPlans, any>
     authLoadState: UITaskState
