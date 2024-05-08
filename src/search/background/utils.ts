@@ -303,12 +303,3 @@ export const splitQueryIntoTerms = (
         matchTermsFuzzyStartsWith,
     }
 }
-
-export const getOldestResultTimestamp = (results: ResultDataByPage): number => {
-    if (!results.size) {
-        return 0
-    }
-    const sortedResults = sortSearchResult(results)
-    const [, oldestResult] = sortedResults[sortedResults.length - 1]
-    return oldestResult.oldestTimestamp
-}

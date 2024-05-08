@@ -41,7 +41,6 @@ import {
     queryAnnotationsByTerms,
     queryPagesByTerms,
     splitQueryIntoTerms,
-    getOldestResultTimestamp,
     sliceSearchResult,
 } from './utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -52,8 +51,6 @@ import { isUrlAnEventPage } from '@worldbrain/memex-common/lib/unified-search/ut
 import type Dexie from 'dexie'
 import { blobToDataURL } from 'src/util/blob-utils'
 import { intersectSets } from 'src/util/map-set-helpers'
-
-const dayMs = 1000 * 60 * 60 * 24
 
 type UnifiedSearchLookupData = {
     pages: Map<string, Omit<AnnotPage, 'annotations' | 'hasBookmark'>>
@@ -418,12 +415,14 @@ export default class SearchBackground {
     private async unifiedBlankSearch(
         params: UnifiedBlankSearchParams,
     ): Promise<IntermediarySearchResult> {
-        const upperBound = params.untilWhen
-        // const lowerBound =
-        //     params.fromWhen ??
-        //     Math.max(upperBound - params.daysToSearch * dayMs, 0)
-
-        // const timeBoundsQuery = { $gt: lowerBound, $lt: upperBound }
+        let upperBound = params.untilWhen
+        // Should be unset on the first page, where we need to set it to the top-most time bound
+        if (upperBound == null) {
+            upperBound = params.filterByListIds.length
+                ? await this.calcLatestListTimeBound(params)
+                : await this.calcSearchTimeBoundEdge('top')
+            upperBound += 1 // This means we can do a < instead of <=
+        }
 
         const resultDataByPage: ResultDataByPage = new Map()
         // TODO: these Dexie queries are here because the storex query didn't result in an indexed query happening
@@ -452,17 +451,6 @@ export default class SearchBackground {
                 .limit(params.limit)
                 .toArray(),
         ])
-        // const [annotations, visits, bookmarks] = await Promise.all([
-        //     this.options.storageManager
-        //         .collection('annotations')
-        //         .findObjects<Annotation>({ lastEdited: timeBoundsQuery }),
-        //     this.options.storageManager
-        //         .collection('visits')
-        //         .findObjects<Visit>({ time: timeBoundsQuery }),
-        //     this.options.storageManager
-        //         .collection('bookmarks')
-        //         .findObjects<Bookmark>({ time: timeBoundsQuery }),
-        // ])
 
         // Work with only the latest N results for this results page, discarding rest
         const inScopeResults = [...annotations, ...visits, ...bookmarks]
@@ -510,7 +498,16 @@ export default class SearchBackground {
         }
 
         await this.filterUnifiedSearchResultsByFilters(resultDataByPage, params)
-        const lowerBound = getOldestResultTimestamp(resultDataByPage)
+        let lowerBound: number
+        if (!inScopeResults.length) {
+            lowerBound = 0
+        } else {
+            const oldestResult = inScopeResults[inScopeResults.length - 1]
+            lowerBound =
+                'lastEdited' in oldestResult
+                    ? oldestResult.lastEdited.valueOf()
+                    : oldestResult.time
+        }
 
         return {
             resultDataByPage,

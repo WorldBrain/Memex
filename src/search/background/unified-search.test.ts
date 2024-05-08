@@ -99,7 +99,7 @@ async function setupTest(opts?: { skipDataInsertion?: boolean }) {
 
 const unifiedSearch = async (
     { search }: BackgroundModules,
-    params: Partial<UnifiedSearchParams>,
+    params: Partial<UnifiedBlankSearchParams>,
 ) => {
     return search['unifiedIntermediarySearch']({
         filterByDomains: [],
@@ -198,9 +198,10 @@ describe('Unified search tests', () => {
                 skipDataInsertion: true,
             })
             const now = Date.now()
-            const resultA = await blankSearch(backgroundModules, {
+            const resultA = await unifiedSearch(backgroundModules, {
                 fromWhen: 0,
                 untilWhen: now,
+                limit: 99999,
             })
             expect(resultA.resultsExhausted).toBe(true)
             expect([...resultA.resultDataByPage]).toEqual([])
@@ -210,16 +211,12 @@ describe('Unified search tests', () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
 
-            const lowestTimeBound = await backgroundModules.search[
-                'calcSearchTimeBoundEdge'
-            ]('bottom')
-            const resultA = await blankSearch(backgroundModules, {
+            const resultA = await unifiedSearch(backgroundModules, {
                 fromWhen: 0,
                 untilWhen: now,
                 limit: 99999,
-                lowestTimeBound,
             })
-            // expect(resultA.resultsExhausted).toBe(true)
+            expect(resultA.resultsExhausted).toBe(true)
             expect(formatResults(resultA)).toEqual([
                 [
                     DATA.PAGE_ID_11,
@@ -364,23 +361,35 @@ describe('Unified search tests', () => {
         // Check comments scattered throughout this test for more details, as things are quite intentionally structured around the test data timestamps
         it('should return most-recent highlights and their pages on unfiltered, paginated blank search', async () => {
             const { backgroundModules } = await setupTest()
-            const resultA = await blankSearch(backgroundModules, {
+            const resultA = await unifiedSearch(backgroundModules, {
+                fromWhen: 0,
                 untilWhen: new Date('2024-03-25T20:00').valueOf(), // This is calculated based on the test data times
+                limit: 10,
             })
-            const resultB = await blankSearch(backgroundModules, {
+            const resultB = await unifiedSearch(backgroundModules, {
+                fromWhen: 0,
                 untilWhen: resultA.oldestResultTimestamp,
+                limit: 10,
             })
-            const resultC = await blankSearch(backgroundModules, {
+            const resultC = await unifiedSearch(backgroundModules, {
+                fromWhen: 0,
                 untilWhen: resultB.oldestResultTimestamp,
+                limit: 10,
             })
-            const resultD = await blankSearch(backgroundModules, {
+            const resultD = await unifiedSearch(backgroundModules, {
+                fromWhen: 0,
                 untilWhen: resultC.oldestResultTimestamp,
+                limit: 10,
             })
-            const resultE = await blankSearch(backgroundModules, {
+            const resultE = await unifiedSearch(backgroundModules, {
+                fromWhen: 0,
                 untilWhen: resultD.oldestResultTimestamp,
+                limit: 10,
             })
-            const resultF = await blankSearch(backgroundModules, {
+            const resultF = await unifiedSearch(backgroundModules, {
+                fromWhen: 0,
                 untilWhen: resultE.oldestResultTimestamp,
+                limit: 10,
             })
             expect(resultA.resultsExhausted).toBe(false)
             expect(resultB.resultsExhausted).toBe(false)
@@ -722,19 +731,19 @@ describe('Unified search tests', () => {
         it('should return recent highlights and their pages on domain filtered blank search', async () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
-            const resultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultA = await unifiedSearch(backgroundModules, {
                 filterByDomains: ['test.com'],
-            })
-            const resultB = await blankSearch(backgroundModules, {
                 fromWhen: 0,
                 untilWhen: now,
+                limit: 9999,
+            })
+            const resultB = await unifiedSearch(backgroundModules, {
                 filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
-            })
-            const resultC = await blankSearch(backgroundModules, {
                 fromWhen: 0,
                 untilWhen: now,
+                limit: 9999,
+            })
+            const resultC = await unifiedSearch(backgroundModules, {
                 filterByDomains: [
                     'wikipedia.org',
                     'en.wikipedia.org',
@@ -742,10 +751,14 @@ describe('Unified search tests', () => {
                     'en.test-2.com',
                     'test.com',
                 ],
+                fromWhen: 0,
+                untilWhen: now,
+                limit: 9999,
             })
 
             expect(resultA.resultsExhausted).toBe(true)
             expect(resultB.resultsExhausted).toBe(true)
+            expect(resultC.resultsExhausted).toBe(true)
             expect(formatResults(resultA).map(([pageId]) => pageId)).toEqual([
                 DATA.PAGE_ID_10,
             ])
