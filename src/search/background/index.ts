@@ -12,6 +12,7 @@ import type {
     UnifiedTermsSearchParams,
     ResultDataByPage,
     IntermediarySearchResult,
+    UnifiedSearchPaginationParams,
 } from './types'
 import { SearchError, BadTermError } from './errors'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
@@ -50,6 +51,7 @@ import { isUrlATweet } from '@worldbrain/memex-common/lib/twitter-integration/ut
 import { isUrlAnEventPage } from '@worldbrain/memex-common/lib/unified-search/utils'
 import type Dexie from 'dexie'
 import { blobToDataURL } from 'src/util/blob-utils'
+import { intersectSets } from 'src/util/map-set-helpers'
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -294,6 +296,125 @@ export default class SearchBackground {
         pageIdsToFilterOut.forEach((id) => resultDataByPage.delete(id))
     }
 
+    private async unifiedBlankListsSearch(
+        params: UnifiedSearchParams,
+    ): Promise<IntermediarySearchResult> {
+        if (!params.filterByListIds.length) {
+            throw new Error(
+                'Lists search was called but no lists were filtered',
+            )
+        }
+        const resultDataByPage: ResultDataByPage = new Map()
+
+        const dexie = this.options.storageManager.backend['dexie'] as Dexie
+        const [pageListEntries, annotListEntries] = await Promise.all([
+            dexie
+                .table<PageListEntry>('pageListEntries')
+                .where('listId')
+                .anyOf(params.filterByListIds)
+                .toArray(),
+            dexie
+                .table<AnnotationListEntry>('annotListEntries')
+                .where('listId')
+                .anyOf(params.filterByListIds)
+                .toArray(),
+        ])
+
+        const latestListEntryTimeByPage = fromPairs(
+            pageListEntries
+                .sort((a, b) => a.createdAt.valueOf() - b.createdAt.valueOf())
+                .map((e) => [e.pageUrl, e.createdAt.valueOf() as number]),
+        )
+
+        // Get intersections of page + annot IDs for all lists - effectively "AND"s the lists
+        const validPageIds = params.filterByListIds
+            .map(
+                (listId) =>
+                    new Set(
+                        pageListEntries
+                            .filter((e) => e.listId === listId)
+                            .map((e) => e.pageUrl),
+                    ),
+            )
+            .reduce((a, b) => intersectSets(a)(b))
+        const validAnnotIds = params.filterByListIds
+            .map(
+                (listId) =>
+                    new Set(
+                        annotListEntries
+                            .filter((e) => e.listId === listId)
+                            .map((e) => e.url),
+                    ),
+            )
+            .reduce((a, b) => intersectSets(a)(b))
+
+        // Get auto-shared annotations
+        let autoSharedAnnots = await dexie
+            .table<Annotation>('annotations')
+            .where('pageUrl')
+            .anyOf([...validPageIds])
+            .toArray()
+        const annotPrivacyLevels = await dexie
+            .table<AnnotationPrivacyLevel>('annotationPrivacyLevels')
+            .where('annotation')
+            .anyOf(autoSharedAnnots.map((a) => a.url))
+            .toArray()
+        const autoSharedAnnotIds = new Set(
+            annotPrivacyLevels
+                .filter((l) =>
+                    [
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(l.privacyLevel),
+                )
+                .map((l) => l.annotation),
+        )
+        autoSharedAnnots = autoSharedAnnots.filter((a) =>
+            autoSharedAnnotIds.has(a.url),
+        )
+
+        // Get selectively-shared annotations
+        const selectivelySharedAnnots = await dexie
+            .table<Annotation>('annotations')
+            .bulkGet([...validAnnotIds])
+
+        // Add in all the annotations to the results
+        const annotsByPage = groupBy(
+            [...autoSharedAnnots, ...selectivelySharedAnnots],
+            (a) => a.pageUrl,
+        )
+        for (const [pageId, annots] of Object.entries(annotsByPage)) {
+            const descOrderedAnnots = annots.sort(
+                (a, b) => b.lastEdited.valueOf() - a.lastEdited.valueOf(),
+            )
+            resultDataByPage.set(pageId, {
+                annotations: descOrderedAnnots,
+                // These may get overwritten in the next loop by the latest page list entry time
+                latestPageTimestamp: descOrderedAnnots[0].lastEdited.valueOf(),
+                oldestTimestamp: 0,
+            })
+        }
+
+        for (const pageId of validPageIds) {
+            const latestPageTimestamp = latestListEntryTimeByPage[pageId] ?? 0
+            const existing = resultDataByPage.get(pageId) ?? {
+                annotations: [],
+                latestPageTimestamp,
+                oldestTimestamp: 0,
+            }
+            resultDataByPage.set(pageId, {
+                ...existing,
+                latestPageTimestamp,
+            })
+        }
+
+        return {
+            resultDataByPage,
+            oldestResultTimestamp: 0,
+            resultsExhausted: true,
+        }
+    }
+
     private async unifiedBlankSearch(
         params: UnifiedBlankSearchParams,
     ): Promise<IntermediarySearchResult> {
@@ -445,56 +566,66 @@ export default class SearchBackground {
         }
     }
 
-    unifiedSearch: RemoteSearchInterface['unifiedSearch'] = async (params) => {
-        let result: IntermediarySearchResult
-        const lowestTimeBound = await this.calcSearchTimeBoundEdge('bottom')
+    private async unifiedIntermediarySearch(
+        params: UnifiedSearchParams & UnifiedSearchPaginationParams,
+    ): Promise<IntermediarySearchResult> {
         const isTermsSearch = params.query.trim().length
-        // There's 2 separate search implementations depending on whether doing a terms search or not
-        if (!isTermsSearch) {
-            // TODO: Only do this on the first search page
-            const highestTimeBound = await this.calcSearchTimeBoundEdge('top')
-            // Skip over days where there's no results, until we get results
-            do {
-                result = await this.unifiedBlankSearch({
-                    ...params,
-                    untilWhen:
-                        result?.oldestResultTimestamp ?? // allows to paginate back from prev result
-                        params.untilWhen ??
-                        highestTimeBound + 1, // default to latest timestamp in DB, to start off search
-                    lowestTimeBound,
-                })
-            } while (!result.resultsExhausted && !result.resultDataByPage.size)
-        } else {
-            const {
-                phrases,
-                terms,
-                inTitle,
-                inContent,
-                inHighlight,
-                inComment,
-                matchTermsFuzzyStartsWith,
-            } = splitQueryIntoTerms(params.query)
 
-            params.matchPageTitleUrl = inTitle
-            params.matchPageText = inContent
-            params.matchNotes = inComment
-            params.matchHighlights = inHighlight
-            params.phrases = phrases
-            params.terms = terms
-            params.matchTermsFuzzyStartsWith = matchTermsFuzzyStartsWith
-            result = await this.unifiedTermsSearch({
-                ...params,
-                queryPages: queryPagesByTerms(
-                    this.options.storageManager,
-                    params,
-                ),
-                queryAnnotations: queryAnnotationsByTerms(
-                    this.options.storageManager,
-                    params,
-                ),
-            })
+        // There's 3 separate search implementations depending on whether doing a terms search or not and if we're filtering by list
+        if (!isTermsSearch) {
+            if (params.filterByListIds.length) {
+                return this.unifiedBlankListsSearch(params)
+            } else {
+                let result: IntermediarySearchResult
+                const lowestTimeBound = await this.calcSearchTimeBoundEdge(
+                    'bottom',
+                )
+
+                // Skip over days where there's no results, until we get results
+                do {
+                    result = await this.unifiedBlankSearch({
+                        ...params,
+                        lowestTimeBound,
+                        untilWhen:
+                            result?.oldestResultTimestamp ?? params.untilWhen, // affords pagination back from prev result
+                    })
+                } while (
+                    !result.resultsExhausted &&
+                    !result.resultDataByPage.size
+                )
+                return result
+            }
         }
 
+        const {
+            phrases,
+            terms,
+            inTitle,
+            inContent,
+            inHighlight,
+            inComment,
+            matchTermsFuzzyStartsWith,
+        } = splitQueryIntoTerms(params.query)
+
+        params.matchPageTitleUrl = inTitle
+        params.matchPageText = inContent
+        params.matchNotes = inComment
+        params.matchHighlights = inHighlight
+        params.phrases = phrases
+        params.terms = terms
+        params.matchTermsFuzzyStartsWith = matchTermsFuzzyStartsWith
+        return this.unifiedTermsSearch({
+            ...params,
+            queryPages: queryPagesByTerms(this.options.storageManager, params),
+            queryAnnotations: queryAnnotationsByTerms(
+                this.options.storageManager,
+                params,
+            ),
+        })
+    }
+
+    unifiedSearch: RemoteSearchInterface['unifiedSearch'] = async (params) => {
+        const result = await this.unifiedIntermediarySearch(params)
         const dataLookups = await this.lookupDataForUnifiedResults(
             result.resultDataByPage,
         )

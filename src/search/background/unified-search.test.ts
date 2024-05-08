@@ -15,6 +15,7 @@ import type {
     TermsSearchOpts,
     ResultDataByPage,
     IntermediarySearchResult,
+    UnifiedSearchParams,
 } from './types'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -94,6 +95,20 @@ async function setupTest(opts?: { skipDataInsertion?: boolean }) {
         await insertTestData(setup.storageManager)
     }
     return setup
+}
+
+const unifiedSearch = async (
+    { search }: BackgroundModules,
+    params: Partial<UnifiedSearchParams>,
+) => {
+    return search['unifiedIntermediarySearch']({
+        filterByDomains: [],
+        filterByListIds: [],
+        query: '',
+        limit: 10,
+        skip: 0,
+        ...params,
+    })
 }
 
 const blankSearch = async (
@@ -632,25 +647,17 @@ describe('Unified search tests', () => {
 
         it('should return recent highlights and their pages on list filtered blank search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
-            const resultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+
+            const resultA = await unifiedSearch(backgroundModules, {
                 filterByListIds: [DATA.LIST_ID_1],
             })
-            const resultB = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultB = await unifiedSearch(backgroundModules, {
                 filterByListIds: [DATA.LIST_ID_1, DATA.LIST_ID_3], // Multiple values do an AND
             })
-            const resultC = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultC = await unifiedSearch(backgroundModules, {
                 filterByListIds: [DATA.LIST_ID_2],
             })
-            const resultD = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultD = await unifiedSearch(backgroundModules, {
                 filterByListIds: [DATA.LIST_ID_2, DATA.LIST_ID_3], // Should be no overlaps
             })
 
@@ -663,8 +670,9 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_4,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_4][0].time,
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][1].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -699,7 +707,7 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][5].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
-                            // Thess ones are selectively shared to a different list to the parent page, thus get omitted
+                            // These ones are selectively shared to a different list to the parent page, thus get omitted
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
