@@ -154,7 +154,7 @@ const LeftSideIconContainer = styled.div<{ alwaysShowRightSideIcon: boolean }>`
 const RightSideActionBar = styled.div<{ alwaysShowRightSideIcon: boolean }>`
     position: absolute;
     padding-right: 10px;
-    right: 0px;
+    right: 5px;
     display: flex;
     z-index: 10;
     backdrop-filter: blur(5px);

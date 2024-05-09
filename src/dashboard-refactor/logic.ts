@@ -4729,18 +4729,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const pageData =
-            previousState?.searchResults?.pageData?.byId[event.pageResultId]
+        const id = event.pageResultId.split('-')[1]
+
+        const pageData = previousState?.searchResults?.pageData?.byId[id]
 
         if (!pageData) {
             return
         }
 
-        if (pageData?.fullPdfUrl) {
+        if (pageData?.fullUrl.includes('memex.cloud/')) {
             // This event will be assigned to an anchor <a> el, so we need to override that for PDFs
             event.synthEvent.preventDefault()
 
-            const memexCloudUrl = new URL(pageData?.fullPdfUrl!)
+            const pdfUrl = pageData.fullUrl
+            const PDFurlwithID = await this.options.searchBG.resolvePdfPageFullUrls(
+                pdfUrl,
+            )
+
+            const memexCloudUrl = new URL(PDFurlwithID.originalLocation)
             const uploadId = memexCloudUrl?.searchParams.get('upload_id')
 
             // Uploaded PDFs need to have temporary access URLs fetched
@@ -4759,7 +4765,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         searchResults: {
                             pageData: {
                                 byId: {
-                                    [event.pageResultId]: {
+                                    [id]: {
                                         uploadedPdfLinkLoadState: {
                                             $set: taskState,
                                         },
@@ -4807,15 +4813,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({ showDropArea: { $set: true } })
             }
 
-            await openPDFInViewer(pageData.fullPdfUrl!, {
+            await openPDFInViewer(PDFurlwithID.originalLocation, {
                 tabsAPI: this.options.tabsAPI,
                 runtimeAPI: this.options.runtimeAPI,
             })
         }
 
-        if (pageData?.fullUrl && !pageData?.fullPdfUrl) {
-            window.open(pageData.fullUrl, '_blank')
-        }
+        // if (pageData?.fullUrl && !pageData?.fullUrl) {
+        //     window.open(pageData.fullUrl, '_blank')
+        // }
     }
 
     dropPdfFile: EventHandler<'dropPdfFile'> = async ({ event }) => {

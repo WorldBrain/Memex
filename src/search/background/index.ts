@@ -48,6 +48,7 @@ import { isUrlATweet } from '@worldbrain/memex-common/lib/twitter-integration/ut
 import { isUrlAnEventPage } from '@worldbrain/memex-common/lib/unified-search/utils'
 import type Dexie from 'dexie'
 import { blobToDataURL } from 'src/util/blob-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -104,6 +105,7 @@ export default class SearchBackground {
             unifiedSearch: this.unifiedSearch,
             extendedSuggest: this.storage.suggestExtended,
             delPages: this.options.pages.delPages.bind(this.options.pages),
+            resolvePdfPageFullUrls: this.resolvePdfPageFullUrls.bind(this),
         }
     }
 
@@ -619,38 +621,35 @@ export default class SearchBackground {
         return lookups
     }
 
-    private async resolvePdfPageFullUrls(
-        docs: AnnotPage[],
-    ): Promise<AnnotPage[]> {
-        const toReturn: AnnotPage[] = []
-        for (const doc of docs) {
-            if (!isMemexPageAPdf(doc)) {
-                toReturn.push(doc)
-                continue
-            }
-
-            const locators = await this.options.pages.findLocatorsByNormalizedUrl(
-                doc.url,
-            )
-            const mainLocator = pickBestLocator(locators, {
-                priority: ContentLocatorType.Remote,
-            })
-
-            // If this is an uploaded PDF, we need to flag it for grabbing a temporary access URL when clicked via the `upload_id` param
-            if (
-                mainLocator &&
-                mainLocator.locationScheme === LocationSchemeType.UploadStorage
-            ) {
-                doc.fullPdfUrl =
-                    mainLocator.originalLocation +
-                    '?upload_id=' +
-                    mainLocator.location
-            } else {
-                doc.fullPdfUrl = mainLocator?.originalLocation ?? undefined
-            }
-
-            toReturn.push(doc)
+    async resolvePdfPageFullUrls(url: string): Promise<any> {
+        const page = {
+            url: url,
         }
-        return toReturn
+
+        const locators = await this.options.pages.findLocatorsByNormalizedUrl(
+            normalizeUrl(page.url),
+        )
+
+        const mainLocator = pickBestLocator(locators, {
+            priority: ContentLocatorType.Remote,
+        })
+
+        let document = mainLocator
+
+        // If this is an uploaded PDF, we need to flag it for grabbing a temporary access URL when clicked via the `upload_id` param
+        if (
+            mainLocator &&
+            mainLocator.locationScheme === LocationSchemeType.UploadStorage
+        ) {
+            document.originalLocation =
+                mainLocator.originalLocation +
+                '?upload_id=' +
+                mainLocator.location
+        } else {
+            document.originalLocation =
+                mainLocator?.originalLocation ?? undefined
+        }
+
+        return document
     }
 }

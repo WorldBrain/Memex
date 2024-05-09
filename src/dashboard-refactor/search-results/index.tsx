@@ -768,6 +768,9 @@ export default class SearchResultsContainer extends React.Component<
                     isBulkSelected={this.props.selectedItems?.includes(
                         page.normalizedUrl,
                     )}
+                    onClick={(event) => {
+                        interactionProps.onClick(event)
+                    }}
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
                     getRootElement={this.props.getRootElement}
