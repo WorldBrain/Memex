@@ -88,6 +88,13 @@ export interface RemoteSearchInterface {
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
     delPages: PageIndexingBackground['delPages']
+    resolvePdfPageFullUrls: (
+        url: string,
+    ) => Promise<{
+        fullUrl: string
+        fullPdfUrl: string
+        originalLocation: string
+    }>
 }
 
 export type UnifiedSearchParams = TermsSearchOpts & {

@@ -1008,12 +1008,13 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 spaceSearchSuggestions={this.state.spaceSearchSuggestions}
                 pageInteractionProps={{
-                    onClick: (day, pageResultId) => async (event) =>
+                    onClick: (day, pageResultId) => async (event) => {
                         this.processEvent('clickPageResult', {
                             day,
                             pageResultId: pageResultId,
                             synthEvent: event,
-                        }),
+                        })
+                    },
                     onMatchingTextToggleClick: (
                         day,
                         pageResultId,
