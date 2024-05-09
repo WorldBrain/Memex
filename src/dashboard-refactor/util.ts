@@ -9,7 +9,7 @@ import {
     initNormalizedState,
     NormalizedState,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { eventProviderDomains } from '@worldbrain/memex-common/lib/constants'
+import { EVENT_PROVIDER_DOMAINS } from '@worldbrain/memex-common/lib/constants'
 import type {
     PageAnnotationsCacheInterface,
     UnifiedList,

@@ -4,6 +4,7 @@ import type {
     TermsSearchOpts,
     UnifiedSearchPageResultData,
     UnifiedSearchPaginationParams,
+    UnifiedSearchParams,
     UnifiedTermsSearchParams,
 } from './types'
 import type { SearchParams as OldSearchParams } from '../types'
@@ -303,3 +304,11 @@ export const splitQueryIntoTerms = (
         matchTermsFuzzyStartsWith,
     }
 }
+
+export const needToFilterSearchByUrl = (params: UnifiedSearchParams): boolean =>
+    params.filterByDomains.length > 0 ||
+    params.filterByPDFs ||
+    params.filterByVideos ||
+    params.filterByTweets ||
+    params.filterByEvents ||
+    params.omitPagesWithoutAnnotations

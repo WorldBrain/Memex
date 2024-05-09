@@ -115,8 +115,12 @@ const blankSearch = async (
     { search }: BackgroundModules,
     params: Partial<UnifiedBlankSearchParams>,
 ) => {
-    const lowestTimeBound = await search['calcSearchTimeBoundEdge']('bottom')
-    const highestTimeBound = await search['calcSearchTimeBoundEdge']('top')
+    // const lowestTimeBound = await search['calcSearchTimeBoundEdge']('bottom')
+    // const highestTimeBound = await search['calcSearchTimeBoundEdge']('top')
+    let [lowestTimeBound, highestTimeBound] = await search[
+        'calcBlankSearchTimeBoundEdges'
+    ](params)
+
     return search['unifiedBlankSearch']({
         filterByDomains: [],
         filterByListIds: [],
@@ -730,18 +734,11 @@ describe('Unified search tests', () => {
 
         it('should return recent highlights and their pages on domain filtered blank search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
             const resultA = await unifiedSearch(backgroundModules, {
                 filterByDomains: ['test.com'],
-                fromWhen: 0,
-                untilWhen: now,
-                limit: 9999,
             })
             const resultB = await unifiedSearch(backgroundModules, {
                 filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
-                fromWhen: 0,
-                untilWhen: now,
-                limit: 9999,
             })
             const resultC = await unifiedSearch(backgroundModules, {
                 filterByDomains: [
@@ -751,14 +748,33 @@ describe('Unified search tests', () => {
                     'en.test-2.com',
                     'test.com',
                 ],
-                fromWhen: 0,
-                untilWhen: now,
-                limit: 9999,
+            })
+            const resultD = await unifiedSearch(backgroundModules, {
+                filterByDomains: [
+                    'wikipedia.org',
+                    'en.wikipedia.org',
+                    'test-2.com',
+                    'en.test-2.com',
+                    'test.com',
+                ],
+                untilWhen: resultC.oldestResultTimestamp,
+            })
+            const resultE = await unifiedSearch(backgroundModules, {
+                filterByDomains: [
+                    'wikipedia.org',
+                    'en.wikipedia.org',
+                    'test-2.com',
+                    'en.test-2.com',
+                    'test.com',
+                ],
+                untilWhen: resultD.oldestResultTimestamp,
             })
 
             expect(resultA.resultsExhausted).toBe(true)
             expect(resultB.resultsExhausted).toBe(true)
-            expect(resultC.resultsExhausted).toBe(true)
+            expect(resultC.resultsExhausted).toBe(false)
+            expect(resultD.resultsExhausted).toBe(false)
+            expect(resultE.resultsExhausted).toBe(true)
             expect(formatResults(resultA).map(([pageId]) => pageId)).toEqual([
                 DATA.PAGE_ID_10,
             ])
@@ -770,6 +786,12 @@ describe('Unified search tests', () => {
                 DATA.PAGE_ID_10,
                 DATA.PAGE_ID_2,
                 DATA.PAGE_ID_9,
+            ])
+            expect(formatResults(resultD).map(([pageId]) => pageId)).toEqual([
+                DATA.PAGE_ID_9,
+            ])
+            expect(formatResults(resultE).map(([pageId]) => pageId)).toEqual([
+                DATA.PAGE_ID_2,
                 DATA.PAGE_ID_1,
             ])
         })
