@@ -139,6 +139,7 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
  */
 export type UnifiedBlankSearchParams = UnifiedSearchParams &
     Pick<UnifiedSearchPaginationParams, 'limit'> & {
+        /** This is how pagination is afforded for blank search. Set to page N's `oldestResultTimestamp` to get page N+1. */
         untilWhen: number
         /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
         lowestTimeBound: number
@@ -151,9 +152,10 @@ export type UnifiedSearchResult = {
 }
 
 export type IntermediarySearchResult = {
-    oldestResultTimestamp: number | null
     resultsExhausted: boolean
     resultDataByPage: ResultDataByPage
+    /** Always null for terms search. */
+    oldestResultTimestamp: number | null
 }
 
 export type ResultDataByPage = Map<string, UnifiedSearchPageResultData>
