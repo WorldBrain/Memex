@@ -588,6 +588,10 @@ export default class SearchBackground {
 
         // Work with only the latest N results for this results page, discarding rest
         const inScopeResults = [...annotations, ...visits, ...bookmarks]
+            .filter((a) => {
+                const time = 'lastEdited' in a ? a.lastEdited.valueOf() : a.time
+                return time >= params.lowestTimeBound
+            })
             // TODO: pick one of the latest visit of bookmark, else each bookmark's also going to show up in results via the visit
             .sort((a, b) => {
                 const timeA =
@@ -597,6 +601,7 @@ export default class SearchBackground {
                 return timeB - timeA
             })
             .slice(0, params.limit)
+
         const onlyInScope = (doc: any) => inScopeResults.includes(doc)
         annotations = annotations.filter(onlyInScope)
         bookmarks = bookmarks.filter(onlyInScope)
@@ -712,6 +717,10 @@ export default class SearchBackground {
                     lowestTimeBound,
                     highestTimeBound,
                 ] = await this.calcBlankSearchTimeBoundEdges(params)
+                // Increase the lowest time bound if there's a specified lower time bound which beats it
+                if (lowestTimeBound < params.fromWhen) {
+                    lowestTimeBound = params.fromWhen
+                }
                 highestTimeBound += 1
 
                 // Skip over days where there's no results, until we get results

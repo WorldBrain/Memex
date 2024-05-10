@@ -582,6 +582,208 @@ describe('Unified search tests', () => {
             expect(formatResults(resultF)).toEqual([])
         })
 
+        it('should return most-recent highlights and their pages on unfiltered, paginated blank search with lower time bound set', async () => {
+            const { backgroundModules } = await setupTest()
+            const lowerBound = new Date('2024-03-22T06:10').valueOf()
+            const resultA = await search(backgroundModules, {
+                fromWhen: lowerBound,
+                untilWhen: new Date('2024-03-25T20:00').valueOf(), // This is calculated based on the test data times
+                limit: 10,
+            })
+            const resultB = await search(backgroundModules, {
+                fromWhen: lowerBound,
+                untilWhen: resultA.oldestResultTimestamp,
+                limit: 10,
+            })
+            const resultC = await search(backgroundModules, {
+                fromWhen: lowerBound,
+                untilWhen: resultB.oldestResultTimestamp,
+                limit: 10,
+            })
+            // This should be beyond the scope of the lower time bound, thus should return no results
+            const resultD = await search(backgroundModules, {
+                fromWhen: lowerBound,
+                untilWhen: resultC.oldestResultTimestamp,
+                limit: 10,
+            })
+            expect(resultA.resultsExhausted).toBe(false)
+            expect(resultB.resultsExhausted).toBe(false)
+            expect(resultC.resultsExhausted).toBe(true)
+            expect(resultD.resultsExhausted).toBe(true)
+            expect(formatResults(resultA)).toEqual([
+                [
+                    DATA.PAGE_ID_11,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_13,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_13][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_8,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_10,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_10][0].url],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_10][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_2,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_2][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_2][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_2][0].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_2
+                        ][2].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_5,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_5][0].url,
+                            // These two should come in the next results "page", being a few days older
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][1].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_5
+                        ][0].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+
+            expect(formatResults(resultB)).toEqual([
+                [
+                    DATA.PAGE_ID_12,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_12
+                        ][0].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_9,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_9][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][0].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][9].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][8].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][7].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][6].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][5].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][0].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_8, // Shows up a second time due to a second visit
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url, // This will be in the next results page
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_7
+                        ][3].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+
+            expect(formatResults(resultC)).toEqual([
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url, // These came in the prev page
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_4, // Shows up a second time to get in some older annotations
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][0].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][9].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][8].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][7].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][6].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][5].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][9].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_6,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(resultD)).toEqual([])
+        })
+
         it('should return recent highlights and their pages on list filtered blank search', async () => {
             const { backgroundModules } = await setupTest()
 
@@ -659,10 +861,12 @@ describe('Unified search tests', () => {
         it('should return recent highlights and their pages on domain filtered blank search', async () => {
             const { backgroundModules } = await setupTest()
             const resultA = await search(backgroundModules, {
+                limit: 9999,
                 filterByDomains: ['test.com'],
             })
             const resultB = await search(backgroundModules, {
-                filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
+                limit: 9999,
+                filterByDomains: ['en.test-2.com', 'test.com'], // Multiple values do an OR
             })
             const resultC = await search(backgroundModules, {
                 filterByDomains: [
