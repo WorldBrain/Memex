@@ -110,11 +110,16 @@ export const stateToSearchParams = (
         filterByListIds.push(listData.localId!)
     }
 
+    const isBlankSearch = !searchFilters.searchQuery.trim().length
+
     // Blank search doesn't use standard skip+limit pagination. Instead it requires the caller to keep
     //  track of the oldest timestamp and supply that as the new upper-bound on each reinvocation
-    const blankSearchUpperBound = !searchFilters.searchQuery.trim().length
+    const blankSearchUpperBound = isBlankSearch
         ? searchResults.blankSearchOldestResultTimestamp
         : null
+
+    // Use a larger page size for blank searches to reduce the chance of duped results, due to annots/visits/bookmarks appearing in different result pages
+    const limit = isBlankSearch ? searchFilters.limit * 3 : searchFilters.limit
 
     // TODO: Dynamically set these flags based on state
     const termsSearchOpts: TermsSearchOpts = {
@@ -126,8 +131,8 @@ export const stateToSearchParams = (
     }
 
     return {
+        limit,
         skip: searchFilters.skip,
-        limit: searchFilters.limit,
         query: searchFilters.searchQuery,
         filterByDomains: searchFilters.domainsIncluded,
         filterByListIds,
