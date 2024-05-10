@@ -240,11 +240,9 @@ export default class SearchBackground {
         }
 
         if (params.omitPagesWithoutAnnotations) {
-            const sortedAnnots = dexie
-                .table<Annotation>('annotations')
-                .orderBy('lastEdited')
-            const latestAnnot = await sortedAnnots.last()
-            const oldestAnnot = await sortedAnnots.first()
+            const annots = dexie.table<Annotation>('annotations')
+            const latestAnnot = await annots.orderBy('lastEdited').last()
+            const oldestAnnot = await annots.orderBy('lastEdited').first()
             if (latestAnnot) {
                 latestTimes.push(latestAnnot.lastEdited.valueOf())
             }

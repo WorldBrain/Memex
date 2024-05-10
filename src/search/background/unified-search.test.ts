@@ -1698,14 +1698,26 @@ describe('Unified search tests', () => {
                 limit: 1000,
                 omitPagesWithoutAnnotations: true,
             })
-            const termsResultB = await search(backgroundModules, {
+            // Same thing as A, but with pagination
+            const blankResultB = await search(backgroundModules, {
+                limit: 20,
+                omitPagesWithoutAnnotations: true,
+            })
+            const blankResultC = await search(backgroundModules, {
+                limit: 20,
+                untilWhen: blankResultB.oldestResultTimestamp,
+                omitPagesWithoutAnnotations: true,
+            })
+            const termsResultA = await search(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
                 omitPagesWithoutAnnotations: true,
             })
             expect(blankResultA.resultsExhausted).toBe(true)
-            expect(termsResultB.resultsExhausted).toBe(true)
+            expect(blankResultB.resultsExhausted).toBe(false)
+            expect(blankResultC.resultsExhausted).toBe(true)
+            expect(termsResultA.resultsExhausted).toBe(true)
             expect(
                 formatResults(blankResultA).map(([pageId]) => pageId),
             ).toEqual([
@@ -1723,7 +1735,31 @@ describe('Unified search tests', () => {
                 // DATA.PAGE_ID_1,
             ])
             expect(
-                formatResults(termsResultB, { skipSorting: true }).map(
+                formatResults(blankResultB).map(([pageId]) => pageId),
+            ).toEqual([
+                // DATA.PAGE_ID_11,
+                // DATA.PAGE_ID_8,
+                DATA.PAGE_ID_10,
+                DATA.PAGE_ID_2,
+                DATA.PAGE_ID_5,
+                DATA.PAGE_ID_12,
+                DATA.PAGE_ID_9,
+                DATA.PAGE_ID_4,
+                DATA.PAGE_ID_7,
+            ])
+            expect(
+                formatResults(blankResultC).map(([pageId]) => pageId),
+            ).toEqual([
+                DATA.PAGE_ID_4,
+                DATA.PAGE_ID_5,
+                // The above two get repeated due to having annotations split across the result pages
+
+                // DATA.PAGE_ID_6,
+                DATA.PAGE_ID_3,
+                // DATA.PAGE_ID_1,
+            ])
+            expect(
+                formatResults(termsResultA, { skipSorting: true }).map(
                     ([pageId]) => pageId,
                 ),
             ).toEqual([
