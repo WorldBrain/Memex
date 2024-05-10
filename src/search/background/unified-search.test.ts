@@ -2,18 +2,11 @@ import omit from 'lodash/omit'
 import type Storex from '@worldbrain/storex'
 import * as DATA from './unified-search.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import {
-    queryAnnotationsByTerms,
-    queryPagesByTerms,
-    sortUnifiedBlankSearchResult,
-    splitQueryIntoTerms,
-} from './utils'
+import { sortSearchResult, splitQueryIntoTerms } from './utils'
 import type {
     UnifiedSearchPaginationParams,
-    UnifiedBlankSearchParams,
-    UnifiedBlankSearchResult,
-    UnifiedTermsSearchParams,
-    TermsSearchOpts,
+    IntermediarySearchResult,
+    UnifiedSearchParams,
 } from './types'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -26,6 +19,15 @@ async function insertTestData(storageManager: Storex) {
         await storageManager
             .collection('pages')
             .createObject(omit(doc, 'listIds'))
+
+        const [latestTimestamp] = [
+            ...(DATA.VISITS[doc.url] ?? []),
+            ...(DATA.BOOKMARKS[doc.url] ?? []),
+        ]
+            .filter(Boolean)
+            .map((a) => a.time as number)
+            .sort((a, b) => b - a)
+
         if ('listIds' in doc) {
             for (const listId of doc.listIds) {
                 await storageManager
@@ -34,7 +36,7 @@ async function insertTestData(storageManager: Storex) {
                         listId,
                         pageUrl: doc.url,
                         fullUrl: doc.fullUrl,
-                        createdAt: new Date(),
+                        createdAt: new Date(latestTimestamp),
                     })
             }
         }
@@ -71,7 +73,7 @@ async function insertTestData(storageManager: Storex) {
                     .createObject({
                         listId,
                         url: doc.url,
-                        createdAt: new Date(),
+                        createdAt: new Date(doc.createdWhen),
                     })
             }
         }
@@ -86,76 +88,27 @@ async function setupTest(opts?: { skipDataInsertion?: boolean }) {
     return setup
 }
 
-const blankSearch = async (
+const search = async (
     { search }: BackgroundModules,
-    params: Partial<UnifiedBlankSearchParams>,
+    params: Partial<UnifiedSearchParams & UnifiedSearchPaginationParams>,
 ) => {
-    const lowestTimeBound = await search['calcSearchTimeBoundEdge']('bottom')
-    const highestTimeBound = await search['calcSearchTimeBoundEdge']('top')
-    return search['unifiedBlankSearch']({
+    return search['unifiedIntermediarySearch']({
         filterByDomains: [],
         filterByListIds: [],
-        lowestTimeBound: lowestTimeBound ?? 0,
-        daysToSearch: 1,
         query: '',
-        untilWhen: params.untilWhen ?? highestTimeBound,
-        ...params,
-    })
-}
-
-const termsSearch = (
-    { search }: BackgroundModules,
-    params: Partial<UnifiedTermsSearchParams> &
-        UnifiedSearchPaginationParams & { query: string },
-) => {
-    const defaultTermsOpts: TermsSearchOpts = {
-        matchNotes: true,
-        matchPageText: true,
-        matchHighlights: true,
-        matchPageTitleUrl: true,
-    }
-
-    const {
-        phrases,
-        terms,
-        inTitle,
-        inContent,
-        inHighlight,
-        inComment,
-        matchTermsFuzzyStartsWith,
-    } = splitQueryIntoTerms(params.query)
-
-    params.matchPageTitleUrl = inTitle
-    params.matchPageText = inContent
-    params.matchNotes = inComment
-    params.matchHighlights = inHighlight
-    params.phrases = phrases
-    params.terms = terms
-    params.matchTermsFuzzyStartsWith = matchTermsFuzzyStartsWith
-
-    return search['unifiedTermsSearch']({
-        filterByDomains: [],
-        filterByListIds: [],
-        queryPages: queryPagesByTerms(search['options'].storageManager, {
-            ...defaultTermsOpts,
-            ...params,
-        }),
-        queryAnnotations: queryAnnotationsByTerms(
-            search['options'].storageManager,
-            { ...defaultTermsOpts, ...params },
-        ),
-        ...defaultTermsOpts,
+        limit: 10,
+        skip: 0,
         ...params,
     })
 }
 
 const formatResults = (
-    result: UnifiedBlankSearchResult,
+    result: IntermediarySearchResult,
     opts?: { skipSorting?: boolean },
 ) => {
     const sortedResults = opts?.skipSorting
         ? [...result.resultDataByPage]
-        : sortUnifiedBlankSearchResult(result.resultDataByPage)
+        : sortSearchResult(result.resultDataByPage)
     return sortedResults.map(([pageId, data]) => [
         pageId,
         {
@@ -173,9 +126,10 @@ describe('Unified search tests', () => {
                 skipDataInsertion: true,
             })
             const now = Date.now()
-            const resultA = await blankSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 fromWhen: 0,
                 untilWhen: now,
+                limit: 99999,
             })
             expect(resultA.resultsExhausted).toBe(true)
             expect([...resultA.resultDataByPage]).toEqual([])
@@ -185,14 +139,10 @@ describe('Unified search tests', () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
 
-            const lowestTimeBound = await backgroundModules.search[
-                'calcSearchTimeBoundEdge'
-            ]('bottom')
-            const resultA = await blankSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 fromWhen: 0,
                 untilWhen: now,
-                daysToSearch: 1,
-                lowestTimeBound,
+                limit: 99999,
             })
             expect(resultA.resultsExhausted).toBe(true)
             expect(formatResults(resultA)).toEqual([
@@ -339,41 +289,42 @@ describe('Unified search tests', () => {
         // Check comments scattered throughout this test for more details, as things are quite intentionally structured around the test data timestamps
         it('should return most-recent highlights and their pages on unfiltered, paginated blank search', async () => {
             const { backgroundModules } = await setupTest()
-            const resultA = await blankSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
+                fromWhen: 0,
                 untilWhen: new Date('2024-03-25T20:00').valueOf(), // This is calculated based on the test data times
-                daysToSearch: 1,
+                limit: 10,
             })
-            const resultB = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-24T20:00').valueOf(),
-                daysToSearch: 1,
+            const resultB = await search(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: resultA.oldestResultTimestamp,
+                limit: 10,
             })
-            const resultC = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-23T20:00').valueOf(),
-                daysToSearch: 1,
+            const resultC = await search(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: resultB.oldestResultTimestamp,
+                limit: 10,
             })
-            const resultD = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-22T20:00').valueOf(),
-                daysToSearch: 1,
+            const resultD = await search(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: resultC.oldestResultTimestamp,
+                limit: 10,
             })
-            const resultE = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-21T20:00').valueOf(),
-                daysToSearch: 1,
+            const resultE = await search(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: resultD.oldestResultTimestamp,
+                limit: 10,
             })
-            const resultF = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-20T20:00').valueOf(),
-                daysToSearch: 1,
-            })
-            const resultG = await blankSearch(backgroundModules, {
-                untilWhen: new Date('2024-03-19T20:00').valueOf(),
-                daysToSearch: 30, // We're really skipping ahead here as we know there's no data until about a month back
+            const resultF = await search(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: resultE.oldestResultTimestamp,
+                limit: 10,
             })
             expect(resultA.resultsExhausted).toBe(false)
             expect(resultB.resultsExhausted).toBe(false)
             expect(resultC.resultsExhausted).toBe(false)
             expect(resultD.resultsExhausted).toBe(false)
-            expect(resultE.resultsExhausted).toBe(false)
-            expect(resultF.resultsExhausted).toBe(false)
-            expect(resultG.resultsExhausted).toBe(true)
+            expect(resultE.resultsExhausted).toBe(true)
+            expect(resultF.resultsExhausted).toBe(true)
             expect(formatResults(resultA)).toEqual([
                 [
                     DATA.PAGE_ID_11,
@@ -436,10 +387,7 @@ describe('Unified search tests', () => {
                 ],
             ])
 
-            // Should be an empty result "page" - nothing on this day
-            expect(formatResults(resultB)).toEqual([])
-
-            expect(formatResults(resultC)).toEqual([
+            expect(formatResults(resultB)).toEqual([
                 [
                     DATA.PAGE_ID_12,
                     {
@@ -496,15 +444,29 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url, // This will be in the next results page
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_7
+                        ][3].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+
+            expect(formatResults(resultC)).toEqual([
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url, // These came in the prev page
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
                         ],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_7][0].time,
                     },
                 ],
-            ])
-
-            expect(formatResults(resultD)).toEqual([
                 [
                     DATA.PAGE_ID_4, // Shows up a second time to get in some older annotations
                     {
@@ -533,6 +495,8 @@ describe('Unified search tests', () => {
                             DATA.VISITS[DATA.PAGE_ID_6][0].time,
                     },
                 ],
+            ])
+            expect(formatResults(resultD)).toEqual([
                 [
                     DATA.PAGE_ID_5,
                     {
@@ -545,8 +509,6 @@ describe('Unified search tests', () => {
                             DATA.VISITS[DATA.PAGE_ID_5][0].time,
                     },
                 ],
-            ])
-            expect(formatResults(resultE)).toEqual([
                 [
                     DATA.PAGE_ID_4, // Shows up a third time to get in the oldest annotations
                     {
@@ -575,6 +537,19 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_3][1].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_3][0].url,
                         ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_3
+                        ][3].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+            expect(formatResults(resultE)).toEqual([
+                // TODO: Ideally this result gets ommitted as it's already shown in the previous results page with all the annots.
+                //   It shows again because there's a visit before the annots that's just on the cut-off point between results pages.
+                [
+                    DATA.PAGE_ID_3,
+                    {
+                        annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_3][0].time,
                     },
@@ -587,9 +562,6 @@ describe('Unified search tests', () => {
                             DATA.BOOKMARKS[DATA.PAGE_ID_2][0].time,
                     },
                 ],
-            ])
-
-            expect(formatResults(resultF)).toEqual([
                 [
                     DATA.PAGE_ID_1,
                     {
@@ -598,9 +570,6 @@ describe('Unified search tests', () => {
                             DATA.VISITS[DATA.PAGE_ID_1][0].time,
                     },
                 ],
-            ])
-            // This is the final 30 day period search to pick up this last result, which is ~1 month before all the other data
-            expect(formatResults(resultG)).toEqual([
                 [
                     DATA.PAGE_ID_12,
                     {
@@ -610,29 +579,224 @@ describe('Unified search tests', () => {
                     },
                 ],
             ])
+            expect(formatResults(resultF)).toEqual([])
+        })
+
+        it('should return most-recent highlights and their pages on unfiltered, paginated blank search with lower time bound set', async () => {
+            const { backgroundModules } = await setupTest()
+            const lowerBound = new Date('2024-03-22T06:10').valueOf()
+            const resultA = await search(backgroundModules, {
+                fromWhen: lowerBound,
+                untilWhen: new Date('2024-03-25T20:00').valueOf(), // This is calculated based on the test data times
+                limit: 10,
+            })
+            const resultB = await search(backgroundModules, {
+                fromWhen: lowerBound,
+                untilWhen: resultA.oldestResultTimestamp,
+                limit: 10,
+            })
+            const resultC = await search(backgroundModules, {
+                fromWhen: lowerBound,
+                untilWhen: resultB.oldestResultTimestamp,
+                limit: 10,
+            })
+            // This should be beyond the scope of the lower time bound, thus should return no results
+            const resultD = await search(backgroundModules, {
+                fromWhen: lowerBound,
+                untilWhen: resultC.oldestResultTimestamp,
+                limit: 10,
+            })
+            expect(resultA.resultsExhausted).toBe(false)
+            expect(resultB.resultsExhausted).toBe(false)
+            expect(resultC.resultsExhausted).toBe(true)
+            expect(resultD.resultsExhausted).toBe(true)
+            expect(formatResults(resultA)).toEqual([
+                [
+                    DATA.PAGE_ID_11,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_13,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_13][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_8,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_10,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_10][0].url],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_10][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_2,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_2][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_2][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_2][0].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_2
+                        ][2].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_5,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_5][0].url,
+                            // These two should come in the next results "page", being a few days older
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][1].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_5
+                        ][0].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+
+            expect(formatResults(resultB)).toEqual([
+                [
+                    DATA.PAGE_ID_12,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_12
+                        ][0].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_9,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_9][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][0].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][9].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][8].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][7].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][6].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][5].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][0].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_8, // Shows up a second time due to a second visit
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url, // This will be in the next results page
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_7
+                        ][3].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+
+            expect(formatResults(resultC)).toEqual([
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url, // These came in the prev page
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_4, // Shows up a second time to get in some older annotations
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][0].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][9].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][8].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][7].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][6].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][5].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][9].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_6,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(resultD)).toEqual([])
         })
 
         it('should return recent highlights and their pages on list filtered blank search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
-            const resultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+
+            const resultA = await search(backgroundModules, {
                 filterByListIds: [DATA.LIST_ID_1],
             })
-            const resultB = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultB = await search(backgroundModules, {
                 filterByListIds: [DATA.LIST_ID_1, DATA.LIST_ID_3], // Multiple values do an AND
             })
-            const resultC = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultC = await search(backgroundModules, {
                 filterByListIds: [DATA.LIST_ID_2],
             })
-            const resultD = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultD = await search(backgroundModules, {
                 filterByListIds: [DATA.LIST_ID_2, DATA.LIST_ID_3], // Should be no overlaps
             })
 
@@ -645,8 +809,9 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_4,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_4][0].time,
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][1].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -681,7 +846,7 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][5].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
-                            // Thess ones are selectively shared to a different list to the parent page, thus get omitted
+                            // These ones are selectively shared to a different list to the parent page, thus get omitted
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
@@ -695,20 +860,15 @@ describe('Unified search tests', () => {
 
         it('should return recent highlights and their pages on domain filtered blank search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
-            const resultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultA = await search(backgroundModules, {
+                limit: 9999,
                 filterByDomains: ['test.com'],
             })
-            const resultB = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
-                filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
+            const resultB = await search(backgroundModules, {
+                limit: 9999,
+                filterByDomains: ['en.test-2.com', 'test.com'], // Multiple values do an OR
             })
-            const resultC = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const resultC = await search(backgroundModules, {
                 filterByDomains: [
                     'wikipedia.org',
                     'en.wikipedia.org',
@@ -717,9 +877,32 @@ describe('Unified search tests', () => {
                     'test.com',
                 ],
             })
+            const resultD = await search(backgroundModules, {
+                filterByDomains: [
+                    'wikipedia.org',
+                    'en.wikipedia.org',
+                    'test-2.com',
+                    'en.test-2.com',
+                    'test.com',
+                ],
+                untilWhen: resultC.oldestResultTimestamp,
+            })
+            const resultE = await search(backgroundModules, {
+                filterByDomains: [
+                    'wikipedia.org',
+                    'en.wikipedia.org',
+                    'test-2.com',
+                    'en.test-2.com',
+                    'test.com',
+                ],
+                untilWhen: resultD.oldestResultTimestamp,
+            })
 
             expect(resultA.resultsExhausted).toBe(true)
             expect(resultB.resultsExhausted).toBe(true)
+            expect(resultC.resultsExhausted).toBe(false)
+            expect(resultD.resultsExhausted).toBe(false)
+            expect(resultE.resultsExhausted).toBe(true)
             expect(formatResults(resultA).map(([pageId]) => pageId)).toEqual([
                 DATA.PAGE_ID_10,
             ])
@@ -731,6 +914,12 @@ describe('Unified search tests', () => {
                 DATA.PAGE_ID_10,
                 DATA.PAGE_ID_2,
                 DATA.PAGE_ID_9,
+            ])
+            expect(formatResults(resultD).map(([pageId]) => pageId)).toEqual([
+                DATA.PAGE_ID_9,
+            ])
+            expect(formatResults(resultE).map(([pageId]) => pageId)).toEqual([
+                DATA.PAGE_ID_2,
                 DATA.PAGE_ID_1,
             ])
         })
@@ -742,7 +931,7 @@ describe('Unified search tests', () => {
                 skipDataInsertion: true,
             })
             const now = Date.now()
-            const resultA = await termsSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
@@ -755,7 +944,7 @@ describe('Unified search tests', () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
 
-            const resultA = await termsSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
@@ -879,7 +1068,7 @@ describe('Unified search tests', () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
 
-            const resultA = await termsSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 query: '微软第三财季营收',
                 limit: 1000,
                 skip: 0,
@@ -900,17 +1089,17 @@ describe('Unified search tests', () => {
         it('should return highlights and their pages on unfiltered, paginated terms search', async () => {
             const { backgroundModules } = await setupTest()
 
-            const resultA = await termsSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 query: 'test',
                 limit: 5,
                 skip: 0,
             })
-            const resultB = await termsSearch(backgroundModules, {
+            const resultB = await search(backgroundModules, {
                 query: 'test',
                 limit: 5,
                 skip: 5,
             })
-            const resultC = await termsSearch(backgroundModules, {
+            const resultC = await search(backgroundModules, {
                 query: 'test',
                 limit: 5,
                 skip: 10,
@@ -1036,12 +1225,12 @@ describe('Unified search tests', () => {
             ])
 
             // Now test multi-terms search (should "AND" all terms)
-            const resultD = await termsSearch(backgroundModules, {
+            const resultD = await search(backgroundModules, {
                 query: 'honshu',
                 limit: 10,
                 skip: 0,
             })
-            const resultE = await termsSearch(backgroundModules, {
+            const resultE = await search(backgroundModules, {
                 query: 'honshu test',
                 limit: 10,
                 skip: 0,
@@ -1085,19 +1274,19 @@ describe('Unified search tests', () => {
         it('should return highlights and their pages on list filtered, paginated terms search', async () => {
             const { backgroundModules } = await setupTest()
 
-            const resultA = await termsSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 query: 'test',
                 limit: 1,
                 skip: 0,
                 filterByListIds: [DATA.LIST_ID_1],
             })
-            const resultB = await termsSearch(backgroundModules, {
+            const resultB = await search(backgroundModules, {
                 query: 'test',
                 limit: 1,
                 skip: 1,
                 filterByListIds: [DATA.LIST_ID_1],
             })
-            const resultC = await termsSearch(backgroundModules, {
+            const resultC = await search(backgroundModules, {
                 query: 'test',
                 limit: 1,
                 skip: 2,
@@ -1130,7 +1319,7 @@ describe('Unified search tests', () => {
             expect(formatResults(resultC, { skipSorting: true })).toEqual([])
 
             // NOTE: Same query as above, but with a bigger pag limit
-            const resultD = await termsSearch(backgroundModules, {
+            const resultD = await search(backgroundModules, {
                 query: 'test',
                 limit: 10,
                 skip: 0,
@@ -1158,7 +1347,7 @@ describe('Unified search tests', () => {
             ])
 
             // NOTE: Same query as above, but with multiple terms (ANDed)
-            const resultE = await termsSearch(backgroundModules, {
+            const resultE = await search(backgroundModules, {
                 query: 'test honshu',
                 limit: 10,
                 skip: 0,
@@ -1177,7 +1366,7 @@ describe('Unified search tests', () => {
                 ],
             ])
 
-            const resultF = await termsSearch(backgroundModules, {
+            const resultF = await search(backgroundModules, {
                 query: 'test',
                 limit: 10,
                 skip: 0,
@@ -1195,7 +1384,7 @@ describe('Unified search tests', () => {
                 ],
             ])
 
-            const resultG = await termsSearch(backgroundModules, {
+            const resultG = await search(backgroundModules, {
                 query: 'test',
                 limit: 10,
                 skip: 0,
@@ -1247,26 +1436,26 @@ describe('Unified search tests', () => {
             //     ],
             // })
 
-            const resultA = await termsSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 query: 'term',
                 limit: 100,
                 skip: 0,
                 filterByDomains: ['test.com'],
             })
-            const resultB = await termsSearch(backgroundModules, {
+            const resultB = await search(backgroundModules, {
                 query: 'term',
                 limit: 100,
                 skip: 0,
                 filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
             })
             // Same as prev but paginated
-            const resultC = await termsSearch(backgroundModules, {
+            const resultC = await search(backgroundModules, {
                 query: 'term',
                 limit: 1,
                 skip: 0,
                 filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
             })
-            const resultD = await termsSearch(backgroundModules, {
+            const resultD = await search(backgroundModules, {
                 query: 'term',
                 limit: 2,
                 skip: 1,
@@ -1274,7 +1463,7 @@ describe('Unified search tests', () => {
             })
 
             // Same as prev but with multiple terms, which are only in one of the results
-            const resultE = await termsSearch(backgroundModules, {
+            const resultE = await search(backgroundModules, {
                 query: 'term phyla',
                 limit: 20,
                 skip: 0,
@@ -1317,22 +1506,22 @@ describe('Unified search tests', () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
 
-            const resultA = await termsSearch(backgroundModules, {
+            const resultA = await search(backgroundModules, {
                 query: '"some nonsense test text"',
                 limit: 1000,
                 skip: 0,
             })
-            const resultB = await termsSearch(backgroundModules, {
+            const resultB = await search(backgroundModules, {
                 query: '"apples, oranges"',
                 limit: 1000,
                 skip: 0,
             })
-            const resultC = await termsSearch(backgroundModules, {
+            const resultC = await search(backgroundModules, {
                 query: '"some nonsense test text" oranges',
                 limit: 1000,
                 skip: 0,
             })
-            const resultD = await termsSearch(backgroundModules, {
+            const resultD = await search(backgroundModules, {
                 query: '"monophyly and validity"',
                 limit: 1000,
                 skip: 0,
@@ -1379,19 +1568,17 @@ describe('Unified search tests', () => {
     describe('search filter tests', () => {
         it('should be able to filter PDF pages in blank and terms search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
-            const blankResultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const blankResultA = await search(backgroundModules, {
+                limit: 1000,
                 filterByPDFs: true,
             })
-            const termsResultB = await termsSearch(backgroundModules, {
+            const termsResultB = await search(backgroundModules, {
                 query: 'text',
                 limit: 1000,
                 skip: 0,
                 filterByPDFs: true,
             })
-            const termsResultC = await termsSearch(backgroundModules, {
+            const termsResultC = await search(backgroundModules, {
                 query: 'test', // NOTE: Different term
                 limit: 1000,
                 skip: 0,
@@ -1450,19 +1637,17 @@ describe('Unified search tests', () => {
 
         it('should be able to filter video pages in blank and terms search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
-            const blankResultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const blankResultA = await search(backgroundModules, {
+                limit: 1000,
                 filterByVideos: true,
             })
-            const termsResultB = await termsSearch(backgroundModules, {
+            const termsResultB = await search(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
                 filterByVideos: true,
             })
-            const termsResultC = await termsSearch(backgroundModules, {
+            const termsResultC = await search(backgroundModules, {
                 query: 'today',
                 limit: 1000,
                 skip: 0,
@@ -1537,19 +1722,17 @@ describe('Unified search tests', () => {
 
         it('should be able to filter tweet pages in blank and terms search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
-            const blankResultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const blankResultA = await search(backgroundModules, {
+                limit: 1000,
                 filterByTweets: true,
             })
-            const termsResultB = await termsSearch(backgroundModules, {
+            const termsResultB = await search(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
                 filterByTweets: true,
             })
-            const termsResultC = await termsSearch(backgroundModules, {
+            const termsResultC = await search(backgroundModules, {
                 query: 'insectum',
                 limit: 1000,
                 skip: 0,
@@ -1639,19 +1822,17 @@ describe('Unified search tests', () => {
 
         it('should be able to filter event pages in blank and terms search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
-            const blankResultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const blankResultA = await search(backgroundModules, {
+                limit: 1000,
                 filterByEvents: true,
             })
-            const termsResultB = await termsSearch(backgroundModules, {
+            const termsResultB = await search(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
                 filterByEvents: true,
             })
-            const termsResultC = await termsSearch(backgroundModules, {
+            const termsResultC = await search(backgroundModules, {
                 query: 'encyclopedia',
                 limit: 1000,
                 skip: 0,
@@ -1717,19 +1898,30 @@ describe('Unified search tests', () => {
         it("should be able to filter out all pages which don't contain annotations in blank and terms search", async () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
-            const blankResultA = await blankSearch(backgroundModules, {
-                fromWhen: 0,
-                untilWhen: now,
+            const blankResultA = await search(backgroundModules, {
+                limit: 1000,
                 omitPagesWithoutAnnotations: true,
             })
-            const termsResultB = await termsSearch(backgroundModules, {
+            // Same thing as A, but with pagination
+            const blankResultB = await search(backgroundModules, {
+                limit: 20,
+                omitPagesWithoutAnnotations: true,
+            })
+            const blankResultC = await search(backgroundModules, {
+                limit: 20,
+                untilWhen: blankResultB.oldestResultTimestamp,
+                omitPagesWithoutAnnotations: true,
+            })
+            const termsResultA = await search(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
                 omitPagesWithoutAnnotations: true,
             })
             expect(blankResultA.resultsExhausted).toBe(true)
-            expect(termsResultB.resultsExhausted).toBe(true)
+            expect(blankResultB.resultsExhausted).toBe(false)
+            expect(blankResultC.resultsExhausted).toBe(true)
+            expect(termsResultA.resultsExhausted).toBe(true)
             expect(
                 formatResults(blankResultA).map(([pageId]) => pageId),
             ).toEqual([
@@ -1747,7 +1939,31 @@ describe('Unified search tests', () => {
                 // DATA.PAGE_ID_1,
             ])
             expect(
-                formatResults(termsResultB, { skipSorting: true }).map(
+                formatResults(blankResultB).map(([pageId]) => pageId),
+            ).toEqual([
+                // DATA.PAGE_ID_11,
+                // DATA.PAGE_ID_8,
+                DATA.PAGE_ID_10,
+                DATA.PAGE_ID_2,
+                DATA.PAGE_ID_5,
+                DATA.PAGE_ID_12,
+                DATA.PAGE_ID_9,
+                DATA.PAGE_ID_4,
+                DATA.PAGE_ID_7,
+            ])
+            expect(
+                formatResults(blankResultC).map(([pageId]) => pageId),
+            ).toEqual([
+                DATA.PAGE_ID_4,
+                DATA.PAGE_ID_5,
+                // The above two get repeated due to having annotations split across the result pages
+
+                // DATA.PAGE_ID_6,
+                DATA.PAGE_ID_3,
+                // DATA.PAGE_ID_1,
+            ])
+            expect(
+                formatResults(termsResultA, { skipSorting: true }).map(
                     ([pageId]) => pageId,
                 ),
             ).toEqual([
@@ -1845,17 +2061,17 @@ describe('Unified search tests', () => {
 
         it('terms search should still work the same with affixed spaces in query', async () => {
             const { backgroundModules } = await setupTest()
-            const termsResultA = await termsSearch(backgroundModules, {
+            const termsResultA = await search(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
             })
-            const termsResultB = await termsSearch(backgroundModules, {
+            const termsResultB = await search(backgroundModules, {
                 query: ' test ',
                 limit: 1000,
                 skip: 0,
             })
-            const termsResultC = await termsSearch(backgroundModules, {
+            const termsResultC = await search(backgroundModules, {
                 query: '   test     test     ',
                 limit: 1000,
                 skip: 0,

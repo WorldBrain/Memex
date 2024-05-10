@@ -1,7 +1,10 @@
 import type Storex from '@worldbrain/storex'
 import type {
+    ResultDataByPage,
     TermsSearchOpts,
-    UnifiedBlankSearchResult,
+    UnifiedSearchPageResultData,
+    UnifiedSearchPaginationParams,
+    UnifiedSearchParams,
     UnifiedTermsSearchParams,
 } from './types'
 import type { SearchParams as OldSearchParams } from '../types'
@@ -63,9 +66,7 @@ export const reshapePageForDisplay = (page) => ({
     annotsCount: page.annotsCount,
 })
 
-export const sortUnifiedBlankSearchResult = (
-    resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'],
-) =>
+export const sortSearchResult = (resultDataByPage: ResultDataByPage) =>
     [...resultDataByPage].sort(
         ([, a], [, b]) =>
             Math.max(
@@ -77,6 +78,14 @@ export const sortUnifiedBlankSearchResult = (
                 a.annotations[0]?.lastEdited.valueOf() ?? 0,
             ),
     )
+
+export const sliceSearchResult = (
+    resultDataByPage: Array<[string, UnifiedSearchPageResultData]>,
+    { limit, skip }: UnifiedSearchPaginationParams,
+): ResultDataByPage => {
+    // NOTE: Current implementation ignores annotation count, and simply paginates by the number of pages in the results
+    return new Map(resultDataByPage.slice(skip, skip + limit))
+}
 
 /** Given separate result sets of the same type, gets the intersection of them / ANDs them together by ID */
 const intersectResults = (results: string[][]): string[] =>
@@ -295,3 +304,11 @@ export const splitQueryIntoTerms = (
         matchTermsFuzzyStartsWith,
     }
 }
+
+export const needToFilterSearchByUrl = (params: UnifiedSearchParams): boolean =>
+    params.filterByDomains.length > 0 ||
+    params.filterByPDFs ||
+    params.filterByVideos ||
+    params.filterByTweets ||
+    params.filterByEvents ||
+    params.omitPagesWithoutAnnotations
