@@ -137,12 +137,13 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
  * (which gets returned from blank searches) and supply that as the new upper time bound
  * for subsequent blank search pages.
  */
-export type UnifiedBlankSearchParams = UnifiedSearchParams & {
-    untilWhen: number
-    daysToSearch: number
-    /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
-    lowestTimeBound: number
-}
+export type UnifiedBlankSearchParams = UnifiedSearchParams &
+    Pick<UnifiedSearchPaginationParams, 'limit'> & {
+        /** This is how pagination is afforded for blank search. Set to page N's `oldestResultTimestamp` to get page N+1. */
+        untilWhen: number
+        /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
+        lowestTimeBound: number
+    }
 
 export type UnifiedSearchResult = {
     docs: AnnotPage[]
@@ -150,13 +151,25 @@ export type UnifiedSearchResult = {
     oldestResultTimestamp: number
 }
 
-export type UnifiedBlankSearchResult = {
-    oldestResultTimestamp: number | null
+export type IntermediarySearchResult = {
     resultsExhausted: boolean
-    resultDataByPage: Map<string, UnifiedBlankSearchPageResultData>
+    resultDataByPage: ResultDataByPage
+    /** Always null for terms search. */
+    oldestResultTimestamp: number | null
 }
 
-export type UnifiedBlankSearchPageResultData = {
-    latestPageTimestamp: number
+export type ResultDataByPage = Map<string, UnifiedSearchPageResultData>
+
+export type UnifiedSearchPageResultData = {
     annotations: Annotation[]
+    /**
+     * Contains the latest timestamp associated with the page bookmark or visits. Not annotation.
+     * Used primarily for sorting and display in UI.
+     */
+    latestPageTimestamp: number
+    /**
+     * Contains the oldest timestamp associated with the page, including bookmarks, visits, or annotations.
+     * Used for paging back through blank search results (oldest timestamp of batch N is the upper bound for batch N+1)
+     */
+    oldestTimestamp: number
 }
