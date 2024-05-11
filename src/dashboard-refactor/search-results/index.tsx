@@ -581,7 +581,8 @@ export default class SearchResultsContainer extends React.Component<
         day: number,
         { onShareBtnClick }: PageInteractionProps,
     ) {
-        const shouldShow = areNotesShown || noteIds[notesType]?.length > 0
+        const shouldShow =
+            areNotesShown === true && noteIds[notesType]?.length > 0
         if (!shouldShow) {
             return null
         }

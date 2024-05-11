@@ -109,7 +109,7 @@ export const getInitialPageResultState = (
     pageResultId,
     notesType: 'user',
     activePage: undefined,
-    areNotesShown: false,
+    areNotesShown: true,
     isTagPickerShown: false,
     isShareMenuShown: false,
     isCopyPasterShown: false,
