@@ -376,7 +376,7 @@ export async function main(
                 'shouldAutoAddSpaces',
             )
 
-            let shouldShareAnnotation
+            let shouldShareAnnotation = false
 
             if (data.shouldShare && shouldShareSettings) {
                 // this setting is here to inverse the "shift" action of the highlight and annotation buttons
@@ -386,7 +386,9 @@ export async function main(
             } else if (shouldShareSettings) {
                 shouldShareAnnotation = true
             }
-
+            if (data.shouldShare != null && !data.shouldShare) {
+                shouldShareAnnotation = false
+            }
             const localListIds: number[] = []
             const remoteListIds: string[] = []
             const unifiedListIds: UnifiedList['unifiedId'][] = []
@@ -443,8 +445,7 @@ export async function main(
                     remoteAnnotationId,
                 } = await createAnnotation({
                     shareOpts: {
-                        shouldShare:
-                            shouldShareAnnotation || remoteListIds.length > 0,
+                        shouldShare: shouldShareAnnotation,
                         shouldCopyShareLink: data.shouldCopyShareLink,
                     },
                     annotationsBG,
@@ -605,7 +606,6 @@ export async function main(
                     false,
                 ))
             ) {
-                console.log('limit reached')
                 sidebarEvents.emit('showPowerUpModal', {
                     limitReachedNotif: 'Bookmarks',
                 })
@@ -734,7 +734,6 @@ export async function main(
             commentText?: string,
             highlightColorSetting?: HighlightColor,
         ) => {
-            console.log('exectuted again and again')
             const selectionEmpty = !selection?.toString().length
             if (selectionEmpty) {
                 return
@@ -759,7 +758,6 @@ export async function main(
                     false,
                 ))
             ) {
-                console.log('öootad')
                 sidebarEvents.emit('showPowerUpModal', {
                     limitReachedNotif: 'Bookmarks',
                 })

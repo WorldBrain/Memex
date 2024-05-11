@@ -47,7 +47,6 @@ import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-si
 export interface OwnProps {
     analyticsBG: AnalyticsCoreInterface
     getRootElement: () => HTMLElement
-    sidebarEvents: AnnotationsSidebarInPageEventEmitter
 }
 
 interface StateProps {
@@ -86,7 +85,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
                 }),
-                sidebarEvents: runInBackground(),
             }),
         )
     }
@@ -397,8 +395,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                             this.props.url,
                             false,
                         )
-
-                        console.log('isAllowed', isAllowed)
 
                         if (!isAllowed) {
                             this.processEvent('showUpgradeNotif', true)

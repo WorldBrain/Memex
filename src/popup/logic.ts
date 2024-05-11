@@ -28,7 +28,6 @@ export interface Dependencies {
     analyticsBG: AnalyticsCoreInterface
     annotationsBG: AnnotationInterface<'provider'>
     authBG: AuthRemoteFunctionsInterface
-    sidebarEvents: AnnotationsSidebarInPageEventEmitter
 }
 
 export interface Event {
