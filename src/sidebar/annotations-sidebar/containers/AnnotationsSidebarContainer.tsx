@@ -1109,6 +1109,15 @@ export class AnnotationsSidebarContainer<
                                     chapterIndex,
                                 )
                             }}
+                            bookmarkPage={() => {
+                                this.processEvent('bookmarkPage', null)
+                            }}
+                            openSpacePickerInRibbon={() => {
+                                this.processEvent(
+                                    'openSpacePickerInRibbon',
+                                    null,
+                                )
+                            }}
                             pageIndexingBG={this.props.pageIndexingBG}
                             analyticsBG={this.props.analyticsBG}
                             copyToClipboard={this.props.copyToClipboard}

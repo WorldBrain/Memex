@@ -281,7 +281,7 @@ export class SidebarContainerLogic extends UILogic<
             videoDetails: null,
             summaryModeActiveTab: 'Answer',
             isAutoAddEnabled: null,
-
+            pageAlreadySaved: false,
             showPageLinkShareMenu: false,
             showPageCitationMenu: false,
             isWidthLocked: false,
@@ -337,7 +337,8 @@ export class SidebarContainerLogic extends UILogic<
 
             confirmPrivatizeNoteArgs: null,
             confirmSelectNoteSpaceArgs: null,
-
+            pageMetaDataLoadingState: 'pristine',
+            BySpacesLoadingState: 'pristine',
             showLoginModal: false,
             showDisplayNameSetupModal: false,
             showAnnotationsShareModal: false,
@@ -964,6 +965,15 @@ export class SidebarContainerLogic extends UILogic<
             }, 1000)
         }
 
+        const pageAlreadySaved =
+            (await this.options.pageIndexingBG.getPageMetadata({
+                normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+            })) != null
+
+        this.emitMutation({
+            pageAlreadySaved: { $set: pageAlreadySaved },
+        })
+
         const openAIKey = await this.syncSettings.openAI?.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
@@ -1476,6 +1486,49 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isWidthLocked: { $set: false } })
     }
 
+    bookmarkPage: EventHandler<'bookmarkPage'> = async ({ event }) => {
+        this.emitMutation({
+            pageMetaDataLoadingState: { $set: 'running' },
+        })
+        this.options.events.emit('bookmarkPage')
+        let pageAlreadySaved = false
+        let retries = 0
+        const maxRetries = 30
+        while (!pageAlreadySaved && retries < maxRetries) {
+            pageAlreadySaved =
+                (await this.options.pageIndexingBG.getPageMetadata({
+                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+                })) != null
+            await sleepPromise(100)
+        }
+
+        this.emitMutation({
+            pageMetaDataLoadingState: { $set: 'success' },
+            pageAlreadySaved: { $set: pageAlreadySaved },
+        })
+    }
+    openSpacePickerInRibbon: EventHandler<'openSpacePickerInRibbon'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            BySpacesLoadingState: { $set: 'running' },
+        })
+        this.options.events.emit('openSpacePickerInRibbon')
+        let pageAlreadySaved = false
+        let retries = 0
+        const maxRetries = 30
+        while (!pageAlreadySaved && retries < maxRetries) {
+            pageAlreadySaved =
+                (await this.options.customListsBG.fetchPageListEntriesByUrl({
+                    url: normalizeUrl(this.fullPageUrl),
+                })) != null
+            await sleepPromise(100)
+        }
+
+        this.emitMutation({
+            BySpacesLoadingState: { $set: 'success' },
+        })
+    }
     createCheckOutLink: EventHandler<'createCheckOutLink'> = async ({
         event,
     }) => {

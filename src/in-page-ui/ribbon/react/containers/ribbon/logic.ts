@@ -240,16 +240,6 @@ export class RibbonContainerLogic extends UILogic<
         } catch (error) {
             console.error('error in updatePageCounter', error)
         }
-
-        const onboardingComplete = await browser.storage.local.get(
-            'rabbitHoleBetaFeatureAccessOnboardingDone',
-        )
-
-        if (onboardingComplete['rabbitHoleBetaFeatureAccessOnboardingDone']) {
-            this.emitMutation({
-                showRabbitHoleButton: { $set: true },
-            })
-        }
     }
 
     async initThemeVariant() {

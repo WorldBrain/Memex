@@ -16,6 +16,7 @@ import {
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { Browser } from 'webextension-polyfill'
+import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -58,6 +59,13 @@ export default class RibbonContainer extends StatefulUIElement<
     async componentDidMount() {
         await super.componentDidMount()
         this.props.inPageUI.events.on('ribbonAction', this.handleExternalAction)
+
+        this.props.events.on('bookmarkPage', () =>
+            this.processEvent('toggleBookmark', null),
+        )
+        this.props.events.on('openSpacePickerInRibbon', () =>
+            this.processEvent('setShowListsPicker', { value: true }),
+        )
     }
 
     async componentWillUnmount() {
@@ -164,6 +172,9 @@ export default class RibbonContainer extends StatefulUIElement<
                         type: listDetails?.type ?? null,
                     }
                 }}
+                forceRibbonShow={(force: boolean) =>
+                    this.props.setRibbonShouldAutoHide(!force)
+                }
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}
@@ -207,6 +218,7 @@ export default class RibbonContainer extends StatefulUIElement<
                 confirmDeletion={async (promptConfirmation: boolean) => {
                     this.processEvent('confirmDeletion', promptConfirmation)
                 }}
+                events={this.props.events}
                 showConfirmDeletion={this.state.showConfirmDeletion}
                 tutorialIdToOpen={this.state.tutorialIdToOpen}
                 // annotationsManager={this.props.annotationsManager}
@@ -280,10 +292,31 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.props.customLists.fetchPageLists({
                             url: this.normalizedPageUrl,
                         }),
-                    selectEntry: (id) =>
-                        this.processEvent('updateLists', {
-                            value: { added: id, deleted: null, selected: [] },
-                        }),
+                    selectEntry: async (id) => {
+                        const isAllowed = await pageActionAllowed(
+                            this.props.browserAPIs,
+                            null,
+                            this.props.customLists,
+                            this.state.fullPageUrl,
+                            true,
+                        )
+
+                        if (!isAllowed) {
+                            this.props.events.emit('showPowerUpModal', {
+                                limitReachedNotif: 'Bookmarks',
+                            })
+                            return false
+                        } else {
+                            this.processEvent('updateLists', {
+                                value: {
+                                    added: id,
+                                    deleted: null,
+                                    selected: [],
+                                },
+                            })
+                            return true
+                        }
+                    },
                     unselectEntry: (id) =>
                         this.processEvent('updateLists', {
                             value: { added: null, deleted: id, selected: [] },

@@ -461,9 +461,6 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                                                     <Icon
                                                                         filePath="removeX"
                                                                         onClick={() => {
-                                                                            console.log(
-                                                                                'handlelick',
-                                                                            )
                                                                             this.handleDeleteEntity(
                                                                                 entity.id,
                                                                             )

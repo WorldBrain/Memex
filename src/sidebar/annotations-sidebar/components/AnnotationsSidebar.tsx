@@ -340,6 +340,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => void
+    bookmarkPage: () => void
+    openSpacePickerInRibbon: () => void
 }
 
 interface AnnotationsSidebarState {
@@ -380,8 +382,6 @@ export class AnnotationsSidebar extends React.Component<
         [annotationUrl: string]: React.RefObject<_AnnotationEditable>
     } = {}
     private sortDropDownButtonRef = React.createRef<HTMLDivElement>()
-    private copyButtonRef = React.createRef<HTMLDivElement>()
-    private pageSummaryText = React.createRef<HTMLDivElement>()
     private autoAddBulkButtonRef = React.createRef<HTMLDivElement>()
     private addSpaceBulkButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
@@ -1275,7 +1275,7 @@ export class AnnotationsSidebar extends React.Component<
                 )}
                 {listAnnotations}
                 {this.renderAnnotationDropdowns()}
-                <Spacer />
+                <Spacer height={120} />
             </FollowedNotesContainer>
         )
     }
@@ -1520,7 +1520,6 @@ export class AnnotationsSidebar extends React.Component<
                     listData,
                     this.spaceEditBtnRefs[listData.unifiedId],
                 )}
-                <Spacer />
             </FollowedListNotesContainer>
         )
     }
@@ -1619,8 +1618,8 @@ export class AnnotationsSidebar extends React.Component<
                     getRootElement={this.props.getRootElement}
                     defaultOpenTab={
                         this.props.showPageCitationMenu
-                            ? 'CopyToClipboard'
-                            : 'ShareViaLink'
+                            ? 'ShareViaLink'
+                            : 'CopyToClipboard'
                     }
                 />
                 {this.props.renderPageLinkMenuForList()}
@@ -1639,12 +1638,8 @@ export class AnnotationsSidebar extends React.Component<
         const allPageListIds = normalizedStateToArray(lists)
             .filter(
                 (listData) =>
-                    pageListIds.has(listData.unifiedId) &&
-                    (listData.unifiedAnnotationIds?.length > 0 ||
-                        listData.hasRemoteAnnotationsToLoad ||
-                        (listData.type === 'page-link' &&
-                            listData.normalizedPageUrl === normalizedPageUrl) ||
-                        pageActiveListIds.includes(listData.unifiedId)),
+                    pageListIds.has(listData.unifiedId) ||
+                    pageActiveListIds.includes(listData.unifiedId),
             )
             .map((listData) => listData.unifiedId)
         const allAnnotationListIds = normalizedStateToArray(annotations)
@@ -1676,17 +1671,17 @@ export class AnnotationsSidebar extends React.Component<
                     </IconBox>
                     <InfoText>
                         This page is not yet in a Space <br /> you created,
-                        follow or collaborate in. <b /> click on the
-                        <span>
-                            {' '}
-                            <Icon
-                                icon="plus"
-                                heightAndWidth="20px"
-                                hoverOff
-                            />{' '}
-                        </span>
-                        icon on the right
+                        follow or collaborate in.
                     </InfoText>
+                    <PrimaryAction
+                        size={'medium'}
+                        label={'Add page to Space'}
+                        onClick={() => {
+                            this.props.openSpacePickerInRibbon()
+                        }}
+                        icon={'plus'}
+                        type={'forth'}
+                    />
                 </EmptyMessageContainer>
             )
         }
@@ -2165,10 +2160,36 @@ export class AnnotationsSidebar extends React.Component<
 
     renderCitations() {
         return (
-            <PageMetadataForm
-                pageIndexingBG={this.props.pageIndexingBG}
-                fullPageUrl={this.props.fullPageUrl}
-            />
+            <PageMetaDataContainer>
+                <PageMetadataFormTitle>Page Metadata</PageMetadataFormTitle>
+                {this.props.pageMetaDataLoadingState === 'running' ? (
+                    <LoadingBox3>
+                        <LoadingIndicator size={30} />
+                    </LoadingBox3>
+                ) : !this.props.pageAlreadySaved ? (
+                    <PageNotSavedContainer>
+                        <PageNotSavedText>
+                            Save this page to fetch metadata.
+                            <br /> Sorry for the extra step we know it could be
+                            better!
+                        </PageNotSavedText>
+                        <PrimaryAction
+                            size={'medium'}
+                            label={'Save Page'}
+                            onClick={() => {
+                                this.props.bookmarkPage()
+                            }}
+                            icon={'heartEmpty'}
+                            type={'forth'}
+                        />
+                    </PageNotSavedContainer>
+                ) : (
+                    <PageMetadataForm
+                        pageIndexingBG={this.props.pageIndexingBG}
+                        fullPageUrl={this.props.fullPageUrl}
+                    />
+                )}
+            </PageMetaDataContainer>
         )
     }
 
@@ -2266,7 +2287,7 @@ export class AnnotationsSidebar extends React.Component<
                                         this.renderSharedNotesByList()}
                                 </>
                             )}
-                            <Spacer />
+                            <Spacer height={120} />
                         </AnnotationSectionScrollContainer>
                     </AnnotationsSectionStyled>
                 )}
@@ -2618,7 +2639,7 @@ export class AnnotationsSidebar extends React.Component<
                             <AnnotationContainer>
                                 {this.renderAnnotationDropdowns()}
                                 {annots}
-                                <Spacer />
+                                <Spacer height={120} />
                             </AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
@@ -4594,6 +4615,7 @@ const InfoText = styled.div`
     font-weight: 400;
     text-align: center;
     max-width: 80%;
+    margin-bottom: 10px;
 `
 
 const FollowedListNotesContainer = styled(Margin)<{
@@ -5089,6 +5111,14 @@ const LoadingBox2 = styled.div`
     position: absolute;
     right: 25px;
 `
+const LoadingBox3 = styled.div`
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+`
 
 const RightSideContainer = styled.div`
     justify-content: flex-end;
@@ -5171,7 +5201,47 @@ const AutoAddBulkSelection = styled.div`
     color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
 `
-const Spacer = styled.div`
-    min-height: 120px;
+const Spacer = styled.div<{ height?: number }>`
+    min-height: ${(props) => props.height ?? '10'}px;
     width: 120px;
+`
+
+const PageMetaDataContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    width: fill-available;
+    width: -moz-available;
+`
+const PageMetadataFormTitle = styled.div`
+    background: ${(props) => props.theme.colors.headerGradient};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 18px;
+    font-weight: 700;
+    margin-left: 15px;
+    margin-bottom: 5px;
+`
+
+const PageNotSavedContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 5px;
+    grid-gap: 10px;
+`
+const PageNotSavedText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    font-weight: 400;
+    display: flex;
+    align-items: flex-start;
+    grid-gap: 5px;
+    margin-bottom: 10px;
+    padding: 0 5px;
+    width: 100%;
+    box-sizing: border-box;
 `

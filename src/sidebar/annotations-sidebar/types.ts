@@ -19,6 +19,8 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
         callback,
     ) => void
     triggerListenerRestart: () => void
+    bookmarkPage: () => void
+    openSpacePickerInRibbon: () => void
     addImageToEditor: (args: { imageData: string }, callback) => void
     addImageToChat: (args: { imageData: string }, callback) => void
     addYouTubeTimestampToEditor: (commentText: string, callback) => void

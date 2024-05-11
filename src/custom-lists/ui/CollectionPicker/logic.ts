@@ -710,7 +710,7 @@ export default class SpacePickerLogic extends UILogic<
 
         await executeUITask(this, 'spaceAddRemoveState', async () => {
             try {
-                let entrySelectPromise: Promise<void> | Promise<boolean>
+                let entrySelectPromise: Promise<void | boolean> | void
                 // If we're going to unselect it
                 if (previousState.selectedListIds.includes(entry.localId)) {
                     this.selectedListIds = previousState.selectedListIds.filter(
@@ -913,10 +913,7 @@ export default class SpacePickerLogic extends UILogic<
                     entry,
                     previousState,
                 )
-                const isSuccessful = await this.dependencies.selectEntry(listId)
-                if (!isSuccessful) {
-                    throw new Error('Failed to select the newly created list')
-                }
+                await this.dependencies.selectEntry(listId)
             } catch (err) {
                 this.emitMutation({ spaceWriteError: { $set: err.message } })
                 throw err

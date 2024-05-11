@@ -162,7 +162,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showChapters: boolean
     pillVisibility: string
     renameListErrorMessage: string | null
-
+    pageAlreadySaved: boolean
     sidebarWidth?: string
     sidebarRightBorderPosition?: number
     spaceTitleEditValue?: string
@@ -285,6 +285,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     immediatelyShareNotes: boolean
     pageHasNetworkAnnotations: boolean
     hasFeedActivity?: boolean
+    pageMetaDataLoadingState?: TaskState
+    BySpacesLoadingState?: TaskState
     showPageLinkShareMenu: boolean
     showPageCitationMenu: boolean
     /**
@@ -586,6 +588,9 @@ interface SidebarEvents {
         skipListsLoad?: boolean
         rerenderHighlights?: boolean
     }
+
+    bookmarkPage: null
+    openSpacePickerInRibbon: null
 
     openWebUIPageForSpace: { unifiedListId: UnifiedList['unifiedId'] }
     // Search

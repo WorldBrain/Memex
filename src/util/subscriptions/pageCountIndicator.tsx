@@ -7,8 +7,10 @@ import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
 import {
     COUNTER_STORAGE_KEY,
+    DEFAULT_COUNTER_STORAGE_KEY,
     FREE_PLAN_LIMIT,
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
@@ -16,6 +18,8 @@ interface Props {
     isTrial?: boolean
     signupDate?: number
     getRootElement: () => HTMLElement
+    events: AnnotationsSidebarInPageEventEmitter
+    forceRibbonShow: (force: boolean) => void
 }
 
 export class BlockCounterIndicator extends React.Component<Props> {
@@ -42,15 +46,6 @@ export class BlockCounterIndicator extends React.Component<Props> {
             }
         })
     }
-
-    private whichCheckOutURL = () => {
-        if (process.env.NODE_ENV === 'production') {
-            return 'https://memex.garden/upgrade'
-        } else {
-            return 'https://memex.garden/upgradeStaging'
-        }
-    }
-
     async componentWillUnmount() {
         if (this.state.shouldShow) {
             browser.storage.onChanged.removeListener((changes) =>
@@ -63,7 +58,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
             this.setState({
                 currentCount: changes[COUNTER_STORAGE_KEY].newValue.c,
-                totalCount: parseInt(changes[COUNTER_STORAGE_KEY].newValue.s),
+                totalCount: FREE_PLAN_LIMIT,
             })
         }
 
@@ -123,7 +118,10 @@ export class BlockCounterIndicator extends React.Component<Props> {
                     topRight ? 'bottom' : bottomRight ? 'top' : 'left-start'
                 }
                 targetElementRef={this.tooltipButtonRef.current}
-                closeComponent={() => this.setState({ showTooltip: false })}
+                closeComponent={() => {
+                    this.props.forceRibbonShow(false)
+                    this.setState({ showTooltip: false })
+                }}
                 offsetX={20}
                 getPortalRoot={this.props.getRootElement}
             >
@@ -146,10 +144,9 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                 icon={'longArrowRight'}
                                 padding="0px 5px 0 10px"
                                 onClick={() => {
-                                    window.open(
-                                        this.whichCheckOutURL(),
-                                        '_blank',
-                                    )
+                                    this.props.events.emit('showPowerUpModal', {
+                                        limitReachedNotif: 'Bookmarks',
+                                    })
                                 }}
                                 size="medium"
                                 type="primary"
@@ -250,7 +247,10 @@ export class BlockCounterIndicator extends React.Component<Props> {
                         <CounterContainer
                             progress={progressPercentNumber}
                             ref={this.tooltipButtonRef}
-                            onClick={() => this.setState({ showTooltip: true })}
+                            onClick={() => {
+                                this.props.forceRibbonShow(true)
+                                this.setState({ showTooltip: true })
+                            }}
                         >
                             <InnerContainer>
                                 {' '}
