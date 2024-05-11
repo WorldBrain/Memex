@@ -1,5 +1,5 @@
 import type Storex from '@worldbrain/storex'
-import type { Runtime, Storage, Tabs } from 'webextension-polyfill'
+import type { Browser, Runtime, Storage, Tabs } from 'webextension-polyfill'
 import type { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
 
 import * as utils from './utils'
@@ -34,7 +34,7 @@ import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 import type { BackgroundModules } from './setup'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { captureException } from 'src/util/raven'
-import { checkStripePlan } from 'src/util/subscriptions/storage'
+import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
@@ -50,6 +50,7 @@ interface Dependencies {
     storageChangesMan: StorageChangesManager
     storageAPI: Storage.Static
     runtimeAPI: Runtime.Static
+    browserAPIs: Browser
     tabsAPI: Tabs.Static
     analyticsBG: AnalyticsCoreInterface
     storageManager: Storex
@@ -252,7 +253,7 @@ class BackgroundScript {
                 let currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
                 if (currentUser) {
                     let emailAddresse = currentUser.email
-                    checkStripePlan(emailAddresse)
+                    checkStripePlan(emailAddresse, this.deps.browserAPIs)
                 }
             })
     }

@@ -119,6 +119,7 @@ export type DashboardDependencies = {
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
     runtimeAPI: Browser['runtime']
+    browserAPIs: Browser
     tabsAPI: Browser['tabs']
     openSpaceInWebUI: (remoteCollectionId: string) => void
     renderUpdateNotifBanner: () => JSX.Element

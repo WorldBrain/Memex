@@ -107,6 +107,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'history'
         | 'tabsAPI'
         | 'runtimeAPI'
+        | 'browserAPIs'
         | 'localStorage'
         | 'annotationsCache'
         | 'analyticsBG'
@@ -138,6 +139,7 @@ export class DashboardContainer extends StatefulUIElement<
         history: window.history,
         tabsAPI: browser.tabs,
         runtimeAPI: browser.runtime,
+        browserAPIs: browser,
         localStorage: browser.storage.local,
         pageActivityIndicatorBG: runInBackground(),
         summarizeBG: runInBackground(),
@@ -1610,6 +1612,7 @@ export class DashboardContainer extends StatefulUIElement<
                             1000,
                         )
                     }
+                    browserAPIs={this.props.browserAPIs}
                 />
             )
         }
@@ -1701,6 +1704,7 @@ export class DashboardContainer extends StatefulUIElement<
                     authBG={this.props.authBG}
                     analyticsBG={this.props.analyticsBG}
                     bgScriptsBG={this.props.bgScriptBG}
+                    browserAPIs={this.props.browserAPIs}
                 />
             )
         }
@@ -1925,6 +1929,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 this.props.pageActivityIndicatorBG
                             }
                             runtimeAPI={this.props.runtimeAPI}
+                            browserAPIs={this.props.browserAPIs}
                             summarizeBG={this.props.summarizeBG}
                             contentConversationsBG={
                                 this.props.contentConversationsBG

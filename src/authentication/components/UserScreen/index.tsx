@@ -12,7 +12,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { LOGIN_URL } from 'src/constants'
 import checkBrowser from 'src/util/check-browser'
-import browser from 'webextension-polyfill'
+import browser, { Browser } from 'webextension-polyfill'
 
 // interface Props {
 //     initiallyShowSubscriptionModal?: boolean
@@ -24,6 +24,7 @@ export interface Props extends Dependencies {
     refreshUser?: boolean
     getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface
+    browserAPIs: Browser
 }
 
 export default class UserScreen extends StatefulUIElement<Props, State, Event> {
@@ -151,6 +152,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                             mode,
                                         })
                                     }}
+                                    browserAPIs={browser}
                                 />
                             </SettingSection>
                         </div>
@@ -163,6 +165,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                             }}
                             getRootElement={this.props.getRootElement}
                             bgScriptBG={this.props.bgScriptBG}
+                            browserAPIs={browser}
                         />
                     )}
                 </>

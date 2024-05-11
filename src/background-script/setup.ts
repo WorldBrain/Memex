@@ -494,6 +494,7 @@ export function createBackgroundModules(options: {
     })
     const summarizeBG = new SummarizeBackground({
         remoteEventEmitter: createRemoteEventEmitter('pageSummary'),
+        browserAPIs: options.browserAPIs,
         analyticsBG,
     })
 
@@ -584,6 +585,7 @@ export function createBackgroundModules(options: {
         storageChangesMan: options.localStorageChangesManager,
         urlNormalizer: normalizeUrl,
         runtimeAPI: options.browserAPIs.runtime,
+        browserAPIs: options.browserAPIs,
         storageAPI: options.browserAPIs.storage,
         tabsAPI: options.browserAPIs.tabs,
         localExtSettingStore,

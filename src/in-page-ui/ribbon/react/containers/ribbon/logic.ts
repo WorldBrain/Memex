@@ -13,11 +13,11 @@ import { resolvablePromise } from 'src/util/resolvable'
 import type { FocusableComponent } from 'src/annotations/components/types'
 import type { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
-import browser, { Storage } from 'webextension-polyfill'
+import browser, { Browser, Storage } from 'webextension-polyfill'
 import {
     enforceTrialPeriod30Days,
     pageActionAllowed,
-} from 'src/util/subscriptions/storage'
+} from '@worldbrain/memex-common/lib/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
@@ -118,6 +118,7 @@ export interface RibbonLogicOptions extends RibbonContainerOptions {
     focusCreateForm: FocusableComponent['focus']
     analytics: Analytics
     analyticsBG: AnalyticsCoreInterface
+    browserAPIs: Browser
 }
 
 type EventHandler<
@@ -224,7 +225,11 @@ export class RibbonContainerLogic extends UILogic<
                 await (await this.dependencies.authBG.getCurrentUser())
                     .creationTime,
             ).getTime()
-            const isTrial = (await enforceTrialPeriod30Days(signupDate)) ?? null
+            const isTrial =
+                (await enforceTrialPeriod30Days(
+                    this.dependencies.browserAPIs,
+                    signupDate,
+                )) ?? null
 
             if (isTrial) {
                 this.emitMutation({
@@ -671,6 +676,7 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
     }) => {
         const isAllowed = await pageActionAllowed(
+            this.dependencies.browserAPIs,
             this.dependencies.analyticsBG,
             this.dependencies.customLists,
             previousState.fullPageUrl,
@@ -678,6 +684,10 @@ export class RibbonContainerLogic extends UILogic<
         )
 
         if (!isAllowed) {
+            this.dependencies.events.emit('showPowerUpModal', {
+                limitReachedNotif: 'Bookmarks',
+            })
+
             return
         }
 
@@ -870,6 +880,7 @@ export class RibbonContainerLogic extends UILogic<
         event,
     }) => {
         const isAllowed = await pageActionAllowed(
+            this.dependencies.browserAPIs,
             this.dependencies.analyticsBG,
             this.dependencies.customLists,
             previousState.fullPageUrl,
@@ -877,6 +888,9 @@ export class RibbonContainerLogic extends UILogic<
         )
 
         if (!isAllowed) {
+            this.dependencies.events.emit('showPowerUpModal', {
+                limitReachedNotif: 'Bookmarks',
+            })
             return
         }
 

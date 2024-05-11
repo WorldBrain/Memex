@@ -78,10 +78,7 @@ import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import {
-    AIActionAllowed,
-    downloadMemexDesktop,
-} from 'src/util/subscriptions/storage'
+import { downloadMemexDesktop } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import {
     getListShareUrl,
     getSinglePageShareUrl,
@@ -91,7 +88,7 @@ import {
     convertMemexURLintoTelegramURL,
     getTelegramUserDisplayName,
 } from '@worldbrain/memex-common/lib/telegram/utils'
-import { enforceTrialPeriod30Days } from 'src/util/subscriptions/storage'
+import { enforceTrialPeriod30Days } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import {
     SpacePickerDependencies,
     SpacePickerEvent,
@@ -890,7 +887,12 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             signupDate: { $set: signupDate },
-            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+            isTrial: {
+                $set: await enforceTrialPeriod30Days(
+                    this.options.browserAPIs,
+                    signupDate,
+                ),
+            },
         })
 
         const userReference = await this.options.getCurrentUser()

@@ -63,10 +63,7 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import {
-    AIActionAllowed,
-    pageActionAllowed,
-} from 'src/util/subscriptions/storage'
+import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import browser from 'webextension-polyfill'
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
@@ -125,10 +122,9 @@ import {
 import {
     COUNTER_STORAGE_KEY,
     DEFAULT_COUNTER_STORAGE_KEY,
-} from 'src/util/subscriptions/constants'
+} from '@worldbrain/memex-common/lib/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
-import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -293,62 +289,6 @@ export async function main(
     const currentTabURL = ((await runInBackground<
         InPageUIInterface<'caller'>
     >().getCurrentTabURL()) as unknown) as string
-
-    const counterStorageListener = async (
-        changes: Record<string, Storage.StorageChange>,
-    ) => {
-        const COUNTER_STORAGE_KEY = '@status'
-
-        if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
-            const oldValues = changes[COUNTER_STORAGE_KEY]?.oldValue
-            const newValues = changes[COUNTER_STORAGE_KEY]?.newValue
-
-            const counterQueriesHaveChanged =
-                oldValues.cQ != null &&
-                newValues.cQ != null &&
-                oldValues?.cQ !== newValues.cQ
-            const counterSavedHaveChanged =
-                oldValues.c != null &&
-                newValues.c != null &&
-                oldValues.c !== newValues.c
-
-            if (!counterQueriesHaveChanged && !counterSavedHaveChanged) {
-                return
-            }
-
-            let isAllowed = true
-            let limitReachedNotif = null
-            if (counterQueriesHaveChanged) {
-                isAllowed = await AIActionAllowed(analyticsBG, null, false)
-                limitReachedNotif = 'AI'
-            }
-            if (counterSavedHaveChanged) {
-                isAllowed = await pageActionAllowed(
-                    analyticsBG,
-                    collectionsBG,
-                    window.location.href,
-                    true,
-                )
-                limitReachedNotif = 'Bookmarks'
-            }
-
-            if (!isAllowed) {
-                if (currentTabURL?.includes(window.location.href)) {
-                    inPageUI.loadOnDemandInPageUI({
-                        component: 'upgrade-modal',
-                        options: {
-                            powerUpModalProps: {
-                                limitReachedNotif: limitReachedNotif,
-                                authBG: authBG,
-                            },
-                        },
-                    })
-                }
-            }
-        }
-    }
-
-    browser.storage.onChanged.addListener(counterStorageListener)
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
@@ -601,9 +541,13 @@ export async function main(
                             action: 'edit_annotation',
                         })
                     } else {
-                        inPageUI.events.emit('tooltipAction', {
-                            annotationCacheId: annotationId.toString(),
-                        })
+                        inPageUI.events.emit(
+                            'tooltipAction',
+                            {
+                                annotationCacheId: annotationId.toString(),
+                            },
+                            (success) => success,
+                        )
                     }
                 },
                 getSelection: selection ?? null,
@@ -654,12 +598,18 @@ export async function main(
 
             if (
                 !(await pageActionAllowed(
+                    browser,
                     analyticsBG,
                     collectionsBG,
                     window.location.href,
                     false,
                 ))
             ) {
+                console.log('limit reached')
+                sidebarEvents.emit('showPowerUpModal', {
+                    limitReachedNotif: 'Bookmarks',
+                })
+
                 return
             }
 
@@ -784,6 +734,7 @@ export async function main(
             commentText?: string,
             highlightColorSetting?: HighlightColor,
         ) => {
+            console.log('exectuted again and again')
             const selectionEmpty = !selection?.toString().length
             if (selectionEmpty) {
                 return
@@ -801,12 +752,17 @@ export async function main(
 
             if (
                 !(await pageActionAllowed(
+                    browser,
                     analyticsBG,
                     collectionsBG,
                     window.location.href,
                     false,
                 ))
             ) {
+                console.log('öootad')
+                sidebarEvents.emit('showPowerUpModal', {
+                    limitReachedNotif: 'Bookmarks',
+                })
                 return
             }
 
@@ -1088,6 +1044,8 @@ export async function main(
                         fullPageUrl: originalPageURL,
                     })
                 },
+                events: sidebarEvents,
+                browserAPIs: browser,
             })
             components.ribbon?.resolve()
         },
@@ -1114,6 +1072,7 @@ export async function main(
                 // inPageMode: true,
                 highlighter: highlightRenderer,
                 analyticsBG,
+                browserAPIs: browser,
                 authBG,
                 annotationsBG,
                 bgScriptBG,
@@ -1204,6 +1163,7 @@ export async function main(
                     copyToClipboard,
                     tabsAPI: browser.tabs,
                     runtimeAPI: browser.runtime,
+                    browserAPIs: browser,
                     localStorage: browser.storage.local,
                     services: createUIServices(),
                     renderUpdateNotifBanner: () => null,
@@ -1213,6 +1173,7 @@ export async function main(
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
                     authBG: authBG,
                     limitReachedNotif: null,
+                    browserAPIs: browser,
                 },
                 annotationsFunctions,
             })

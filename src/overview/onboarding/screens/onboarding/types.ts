@@ -6,6 +6,7 @@ import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/ty
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
+import { Browser } from 'webextension-polyfill'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -15,6 +16,7 @@ export interface Dependencies {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     analyticsBG?: AnalyticsCoreInterface
     bgScriptsBG: RemoteBGScriptInterface
+    browserAPIs: Browser
 }
 
 export interface State {

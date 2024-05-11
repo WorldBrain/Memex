@@ -15,6 +15,7 @@ import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { Browser } from 'webextension-polyfill'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -24,6 +25,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     selectRibbonPositionOption: (option) => void
     analyticsBG: AnalyticsCoreInterface
     theme: MemexThemeVariant
+    browserAPIs: Browser
 }
 
 export default class RibbonContainer extends StatefulUIElement<
@@ -40,6 +42,7 @@ export default class RibbonContainer extends StatefulUIElement<
                 ...props,
                 analytics,
                 analyticsBG: props.analyticsBG,
+                browserAPIs: props.browserAPIs,
                 focusCreateForm: () =>
                     this.ribbonRef?.current?.focusCreateForm(),
             }),

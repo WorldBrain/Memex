@@ -107,12 +107,12 @@ import {
 } from '@worldbrain/memex-common/lib/summarization/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/index'
-import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
-import browser from 'webextension-polyfill'
+import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/lib/subscriptions/constants'
+import browser, { Browser } from 'webextension-polyfill'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
-import { AIActionAllowed } from 'src/util/subscriptions/storage'
+import { AIActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
@@ -300,6 +300,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     inPageMode?: boolean
     authBG: AuthRemoteFunctionsInterface
     analyticsBG: AnalyticsCoreInterface
+    browserAPIs: Browser
     pageIndexingBG: PageIndexingInterface<'caller'>
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
@@ -1960,6 +1961,7 @@ export class AnnotationsSidebar extends React.Component<
                     updateAIChatHistoryState={
                         this.props.updateAIChatHistoryState
                     }
+                    analyticsBG={this.props.analyticsBG}
                     updateEditorContentState={
                         this.props.updateAIChatEditorState
                     }
@@ -1968,6 +1970,7 @@ export class AnnotationsSidebar extends React.Component<
                     }
                     isAIChatAllowed={async () => {
                         const isAllowed = await AIActionAllowed(
+                            this.props.browserAPIs,
                             this.props.analyticsBG,
                             this.props.hasKey,
                             false,
@@ -1989,7 +1992,7 @@ export class AnnotationsSidebar extends React.Component<
                     signupDate={this.props.signupDate}
                     hasKey={this.props.hasKey}
                     syncSettingsBG={this.props.syncSettingsBG}
-                    browserAPIs={browser}
+                    browserAPIs={this.props.browserAPIs}
                     isKeyValid={this.props.isKeyValid}
                     checkIfKeyValid={this.props.checkIfKeyValid}
                     renderOptionsContainer={() => this.renderOptionsContainer()}

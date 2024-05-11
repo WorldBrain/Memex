@@ -12,6 +12,7 @@ import type {
 } from 'src/search-injection/types'
 import type { ContentScriptComponent } from 'src/content-scripts/types'
 import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
+import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -73,7 +74,7 @@ export interface SidebarActionOptions {
 }
 export interface ToolTipActionOptions {
     annotationCacheId?: UnifiedAnnotation['unifiedId']
-    selection?: Selection
+    selection?: PseudoSelection
     openForSpaces?: boolean
 }
 
@@ -85,7 +86,7 @@ export interface SharedInPageUIEvents {
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
     ribbonUpdate: () => void
     sidebarAction: (event: SidebarActionOptions) => void
-    tooltipAction: (event: ToolTipActionOptions) => void
+    tooltipAction: (event: ToolTipActionOptions, callback) => void
     componentShouldSetUp: (event: {
         component: InPageUIComponent
         options?: ShouldSetUpOptions

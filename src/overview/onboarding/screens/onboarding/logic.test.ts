@@ -23,6 +23,7 @@ async function setupTest(
         navToGuidedTutorial: () => undefined,
         contentScriptsBG: backgroundModules.contentScripts.remoteFunctions,
         bgScriptsBG: backgroundModules.bgScript.remoteFunctions,
+        browserAPIs: null,
     })
 
     const logic = createElement(_logic)

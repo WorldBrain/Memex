@@ -138,14 +138,21 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             renderSpacePicker: () => null, // Placeholder function returning nullr empty object
             analyticsBG: params.analyticsBG,
             openAnnotationEdit: async (openTooltipInAnnotationEditMode) => {
-                const handleExternalAction = (event) => {
+                const handleExternalAction = (event, callback) => {
                     openTooltipInAnnotationEditMode(
                         event.annotationCacheId,
                         event.selection,
                         event.openForSpaces,
                     )
+                    if (callback) callback(true)
                 }
-                params.inPageUI.events.on('tooltipAction', handleExternalAction)
+                params.inPageUI.events.on(
+                    'tooltipAction',
+                    (event, callback) => {
+                        handleExternalAction(event, callback)
+                        callback(true)
+                    },
+                )
             },
             currentAnnotation: null, // Adjust based on your needs
             getAnnotationData: async (annotationId: string) => {

@@ -5,7 +5,7 @@ import {
     UIEventHandler,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
-import { checkStripePlan } from 'src/util/subscriptions/storage'
+import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -162,7 +162,10 @@ export default class Logic extends UILogic<State, Event> {
                 $set: 'running',
             },
         })
-        const subscriptionStatusInfo = await checkStripePlan(event.email)
+        const subscriptionStatusInfo = await checkStripePlan(
+            event.email,
+            this.dependencies.browserAPIs,
+        )
 
         if (subscriptionStatusInfo != null) {
             this.emitMutation({

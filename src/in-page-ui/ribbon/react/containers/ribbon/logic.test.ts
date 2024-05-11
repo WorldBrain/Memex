@@ -100,6 +100,8 @@ describe('Ribbon logic', () => {
             },
             annotationsCache,
             openPDFinViewer: () => undefined,
+            browserAPIs: device.browserAPIs,
+            events: null,
         })
 
         const ribbon = device.createElement(ribbonLogic)

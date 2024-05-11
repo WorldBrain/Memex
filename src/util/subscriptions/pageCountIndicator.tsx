@@ -5,7 +5,10 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import React from 'react'
 import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
-import { COUNTER_STORAGE_KEY, FREE_PLAN_LIMIT } from './constants'
+import {
+    COUNTER_STORAGE_KEY,
+    FREE_PLAN_LIMIT,
+} from '@worldbrain/memex-common/lib/subscriptions/constants'
 
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'

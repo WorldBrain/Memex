@@ -81,6 +81,7 @@ export interface Props extends SidebarContainerOptions {
     highlightColorSettings?: HighlightColor[]
     getRootElement: () => HTMLElement
     inPageMode?: boolean
+    isOpenonDashboard?: boolean
 }
 
 export class AnnotationsSidebarContainer<
@@ -897,6 +898,7 @@ export class AnnotationsSidebarContainer<
                 return 'success'
             }}
             authBG={this.props.authBG}
+            browserAPIs={this.props.browserAPIs}
         />
     )
 
@@ -1154,6 +1156,7 @@ export class AnnotationsSidebarContainer<
                                     color: color,
                                 })
                             }}
+                            browserAPIs={this.props.browserAPIs}
                             syncSettingsBG={this.props.syncSettingsBG}
                             onGoToAnnotation={async (unifiedAnnotationId) =>
                                 this.processEvent('goToAnnotationInNewTab', {

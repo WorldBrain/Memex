@@ -35,7 +35,7 @@ import type { SummarizationInterface } from 'src/summarization-llm/background/in
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
-import type { Storage, Runtime } from 'webextension-polyfill'
+import type { Storage, Runtime, Browser } from 'webextension-polyfill'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
@@ -82,6 +82,7 @@ export interface SidebarContainerDependencies {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
+    browserAPIs: Browser
     bgScriptBG: RemoteBGScriptInterface
     pkmSyncBG: PkmSyncInterface
     subscription: SubscriptionsService

@@ -45,12 +45,6 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     ) => void
     setActiveSidebarTab: (args: { activeTab: SidebarTab }) => void
     showPowerUpModal: (args: { limitReachedNotif: PowerUpModalVersion }) => void
-    // No longer used, as of the sidebar refactor
-    // removeTemporaryHighlights: () => void
-    // removeAnnotationHighlight: (args: { url: string }) => void
-    // removeAnnotationHighlights: (args: { urls: string[] }) => void
-    // hideHighlights: () => void
-    // showHighlights: () => void
 }>
 
 export interface SidebarTheme {

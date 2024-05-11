@@ -444,6 +444,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                                 shown: false,
                             })
                         }
+                        browserAPIs={this.props.browserAPIs}
                     />
                 )}
                 {this.state.showDisplayNameSetupModal && (

@@ -8,6 +8,7 @@ import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import AuthDialog from 'src/authentication/components/AuthDialog'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { Browser } from 'webextension-polyfill'
 
 export interface Props
     extends Pick<
@@ -21,6 +22,7 @@ export interface Props
     onSuccess?(isNewUser?: boolean): void
     onFail?(): void
     redirectTo?: string
+    browserAPIs: Browser
 }
 
 export default class LoginModal extends React.PureComponent<Props> {
@@ -60,7 +62,10 @@ export default class LoginModal extends React.PureComponent<Props> {
                 ) : (
                     <>
                         <TitleText>Login or Sign up</TitleText>
-                        <AuthDialog onAuth={() => this.handleLoginSuccess()} />
+                        <AuthDialog
+                            browserAPIs={this.props.browserAPIs}
+                            onAuth={() => this.handleLoginSuccess()}
+                        />
                     </>
                 )}
             </Modal>

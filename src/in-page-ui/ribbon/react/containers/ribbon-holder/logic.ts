@@ -6,6 +6,8 @@ import type {
     ShouldSetUpOptions,
 } from 'src/in-page-ui/shared-state/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { Browser } from 'webextension-polyfill'
 
 export interface RibbonHolderState {
     state: 'visible' | 'hidden'
@@ -27,6 +29,8 @@ export interface RibbonHolderDependencies {
     inPageUI: SharedInPageUIInterface
     containerDependencies: RibbonContainerDependencies
     analyticsBG: AnalyticsCoreInterface
+    events: AnnotationsSidebarInPageEventEmitter
+    browserAPIs: Browser
 }
 
 type EventHandler<EventName extends keyof RibbonHolderEvents> = UIEventHandler<

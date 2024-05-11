@@ -5,6 +5,7 @@ import {
 } from '../../../external/@worldbrain/memex-common/ts/main-ui/classes/logic'
 import { PremiumPlans } from '../../../external/@worldbrain/memex-common/ts/subscriptions/availablePowerups'
 import { AuthRemoteFunctionsInterface } from '../background/types'
+import { Browser } from 'webextension-polyfill'
 
 export interface PromptTemplatesDependencies {
     powerUpType: PowerUpModalVersion
@@ -18,6 +19,7 @@ export interface PromptTemplatesDependencies {
     getRootElement?: () => HTMLElement
     closeComponent?: () => void
     authBG: AuthRemoteFunctionsInterface
+    browserAPIs: Browser
 }
 
 export interface PromptTemplatesState {
