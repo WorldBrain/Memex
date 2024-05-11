@@ -490,6 +490,7 @@ class SpacePicker extends StatefulUIElement<
                         onCancelEdit={this.handleSpaceContextMenuClose(
                             list.localId,
                         )}
+                        getRootElement={this.props.getRootElement}
                     />
                 </>
             )

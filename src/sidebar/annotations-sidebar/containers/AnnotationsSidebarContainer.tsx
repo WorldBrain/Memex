@@ -1641,6 +1641,9 @@ export class AnnotationsSidebarContainer<
                                         contentSharingBG={
                                             this.props.contentSharingBG
                                         }
+                                        getRootElement={
+                                            this.props.getRootElement
+                                        }
                                         spacesBG={this.props.customListsBG}
                                         listData={listData}
                                         disableWriteOps={

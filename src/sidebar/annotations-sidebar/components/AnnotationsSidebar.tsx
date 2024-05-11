@@ -873,9 +873,9 @@ export class AnnotationsSidebar extends React.Component<
             })
         }
 
-        let listAnnotations: JSX.Element | JSX.Element[]
+        let listAnnotations: JSX.Element[] = []
         if (!annotationsData?.length) {
-            listAnnotations = (
+            listAnnotations = [
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
                         <Icon
@@ -886,12 +886,57 @@ export class AnnotationsSidebar extends React.Component<
                         />
                     </IconBox>
                     <InfoText>
-                        {listData.type === 'page-link'
-                            ? 'Add new notes to this page link by highlighting text, or by adding existing notes to it via the Space selector on each note.'
-                            : 'This page is added to this Space, but has no notes yet.'}
+                        {listData.type === 'page-link' ? (
+                            <span>
+                                <EmptyMessageTitle>
+                                    No notes yet
+                                </EmptyMessageTitle>
+                                Every highlight you create while in this
+                                <br />
+                                view is only added to this Space.
+                            </span>
+                        ) : // 'Add new notes to this page link by highlighting text, or by adding existing notes to it via the Space selector on each note.'
+                        this.props.selectedListId != null ? (
+                            <span>
+                                <EmptyMessageTitle>
+                                    No notes yet in this Space
+                                </EmptyMessageTitle>
+                                Every highlight you create while in this
+                                <br />
+                                view is only added to this Space.
+                                <br />
+                                <br />
+                                Add highlights via the
+                                <Icon
+                                    icon="plus"
+                                    color="prime1"
+                                    heightAndWidth="20px"
+                                    hoverOff
+                                    inline
+                                />{' '}
+                                button the tooltip or annotation card, or by
+                                using [[WikiLinks]] or #hashtags in the note.
+                            </span>
+                        ) : (
+                            <span>
+                                <EmptyMessageTitle>
+                                    No notes yet in this Space
+                                </EmptyMessageTitle>
+                                Add highlights via the
+                                <Icon
+                                    icon="plus"
+                                    color="prime1"
+                                    heightAndWidth="24px"
+                                    hoverOff
+                                    inline
+                                />{' '}
+                                button the tooltip or annotation card, or by
+                                using [[WikiLinks]] or #hashtags in the note.
+                            </span>
+                        )}
                     </InfoText>
-                </EmptyMessageContainer>
-            )
+                </EmptyMessageContainer>,
+            ]
         } else {
             listAnnotations = annotationsData.map((annotation, i) => {
                 const instanceId = generateAnnotationCardInstanceId(
@@ -1169,6 +1214,8 @@ export class AnnotationsSidebar extends React.Component<
             })
         }
 
+        console.log('listAnnotations', !annotationsData?.length)
+
         return (
             <FollowedNotesContainer zIndex={parseFloat(listData.unifiedId)}>
                 {(cacheUtils.deriveListOwnershipStatus(
@@ -1185,90 +1232,93 @@ export class AnnotationsSidebar extends React.Component<
                                 !selectedListMode ? unifiedListId : undefined,
                             )}
                         </NewAnnotationBoxMyAnnotations>
-                        <RemoteOrLocalSwitcherContainer>
-                            <PrimaryAction
-                                size={'small'}
-                                active={
-                                    this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ] === 'all' ||
-                                    !this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ]
-                                }
-                                label={
-                                    <SwitcherButtonContent>
-                                        All
-                                        <SwitcherCounter>
-                                            {allCounter}
-                                        </SwitcherCounter>
-                                    </SwitcherButtonContent>
-                                }
-                                type={'tertiary'}
-                                onClick={() => {
-                                    this.setState({
-                                        othersOrOwnAnnotationsState: {
-                                            ...this.state
-                                                .othersOrOwnAnnotationsState,
-                                            [unifiedListId]: 'all',
-                                        },
-                                    })
-                                }}
-                            />
-                            <PrimaryAction
-                                size={'small'}
-                                active={
-                                    this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ] === 'othersAnnotations'
-                                }
-                                label={
-                                    <SwitcherButtonContent>
-                                        Others
-                                        <SwitcherCounter>
-                                            {othersCounter}
-                                        </SwitcherCounter>
-                                    </SwitcherButtonContent>
-                                }
-                                type={'tertiary'}
-                                onClick={() => {
-                                    this.setState({
-                                        othersOrOwnAnnotationsState: {
-                                            ...this.state
-                                                .othersOrOwnAnnotationsState,
-                                            [unifiedListId]:
-                                                'othersAnnotations',
-                                        },
-                                    })
-                                }}
-                            />
-                            <PrimaryAction
-                                size={'small'}
-                                active={
-                                    this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ] === 'ownAnnotations'
-                                }
-                                label={
-                                    <SwitcherButtonContent>
-                                        Yours
-                                        <SwitcherCounter>
-                                            {ownCounter}
-                                        </SwitcherCounter>
-                                    </SwitcherButtonContent>
-                                }
-                                type={'tertiary'}
-                                onClick={() => {
-                                    this.setState({
-                                        othersOrOwnAnnotationsState: {
-                                            ...this.state
-                                                .othersOrOwnAnnotationsState,
-                                            [unifiedListId]: 'ownAnnotations',
-                                        },
-                                    })
-                                }}
-                            />
-                        </RemoteOrLocalSwitcherContainer>
+                        {annotationsData?.length ? (
+                            <RemoteOrLocalSwitcherContainer>
+                                <PrimaryAction
+                                    size={'small'}
+                                    active={
+                                        this.state.othersOrOwnAnnotationsState[
+                                            unifiedListId
+                                        ] === 'all' ||
+                                        !this.state.othersOrOwnAnnotationsState[
+                                            unifiedListId
+                                        ]
+                                    }
+                                    label={
+                                        <SwitcherButtonContent>
+                                            All
+                                            <SwitcherCounter>
+                                                {allCounter}
+                                            </SwitcherCounter>
+                                        </SwitcherButtonContent>
+                                    }
+                                    type={'tertiary'}
+                                    onClick={() => {
+                                        this.setState({
+                                            othersOrOwnAnnotationsState: {
+                                                ...this.state
+                                                    .othersOrOwnAnnotationsState,
+                                                [unifiedListId]: 'all',
+                                            },
+                                        })
+                                    }}
+                                />
+                                <PrimaryAction
+                                    size={'small'}
+                                    active={
+                                        this.state.othersOrOwnAnnotationsState[
+                                            unifiedListId
+                                        ] === 'othersAnnotations'
+                                    }
+                                    label={
+                                        <SwitcherButtonContent>
+                                            Others
+                                            <SwitcherCounter>
+                                                {othersCounter}
+                                            </SwitcherCounter>
+                                        </SwitcherButtonContent>
+                                    }
+                                    type={'tertiary'}
+                                    onClick={() => {
+                                        this.setState({
+                                            othersOrOwnAnnotationsState: {
+                                                ...this.state
+                                                    .othersOrOwnAnnotationsState,
+                                                [unifiedListId]:
+                                                    'othersAnnotations',
+                                            },
+                                        })
+                                    }}
+                                />
+                                <PrimaryAction
+                                    size={'small'}
+                                    active={
+                                        this.state.othersOrOwnAnnotationsState[
+                                            unifiedListId
+                                        ] === 'ownAnnotations'
+                                    }
+                                    label={
+                                        <SwitcherButtonContent>
+                                            Yours
+                                            <SwitcherCounter>
+                                                {ownCounter}
+                                            </SwitcherCounter>
+                                        </SwitcherButtonContent>
+                                    }
+                                    type={'tertiary'}
+                                    onClick={() => {
+                                        this.setState({
+                                            othersOrOwnAnnotationsState: {
+                                                ...this.state
+                                                    .othersOrOwnAnnotationsState,
+                                                [unifiedListId]:
+                                                    'ownAnnotations',
+                                            },
+                                        })
+                                    }}
+                                />
+                            </RemoteOrLocalSwitcherContainer>
+                        ) : null}
                         {this.props.bulkSelectionState?.length > 0 &&
                             this.renderBulkEditBar()}
                     </>
@@ -4287,6 +4337,16 @@ const FocusModeNotifTitle = styled.div`
     grid-gap: 5px;
     font-weight: 500;
 `
+const EmptyMessageTitle = styled.div`
+    display: flex;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 10px;
+`
 
 const FocusModeNotifExplainer = styled.div`
     display: flex;
@@ -4616,6 +4676,7 @@ const InfoText = styled.div`
     text-align: center;
     max-width: 80%;
     margin-bottom: 10px;
+    line-height: 24px;
 `
 
 const FollowedListNotesContainer = styled(Margin)<{
