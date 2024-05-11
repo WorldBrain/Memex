@@ -13,6 +13,8 @@ import Popup from './container'
 import configureStore from './store'
 import { setupRpcConnection } from 'src/util/webextensionRPC'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { EventEmitter } from 'events'
 
 interface RootProps {
     store: ReturnType<typeof configureStore>
@@ -25,11 +27,13 @@ interface RootState {
 
 class Root extends React.Component<RootProps, RootState> {
     state: RootState = {}
+    sidebarEvents: AnnotationsSidebarInPageEventEmitter
 
     async componentDidMount() {
         this.setState({
             themeVariant: await loadThemeVariant(),
         })
+        this.sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
     }
 
     render() {
@@ -37,6 +41,7 @@ class Root extends React.Component<RootProps, RootState> {
         if (!themeVariant) {
             return null
         }
+        console.log('this sidebarEvents', this.sidebarEvents)
         return (
             <Provider store={this.props.store}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
@@ -44,6 +49,7 @@ class Root extends React.Component<RootProps, RootState> {
                         <Popup
                             getRootElement={this.props.getRootElement}
                             analyticsBG={null}
+                            sidebarEvents={this.sidebarEvents}
                         />
                     </ErrorBoundary>
                 </ThemeProvider>

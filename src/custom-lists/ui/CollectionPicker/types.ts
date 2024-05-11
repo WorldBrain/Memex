@@ -89,7 +89,7 @@ export interface SpacePickerDependencies {
     selectEntry: (
         listId: number,
         options?: { protectAnnotation?: boolean },
-    ) => Promise<void>
+    ) => Promise<void> | Promise<boolean>
     unselectEntry: (listId: number) => Promise<void>
     actOnAllTabs?: (listId: number) => Promise<void>
     /** Called when user keys Enter+Cmd/Ctrl in main text input */

@@ -11,6 +11,9 @@ import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { Browser } from 'webextension-polyfill'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 
 const styles = require('./BookmarkButton.css')
 const buttonStyles = require('../../components/Button.css')
@@ -20,6 +23,9 @@ export interface OwnProps {
     pageUrl: string
     isSavedPage: boolean
     getRootElement: () => HTMLElement
+    browserAPIs: Browser
+    collectionsBG: RemoteCollectionsInterface
+    saveBookmark: () => Promise<boolean>
 }
 
 interface StateProps {
@@ -142,8 +148,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     props,
 ) => ({
     toggleBookmark: async (element: HTMLElement) => {
-        const allowed = true
-        // await pageActionAllowed(analyticsBG)
+        const allowed = await props.saveBookmark()
 
         if (allowed) {
             await dispatch(acts.toggleBookmark())
