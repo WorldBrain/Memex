@@ -149,6 +149,8 @@ export default class SearchBar extends PureComponent<SearchBarProps, State> {
                     <TutorialBox
                         tutorialId="savePages"
                         getRootElement={this.props.getRootElement}
+                        iconPadding={'6px'}
+                        iconSize="22px"
                     />
                 </ActionButtons>
                 {!this.props.inPageMode && <Placeholder />}

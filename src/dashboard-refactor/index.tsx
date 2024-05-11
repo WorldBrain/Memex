@@ -70,6 +70,7 @@ import CopyPaster from 'src/copy-paster/components/CopyPaster'
 import { PageSearchCopyPaster } from 'src/copy-paster'
 import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -526,7 +527,6 @@ export class DashboardContainer extends StatefulUIElement<
                                         },
                                     )
                                 }
-                                label={'Sync Status'}
                                 size={'medium'}
                                 icon={getSyncStatusIcon(syncStatusIconState)}
                                 type={'tertiary'}
@@ -550,6 +550,16 @@ export class DashboardContainer extends StatefulUIElement<
                             filePath={icons.settings}
                         />
                         {this.renderStatusMenu(syncStatusIconState)}
+                        {this.state.isNoteSidebarShown && (
+                            <Icon
+                                icon="arrowRight"
+                                heightAndWidth="22px"
+                                padding="6px"
+                                onClick={() =>
+                                    this.notesSidebarRef.current.hideSidebar()
+                                }
+                            />
+                        )}
                     </>
                 </RightHeader>
             </HeaderContainer>
@@ -1949,6 +1959,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 )
                             }
                             onNotesSidebarClose={() => {
+                                console.log('onnotes close')
                                 this.processEvent('toggleNoteSidebarOff', null)
                                 this.processEvent('setActivePage', {
                                     activeDay: undefined,
@@ -1990,6 +2001,8 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('toggleTheme', null)
                         }
                         getRootElement={this.props.getRootElement}
+                        padding={'4px'}
+                        iconSize="22px"
                     />
                     {/* {this.state.listsSidebar.draggedListId != null ||
                         (this.state.searchResults.draggedPageId != null && ( */}
