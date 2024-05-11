@@ -32,6 +32,7 @@ import {
     TypedRemoteEventEmitter,
     getRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 interface TooltipRootProps {
     mount: InPageUIRootMount
@@ -179,6 +180,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         this.props.annotationsCache.updateAnnotation({
             ...currentAnnotation,
             unifiedListIds: updatedUnifiedListIdLists,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         })
 
         this.props.contentSharingBG.shareAnnotationToSomeLists({
