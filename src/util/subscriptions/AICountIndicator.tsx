@@ -11,7 +11,7 @@ import styled, { css } from 'styled-components'
 import browser, { Browser, Storage } from 'webextension-polyfill'
 import {
     COUNTER_STORAGE_KEY,
-    DEFAULT_COUNTER_STORAGE_KEY,
+    DEFAULT_COUNTER_STORAGE_VALUE,
     DEFAULT_POWERUP_LIMITS,
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import { TaskState } from 'ui-logic-core/lib/types'
@@ -57,7 +57,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
     private syncSettings: SyncSettingsStore<'openAI'>
 
     state: State = {
-        currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
+        currentCount: DEFAULT_COUNTER_STORAGE_VALUE.cQ,
         shouldShow: true,
         showTooltip: false,
         openAIKey: '',

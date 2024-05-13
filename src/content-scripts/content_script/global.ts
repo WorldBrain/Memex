@@ -121,7 +121,7 @@ import {
 } from '@worldbrain/memex-common/lib/annotations/utils'
 import {
     COUNTER_STORAGE_KEY,
-    DEFAULT_COUNTER_STORAGE_KEY,
+    DEFAULT_COUNTER_STORAGE_VALUE,
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
@@ -1495,7 +1495,8 @@ export async function main(
                     subscriptionBefore[COUNTER_STORAGE_KEY]
 
                 const subscriptionsBefore =
-                    subscriptionDataBefore?.pU ?? DEFAULT_COUNTER_STORAGE_KEY.pU
+                    subscriptionDataBefore?.pU ??
+                    DEFAULT_COUNTER_STORAGE_VALUE.pU
 
                 await sleepPromise(1000)
                 await runInBackground<
@@ -1509,7 +1510,8 @@ export async function main(
                     subscriptionAfter[COUNTER_STORAGE_KEY]
 
                 const subscriptionsAfter =
-                    subscriptionDataAfter?.pU ?? DEFAULT_COUNTER_STORAGE_KEY.pU
+                    subscriptionDataAfter?.pU ??
+                    DEFAULT_COUNTER_STORAGE_VALUE.pU
 
                 let keyChanged = false
                 for (const key in subscriptionsBefore) {

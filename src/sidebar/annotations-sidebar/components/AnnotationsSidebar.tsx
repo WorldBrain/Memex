@@ -1214,8 +1214,6 @@ export class AnnotationsSidebar extends React.Component<
             })
         }
 
-        console.log('listAnnotations', !annotationsData?.length)
-
         return (
             <FollowedNotesContainer zIndex={parseFloat(listData.unifiedId)}>
                 {(cacheUtils.deriveListOwnershipStatus(

@@ -15,7 +15,10 @@ import {
 import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
 import browser, { Browser } from 'webextension-polyfill'
 import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/lib/subscriptions/constants'
-import { AIActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import {
+    AIActionAllowed,
+    updateTabAISessions,
+} from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -75,6 +78,30 @@ export default class SummarizeBackground {
         makeRemotelyCallable(this.remoteFunctions, { insertExtraArg: true })
     }
 
+    async saveActiveTabId(hasKey: boolean, AImodel: AImodels) {
+        const isAlreadySaved = await updateTabAISessions(
+            this.options.browserAPIs,
+        )
+
+        if (isAlreadySaved) {
+            return
+        } else {
+            await AIActionAllowed(
+                this.options.browserAPIs,
+                this.options.analyticsBG,
+                hasKey,
+                true,
+                AImodel,
+            )
+        }
+
+        this.options.browserAPIs.tabs.onRemoved.addListener(this.onTabClosed)
+    }
+
+    onTabClosed = (tabId, removeInfo) => {
+        updateTabAISessions(this.options.browserAPIs, tabId)
+    }
+
     startPageSummaryStream: SummarizationInterface<
         'provider'
     >['startPageSummaryStream'] = async (
@@ -90,6 +117,8 @@ export default class SummarizeBackground {
             promptData,
         },
     ) => {
+        await this.saveActiveTabId(apiKey?.length > 0, AImodel)
+
         let isAllowed = null
 
         isAllowed = await AIActionAllowed(
