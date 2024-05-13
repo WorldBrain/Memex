@@ -490,6 +490,7 @@ class SpacePicker extends StatefulUIElement<
                         onCancelEdit={this.handleSpaceContextMenuClose(
                             list.localId,
                         )}
+                        getRootElement={this.props.getRootElement}
                     />
                 </>
             )
@@ -515,7 +516,7 @@ class SpacePicker extends StatefulUIElement<
                             onKeyDown={this.handleKeyPress}
                             onKeyUp={this.handleKeyUp}
                             value={this.state.query}
-                            autoFocus={this.props.autoFocus}
+                            autoFocus={true}
                         />
                     </SearchContainer>
                 )}

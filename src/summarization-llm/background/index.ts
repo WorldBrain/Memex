@@ -13,9 +13,12 @@ import {
     PromptData,
 } from '@worldbrain/memex-common/lib/summarization/types'
 import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
-import browser from 'webextension-polyfill'
-import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
-import { AIActionAllowed } from 'src/util/subscriptions/storage'
+import browser, { Browser } from 'webextension-polyfill'
+import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/lib/subscriptions/constants'
+import {
+    AIActionAllowed,
+    updateTabAISessions,
+} from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -49,12 +52,12 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
 
 export interface summarizePageBackgroundOptions {
     remoteEventEmitter: RemoteEventEmitter<'pageSummary'>
+    browserAPIs: Browser
     analyticsBG?: AnalyticsCoreInterface
 }
 
 export default class SummarizeBackground {
     remoteFunctions: SummarizationInterface<'provider'>
-    analyticsBG: AnalyticsCoreInterface
 
     private summarizationService = new SummarizationService({
         serviceURL:
@@ -75,6 +78,30 @@ export default class SummarizeBackground {
         makeRemotelyCallable(this.remoteFunctions, { insertExtraArg: true })
     }
 
+    async saveActiveTabId(hasKey: boolean, AImodel: AImodels) {
+        this.options.browserAPIs.tabs.onRemoved.removeListener(this.onTabClosed)
+        this.options.browserAPIs.tabs.onRemoved.addListener(this.onTabClosed)
+        const isAlreadySaved = await updateTabAISessions(
+            this.options.browserAPIs,
+        )
+
+        if (isAlreadySaved) {
+            return true
+        } else {
+            return await AIActionAllowed(
+                this.options.browserAPIs,
+                this.options.analyticsBG,
+                hasKey,
+                true,
+                AImodel,
+            )
+        }
+    }
+
+    onTabClosed = (tabId, removeInfo) => {
+        updateTabAISessions(this.options.browserAPIs, tabId)
+    }
+
     startPageSummaryStream: SummarizationInterface<
         'provider'
     >['startPageSummaryStream'] = async (
@@ -90,14 +117,7 @@ export default class SummarizeBackground {
             promptData,
         },
     ) => {
-        let isAllowed = null
-
-        isAllowed = await AIActionAllowed(
-            this.analyticsBG,
-            apiKey?.length > 0,
-            true,
-            AImodel,
-        )
+        let isAllowed = await this.saveActiveTabId(apiKey?.length > 0, AImodel)
 
         if (!isAllowed) {
             return
@@ -106,7 +126,7 @@ export default class SummarizeBackground {
         // this is here to not scam our users that have the full subscription and add a key only for using GPT-4.
         let apiKeyToUse = apiKey ?? ''
         if (apiKeyToUse?.length > 0 && AImodel === 'gpt-3') {
-            const subscriptionStorage = await browser.storage.local.get(
+            const subscriptionStorage = await this.options.browserAPIs.storage.local.get(
                 COUNTER_STORAGE_KEY,
             )
             const subscriptionData = subscriptionStorage[COUNTER_STORAGE_KEY]

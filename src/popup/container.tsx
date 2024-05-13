@@ -41,6 +41,8 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 export interface OwnProps {
     analyticsBG: AnalyticsCoreInterface
@@ -186,6 +188,42 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         }
     }
 
+    private renderUpgradeNotif() {
+        if (this.state.showUpgradeNotif) {
+            return (
+                <BlurredNotice browser={this.browserName}>
+                    <NoticeTitle>
+                        You've reached the limit of
+                        <br /> 25 saved pages per month
+                    </NoticeTitle>
+                    <NoticeSubTitle>
+                        Upgrade to continue to save, annotate and organise.
+                        Search & AI features are not affected.
+                    </NoticeSubTitle>
+                    <PrimaryAction
+                        label="Upgrade"
+                        onClick={() => {
+                            browser.tabs.create({
+                                url: `chrome-extension://${browser.runtime.id}/options.html#/account`,
+                            })
+                            this.processEvent('showUpgradeNotif', false)
+                        }}
+                        size={'medium'}
+                        type={'primary'}
+                    />
+                    <PrimaryAction
+                        label="Go Back"
+                        onClick={() => {
+                            this.processEvent('showUpgradeNotif', false)
+                        }}
+                        size={'medium'}
+                        type={'tertiary'}
+                    />
+                </BlurredNotice>
+            )
+        }
+        return null
+    }
     private maybeRenderBlurredNotice() {
         if (!this.isCurrentPagePDF) {
             return null
@@ -270,19 +308,34 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         if (this.props.showCollectionsPicker) {
             return (
                 <SpacePickerContainer>
+                    {this.renderUpgradeNotif()}
                     <BackContainer
                         onClick={this.props.toggleShowCollectionsPicker}
                         header={'Add Page to Spaces'}
                         showAutoSaved={this.state.showAutoSaved}
                     />
                     <CollectionPicker
-                        selectEntry={(listId) =>
-                            this.handleListUpdate({
-                                added: listId,
-                                deleted: null,
-                                pageTitle: title,
-                            })
-                        }
+                        selectEntry={async (listId) => {
+                            const isAllowed = await pageActionAllowed(
+                                browser,
+                                null,
+                                collections,
+                                this.props.url,
+                                false,
+                            )
+
+                            if (!isAllowed) {
+                                this.processEvent('showUpgradeNotif', true)
+                                return false
+                            } else {
+                                this.handleListUpdate({
+                                    added: listId,
+                                    deleted: null,
+                                    pageTitle: title,
+                                })
+                                return true
+                            }
+                        }}
                         unselectEntry={(listId) =>
                             this.handleListUpdate({
                                 added: null,
@@ -307,6 +360,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return (
             <PopupContainerContainer>
                 {this.maybeRenderBlurredNotice()}
+                {this.renderUpgradeNotif()}
                 <FeedActivitySection
                     onClick={async () => {
                         await this.activityIndicatorBG.markActivitiesAsSeen()
@@ -331,6 +385,24 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     closePopup={this.closePopup}
                     isSavedPage={this.state.isSavedPage}
                     getRootElement={this.props.getRootElement}
+                    browserAPIs={browser}
+                    collectionsBG={collections}
+                    saveBookmark={async () => {
+                        const isAllowed = await pageActionAllowed(
+                            browser,
+                            null,
+                            collections,
+                            this.props.url,
+                            false,
+                        )
+
+                        if (!isAllowed) {
+                            this.processEvent('showUpgradeNotif', true)
+                            return false
+                        } else {
+                            return true
+                        }
+                    }}
                 />
                 <CollectionsButton
                     getRootElement={this.props.getRootElement}
@@ -495,11 +567,15 @@ const FeedActivitySectionInnerContainer = styled.div`
 `
 
 const NoticeTitle = styled.div`
-    font-size: 16px;
-    color: ${(props) => props.theme.colors.white};
+    font-size: 18px;
     font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
+    background: ${(props) => props.theme.colors.headerGradient};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
 `
 
 const LoadingBox = styled.div`
@@ -511,18 +587,17 @@ const LoadingBox = styled.div`
 `
 
 const NoticeSubTitle = styled.div`
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.greyScale6};
     font-weight: 300;
     padding-bottom: 15px;
     text-align: center;
-    padding: 0 10px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 `
 
 const BlurredNotice = styled.div<{
-    browser: string
-    location: string
+    browser?: string
+    location?: string
 }>`
     position: absolute;
     height: 100%;
@@ -530,18 +605,19 @@ const BlurredNotice = styled.div<{
     width: fill-available;
     width: -moz-available;
     height: 100%;
-    z-index: 30;
+    z-index: 11111;
     overflow-y: ${(props) =>
         props.browser === 'firefox' && props.location === 'local'
             ? 'hidden'
             : 'scroll'};
     background: ${(props) =>
-        props.browser === 'firefox' ? props.theme.colors.black + 90 : 'none'};
+        props.browser === 'firefox' ? props.theme.colors.black1 + 99 : 'none'};
     backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    padding: 20px;
 
     scrollbar-width: none;
 

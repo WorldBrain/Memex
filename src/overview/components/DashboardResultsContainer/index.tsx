@@ -85,7 +85,12 @@ export default class DashboardResultsContainer extends StatefulUIElement<
 
     render() {
         if (isDuringInstall()) {
-            return <Onboarding navToDashboard={this.handleOnboardingComplete} />
+            return (
+                <Onboarding
+                    browserAPIs={browser}
+                    navToDashboard={this.handleOnboardingComplete}
+                />
+            )
         }
 
         if (this.state.theme == null) {
@@ -108,6 +113,7 @@ export default class DashboardResultsContainer extends StatefulUIElement<
                             getRootElement={() =>
                                 document.getElementById('app')
                             }
+                            browserAPIs={browser}
                         />
 
                         {this.state.readerShow && (

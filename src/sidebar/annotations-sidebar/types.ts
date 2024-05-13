@@ -19,6 +19,8 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
         callback,
     ) => void
     triggerListenerRestart: () => void
+    bookmarkPage: () => void
+    openSpacePickerInRibbon: () => void
     addImageToEditor: (args: { imageData: string }, callback) => void
     addImageToChat: (args: { imageData: string }, callback) => void
     addYouTubeTimestampToEditor: (commentText: string, callback) => void
@@ -45,12 +47,6 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     ) => void
     setActiveSidebarTab: (args: { activeTab: SidebarTab }) => void
     showPowerUpModal: (args: { limitReachedNotif: PowerUpModalVersion }) => void
-    // No longer used, as of the sidebar refactor
-    // removeTemporaryHighlights: () => void
-    // removeAnnotationHighlight: (args: { url: string }) => void
-    // removeAnnotationHighlights: (args: { urls: string[] }) => void
-    // hideHighlights: () => void
-    // showHighlights: () => void
 }>
 
 export interface SidebarTheme {

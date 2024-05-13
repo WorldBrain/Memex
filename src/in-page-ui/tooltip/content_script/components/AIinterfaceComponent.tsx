@@ -5,7 +5,6 @@ import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-fi
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { updateAICounter } from 'src/util/subscriptions/storage'
 
 export interface Props {
     sendAIprompt: any

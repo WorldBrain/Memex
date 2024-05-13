@@ -207,6 +207,7 @@ export async function setupTest(
             device.backgroundModules.imageSupport,
         ) as any,
         bgScriptBG: device.backgroundModules.bgScript.remoteFunctions,
+        browserAPIs: device.browserAPIs,
     })
 
     if (args.overrideSearchTrigger) {

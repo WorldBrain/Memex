@@ -58,11 +58,6 @@ import {
 } from '../../util/webextensionRPC'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
-import {
-    enforceTrialPeriod30Days,
-    pageActionAllowed,
-    updatePageCounter,
-} from 'src/util/subscriptions/storage'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'

@@ -74,6 +74,7 @@ export default [
                 initiallyShowSubscriptionModal
                 refreshUser
                 bgScriptBG={this.props.bgScriptBG}
+                browserAPIs={browser}
             />
         ),
         hideFromSidebar: true,

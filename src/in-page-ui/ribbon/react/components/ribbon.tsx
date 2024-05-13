@@ -47,6 +47,7 @@ import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -86,6 +87,8 @@ export interface Props extends RibbonSubcomponentProps {
     setTutorialIdToOpen: (tutorialId: string) => void
     deletePage: () => void
     confirmDeletion: (promptConfirmation: boolean) => void
+    events: AnnotationsSidebarInPageEventEmitter
+    forceRibbonShow: (force: boolean) => void
 }
 
 interface State {
@@ -1282,6 +1285,7 @@ export default class Ribbon extends Component<Props, State> {
                             heightAndWidth="22px"
                             filePath={'plus'}
                             containerRef={this.spacePickerRef}
+                            active={this.props.lists.showListsPicker}
                         />
                         {this.props.lists.pageListIds.length > 0 && (
                             <SpacesCounter>
@@ -2058,6 +2062,10 @@ export default class Ribbon extends Component<Props, State> {
                                             getRootElement={
                                                 this.props.getRootElement
                                             }
+                                            events={this.props.events}
+                                            forceRibbonShow={
+                                                this.props.forceRibbonShow
+                                            }
                                         />
                                         {this.renderTutorialButton()}
                                     </BottomSection>
@@ -2262,6 +2270,8 @@ export default class Ribbon extends Component<Props, State> {
                                     isTrial={this.props.isTrial}
                                     signupDate={this.props.signupDate}
                                     getRootElement={this.props.getRootElement}
+                                    events={this.props.events}
+                                    forceRibbonShow={this.props.forceRibbonShow}
                                 />
                                 {this.renderCloseRibbonButton()}
                             </BottomSection>

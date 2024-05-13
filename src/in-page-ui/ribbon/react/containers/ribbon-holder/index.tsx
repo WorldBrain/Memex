@@ -198,6 +198,8 @@ export default class RibbonHolder extends StatefulUIElement<
                                 )
                             }
                             analyticsBG={this.props.analyticsBG}
+                            events={this.props.events}
+                            browserAPIs={this.props.browserAPIs}
                         />
                     </RibbonHolderBox>
                 )}

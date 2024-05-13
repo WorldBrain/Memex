@@ -63,10 +63,7 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import {
-    AIActionAllowed,
-    pageActionAllowed,
-} from 'src/util/subscriptions/storage'
+import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import browser from 'webextension-polyfill'
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
@@ -124,11 +121,10 @@ import {
 } from '@worldbrain/memex-common/lib/annotations/utils'
 import {
     COUNTER_STORAGE_KEY,
-    DEFAULT_COUNTER_STORAGE_KEY,
-} from 'src/util/subscriptions/constants'
+    DEFAULT_COUNTER_STORAGE_VALUE,
+} from '@worldbrain/memex-common/lib/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
-import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -294,62 +290,6 @@ export async function main(
         InPageUIInterface<'caller'>
     >().getCurrentTabURL()) as unknown) as string
 
-    const counterStorageListener = async (
-        changes: Record<string, Storage.StorageChange>,
-    ) => {
-        const COUNTER_STORAGE_KEY = '@status'
-
-        if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
-            const oldValues = changes[COUNTER_STORAGE_KEY]?.oldValue
-            const newValues = changes[COUNTER_STORAGE_KEY]?.newValue
-
-            const counterQueriesHaveChanged =
-                oldValues.cQ != null &&
-                newValues.cQ != null &&
-                oldValues?.cQ !== newValues.cQ
-            const counterSavedHaveChanged =
-                oldValues.c != null &&
-                newValues.c != null &&
-                oldValues.c !== newValues.c
-
-            if (!counterQueriesHaveChanged && !counterSavedHaveChanged) {
-                return
-            }
-
-            let isAllowed = true
-            let limitReachedNotif = null
-            if (counterQueriesHaveChanged) {
-                isAllowed = await AIActionAllowed(analyticsBG, null, false)
-                limitReachedNotif = 'AI'
-            }
-            if (counterSavedHaveChanged) {
-                isAllowed = await pageActionAllowed(
-                    analyticsBG,
-                    collectionsBG,
-                    window.location.href,
-                    true,
-                )
-                limitReachedNotif = 'Bookmarks'
-            }
-
-            if (!isAllowed) {
-                if (currentTabURL?.includes(window.location.href)) {
-                    inPageUI.loadOnDemandInPageUI({
-                        component: 'upgrade-modal',
-                        options: {
-                            powerUpModalProps: {
-                                limitReachedNotif: limitReachedNotif,
-                                authBG: authBG,
-                            },
-                        },
-                    })
-                }
-            }
-        }
-    }
-
-    browser.storage.onChanged.addListener(counterStorageListener)
-
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
     const loadContentScript = createContentScriptLoader({
@@ -436,7 +376,7 @@ export async function main(
                 'shouldAutoAddSpaces',
             )
 
-            let shouldShareAnnotation
+            let shouldShareAnnotation = false
 
             if (data.shouldShare && shouldShareSettings) {
                 // this setting is here to inverse the "shift" action of the highlight and annotation buttons
@@ -446,7 +386,9 @@ export async function main(
             } else if (shouldShareSettings) {
                 shouldShareAnnotation = true
             }
-
+            if (data.shouldShare != null && !data.shouldShare) {
+                shouldShareAnnotation = false
+            }
             const localListIds: number[] = []
             const remoteListIds: string[] = []
             const unifiedListIds: UnifiedList['unifiedId'][] = []
@@ -503,8 +445,7 @@ export async function main(
                     remoteAnnotationId,
                 } = await createAnnotation({
                     shareOpts: {
-                        shouldShare:
-                            shouldShareAnnotation || remoteListIds.length > 0,
+                        shouldShare: shouldShareAnnotation,
                         shouldCopyShareLink: data.shouldCopyShareLink,
                     },
                     annotationsBG,
@@ -601,9 +542,13 @@ export async function main(
                             action: 'edit_annotation',
                         })
                     } else {
-                        inPageUI.events.emit('tooltipAction', {
-                            annotationCacheId: annotationId.toString(),
-                        })
+                        inPageUI.events.emit(
+                            'tooltipAction',
+                            {
+                                annotationCacheId: annotationId.toString(),
+                            },
+                            (success) => success,
+                        )
                     }
                 },
                 getSelection: selection ?? null,
@@ -644,22 +589,38 @@ export async function main(
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
-            const selectionEmpty = !selection?.toString().length
-            if (selectionEmpty && !drawRectangle) {
-                return
-            }
+            console.log('createHighlight', selection)
 
             let anchor: Anchor
             let quote: string
 
+            if (selection) {
+                quote = getSelectionHtml(selection)
+                const descriptor = await anchoring.selectionToDescriptor({
+                    _document: this.document,
+                    _window: this.window,
+                    isPdf: this.pdfViewer != null,
+                    selection,
+                })
+                anchor = { quote, descriptor }
+            }
+            if (quote?.length === 0 && !drawRectangle) {
+                return
+            }
+
             if (
                 !(await pageActionAllowed(
+                    browser,
                     analyticsBG,
                     collectionsBG,
                     window.location.href,
                     false,
                 ))
             ) {
+                sidebarEvents.emit('showPowerUpModal', {
+                    limitReachedNotif: 'Bookmarks',
+                })
+
                 return
             }
 
@@ -703,16 +664,7 @@ export async function main(
                 )
                 annotationId = results.annotationId
                 await results.createPromise
-            } else if (selection) {
-                quote = getSelectionHtml(selection)
-                const descriptor = await anchoring.selectionToDescriptor({
-                    _document: this.document,
-                    _window: this.window,
-                    isPdf: this.pdfViewer != null,
-                    selection,
-                })
-                anchor = { quote, descriptor }
-
+            } else if (quote.length > 0) {
                 const results = await saveHighlight(
                     shouldShare,
                     shouldCopyShareLink,
@@ -801,12 +753,16 @@ export async function main(
 
             if (
                 !(await pageActionAllowed(
+                    browser,
                     analyticsBG,
                     collectionsBG,
                     window.location.href,
                     false,
                 ))
             ) {
+                sidebarEvents.emit('showPowerUpModal', {
+                    limitReachedNotif: 'Bookmarks',
+                })
                 return
             }
 
@@ -1088,6 +1044,8 @@ export async function main(
                         fullPageUrl: originalPageURL,
                     })
                 },
+                events: sidebarEvents,
+                browserAPIs: browser,
             })
             components.ribbon?.resolve()
         },
@@ -1114,6 +1072,7 @@ export async function main(
                 // inPageMode: true,
                 highlighter: highlightRenderer,
                 analyticsBG,
+                browserAPIs: browser,
                 authBG,
                 annotationsBG,
                 bgScriptBG,
@@ -1204,6 +1163,7 @@ export async function main(
                     copyToClipboard,
                     tabsAPI: browser.tabs,
                     runtimeAPI: browser.runtime,
+                    browserAPIs: browser,
                     localStorage: browser.storage.local,
                     services: createUIServices(),
                     renderUpdateNotifBanner: () => null,
@@ -1213,6 +1173,7 @@ export async function main(
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
                     authBG: authBG,
                     limitReachedNotif: null,
+                    browserAPIs: browser,
                 },
                 annotationsFunctions,
             })
@@ -1536,7 +1497,8 @@ export async function main(
                     subscriptionBefore[COUNTER_STORAGE_KEY]
 
                 const subscriptionsBefore =
-                    subscriptionDataBefore?.pU ?? DEFAULT_COUNTER_STORAGE_KEY.pU
+                    subscriptionDataBefore?.pU ??
+                    DEFAULT_COUNTER_STORAGE_VALUE.pU
 
                 await sleepPromise(1000)
                 await runInBackground<
@@ -1550,7 +1512,8 @@ export async function main(
                     subscriptionAfter[COUNTER_STORAGE_KEY]
 
                 const subscriptionsAfter =
-                    subscriptionDataAfter?.pU ?? DEFAULT_COUNTER_STORAGE_KEY.pU
+                    subscriptionDataAfter?.pU ??
+                    DEFAULT_COUNTER_STORAGE_VALUE.pU
 
                 let keyChanged = false
                 for (const key in subscriptionsBefore) {

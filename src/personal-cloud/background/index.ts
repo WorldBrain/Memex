@@ -126,6 +126,7 @@ export class PersonalCloudBackground {
             runDataMigration: this.waitForSync,
             isCloudSyncEnabled: this.isCloudSyncEnabled,
             invokeSyncDownload: this.invokeSyncDownload,
+            countPendingSyncDownloads: this.countPendingSyncDownloads,
             enableCloudSyncForNewInstall: this.enableSyncForNewInstall,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
@@ -160,6 +161,17 @@ export class PersonalCloudBackground {
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
 
+    countPendingSyncDownloads: PersonalCloudRemoteInterface['countPendingSyncDownloads'] = async () => {
+        const pendingDownloads = await this.options.backend.countPendingUpdates(
+            {},
+        )
+
+        this.stats.pendingDownloads = pendingDownloads ?? 0
+
+        const pendingStats = this.stats.pendingDownloads
+        return pendingStats
+    }
+
     invokeSyncDownload = async () => {
         this.options.backend.triggerSyncContinuation()
     }
@@ -173,7 +185,7 @@ export class PersonalCloudBackground {
 
         await this.actionQueue.setup({ paused: true })
         this._modifyStats({
-            pendingUploads: this.actionQueue.pendingActionCount,
+            pendingUploads: this.actionQueue.pendingActionCount ?? 0,
         })
 
         await this.startSync()
@@ -323,6 +335,21 @@ export class PersonalCloudBackground {
         }
     }
 
+    async sendCountPendingDownloadsDownUpdate() {
+        if (this.emitEvents) {
+            try {
+                this.options.remoteEventEmitter.emit('cloudStatsUpdated', {
+                    stats: {
+                        pendingDownloads: this.stats.pendingDownloads - 1,
+                        pendingUploads: this.stats.pendingUploads,
+                    },
+                })
+            } catch (err) {
+                console.error('Error while emitting updated stats:', err)
+            }
+        }
+    }
+
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         this.options.remoteEventEmitter.emit('downloadStarted')
         const { releaseMutex } = await this.pullMutex.lock()
@@ -388,6 +415,7 @@ export class PersonalCloudBackground {
                     ? await doesListExist(update.parentLocalListId)
                     : true)
             ) {
+                this.sendCountPendingDownloadsDownUpdate()
                 return
             }
             await storageManager.operation(
@@ -402,6 +430,7 @@ export class PersonalCloudBackground {
         } else if (update.type === PersonalCloudUpdateType.ListTreeDelete) {
             // Skip op if lists don't exist (most likely been deleted)
             if (!(await doesListExist(update.rootNodeLocalListId))) {
+                this.sendCountPendingDownloadsDownUpdate()
                 return
             }
             await storageManager.operation(
@@ -413,6 +442,7 @@ export class PersonalCloudBackground {
                 { skipSync: true },
             )
         }
+        this.sendCountPendingDownloadsDownUpdate()
     }
 
     async downloadMedia(

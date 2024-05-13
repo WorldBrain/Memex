@@ -19,10 +19,12 @@ import {
 import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
     onDeleteSpaceConfirm?: () => void
+    getRootElement: () => HTMLElement
 }
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
@@ -145,6 +147,7 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
                                         onKeyDown={
                                             this.handleNameEditInputKeyDown
                                         }
+                                        autoFocus
                                     />
                                 </Container>
                                 {this.props.errorMessage && (
@@ -175,17 +178,32 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
                     <>
                         {this.state?.showSaveButton &&
                             this.state.nameValue.length > 0 && (
-                                <Icon
-                                    filePath="check"
-                                    color="prime1"
-                                    heightAndWidth="24px"
-                                    onClick={() =>
-                                        this.processEvent(
-                                            'confirmSpaceNameEdit',
-                                            null,
-                                        )
+                                <TooltipBox
+                                    tooltipText={
+                                        <span>
+                                            <KeyboardShortcuts
+                                                keys={['MOD_KEY', 'Enter']}
+                                                getRootElement={() =>
+                                                    this.props.getRootElement()
+                                                }
+                                            />
+                                        </span>
                                     }
-                                />
+                                    placement="bottom-end"
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <Icon
+                                        filePath="check"
+                                        color="prime1"
+                                        heightAndWidth="24px"
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'confirmSpaceNameEdit',
+                                                null,
+                                            )
+                                        }
+                                    />
+                                </TooltipBox>
                             )}
                     </>
                 </ButtonBox>

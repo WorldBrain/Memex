@@ -6,13 +6,14 @@ import SearchStorage from './storage'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import type {
     RemoteSearchInterface,
-    AnnotPage,
+    SearchResultPage,
     UnifiedSearchParams,
     UnifiedBlankSearchParams,
     UnifiedTermsSearchParams,
     ResultDataByPage,
     IntermediarySearchResult,
     UnifiedSearchPaginationParams,
+    UnifiedSearchLookupData,
 } from './types'
 import { SearchError, BadTermError } from './errors'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
@@ -61,11 +62,6 @@ import { EVENT_PROVIDER_URLS } from '@worldbrain/memex-common/lib/constants'
 import { TWITTER_URLS } from '@worldbrain/memex-common/lib/twitter-integration/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
-type UnifiedSearchLookupData = {
-    pages: Map<string, Omit<AnnotPage, 'annotations' | 'hasBookmark'>>
-    annotations: Map<string, Annotation & { lists: number[] }>
-}
-
 export default class SearchBackground {
     storage: SearchStorage
     public remoteFunctions: RemoteSearchInterface
@@ -89,7 +85,11 @@ export default class SearchBackground {
         }
     }
 
-    static shapePageResult(results: AnnotPage[], limit: number, extra = {}) {
+    static shapePageResult(
+        results: SearchResultPage[],
+        limit: number,
+        extra = {},
+    ) {
         return {
             resultsExhausted: results.length < limit,
             totalCount: null, // TODO: try to get this implemented
@@ -812,6 +812,7 @@ export default class SearchBackground {
         const [
             pages,
             annotations,
+            annotPrivacyLevels,
             pageListEntries,
             annotListEntries,
         ] = await Promise.all([
@@ -819,6 +820,11 @@ export default class SearchBackground {
             //  Need to fix the bug in storex-backend-dexie when it comes time to port this and revert them to storex queries
             dexie.table<Page>('pages').bulkGet(pageIds),
             dexie.table<Annotation>('annotations').bulkGet(annotIds),
+            dexie
+                .table<AnnotationPrivacyLevel>('annotationPrivacyLevels')
+                .where('annotation')
+                .anyOf(annotIds)
+                .toArray(),
             dexie
                 .table<PageListEntry, [number, string]>('pageListEntries')
                 .where('pageUrl')
@@ -890,6 +896,9 @@ export default class SearchBackground {
             annotListEntries,
             ([, pageUrl]) => pageUrl,
         )
+        const privacyLevelByAnnot = fromPairs(
+            annotPrivacyLevels.map((l) => [l.annotation, l.privacyLevel]),
+        )
 
         const lookups: UnifiedSearchLookupData = {
             annotations: new Map(),
@@ -910,6 +919,9 @@ export default class SearchBackground {
         for (const annotation of annotations) {
             lookups.annotations.set(annotation.url, {
                 ...annotation,
+                privacyLevel:
+                    privacyLevelByAnnot[annotation.url] ??
+                    AnnotationPrivacyLevels.PROTECTED,
                 lists: (listIdsByAnnot[annotation.url] ?? []).map(
                     ([listId]) => listId,
                 ),

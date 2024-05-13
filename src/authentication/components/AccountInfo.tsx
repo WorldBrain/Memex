@@ -19,6 +19,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import UpgradeModal from '../upgrade-modal'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
+import { Browser } from 'webextension-polyfill'
 
 const styles = require('./styles.css')
 
@@ -30,6 +31,7 @@ export interface Props extends Dependencies {
     setAuthMode: (mode) => void
     getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface
+    browserAPIs: Browser
 }
 
 export default class UserScreen extends StatefulUIElement<Props, State, Event> {
@@ -122,6 +124,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                 }
                                 componentVariant={'AccountPage'}
                                 limitReachedNotif={null}
+                                browserAPIs={this.props.browserAPIs}
                             />
                         </SettingSection>
                         <SettingSection

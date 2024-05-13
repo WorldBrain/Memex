@@ -18,6 +18,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 import Checkbox from 'src/common-ui/components/Checkbox'
 import UpgradeModal from 'src/authentication/upgrade-modal'
+import Browser from 'webextension-polyfill'
 
 export interface Props extends Dependencies {}
 
@@ -35,6 +36,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         | 'contentScriptsBG'
         | 'analyticsBG'
         | 'bgScriptsBG'
+        | 'browserAPIs'
     > = {
         authBG: runInBackground(),
         personalCloudBG: runInBackground(),
@@ -48,6 +50,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             window.open(GUIDED_ONBOARDING_URL)
         },
         analyticsBG: runInBackground(),
+        browserAPIs: Browser,
     }
 
     constructor(props: Props) {
@@ -207,6 +210,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     createCheckOutLink={
                         this.props.bgScriptsBG.createCheckoutLink
                     }
+                    browserAPIs={this.props.browserAPIs}
                 />
             </UpgradeModalContainer>
 
@@ -385,6 +389,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     mode,
                                 })
                             }}
+                            browserAPIs={this.props.browserAPIs}
                         />
                     </>
                 </ContentBox>

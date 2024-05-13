@@ -70,6 +70,9 @@ import CopyPaster from 'src/copy-paster/components/CopyPaster'
 import { PageSearchCopyPaster } from 'src/copy-paster'
 import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -106,6 +109,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'history'
         | 'tabsAPI'
         | 'runtimeAPI'
+        | 'browserAPIs'
         | 'localStorage'
         | 'annotationsCache'
         | 'analyticsBG'
@@ -137,6 +141,7 @@ export class DashboardContainer extends StatefulUIElement<
         history: window.history,
         tabsAPI: browser.tabs,
         runtimeAPI: browser.runtime,
+        browserAPIs: browser,
         localStorage: browser.storage.local,
         pageActivityIndicatorBG: runInBackground(),
         summarizeBG: runInBackground(),
@@ -514,31 +519,43 @@ export class DashboardContainer extends StatefulUIElement<
                     />
                 </SearchSection>
 
-                <RightHeader>
-                    {!this.props.inPageMode && (
-                        <ActionWrapper>
-                            <PrimaryAction
-                                onClick={() =>
-                                    this.processEvent(
-                                        'setSyncStatusMenuDisplayState',
-                                        {
-                                            isShown: syncMenu.isDisplayed,
-                                        },
-                                    )
-                                }
-                                label={'Sync Status'}
-                                size={'medium'}
-                                icon={getSyncStatusIcon(syncStatusIconState)}
-                                type={'tertiary'}
-                                iconColor={getSyncIconColor(
-                                    syncStatusIconState,
-                                )}
-                                spinningIcon={syncStatusIconState === 'yellow'}
-                                innerRef={this.syncStatusButtonRef}
-                            />
-                        </ActionWrapper>
-                    )}
-                    <>
+                <RightHeader notesSidebarShown={this.state.isNoteSidebarShown}>
+                    <LeftSideRightHeader>
+                        {!this.props.inPageMode && (
+                            <ActionWrapper>
+                                <TooltipBox
+                                    tooltipText={'Sync Status'}
+                                    placement="bottom"
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'setSyncStatusMenuDisplayState',
+                                                {
+                                                    isShown:
+                                                        syncMenu.isDisplayed,
+                                                },
+                                            )
+                                        }
+                                        size={'medium'}
+                                        icon={getSyncStatusIcon(
+                                            syncStatusIconState,
+                                        )}
+                                        type={'tertiary'}
+                                        iconColor={getSyncIconColor(
+                                            syncStatusIconState,
+                                        )}
+                                        spinningIcon={
+                                            syncStatusIconState === 'yellow'
+                                        }
+                                        innerRef={this.syncStatusButtonRef}
+                                        padding="6px"
+                                    />
+                                </TooltipBox>
+                                {this.renderStatusMenu(syncStatusIconState)}
+                            </ActionWrapper>
+                        )}
                         <Icon
                             onClick={() =>
                                 this.props.inPageMode
@@ -549,8 +566,37 @@ export class DashboardContainer extends StatefulUIElement<
                             padding={'6px'}
                             filePath={icons.settings}
                         />
-                        {this.renderStatusMenu(syncStatusIconState)}
-                    </>
+                    </LeftSideRightHeader>
+                    {this.state.isNoteSidebarShown && (
+                        <RightSideRightHeader>
+                            <TooltipBox
+                                tooltipText={
+                                    <TooltipContent>
+                                        Close Sidebar
+                                        <KeyboardShortcuts
+                                            size={'small'}
+                                            keys={['Esc']}
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
+                                        />
+                                    </TooltipContent>
+                                }
+                                placement="bottom"
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <PrimaryAction
+                                    icon="arrowRight"
+                                    padding="6px"
+                                    onClick={() =>
+                                        this.notesSidebarRef.current.hideSidebar()
+                                    }
+                                    type="glass"
+                                    size="medium"
+                                />
+                            </TooltipBox>
+                        </RightSideRightHeader>
+                    )}
                 </RightHeader>
             </HeaderContainer>
         )
@@ -584,7 +630,10 @@ export class DashboardContainer extends StatefulUIElement<
                                 }),
                             onToggleDisplayState: () => {},
                             getRootElement: this.props.getRootElement,
-                            syncNow: () => this.processEvent('syncNow', null),
+                            syncNow: (preventUpdateStats) =>
+                                this.processEvent('syncNow', {
+                                    preventUpdateStats: preventUpdateStats,
+                                }),
                             browserAPIs: browser,
                         }}
                         syncStatusIconState={syncStatusIconState}
@@ -1600,6 +1649,7 @@ export class DashboardContainer extends StatefulUIElement<
                             1000,
                         )
                     }
+                    browserAPIs={this.props.browserAPIs}
                 />
             )
         }
@@ -1691,6 +1741,7 @@ export class DashboardContainer extends StatefulUIElement<
                     authBG={this.props.authBG}
                     analyticsBG={this.props.analyticsBG}
                     bgScriptsBG={this.props.bgScriptBG}
+                    browserAPIs={this.props.browserAPIs}
                 />
             )
         }
@@ -1886,6 +1937,7 @@ export class DashboardContainer extends StatefulUIElement<
                             )}
                         </MainContent>
                         <NotesSidebar
+                            storageAPI={this.props.browserAPIs.storage}
                             inPageMode={this.props.inPageMode}
                             imageSupport={this.props.imageSupportBG}
                             theme={this.props.theme}
@@ -1915,6 +1967,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 this.props.pageActivityIndicatorBG
                             }
                             runtimeAPI={this.props.runtimeAPI}
+                            browserAPIs={this.props.browserAPIs}
                             summarizeBG={this.props.summarizeBG}
                             contentConversationsBG={
                                 this.props.contentConversationsBG
@@ -1990,6 +2043,8 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('toggleTheme', null)
                         }
                         getRootElement={this.props.getRootElement}
+                        padding={'4px'}
+                        iconSize="22px"
                     />
                     {/* {this.state.listsSidebar.draggedListId != null ||
                         (this.state.searchResults.draggedPageId != null && ( */}
@@ -2516,7 +2571,9 @@ const SearchSection = styled(Margin)`
     }
 `
 
-const RightHeader = styled.div`
+const RightHeader = styled.div<{
+    notesSidebarShown: boolean
+}>`
     width: min-content;
     display: flex;
     align-items: center;
@@ -2524,11 +2581,17 @@ const RightHeader = styled.div`
     flex: 1;
     position: absolute;
     right: 30px;
-    grid-gap: 10px;
+    grid-gap: 15px;
 
     @media screen and (max-width: 900px) {
         right: 15px;
     }
+
+    ${(props) =>
+        props.notesSidebarShown &&
+        css`
+            right: 10px;
+        `}
 `
 
 const InPageBackground = styled.div`
@@ -2544,3 +2607,18 @@ const InPageBackground = styled.div`
     position: fixed;
     z-index: 10000;
 `
+
+const TooltipContent = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    flex-direction: row;
+    justify-content: center;
+`
+
+const LeftSideRightHeader = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+`
+const RightSideRightHeader = styled.div``

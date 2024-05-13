@@ -8,12 +8,12 @@ import {
     SyncSettingsStore,
 } from 'src/sync-settings/util'
 import styled, { css } from 'styled-components'
-import browser, { Storage } from 'webextension-polyfill'
+import browser, { Browser, Storage } from 'webextension-polyfill'
 import {
     COUNTER_STORAGE_KEY,
-    DEFAULT_COUNTER_STORAGE_KEY,
+    DEFAULT_COUNTER_STORAGE_VALUE,
     DEFAULT_POWERUP_LIMITS,
-} from './constants'
+} from '@worldbrain/memex-common/lib/subscriptions/constants'
 import { TaskState } from 'ui-logic-core/lib/types'
 import {
     CustomerPowerUps,
@@ -36,6 +36,7 @@ export interface Props {
         doNotOpen: boolean,
     ) => Promise<'success' | 'error'>
     authBG: AuthRemoteFunctionsInterface
+    browserAPIs: Browser
 }
 
 interface State {
@@ -56,7 +57,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
     private syncSettings: SyncSettingsStore<'openAI'>
 
     state: State = {
-        currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
+        currentCount: DEFAULT_COUNTER_STORAGE_VALUE.cQ,
         shouldShow: true,
         showTooltip: false,
         openAIKey: '',
@@ -209,6 +210,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                     }}
                     limitReachedNotif={null}
                     authBG={this.props.authBG}
+                    browserAPIs={this.props.browserAPIs}
                 />
             )
         }

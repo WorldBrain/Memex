@@ -920,11 +920,7 @@ export default class CustomListStorage extends StorageModule {
                     await trackSpaceEntryCreate(analyticsBG, {
                         type: isShared ? 'shared' : 'private',
                     })
-                } catch (error) {
-                    console.error(
-                        `Error tracking space Entry create event', ${error}`,
-                    )
-                }
+                } catch (error) {}
             }
 
             if (isPkmSyncEnabled({ storageAPI: this.options.___storageAPI })) {

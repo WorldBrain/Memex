@@ -12,6 +12,8 @@ export interface Props {
     theme: MemexThemeVariant
     toggleTheme: () => void
     getRootElement: () => HTMLElement
+    padding?: string
+    iconSize?: string
 }
 export interface State {
     isOpen: boolean
@@ -194,7 +196,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                 {this.renderMenu()}
                 {window.location.href.includes('/overview') && (
                     <Icon
-                        heightAndWidth="24px"
+                        heightAndWidth={this.props.iconSize || '24px'}
                         color={
                             this.props.theme === 'dark'
                                 ? 'greyScale5'
@@ -202,13 +204,15 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         }
                         filePath={this.props.theme === 'dark' ? 'moon' : 'sun'}
                         onClick={() => this.props.toggleTheme()}
+                        padding={this.props.padding}
                     />
                 )}
                 <Icon
                     filePath={icons.helpIcon}
-                    heightAndWidth={'24px'}
+                    heightAndWidth={this.props.iconSize || '24px'}
                     onClick={this.handleClick}
                     containerRef={this.helpButtonRef}
+                    padding={this.props.padding}
                 />
             </HelpIconPosition>
         )
