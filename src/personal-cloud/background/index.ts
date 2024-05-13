@@ -126,6 +126,7 @@ export class PersonalCloudBackground {
             runDataMigration: this.waitForSync,
             isCloudSyncEnabled: this.isCloudSyncEnabled,
             invokeSyncDownload: this.invokeSyncDownload,
+            countPendingSyncDownloads: this.countPendingSyncDownloads,
             enableCloudSyncForNewInstall: this.enableSyncForNewInstall,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
@@ -159,6 +160,10 @@ export class PersonalCloudBackground {
     }
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
+
+    countPendingSyncDownloads: PersonalCloudRemoteInterface['countPendingSyncDownloads'] = async () => {
+        return this.options.backend.countPendingUpdates({})
+    }
 
     invokeSyncDownload = async () => {
         this.options.backend.triggerSyncContinuation()
