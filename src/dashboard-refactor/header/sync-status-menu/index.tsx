@@ -67,7 +67,7 @@ export interface SyncStatusMenuProps extends RootState {
     syncStatusIconState?: any
     getRootElement: () => HTMLElement
     onToggleDisplayState?: () => void
-    syncNow: () => void
+    syncNow: (preventUpdateStats: boolean) => void
     browserAPIs: Browser
 }
 
@@ -80,6 +80,29 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
         if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
             return 'Nothing to sync yet'
+        }
+    }
+
+    state = {
+        ShowBraveSyncNotif: false,
+    }
+
+    async componentDidMount(): Promise<void> {
+        if (checkBrowser() === 'brave') {
+            const cachedSetting = await this.props.browserAPIs.storage.local.get(
+                'ShowBraveSyncNotif',
+            )
+            const cachedValue = cachedSetting['ShowBraveSyncNotif']
+            let showNotif = true
+
+            // Check if cachedSetting is an empty object
+            if (Object.keys(cachedSetting).length > 0) {
+                showNotif = cachedValue
+            }
+            this.setState({ ['ShowBraveSyncNotif']: showNotif })
+            await this.props.browserAPIs.storage.local.set({
+                ShowBraveSyncNotif: showNotif,
+            })
         }
     }
 
@@ -202,20 +225,6 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         if (!isDisplayed) {
             return null
         }
-
-        if (
-            pendingLocalChangeCount == null &&
-            pendingRemoteChangeCount == null
-        ) {
-            return (
-                <Container>
-                    <LoadingBox>
-                        <LoadingIndicator size={30} />
-                    </LoadingBox>
-                </Container>
-            )
-        }
-
         return (
             <Container>
                 {this.renderStatus()}
@@ -223,30 +232,34 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 <RowContainer>
                     <Row>
                         <InfoText> pending uploads</InfoText>
-                        <SectionCircle>
-                            {pendingLocalChangeCount < 0
-                                ? 0
-                                : pendingLocalChangeCount}
-                        </SectionCircle>
+                        {pendingLocalChangeCount == null ? (
+                            <LoadingIndicator size={14} />
+                        ) : (
+                            <SectionCircle>
+                                {pendingLocalChangeCount}
+                            </SectionCircle>
+                        )}
                         {/* This is a hack to make sure we don't show negative numbers but it'll hide some problems away */}
                     </Row>
 
                     {/* TODO: Re-implement this */}
-                    {/* <Row>
+                    <Row>
                         <InfoText> pending downloads</InfoText>
-                        <SectionCircle>
-                            {pendingRemoteChangeCount < 0
-                                ? 0
-                                : pendingRemoteChangeCount}
-                        </SectionCircle>
-                    </Row> */}
+                        {pendingRemoteChangeCount == null ? (
+                            <LoadingIndicator size={14} />
+                        ) : (
+                            <SectionCircle>
+                                {pendingRemoteChangeCount}
+                            </SectionCircle>
+                        )}
+                    </Row>
                 </RowContainer>
                 <Separator />
                 <BottomRow>
                     {this.props.syncStatusIconState !== 'yellow' && (
                         <PrimaryAction
                             label="Sync Now"
-                            onClick={this.props.syncNow}
+                            onClick={() => this.props.syncNow(true)}
                             size={'medium'}
                             icon={'reload'}
                             fullWidth
@@ -271,7 +284,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         </HelpTextBlockLink>
                     </ReportProblemRow>
                 </BottomRow>
-                {checkBrowser() === 'brave' && (
+                {checkBrowser() === 'brave' && this.state.ShowBraveSyncNotif && (
                     <>
                         <Separator />
                         <BraveBlockInfo>
@@ -295,6 +308,23 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                             <br />
                             3. Create new sync update on other devices
                         </BraveBlockInfo>
+                        <RemoveButtonContainer>
+                            <PrimaryAction
+                                type={'glass'}
+                                icon={'removeX'}
+                                size="small"
+                                onClick={async () => {
+                                    this.setState({ ShowBraveSyncNotif: false })
+                                    await this.props.browserAPIs.storage.local.set(
+                                        {
+                                            ShowBraveSyncNotif: false,
+                                        },
+                                    )
+                                }}
+                                width="fill-available"
+                                label="Remove Notice"
+                            />
+                        </RemoveButtonContainer>
                     </>
                 )}
             </Container>
@@ -441,6 +471,7 @@ const BraveBlockInfo = styled.span<{
     font-size: 14px;
     padding: 15px;
     line-height: 20x;
+    position: relative;
     display: flex;
     grid-gap: 5px;
     align-items: flex-start;
@@ -508,4 +539,7 @@ const TextContainer = styled.div`
     align-items: flex-start;
     grid-gap: 5px;
     padding-left: 5px;
+`
+const RemoveButtonContainer = styled.div`
+    padding: 10px;
 `

@@ -552,8 +552,8 @@ export class DashboardContainer extends StatefulUIElement<
                                         innerRef={this.syncStatusButtonRef}
                                         padding="6px"
                                     />
-                                    {this.renderStatusMenu(syncStatusIconState)}
                                 </TooltipBox>
+                                {this.renderStatusMenu(syncStatusIconState)}
                             </ActionWrapper>
                         )}
                         <Icon
@@ -630,7 +630,10 @@ export class DashboardContainer extends StatefulUIElement<
                                 }),
                             onToggleDisplayState: () => {},
                             getRootElement: this.props.getRootElement,
-                            syncNow: () => this.processEvent('syncNow', null),
+                            syncNow: (preventUpdateStats) =>
+                                this.processEvent('syncNow', {
+                                    preventUpdateStats: preventUpdateStats,
+                                }),
                             browserAPIs: browser,
                         }}
                         syncStatusIconState={syncStatusIconState}

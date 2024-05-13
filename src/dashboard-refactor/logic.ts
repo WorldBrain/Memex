@@ -140,12 +140,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     private setupRemoteEventListeners() {
         this.personalCloudEvents = getRemoteEventEmitter('personalCloud')
         this.personalCloudEvents.on('cloudStatsUpdated', async ({ stats }) => {
-            const dateNow = Date.now()
             this.emitMutation({
                 syncMenu: {
-                    pendingLocalChangeCount: { $set: stats.pendingUploads },
+                    pendingLocalChangeCount: {
+                        $set: stats.pendingUploads ?? null,
+                    },
                     // TODO: re-implement pending download count
-                    // pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                    pendingRemoteChangeCount: {
+                        $set: stats.pendingDownloads ?? null,
+                    },
                 },
             })
 
@@ -162,9 +165,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         this.personalCloudEvents.on('downloadStarted', () => {
-            this.emitMutation({
-                syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
-            })
+            // this.emitMutation({
+            //     syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+            // })
             this.toggleSyncDownloadActive()
         })
         // this.personalCloudEvents.on('downloadStopped', () => {
@@ -180,16 +183,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         //     'downloadStopped',
         //     this.toggleSyncDownloadActive,
         // )
-        this.emitMutation({
-            syncMenu: {
-                pendingLocalChangeCount: {
-                    $set: 0,
-                },
-                pendingRemoteChangeCount: {
-                    $set: 0,
-                },
-            },
-        })
     }
 
     getInitialState(): State {
@@ -400,7 +393,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 retries++
             }
             //////
-
             setSentryUserContext(user)
             this.emitMutation({
                 currentUser: { $set: user },
@@ -457,9 +449,14 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
+            await this.getDownloadStats()
             if (user) {
-                this.processUIEvent('syncNow', { previousState, event: null })
+                this.processUIEvent('syncNow', {
+                    previousState,
+                    event: { preventUpdateStats: true },
+                })
             }
+
             const syncSettings = createSyncSettingsStore<'highlightColors'>({
                 syncSettingsBG: this.options.syncSettingsBG,
             })
@@ -499,6 +496,25 @@ export class DashboardLogic extends UILogic<State, Events> {
     //  A rough test got me delays of 1-8s between docs created at roughly the same time, which is why the 8s wait was chosen.
 
     private downloadStoppedTimeout: any | null = null
+
+    getDownloadStats = async () => {
+        const pendingDownloads = await this.options.personalCloudBG.countPendingSyncDownloads()
+        this.emitMutation({
+            syncMenu: {
+                pendingRemoteChangeCount: { $set: pendingDownloads },
+            },
+        })
+        if (pendingDownloads === 0) {
+            const dateNow = Date.now()
+            this.emitMutation({
+                syncMenu: {
+                    lastSuccessfulSyncDate: {
+                        $set: new Date(dateNow),
+                    },
+                },
+            })
+        }
+    }
 
     private toggleSyncDownloadActive = () => {
         // Clear any existing timeout to reset the debounce timer
@@ -1444,10 +1460,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
-    syncNow: EventHandler<'syncNow'> = ({ event }) => {
+    syncNow: EventHandler<'syncNow'> = async ({ event }) => {
         this.emitMutation({
-            syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+            syncMenu: {
+                pendingLocalChangeCount: { $set: null },
+                pendingRemoteChangeCount: { $set: null },
+            },
         })
+        if (!event.preventUpdateStats) {
+            await this.getDownloadStats()
+        }
         this.options.personalCloudBG.invokeSyncDownload()
     }
 
