@@ -274,6 +274,37 @@ describe('Ribbon logic', () => {
 
             expect(result).toBe(true)
         })
+        it('should allow action if user has AIpowerupOwnKey powerup AND no key AND not hit free quota', async ({
+            device,
+        }) => {
+            const { browserAPIs, analytics, collectionsBG } = await setupTest(
+                device,
+            )
+
+            const fakeStorageEntry = {
+                ...DEFAULT_COUNTER_STORAGE_VALUE,
+                cQ: DEFAULT_POWERUP_LIMITS.AIpowerup - 10,
+                pU: {
+                    ...DEFAULT_COUNTER_STORAGE_VALUE.pU,
+                    AIpowerupOwnKey: true,
+                },
+            }
+
+            await browserAPIs.storage.local.set({
+                [COUNTER_STORAGE_KEY]: fakeStorageEntry,
+            })
+
+            const result = await AIActionAllowed(
+                browserAPIs,
+                analytics,
+                false,
+                false,
+                'gpt-3',
+            )
+
+            expect(result).toBe(true)
+        })
+
         it('should prevent action if user has AIpowerupOwnKey powerup AND no key AND over free tier limit', async ({
             device,
         }) => {
@@ -329,10 +360,6 @@ describe('Ribbon logic', () => {
             )
             expect(result).toBe(false)
         })
-
-        // it('should allow action if user is out of trial time and below the sessionlimit', async ({
-
-        // it('should allow action if user has AIpowerupOwnKey powerup AND no key AND over free tier limit', async ({
     })
 
     describe('Check for the stripe plan and give back my current subscription status.', () => {
