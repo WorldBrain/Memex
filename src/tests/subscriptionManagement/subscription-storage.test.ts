@@ -1,24 +1,10 @@
-import {
-    checkStripePlan,
-    pageActionAllowed,
-} from '@worldbrain/memex-common/lib/subscriptions/storage'
-import { Browser } from 'webextension-polyfill'
-
+import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
-    insertBackgroundFunctionTab,
 } from 'src/tests/ui-logic-tests'
-import {
-    RibbonContainerLogic,
-    INITIAL_RIBBON_COMMENT_BOX_STATE,
-    RibbonLogicOptions,
-} from './logic'
-import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { FakeAnalytics } from 'src/analytics/mock'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
-import { PageAnnotationsCache } from 'src/annotations/cache'
-import { runInBackground } from 'src/util/webextensionRPC'
 import {
     COUNTER_STORAGE_KEY,
     DEFAULT_COUNTER_STORAGE_VALUE,
@@ -39,7 +25,7 @@ describe('Ribbon logic', () => {
     async function setupTest(
         device: UILogicTestDevice,
         options: {
-            dependencies?: Partial<RibbonLogicOptions>
+            dependencies?: any
         } = {},
     ) {
         const { backgroundModules, browserAPIs } = device

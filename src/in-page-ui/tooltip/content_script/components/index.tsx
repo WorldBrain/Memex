@@ -388,7 +388,6 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         currentAnnotation={this.state.currentAnnotation}
                         getAnnotationLists={this.getAnnotationLists}
                         toggleSpacePicker={this.toggleSpacePicker}
-                        showSpacePicker={this.state.showSpacePicker}
                         removeSpaceForAnnotation={this.removeSpaceForAnnotation}
                         selectSpaceForAnnotation={this.selectSpaceForAnnotation}
                         updateSpacesSearchSuggestions={
