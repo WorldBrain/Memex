@@ -113,7 +113,6 @@ export class AnnotationsSidebarContainer<
                 },
                 imageSupportBG: props.imageSupport,
                 bgScriptBG: props.bgScriptBG,
-                storage: props.storageAPI,
                 pkmSyncBG: props.pkmSyncBG,
                 getRootElement: props.getRootElement,
             }),
