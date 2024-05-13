@@ -45,6 +45,6 @@ export interface PersonalCloudRemoteInterface {
 export interface PersonalCloudStats {
     // countingDownloads: boolean
     // countingUploads: boolean
-    pendingDownloads: number
-    pendingUploads: number
+    pendingDownloads?: number
+    pendingUploads?: number
 }

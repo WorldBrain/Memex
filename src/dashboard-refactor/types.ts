@@ -188,7 +188,7 @@ export type DashboardModalsEvents = UIEvent<{
     }
     saveHighlightColorSettings: { newState: HighlightColor[] }
     setShowDisplayNameSetupModal: { isShown: boolean }
-    syncNow: null
+    syncNow: { preventUpdateStats?: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 
     setDeletingListId: { listId: string }
