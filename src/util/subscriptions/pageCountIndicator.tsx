@@ -7,8 +7,7 @@ import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
 import {
     COUNTER_STORAGE_KEY,
-    DEFAULT_COUNTER_STORAGE_KEY,
-    FREE_PLAN_LIMIT,
+    DEFAULT_POWERUP_LIMITS,
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
@@ -37,7 +36,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
             if (!result[COUNTER_STORAGE_KEY].pU.bookmarksPowerUp) {
                 this.setState({
                     shouldShow: true,
-                    totalCount: FREE_PLAN_LIMIT,
+                    totalCount: DEFAULT_POWERUP_LIMITS.bookmarksPowerUp,
                     currentCount: result[COUNTER_STORAGE_KEY].c,
                 })
                 browser.storage.onChanged.addListener((changes) =>
@@ -58,7 +57,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
             this.setState({
                 currentCount: changes[COUNTER_STORAGE_KEY].newValue.c,
-                totalCount: FREE_PLAN_LIMIT,
+                totalCount: DEFAULT_POWERUP_LIMITS.bookmarksPowerUp,
             })
         }
 
