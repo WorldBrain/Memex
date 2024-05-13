@@ -79,14 +79,16 @@ export default class SummarizeBackground {
     }
 
     async saveActiveTabId(hasKey: boolean, AImodel: AImodels) {
+        this.options.browserAPIs.tabs.onRemoved.removeListener(this.onTabClosed)
+        this.options.browserAPIs.tabs.onRemoved.addListener(this.onTabClosed)
         const isAlreadySaved = await updateTabAISessions(
             this.options.browserAPIs,
         )
 
         if (isAlreadySaved) {
-            return
+            return true
         } else {
-            await AIActionAllowed(
+            return await AIActionAllowed(
                 this.options.browserAPIs,
                 this.options.analyticsBG,
                 hasKey,
@@ -94,8 +96,6 @@ export default class SummarizeBackground {
                 AImodel,
             )
         }
-
-        this.options.browserAPIs.tabs.onRemoved.addListener(this.onTabClosed)
     }
 
     onTabClosed = (tabId, removeInfo) => {
@@ -117,17 +117,7 @@ export default class SummarizeBackground {
             promptData,
         },
     ) => {
-        await this.saveActiveTabId(apiKey?.length > 0, AImodel)
-
-        let isAllowed = null
-
-        isAllowed = await AIActionAllowed(
-            this.options.browserAPIs,
-            this.options.analyticsBG,
-            apiKey?.length > 0,
-            true,
-            AImodel,
-        )
+        let isAllowed = await this.saveActiveTabId(apiKey?.length > 0, AImodel)
 
         if (!isAllowed) {
             return

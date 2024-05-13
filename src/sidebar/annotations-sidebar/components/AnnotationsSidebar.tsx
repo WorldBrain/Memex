@@ -112,7 +112,6 @@ import browser, { Browser } from 'webextension-polyfill'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
-import { AIActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
