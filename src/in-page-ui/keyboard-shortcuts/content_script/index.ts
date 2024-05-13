@@ -138,7 +138,7 @@ function getShortcutHandlers({
             } else {
                 await annotationFunctions.createHighlight(
                     cloneSelectionAsPseudoObject(window.getSelection()),
-                    false,
+                    null,
                 )
             }
 

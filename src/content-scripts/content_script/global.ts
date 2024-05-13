@@ -589,13 +589,24 @@ export async function main(
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
-            const selectionEmpty = !selection?.toString().length
-            if (selectionEmpty && !drawRectangle) {
-                return
-            }
+            console.log('createHighlight', selection)
 
             let anchor: Anchor
             let quote: string
+
+            if (selection) {
+                quote = getSelectionHtml(selection)
+                const descriptor = await anchoring.selectionToDescriptor({
+                    _document: this.document,
+                    _window: this.window,
+                    isPdf: this.pdfViewer != null,
+                    selection,
+                })
+                anchor = { quote, descriptor }
+            }
+            if (quote?.length === 0 && !drawRectangle) {
+                return
+            }
 
             if (
                 !(await pageActionAllowed(
@@ -653,16 +664,7 @@ export async function main(
                 )
                 annotationId = results.annotationId
                 await results.createPromise
-            } else if (selection) {
-                quote = getSelectionHtml(selection)
-                const descriptor = await anchoring.selectionToDescriptor({
-                    _document: this.document,
-                    _window: this.window,
-                    isPdf: this.pdfViewer != null,
-                    selection,
-                })
-                anchor = { quote, descriptor }
-
+            } else if (quote.length > 0) {
                 const results = await saveHighlight(
                     shouldShare,
                     shouldCopyShareLink,

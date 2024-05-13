@@ -332,7 +332,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                     initialSelectedListIds={() =>
                         cacheUtils.getLocalListIdsForCacheIds(
                             this.props.annotationsCache,
-                            this.state.currentAnnotation.unifiedListIds,
+                            this.state.currentAnnotation?.unifiedListIds ?? [],
                         )
                     }
                     closePicker={() => this.toggleSpacePicker(false)}
@@ -388,6 +388,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         currentAnnotation={this.state.currentAnnotation}
                         getAnnotationLists={this.getAnnotationLists}
                         toggleSpacePicker={this.toggleSpacePicker}
+                        showSpacePicker={this.state.showSpacePicker}
                         removeSpaceForAnnotation={this.removeSpaceForAnnotation}
                         selectSpaceForAnnotation={this.selectSpaceForAnnotation}
                         updateSpacesSearchSuggestions={
