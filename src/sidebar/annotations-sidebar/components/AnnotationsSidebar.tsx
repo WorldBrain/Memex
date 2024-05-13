@@ -2011,6 +2011,16 @@ export class AnnotationsSidebar extends React.Component<
                     createNewNoteFromAISummary={
                         this.props.createNewNoteFromAISummary
                     }
+                    isAIChatAllowed={async () => {
+                        const isAllowed = await AIActionAllowed(
+                            this.props.browserAPIs,
+                            this.props.analyticsBG,
+                            this.props.hasKey,
+                            false,
+                        )
+
+                        return isAllowed
+                    }}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
                     aiChatStateExternal={{

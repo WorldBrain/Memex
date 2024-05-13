@@ -58,7 +58,6 @@ export interface summarizePageBackgroundOptions {
 
 export default class SummarizeBackground {
     remoteFunctions: SummarizationInterface<'provider'>
-    tabIDsWithRunningAISessions: Set<number> = new Set()
 
     private summarizationService = new SummarizationService({
         serviceURL:
@@ -79,46 +78,28 @@ export default class SummarizeBackground {
         makeRemotelyCallable(this.remoteFunctions, { insertExtraArg: true })
     }
 
-    async saveActiveTabId() {
-        this.options.browserAPIs.tabs.onRemoved.removeListener(this.onTabClosed)
-        const tabs = await this.options.browserAPIs.tabs.query({
-            active: true,
-            currentWindow: true,
-        })
-        if (tabs.length > 0) {
-            const activeTabId = tabs[0].id
-            console.log(`Active tab ID: ${activeTabId}`)
-            if (activeTabId !== undefined) {
-                this.tabIDsWithRunningAISessions.add(activeTabId)
-                this.options.browserAPIs.tabs.onRemoved.addListener(
-                    this.onTabClosed,
-                )
-            }
+    async saveActiveTabId(hasKey: boolean, AImodel: AImodels) {
+        const isAlreadySaved = await updateTabAISessions(
+            this.options.browserAPIs,
+        )
+
+        if (isAlreadySaved) {
+            return
+        } else {
+            await AIActionAllowed(
+                this.options.browserAPIs,
+                this.options.analyticsBG,
+                hasKey,
+                true,
+                AImodel,
+            )
         }
+
+        this.options.browserAPIs.tabs.onRemoved.addListener(this.onTabClosed)
     }
 
     onTabClosed = (tabId, removeInfo) => {
-        if (this.tabIDsWithRunningAISessions.has(tabId)) {
-            this.tabIDsWithRunningAISessions.delete(tabId)
-            this.onTabClosedTriggerFunction(tabId) // Assuming this function exists
-        }
-    }
-
-    // Example of a function triggered when a tab from the set is closed
-    async onTabClosedTriggerFunction(tabId: number) {
-        console.log(
-            `Tab with ID ${tabId} was closed and had an active AI session.`,
-        )
-
-        await AIActionAllowed(
-            this.options.browserAPIs,
-            this.options.analyticsBG,
-            false,
-            true,
-            'gpt-3',
-        )
-
-        // Additional logic here
+        updateTabAISessions(this.options.browserAPIs, tabId)
     }
 
     startPageSummaryStream: SummarizationInterface<
@@ -136,7 +117,7 @@ export default class SummarizeBackground {
             promptData,
         },
     ) => {
-        await this.saveActiveTabId()
+        await this.saveActiveTabId(apiKey?.length > 0, AImodel)
 
         let isAllowed = null
 
@@ -144,7 +125,7 @@ export default class SummarizeBackground {
             this.options.browserAPIs,
             this.options.analyticsBG,
             apiKey?.length > 0,
-            false,
+            true,
             AImodel,
         )
 

@@ -52,8 +52,10 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type {
     PageAnnotationsCacheEvents,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
+    UnifiedListForCache,
 } from 'src/annotations/cache/types'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import {
@@ -102,6 +104,8 @@ import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import Raven from 'raven-js'
@@ -3275,6 +3279,31 @@ export class SidebarContainerLogic extends UILogic<
 
         return response
     }
+
+    // removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
+    //     event,
+    //     previousState,
+    // }) => {
+    //     let suggestions = this.AIpromptSuggestions
+
+    //     const suggestionToRemove = event.suggestion
+    //     const newSuggestions = suggestions.filter(
+    //         (item) => item.prompt !== suggestionToRemove,
+    //     )
+
+    //     const newSuggestionsToSave = newSuggestions.map((item) => item.prompt)
+
+    //     await this.syncSettings.openAI.set(
+    //         'promptSuggestions',
+    //         newSuggestionsToSave,
+    //     )
+
+    //     this.emitMutation({
+    //         AIsuggestions: { $set: newSuggestions },
+    //     })
+
+    //     this.AIpromptSuggestions = newSuggestions
+    // }
 
     addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
         this.emitMutation({
