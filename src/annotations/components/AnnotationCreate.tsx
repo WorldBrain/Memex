@@ -206,6 +206,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 } else {
                                     this.editor?.addYoutubeTimestamp()
                                 }
+                                this.editor.focus()
                             })
                         } else {
                             if (commentText) {
@@ -215,6 +216,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             } else {
                                 this.editor?.addYoutubeTimestamp()
                             }
+                            this.editor.focus()
                             callback(true) // signal successful processing
                         }
                     }
