@@ -181,7 +181,9 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     <br />
                                     After the trial: 60 days
                                     money-back-guarantee and a free tier with 25
-                                    saved pages & 25 AI queries per month.
+                                    saved pages & $
+                                    {DEFAULT_POWERUP_LIMITS.AIpowerup} AI page
+                                    sessions per month.
                                     <br />
                                     Each saved page counts only once - forever.
                                 </InfoTooltipSubTitle>

@@ -12,6 +12,7 @@ import { UIElement } from 'ui-logic-react'
 import Icon from '../../../external/@worldbrain/memex-common/ts/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { DEFAULT_POWERUP_LIMITS } from '@worldbrain/memex-common/lib/subscriptions/constants'
 
 export default class UpgradeModal extends UIElement<
     PromptTemplatesDependencies,
@@ -51,7 +52,8 @@ export default class UpgradeModal extends UIElement<
                 {this.props.limitReachedNotif === 'AI' && (
                     <UpgradeOverlayTextContainer>
                         <UpgradeOverlayText>
-                            You reached the monthly limit of 25 AI queries
+                            You reached the monthly limit of $
+                            {DEFAULT_POWERUP_LIMITS.AIpowerup} AI sessions
                         </UpgradeOverlayText>
                         <UpgradeOverlaySubText>
                             Add the AI powerup to continue using the AI features
@@ -238,7 +240,9 @@ export default class UpgradeModal extends UIElement<
                 {this.props.limitReachedNotif === 'Bookmarks' && (
                     <UpgradeOverlayTextContainer>
                         <UpgradeOverlayText>
-                            You reached the monthly limit of 25 saved pages
+                            You reached the monthly limit of $
+                            {DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} saved
+                            pages
                         </UpgradeOverlayText>
                         <UpgradeOverlaySubText>
                             Add the bookmarking powerup to continue saving,
@@ -521,8 +525,7 @@ const Powerups = [
         powerUps: {
             basic: {
                 title: 'Basic',
-                subTitle:
-                    '25 uniquely new pages per month. Every page saved, annotated or added to a Space counts once, forever.',
+                subTitle: `${DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} uniquely new pages per month. Every page saved, annotated or added to a Space counts once, forever.`,
                 pricing: 'Free',
             },
             pro: {
@@ -546,14 +549,13 @@ const Powerups = [
         powerUps: {
             basic: {
                 title: 'Basic',
-                subTitle:
-                    '25 queries per month with Claude-3-Haiku and GPT-3.5-Turbo',
+                subTitle: `${DEFAULT_POWERUP_LIMITS.AIpowerup} page sessions per month with Claude-3-Haiku and GPT-3.5-Turbo`,
                 pricing: 'Free',
             },
             pro: {
                 title: 'Pro',
                 subTitle:
-                    'Unlimited queries with Claude-3-Haiku and GPT-3.5-Turbo, and GPT-4 with own key',
+                    'Unlimited sessions with Claude-3-Haiku and GPT-3.5-Turbo, and GPT-4 with own key',
                 pricing: {
                     monthly: '$6',
                     yearly: '$60',
@@ -566,7 +568,7 @@ const Powerups = [
             ownKey: {
                 title: 'Bring your own Key',
                 subTitle:
-                    'Unlimited queries with GPT-3.5 and GPT-4, at your own cost of the OpenAI API.',
+                    'Unlimited sessions with GPT-3.5 and GPT-4, at your own cost of the OpenAI API.',
                 pricing: {
                     monthly: '$2.50',
                     yearly: '$25',

@@ -286,7 +286,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         ? 0
                                         : this.leftOverBlocks}
                                 </strong>{' '}
-                                AI queries left this month
+                                AI sessions left this month
                             </InfoTooltipTitle>
                         )}
                         {/*Is NOT in Trial anymore, has Key and no AI ownkey powerup */}
@@ -303,7 +303,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         ? 0
                                         : this.leftOverBlocks}
                                 </strong>{' '}
-                                Claude queries left this month
+                                Claude sessions left this month
                             </InfoTooltipTitle>
                         )}
                         <PrimaryAction
@@ -324,9 +324,10 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         {/* Is in Trial */}
                         {scenario === 'InTrial' && (
                             <InfoTooltipSubTitle>
-                                Unlimited queries.
+                                Unlimited sessions.
                                 <br />
-                                <strong>After trial:</strong> 25 queries per
+                                <strong>After trial:</strong> $
+                                {DEFAULT_POWERUP_LIMITS.AIpowerup} sessions per
                                 month & 60 days money-back-guarantee
                             </InfoTooltipSubTitle>
                         )}
@@ -349,7 +350,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         ? 0
                                         : this.leftOverBlocks}
                                 </strong>{' '}
-                                GPT-3, Claude-Haiki & Image queries left this
+                                GPT-3, Claude-Haiki & Image sessions left this
                                 month. Resets in{' '}
                                 <strong>
                                     {this.daysUntilNextMonth()} days.
@@ -361,8 +362,8 @@ export class AICounterIndicator extends React.Component<Props, State> {
 
                         {scenario === 'NoTrialHasKeyHasOwnKeyPowerUp' && (
                             <InfoTooltipSubTitle>
-                                Unlimited queries with GPT-3 and GPT-4 at your
-                                own cost. Claude queries reset in{' '}
+                                Unlimited sessions with GPT-3 and GPT-4 at your
+                                own cost. Claude sessions reset in{' '}
                                 <strong>
                                     {this.daysUntilNextMonth()} days.
                                 </strong>
