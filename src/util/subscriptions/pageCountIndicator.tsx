@@ -10,6 +10,7 @@ import {
     DEFAULT_POWERUP_LIMITS,
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { DEFAULT_TRIAL_PERIOD } from '@worldbrain/memex-common/lib/subscriptions/constants'
 
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
@@ -102,7 +103,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
         )
 
         // Calculate the days remaining to complete 30 days
-        const remainingDays = 30 - elapsedDays
+        const remainingDays = DEFAULT_TRIAL_PERIOD - elapsedDays
 
         return remainingDays
     }
@@ -198,8 +199,10 @@ export class BlockCounterIndicator extends React.Component<Props> {
                 (this.state.currentCount / parseInt(this.state.totalCount)) *
                     100) *
             3.6
-        const leftOverBlocks = this.state.totalCount - this.state.currentCount
-
+        const leftOverBlocks = Math.max(
+            0,
+            this.state.totalCount - this.state.currentCount,
+        )
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
 

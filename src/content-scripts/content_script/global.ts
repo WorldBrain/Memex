@@ -589,8 +589,6 @@ export async function main(
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
-            console.log('createHighlight', selection)
-
             let anchor: Anchor
             let quote: string
 

@@ -79,7 +79,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         <AuthenticationMethods>
                             <EmailPasswordLogin>
                                 {this.renderLoginTypeSwitcher()}
-                                {this.checkBrowser() !== 'Firefox' && (
+                                {/* {this.checkBrowser() !== 'Firefox' && (
                                     <>
                                         <SocialLogins>
                                             <SocialLogin
@@ -111,7 +111,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         </SocialLogins>
                                         <OrTitle>or</OrTitle>
                                     </>
-                                )}
+                                )} */}
                                 <TextInputContainer>
                                     <Icon
                                         filePath={icons.mail}
@@ -275,7 +275,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         <AuthenticationMethods>
                             <EmailPasswordLogin>
                                 {this.renderLoginTypeSwitcher()}
-                                {this.checkBrowser() !== 'Firefox' && (
+                                {/* {this.checkBrowser() !== 'Firefox' && (
                                     <>
                                         <SocialLogins>
                                             <SocialLogin
@@ -307,7 +307,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         </SocialLogins>
                                         <OrTitle>or</OrTitle>
                                     </>
-                                )}
+                                )} */}
                                 <TextInputContainer>
                                     <Icon
                                         filePath={icons.mail}
@@ -377,32 +377,38 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         </TextInputContainer>
                                     </>
                                 )}
-                                <ConfirmContainer>
-                                    <PrimaryAction
-                                        onClick={() =>
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        }
-                                        disabled={
-                                            !(
-                                                this.state.password.length >
-                                                    0 &&
-                                                this.state.email.includes(
-                                                    '@',
-                                                ) &&
-                                                this.state.email.includes('.')
-                                            )
-                                        }
-                                        label={'Login'}
-                                        size={'large'}
-                                        type={'primary'}
-                                        fullWidth
-                                        icon={'longArrowRight'}
-                                        iconPosition={'right'}
-                                    />
-                                </ConfirmContainer>
+                                {this.state.password.length > 0 &&
+                                this.state.email.includes('@') &&
+                                this.state.email.includes('.') ? (
+                                    <ConfirmContainer>
+                                        <PrimaryAction
+                                            onClick={() =>
+                                                this.processEvent(
+                                                    'emailPasswordConfirm',
+                                                    null,
+                                                )
+                                            }
+                                            disabled={
+                                                !(
+                                                    this.state.password.length >
+                                                        0 &&
+                                                    this.state.email.includes(
+                                                        '@',
+                                                    ) &&
+                                                    this.state.email.includes(
+                                                        '.',
+                                                    )
+                                                )
+                                            }
+                                            label={'Login'}
+                                            size={'large'}
+                                            type={'primary'}
+                                            fullWidth
+                                            icon={'longArrowRight'}
+                                            iconPosition={'right'}
+                                        />
+                                    </ConfirmContainer>
+                                ) : null}
                                 {this.state.error && (
                                     <AuthErrorMessage>
                                         {this.renderAuthError()}
@@ -756,7 +762,7 @@ const TextInputContainer = styled.div`
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    background: ${(props) => props.theme.colors.greyScale1};
+    background: ${(props) => props.theme.colors.greyScale2};
     height: 44px;
     border-radius: 8px;
     padding: 0 15px;

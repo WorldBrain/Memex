@@ -104,7 +104,6 @@ export class ContentScriptsBackground {
     }
 
     onTabClosed = (tabId, removeInfo) => {
-        console.log('tabid', tabId)
         updateTabAISessions(this.options.browserAPIs, tabId)
     }
 

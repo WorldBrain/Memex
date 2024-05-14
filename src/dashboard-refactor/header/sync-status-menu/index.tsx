@@ -243,20 +243,23 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     </Row>
 
                     {/* TODO: Re-implement this */}
-                    <Row>
-                        <InfoText> pending downloads</InfoText>
-                        {pendingRemoteChangeCount == null ? (
-                            <LoadingIndicator size={14} />
-                        ) : (
-                            <SectionCircle>
-                                {pendingRemoteChangeCount}
-                            </SectionCircle>
-                        )}
-                    </Row>
+                    {this.props.syncStatusIconState !== 'yellow' &&
+                    this.props.syncStatusIconState !== 'red' ? (
+                        <Row>
+                            <InfoText> pending downloads</InfoText>
+                            {pendingRemoteChangeCount == null ? (
+                                <LoadingIndicator size={14} />
+                            ) : (
+                                <SectionCircle>
+                                    {pendingRemoteChangeCount}
+                                </SectionCircle>
+                            )}
+                        </Row>
+                    ) : null}
                 </RowContainer>
                 <Separator />
                 <BottomRow>
-                    {this.props.syncStatusIconState !== 'yellow' && (
+                    {this.props.syncStatusIconState === 'green' && (
                         <PrimaryAction
                             label="Sync Now"
                             onClick={() => this.props.syncNow(true)}
