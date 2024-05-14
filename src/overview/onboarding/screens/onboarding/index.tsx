@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled, { keyframes, css } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
@@ -196,39 +196,28 @@ export default class OnboardingScreen extends StatefulUIElement<
         </WelcomeBox>
     )
     private renderPricingStep = () => (
-        <WelcomeBox>
-            <Title>Pricing</Title>
-            <DescriptionText>
-                Upgrade before your trial runs out in 30 days to{' '}
-                <HighlightedText>get a 20% discount</HighlightedText>
-            </DescriptionText>
-            <UpgradeModalContainer>
-                <UpgradeModal
-                    componentVariant="OnboardingStep"
-                    authBG={this.props.authBG}
-                    powerUpType="Bookmarks"
-                    createCheckOutLink={
-                        this.props.bgScriptsBG.createCheckoutLink
-                    }
-                    browserAPIs={this.props.browserAPIs}
-                />
-            </UpgradeModalContainer>
+        <>
+            <WelcomeBox scale={this.state.scaleView}>
+                <Title>Pricing</Title>
+                <DescriptionText>
+                    Upgrade before your trial runs out in 30 days to{' '}
+                    <HighlightedText>get a 20% discount</HighlightedText>
+                </DescriptionText>
+                <UpgradeModalContainer>
+                    <UpgradeModal
+                        componentVariant="OnboardingStep"
+                        authBG={this.props.authBG}
+                        powerUpType="Bookmarks"
+                        createCheckOutLink={
+                            this.props.bgScriptsBG.createCheckoutLink
+                        }
+                        browserAPIs={this.props.browserAPIs}
+                    />
+                </UpgradeModalContainer>
 
-            {/* {this.state.hoveredOverOnboardingIcon ? ( */}
-            <ContinueButton>
-                <PrimaryAction
-                    label={'Continue'}
-                    icon={'longArrowRight'}
-                    onClick={() =>
-                        this.processEvent('goToNextOnboardingStep', {
-                            step: 'basicIntro',
-                        })
-                    }
-                    type="primary"
-                    size={'large'}
-                />
-            </ContinueButton>
-            {/* // ) : (
+                {/* {this.state.hoveredOverOnboardingIcon ? ( */}
+
+                {/* // ) : (
             //     <>
             //         <MemexActionButtonIntro
             //             onMouseEnter={() => {
@@ -249,7 +238,21 @@ export default class OnboardingScreen extends StatefulUIElement<
             //         </ContinueButtonNotif>
             //     </>
             // )} */}
-        </WelcomeBox>
+            </WelcomeBox>
+            <ContinueButton>
+                <PrimaryAction
+                    label={'Continue'}
+                    icon={'longArrowRight'}
+                    onClick={() =>
+                        this.processEvent('goToNextOnboardingStep', {
+                            step: 'basicIntro',
+                        })
+                    }
+                    type="primary"
+                    size={'large'}
+                />
+            </ContinueButton>
+        </>
     )
     private renderOnboardingOptions = () => (
         <WelcomeBox>
@@ -564,15 +567,6 @@ const TitleBox = styled.div`
     flex-direction: column;
 `
 
-const WelcomeBox = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-`
-
 const BetaButton = styled.div`
     display: flex;
     background: linear-gradient(
@@ -750,7 +744,7 @@ const DescriptionText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 20px;
     font-weight: 300;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
     text-align: center;
 `
 
@@ -877,4 +871,29 @@ const HighlightedText = styled.span`
     color: ${(props) => props.theme.colors.prime1};
     font-weight: 600;
     display: inline;
+`
+const WelcomeBox = styled.div<{
+    scale?: number
+}>`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+
+    ${(props) =>
+        props.scale != null &&
+        css`
+            ${UpgradeModalContainer} {
+                scale: ${props.scale};
+            }
+            ${Title} {
+                scale: ${props.scale - 0.1};
+            }
+            ${DescriptionText} {
+                scale: ${props.scale - 0.1};
+            }
+        `}
 `

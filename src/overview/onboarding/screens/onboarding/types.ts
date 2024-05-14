@@ -40,6 +40,7 @@ export interface State {
     welcomeStep: string
     enableNudges: boolean
     hoveredOverOnboardingIcon: boolean
+    scaleView: number
 }
 
 export type Event = UIEvent<{
