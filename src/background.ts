@@ -218,14 +218,6 @@ export async function main(): Promise<void> {
     })
     __debugCounter++
 
-    services.contentSharing.preKeyGeneration = async (params) => {
-        if (params.key.roleID > SharedListRoleID.Commenter) {
-            await backgroundModules.personalCloud.waitForSync()
-        }
-    }
-
-    __debugCounter++
-
     // Attach interesting features onto global globalThis scope for interested users
     globalThis['getDb'] = getDb
     globalThis['storageMan'] = storageManager

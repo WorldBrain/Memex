@@ -1691,10 +1691,12 @@ export class DashboardContainer extends StatefulUIElement<
                                   //   })
                                   return shareResult
                               },
-                              waitForListShare: () =>
-                                  this.props.contentShareBG.waitForListShare({
-                                      localListId: listData.localId,
-                                  }),
+                              waitForListShareSideEffects: () =>
+                                  this.props.contentShareBG.waitForListShareSideEffects(
+                                      {
+                                          localListId: listData.localId,
+                                      },
+                                  ),
                           })}
                     onCloseRequested={() =>
                         this.processEvent('setShareListId', {})
