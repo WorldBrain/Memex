@@ -156,6 +156,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     } else {
                         if (imageData) {
                             this.editor?.addVideoSnapshotToEditor(imageData)
+                            this.editor.focus()
                             callback(true) // signal successful processing
                         } else {
                             callback(false) // signal failure or "not ready" due to missing data
@@ -177,6 +178,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     } else {
                         if (imageData) {
                             this.editor?.addImageToEditor(imageData)
+                            this.editor.focus()
                             callback(true) // signal successful processing
                         } else {
                             callback(false) // signal failure or "not ready" due to missing data
