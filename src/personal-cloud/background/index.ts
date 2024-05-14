@@ -145,12 +145,12 @@ export class PersonalCloudBackground {
             })
             await this.options.settingStore.set('lastSyncUpload', Date.now())
         })
-        this.options.backend.events.on('incomingChangesPending', (event) => {
-            this._modifyStats({
-                pendingDownloads:
-                    this.stats.pendingDownloads + event.changeCountDelta,
-            })
-        })
+        // this.options.backend.events.on('incomingChangesPending', (event) => {
+        //     this._modifyStats({
+        //         pendingDownloads:
+        //             this.stats.pendingDownloads + event.changeCountDelta,
+        //     })
+        // })
         this.options.backend.events.on('incomingChangesProcessed', (event) => {
             const pendingDownloads = this.stats.pendingDownloads - event.count
             this._modifyStats({
@@ -168,7 +168,7 @@ export class PersonalCloudBackground {
 
         this.stats.pendingDownloads = pendingDownloads ?? 0
 
-        const pendingStats = this.stats.pendingDownloads
+        const pendingStats = pendingDownloads
         return pendingStats
     }
 
