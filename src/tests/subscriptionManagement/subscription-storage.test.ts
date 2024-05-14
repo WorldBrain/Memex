@@ -10,7 +10,7 @@ import {
     DEFAULT_COUNTER_STORAGE_VALUE,
     DEFAULT_POWERUP_LIMITS,
     DEFAULT_TESTING_EMAIL,
-    DEFAULT_Trial_PERIOD,
+    DEFAULT_TRIAL_PERIOD,
     SIGNUP_TIMESTAMP_STORAGE_KEY,
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import { AI_PROMPT_DEFAULTS } from 'src/sidebar/annotations-sidebar/constants'
@@ -37,7 +37,7 @@ describe('Ribbon logic', () => {
 
         // set the default timestam of user to be out of trial
         await giveAndSaveTimeStampFromXdaysAgo(
-            DEFAULT_Trial_PERIOD + 10,
+            DEFAULT_TRIAL_PERIOD + 10,
             browserAPIs,
         )
 
