@@ -279,7 +279,7 @@ export default class Logic extends UILogic<State, Event> {
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
         this.emitMutation({
-            welcomeStep: { $set: 'basicIntro' },
+            welcomeStep: { $set: 'pricingStep' },
         })
         // this.emitMutation({
         //     loadState: { $set: 'running' },
