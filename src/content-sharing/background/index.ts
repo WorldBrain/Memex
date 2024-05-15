@@ -252,10 +252,7 @@ export default class ContentSharingBackground {
 
         this.remoteFunctions = {
             waitForPageLinkCreation: this.waitForPageLinkCreation,
-            getExistingKeyLinksForList: async (...args) => {
-                const { contentSharing } = await options.services
-                return contentSharing.getExistingKeyLinksForList(...args)
-            },
+            getExistingKeyLinksForList: this.getExistingKeyLinksForList,
             deleteKeyLink: async (...args) => {
                 const { contentSharing } = await options.services
                 return contentSharing.deleteKeyLink(...args)
@@ -336,6 +333,27 @@ export default class ContentSharingBackground {
     }
 
     async executePendingActions() {}
+
+    getExistingKeyLinksForList: ContentSharingInterface['getExistingKeyLinksForList'] = async (
+        params,
+    ) => {
+        let { contentSharing } = this.options.services
+        let { links } = await contentSharing.getExistingKeyLinksForList(params)
+
+        // Generate collab key on-demand if it's not there (can happen if user was offline when list created)
+        if (
+            links.length === 1 &&
+            links[0].roleID !== SharedListRoleID.ReadWrite
+        ) {
+            let collabKey = await contentSharing.generateKeyLink({
+                key: { roleID: SharedListRoleID.ReadWrite },
+                listReference: params.listReference,
+            })
+            links.push(collabKey)
+        }
+
+        return { links }
+    }
 
     private generateRemoteAnnotationId = (): string =>
         this.options.generateServerId('sharedAnnotation').toString()
