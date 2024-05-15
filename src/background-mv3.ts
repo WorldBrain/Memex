@@ -213,13 +213,6 @@ async function main() {
         analyticsBG: backgroundModules.analyticsBG,
     })
 
-    // TODO: Why is this here?
-    services.contentSharing.preKeyGeneration = async (params) => {
-        if (params.key.roleID > SharedListRoleID.Commenter) {
-            await backgroundModules.personalCloud.waitForSync()
-        }
-    }
-
     rpcManager.unpause()
 
     globalThis['bgServices'] = services

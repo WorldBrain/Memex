@@ -45,6 +45,7 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
+import type { SharedListKeyLink } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -66,11 +67,10 @@ export default class ContentSharingBackground {
             details: CreatedPageLinkDetails
         }
     } = {}
-    private listSharePromises: {
-        [localListId: number]: Promise<void>
-    } = {}
-    private listShareAnnotationSharePromises: {
-        [localListId: number]: Promise<AnnotationSharingStates>
+    private listShareSideEffectPromises: {
+        [localListId: number]: Promise<
+            [AnnotationSharingStates, SharedListKeyLink[]]
+        >
     } = {}
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
@@ -252,16 +252,13 @@ export default class ContentSharingBackground {
 
         this.remoteFunctions = {
             waitForPageLinkCreation: this.waitForPageLinkCreation,
-            getExistingKeyLinksForList: async (...args) => {
-                const { contentSharing } = await options.services
-                return contentSharing.getExistingKeyLinksForList(...args)
-            },
+            getExistingKeyLinksForList: this.getExistingKeyLinksForList,
             deleteKeyLink: async (...args) => {
                 const { contentSharing } = await options.services
                 return contentSharing.deleteKeyLink(...args)
             },
             scheduleListShare: this.scheduleListShare,
-            waitForListShare: this.waitForListShare,
+            waitForListShareSideEffects: this.waitForListShareSideEffects,
             deleteListAndAllAssociatedData: this.deleteListAndAllAssociatedData,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
@@ -336,6 +333,27 @@ export default class ContentSharingBackground {
     }
 
     async executePendingActions() {}
+
+    getExistingKeyLinksForList: ContentSharingInterface['getExistingKeyLinksForList'] = async (
+        params,
+    ) => {
+        let { contentSharing } = this.options.services
+        let { links } = await contentSharing.getExistingKeyLinksForList(params)
+
+        // Generate collab key on-demand if it's not there (can happen if user was offline when list created)
+        if (
+            links.length === 1 &&
+            links[0].roleID !== SharedListRoleID.ReadWrite
+        ) {
+            let collabKey = await contentSharing.generateKeyLink({
+                key: { roleID: SharedListRoleID.ReadWrite },
+                listReference: params.listReference,
+            })
+            links.push(collabKey)
+        }
+
+        return { links }
+    }
 
     private generateRemoteAnnotationId = (): string =>
         this.options.generateServerId('sharedAnnotation').toString()
@@ -431,9 +449,9 @@ export default class ContentSharingBackground {
         localListId,
         ...preGeneratedIds
     }) => {
-        if (this.listSharePromises[localListId]) {
+        if (this.listShareSideEffectPromises[localListId]) {
             throw new Error(
-                `This list is already in the process of being shared - try calling "waitForListShare" RPC method`,
+                `This list is already in the process of being shared - try calling "waitForListShareSideEffects" RPC method`,
             )
         }
 
@@ -448,7 +466,7 @@ export default class ContentSharingBackground {
             localListId,
         )
 
-        this.listSharePromises[localListId] = this.performListShare({
+        await this.performListShare({
             collabKey,
             isPrivate,
             localListId,
@@ -479,12 +497,12 @@ export default class ContentSharingBackground {
         }
     }
 
-    waitForListShare: ContentSharingInterface['waitForListShare'] = async ({
+    waitForListShareSideEffects: ContentSharingInterface['waitForListShareSideEffects'] = async ({
         localListId,
     }) => {
-        const promise = this.listSharePromises[localListId]
-        delete this.listSharePromises[localListId]
-        return promise
+        const promise = this.listShareSideEffectPromises[localListId]
+        delete this.listShareSideEffectPromises[localListId]
+        await promise
     }
 
     private async performListShare(options: {
@@ -496,15 +514,17 @@ export default class ContentSharingBackground {
         annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
     }): Promise<void> {
         const {
+            linksPromise,
             annotationSharingStatesPromise,
         } = await this.listSharingService.shareList(options)
 
         // NOTE: Currently we don't wait for the annotationsSharingStatesPromise, letting list annotations
         //  get shared asyncronously. If we wanted some UI loading state, we'd need to set up another remote
         //  method to wait for it.
-        this.listShareAnnotationSharePromises[
-            options.localListId
-        ] = annotationSharingStatesPromise
+        this.listShareSideEffectPromises[options.localListId] = Promise.all([
+            annotationSharingStatesPromise,
+            linksPromise,
+        ])
 
         if (this.options.analyticsBG && options.dontTrack == null) {
             try {
@@ -1151,7 +1171,8 @@ export default class ContentSharingBackground {
             remoteListId,
             collabKey,
         })
-        await this.waitForListShare({ localListId })
+        // This can take a long time because of sync, thus ignore it for now
+        // await this.waitForListShareSideEffects({ localListId })
         await bgModules.customLists.insertPageToList({
             id: localListId,
             url: fullPageUrl,

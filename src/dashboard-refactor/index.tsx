@@ -624,10 +624,15 @@ export class DashboardContainer extends StatefulUIElement<
                             isLoggedIn: this.state.currentUser != null,
                             outsideClickIgnoreClass:
                                 HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
-                            onLoginClick: () =>
+                            onLoginClick: () => {
+                                this.processEvent(
+                                    'setSyncStatusMenuDisplayState',
+                                    { isShown: false },
+                                )
                                 this.processEvent('setShowLoginModal', {
                                     isShown: true,
-                                }),
+                                })
+                            },
                             onToggleDisplayState: () => {},
                             getRootElement: this.props.getRootElement,
                             syncNow: (preventUpdateStats) =>
@@ -1635,22 +1640,32 @@ export class DashboardContainer extends StatefulUIElement<
 
         if (modalsState.showLogin) {
             return (
-                <LoginModal
-                    onClose={() =>
+                <OverlayModals
+                    getPortalRoot={this.props.getRootElement}
+                    closeComponent={() =>
                         this.processEvent('setShowLoginModal', {
                             isShown: false,
                         })
                     }
-                    authBG={this.props.authBG}
-                    contentSharingBG={this.props.contentShareBG}
-                    onSuccess={() =>
-                        setTimeout(
-                            () => this.processEvent('checkSharingAccess', null),
-                            1000,
-                        )
-                    }
-                    browserAPIs={this.props.browserAPIs}
-                />
+                    blockedBackground
+                    positioning="centerCenter"
+                >
+                    <LoginModal
+                        authBG={this.props.authBG}
+                        contentSharingBG={this.props.contentShareBG}
+                        onSuccess={() =>
+                            setTimeout(
+                                () =>
+                                    this.processEvent(
+                                        'checkSharingAccess',
+                                        null,
+                                    ),
+                                1000,
+                            )
+                        }
+                        browserAPIs={this.props.browserAPIs}
+                    />
+                </OverlayModals>
             )
         }
 
@@ -1691,10 +1706,12 @@ export class DashboardContainer extends StatefulUIElement<
                                   //   })
                                   return shareResult
                               },
-                              waitForListShare: () =>
-                                  this.props.contentShareBG.waitForListShare({
-                                      localListId: listData.localId,
-                                  }),
+                              waitForListShareSideEffects: () =>
+                                  this.props.contentShareBG.waitForListShareSideEffects(
+                                      {
+                                          localListId: listData.localId,
+                                      },
+                                  ),
                           })}
                     onCloseRequested={() =>
                         this.processEvent('setShareListId', {})

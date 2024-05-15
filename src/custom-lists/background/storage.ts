@@ -99,10 +99,6 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
                     operation: 'createObject',
                 },
-                createListTree: {
-                    collection: CustomListStorage.LIST_TREES_COLL,
-                    operation: 'createObject',
-                },
                 countListEntries: {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'countObjects',

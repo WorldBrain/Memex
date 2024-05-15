@@ -75,6 +75,7 @@ import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import type { UnifiedSearchResult } from 'src/search/background/types'
 import { BulkEditCollection } from 'src/bulk-edit/types'
+import checkBrowser from 'src/util/check-browser'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -1453,12 +1454,30 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
-    setShowLoginModal: EventHandler<'setShowLoginModal'> = ({ event }) => {
-        this.emitMutation({
-            modals: {
-                showLogin: { $set: event.isShown },
-            },
-        })
+    setShowLoginModal: EventHandler<'setShowLoginModal'> = async ({
+        event,
+    }) => {
+        const isNotFirefox = checkBrowser() !== 'firefox'
+
+        if (isNotFirefox) {
+            const isStaging = process.env.NODE_ENV === 'development'
+
+            let url = ''
+
+            if (isStaging) {
+                url = 'https://staging.memex.social/auth'
+            } else {
+                url = 'https://memex.social/auth'
+            }
+
+            window.open(url, '_blank')
+        } else {
+            this.emitMutation({
+                modals: {
+                    showLogin: { $set: event.isShown },
+                },
+            })
+        }
     }
     syncNow: EventHandler<'syncNow'> = async ({ event }) => {
         this.emitMutation({

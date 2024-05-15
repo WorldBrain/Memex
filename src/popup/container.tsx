@@ -43,6 +43,7 @@ import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegra
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { DEFAULT_POWERUP_LIMITS } from '@worldbrain/memex-common/lib/subscriptions/constants'
 
 export interface OwnProps {
     analyticsBG: AnalyticsCoreInterface
@@ -194,7 +195,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>
                         You've reached the limit of
-                        <br /> 25 saved pages per month
+                        <br /> ${DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} saved
+                        pages per month
                     </NoticeTitle>
                     <NoticeSubTitle>
                         Upgrade to continue to save, annotate and organise.
