@@ -27,7 +27,6 @@ export class StorexHubBackground {
     constructor(
         private dependencies: {
             storageManager: StorageManager
-            // fetchPageData?: FetchPageProcessor
             storePageContent: (content: PageContent) => Promise<void>
             localBrowserStorage: Storage.LocalStorageArea
             addVisit: (visit: {
