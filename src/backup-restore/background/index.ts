@@ -14,7 +14,6 @@ import type NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 import * as Raven from 'src/util/raven'
 import type { BackupInterface, LocalBackupSettings } from './types'
-import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { checkServerStatus } from '../../backup-restore/ui/utils'
 import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
@@ -46,7 +45,6 @@ export class BackupBackgroundModule {
     scheduledAutomaticBackupTimestamp?: number
     notifications: NotificationBackground
     checkAuthorizedForAutoBackup: () => Promise<boolean>
-    jobScheduler: JobScheduler
 
     constructor(
         private options: {
@@ -54,7 +52,6 @@ export class BackupBackgroundModule {
             createQueue?: typeof Queue
             queueOpts?: QueueOpts
             notifications: NotificationBackground
-            jobScheduler: JobScheduler
             browserAPIs: Pick<Browser, 'runtime' | 'storage' | 'alarms'>
             localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
             checkAuthorizedForAutoBackup: () => Promise<boolean>
@@ -70,7 +67,6 @@ export class BackupBackgroundModule {
             storageAPI: options.browserAPIs.storage,
             localBackupSettings: options.localBackupSettings,
         })
-        this.jobScheduler = options.jobScheduler
         this.storageManager = options.storageManager
         this.storage = new BackupStorage({
             storageManager: options.storageManager,

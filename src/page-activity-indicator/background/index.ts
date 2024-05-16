@@ -14,7 +14,6 @@ import {
     sharedListEntryToFollowedListEntry,
     sharedListToFollowedList,
 } from './utils'
-import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import type {
     SharedListTimestamp,
@@ -27,7 +26,6 @@ import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 export interface PageActivityIndicatorDependencies {
     fetch: typeof fetch
     storageManager: Storex
-    jobScheduler: JobScheduler
     contentSharingBackend: ContentSharingBackendInterface
     getCurrentUserId: () => Promise<AutoPk | null>
     pkmSyncBG: PKMSyncBackgroundModule

@@ -48,7 +48,6 @@ import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { Alarms, Browser } from 'webextension-polyfill'
 import { CLOUD_SYNC_RETRY_UL_ALARM_NAME } from './constants'
-import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/types'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import { keepWorkerAlive } from 'src/util/service-worker-utils'
@@ -73,7 +72,6 @@ export interface PersonalCloudBackgroundOptions {
         updates: { [key: string]: any }
     }): Promise<void>
     serverStorageManager: StorageManager
-    jobScheduler: JobScheduler
 }
 
 export class PersonalCloudBackground {

@@ -34,7 +34,6 @@ import {
     updateEmail,
 } from 'firebase/auth/web-extension'
 import type { FirebaseError } from 'firebase/app'
-import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthServices } from 'src/services/types'
 import { listenToWebAppMessage } from './auth-sync'
 import type { Runtime } from 'webextension-polyfill'
@@ -53,7 +52,6 @@ export class AuthBackground {
         public options: {
             runtimeAPI: Runtime.Static
             authServices: AuthServices
-            jobScheduler: JobScheduler
             localStorageArea: LimitedBrowserStorage
             backendFunctions: AuthBackendFunctions
             remoteEmitter: RemoteEventEmitter<'auth'>
@@ -143,38 +141,6 @@ export class AuthBackground {
         await this.options.remoteEmitter.emit('onLoadingUser', false)
     }
 
-    _scheduleSubscriptionCheck = (
-        userWithClaims: AuthenticatedUser & { claims: Claims },
-    ) => {
-        if (userWithClaims?.claims?.subscriptionExpiry) {
-            const when = userWithClaims?.claims?.subscriptionExpiry * 1000
-            isDev &&
-                console['info'](
-                    `Subscription check: scheduled for ${new Date(
-                        when,
-                    ).toLocaleString()}`,
-                )
-
-            this.options.jobScheduler.scheduleJobOnce({
-                name: 'user-subscription-expiry-refresh',
-                when,
-                job: async () => {
-                    isDev && console['info'](`Subscription check: running`)
-                    const result = await this.authService.refreshUserInfo.bind(
-                        this.authService,
-                    )()
-                    isDev && console['info'](`Subscription check: done`, result)
-                },
-            })
-        } else {
-            this.options.jobScheduler.scheduleJobOnce({
-                name: 'user-subscription-expiry-refresh',
-                when: Date.now(),
-                job: () => null,
-            })
-        }
-    }
-
     sendPasswordResetEmailProcess = async (email: string) => {
         await sendPasswordResetEmail(getAuth(), email)
     }
@@ -196,7 +162,6 @@ export class AuthBackground {
                       claims: await this.subscriptionService.getCurrentUserClaims(),
                   }
                 : null
-            this._scheduleSubscriptionCheck(userWithClaims)
 
             if (isDev) {
                 const claims = userWithClaims?.claims
