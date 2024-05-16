@@ -102,7 +102,10 @@ import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/
 import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
 import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
 import { FOLLOWED_LIST_SYNC_ALARM_NAME } from 'src/page-activity-indicator/constants'
-import { CLOUD_SYNC_PERIODIC_DL_ALARM_NAME } from 'src/personal-cloud/background/constants'
+import {
+    CLOUD_SYNC_PERIODIC_DL_ALARM_NAME,
+    CLOUD_SYNC_RETRY_UL_ALARM_NAME,
+} from 'src/personal-cloud/background/constants'
 import checkBrowser from 'src/util/check-browser'
 import { AUTOMATED_BACKUP_ALARM_NAME } from 'src/backup-restore/background/constants'
 import { AlarmJob, setupAlarms } from './alarms'
@@ -783,6 +786,11 @@ export async function setupBackgroundModules(
         [AUTOMATED_BACKUP_ALARM_NAME]: {
             alarmDefinition: null, // Dynamically scheduled in the backups module
             job: () => backgroundModules.backupModule.doBackup(),
+        },
+        [CLOUD_SYNC_RETRY_UL_ALARM_NAME]: {
+            alarmDefinition: null, // Dynamically scheduled in the personalCloud module
+            job: () =>
+                backgroundModules.personalCloud.actionQueue.executePendingActions(),
         },
     }
 

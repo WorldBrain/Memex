@@ -109,16 +109,6 @@ export class PersonalCloudBackground {
             preprocessAction: this.preprocessAction,
             onSetupError: (err) => Raven.captureException(err),
             setTimeout: (job, timeout) => {
-                function onAlarmListener({ name }: Alarms.Alarm) {
-                    if (name !== CLOUD_SYNC_RETRY_UL_ALARM_NAME) {
-                        return
-                    }
-                    job()
-                    options.webExtAPIs.alarms.onAlarm.removeListener(
-                        onAlarmListener,
-                    )
-                }
-                options.webExtAPIs.alarms.onAlarm.addListener(onAlarmListener)
                 options.webExtAPIs.alarms.create(
                     CLOUD_SYNC_RETRY_UL_ALARM_NAME,
                     {
