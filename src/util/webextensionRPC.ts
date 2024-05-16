@@ -298,7 +298,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
 ): RemoteEventEmitter<ModuleName> {
     const message = {
         __REMOTE_EVENT__: __REMOTE_EMITTER_EVENT__,
-        __REMOTE_EVENT_TYPE__: moduleName,
+        [__REMOTE_EVENT_TYPE__]: moduleName,
     }
 
     const emit: RemoteEventEmitter<ModuleName>['emit'] = broadcastToTabs
@@ -308,7 +308,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
                   try {
                       await browser.tabs.sendMessage(tabId, {
                           ...message,
-                          __REMOTE_EVENT_NAME__: eventName,
+                          [__REMOTE_EVENT_NAME__]: eventName,
                           data: args[0],
                       })
                   } catch (err) {
@@ -328,7 +328,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
               try {
                   await browser.runtime.sendMessage({
                       ...message,
-                      __REMOTE_EVENT_NAME__: eventName,
+                      [__REMOTE_EVENT_NAME__]: eventName,
                       data: args[0],
                   })
               } catch (err) {
@@ -355,7 +355,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
             try {
                 await browser.tabs.sendMessage(tabId, {
                     ...message,
-                    __REMOTE_EVENT_NAME__: eventName,
+                    [__REMOTE_EVENT_NAME__]: eventName,
                     data: args[0],
                 })
             } catch (err) {
@@ -370,7 +370,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
 }
 
 // Receiving Side (e.g. content script, options page, etc)
-const remoteEventEmitters: RemoteEventEmitters = {} as RemoteEventEmitters
+const remoteEventEmitters: RemoteEventEmitters = {}
 type RemoteEventEmitters = {
     [K in keyof RemoteEvents]?: TypedRemoteEventEmitter<K>
 }
@@ -387,10 +387,10 @@ export interface RemoteEvents {
 }
 
 function registerRemoteEventForwarder() {
-    if (browser.runtime.onMessage.hasListener(remoteEventForwarder)) {
+    if (browser.runtime.onMessage.hasListener(remoteEventForwarder as any)) {
         return
     }
-    browser.runtime.onMessage.addListener(remoteEventForwarder)
+    browser.runtime.onMessage.addListener(remoteEventForwarder as any)
 }
 
 const remoteEventForwarder = (message, _) => {
@@ -398,14 +398,15 @@ const remoteEventForwarder = (message, _) => {
         message == null ||
         message[__REMOTE_EMITTER_EVENT__] !== __REMOTE_EMITTER_EVENT__
     ) {
-        return
+        return false
     }
 
     const emitterType = message[__REMOTE_EVENT_TYPE__]
-    const emitter = remoteEventEmitters[emitterType]
-
+    const emitter = remoteEventEmitters[emitterType] as TypedRemoteEventEmitter<
+        any
+    >
     if (emitter == null) {
-        return
+        return false
     }
 
     emitter.emit(message[__REMOTE_EVENT_NAME__], message.data)
@@ -419,7 +420,7 @@ export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
         return existingEmitter
     }
 
-    const newEmitter = new EventEmitter() as any
+    const newEmitter = new EventEmitter()
     remoteEventEmitters[eventType] = newEmitter
     registerRemoteEventForwarder()
     return newEmitter
