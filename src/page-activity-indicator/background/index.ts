@@ -7,7 +7,6 @@ import type {
     FollowedList,
     RemotePageActivityIndicatorInterface,
 } from './types'
-import type { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import PageActivityIndicatorStorage from './storage'
 import {
@@ -23,7 +22,7 @@ import type {
 } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/types'
 import { SHARED_LIST_TIMESTAMP_GET_ROUTE } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/constants'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
-import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
+import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 
 export interface PageActivityIndicatorDependencies {
     fetch: typeof fetch
@@ -33,8 +32,6 @@ export interface PageActivityIndicatorDependencies {
     getCurrentUserId: () => Promise<AutoPk | null>
     pkmSyncBG: PKMSyncBackgroundModule
 }
-
-export const PERIODIC_SYNC_JOB_NAME = 'followed-list-entry-sync'
 
 export class PageActivityIndicatorBackground {
     storage: PageActivityIndicatorStorage
@@ -54,15 +51,7 @@ export class PageActivityIndicatorBackground {
         }
     }
 
-    async setup(): Promise<void> {
-        await this.deps.jobScheduler.scheduleJob({
-            name: PERIODIC_SYNC_JOB_NAME,
-            periodInMinutes: 20,
-            job: this.syncFollowedListEntriesWithNewActivity,
-        })
-    }
-
-    private syncFollowedListEntriesWithNewActivity = async (opts?: {
+    syncFollowedListEntriesWithNewActivity = async (opts?: {
         now?: number
     }) => {
         const existingFollowedListsLookup = await this.storage.findAllFollowedLists()

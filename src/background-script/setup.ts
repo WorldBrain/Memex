@@ -104,6 +104,11 @@ import { ImageSupportBackground } from 'src/image-support/background'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
 import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
+import { FOLLOWED_LIST_SYNC_ALARM_NAME } from 'src/page-activity-indicator/constants'
+import { CLOUD_SYNC_PERIODIC_DL_ALARM_NAME } from 'src/personal-cloud/background/constants'
+import checkBrowser from 'src/util/check-browser'
+import { AUTOMATED_BACKUP_ALARM_NAME } from 'src/backup-restore/background/constants'
+import { AlarmJob, setupAlarms } from './alarms'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -530,7 +535,7 @@ export function createBackgroundModules(options: {
         storageManager,
         syncSettingsStore,
         serverStorageManager: options.serverStorage.manager,
-        runtimeAPI: options.browserAPIs.runtime,
+        webExtAPIs: options.browserAPIs,
         jobScheduler: jobScheduler.scheduler,
         persistentStorageManager: options.persistentStorageManager,
         mediaBackend:
@@ -633,7 +638,6 @@ export function createBackgroundModules(options: {
         syncSettings,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
-            jobScheduler: jobScheduler.scheduler,
             browserAPIs: options.browserAPIs,
             localBackupSettings: new BrowserSettingsStore(
                 options.browserAPIs.storage.local,
@@ -756,8 +760,6 @@ export async function setupBackgroundModules(
         storageAPI: browserAPIs.storage,
     })
 
-    // TODO mv3: migrate web req APIs
-    // backgroundModules.auth.setupRequestInterceptor()
     backgroundModules.auth.registerRemoteEmitter()
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
@@ -785,9 +787,30 @@ export async function setupBackgroundModules(
 
     backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
-    await backgroundModules.pageActivityIndicator.setup()
 
     await backgroundModules.personalCloud.setup()
+
+    // Set up static alarm jobs
+    let alarmJobs: { [name: string]: AlarmJob } = {
+        [FOLLOWED_LIST_SYNC_ALARM_NAME]: {
+            alarmDefinition: { periodInMinutes: 20 },
+            job: () =>
+                backgroundModules.pageActivityIndicator.syncFollowedListEntriesWithNewActivity(),
+        },
+        [AUTOMATED_BACKUP_ALARM_NAME]: {
+            alarmDefinition: null, // Dynamically scheduled in the backups module
+            job: () => backgroundModules.backupModule.doBackup(),
+        },
+    }
+
+    if (checkBrowser() !== 'firefox') {
+        alarmJobs[CLOUD_SYNC_PERIODIC_DL_ALARM_NAME] = {
+            alarmDefinition: { periodInMinutes: 60 },
+            job: () => backgroundModules.personalCloud.invokeSyncDownload(),
+        }
+    }
+
+    setupAlarms(browserAPIs.alarms, alarmJobs)
 }
 
 export function getBackgroundStorageModules(

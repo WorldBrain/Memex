@@ -46,18 +46,18 @@ import * as Raven from 'src/util/raven'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
-import type { Runtime } from 'webextension-polyfill'
+import type { Alarms, Browser } from 'webextension-polyfill'
+import { CLOUD_SYNC_RETRY_UL_ALARM_NAME } from './constants'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/types'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import { keepWorkerAlive } from 'src/util/service-worker-utils'
-import checkBrowser from 'src/util/check-browser'
 import { COLLECTION_NAMES as PAGE_COLLS } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
     mediaBackend: PersonalCloudMediaBackend
-    runtimeAPI: Runtime.Static
+    webExtAPIs: Pick<Browser, 'alarms' | 'runtime'>
     storageManager: StorageManager
     syncSettingsStore: SyncSettingsStore<'dashboard'>
     persistentStorageManager: StorageManager
@@ -106,16 +106,27 @@ export class PersonalCloudBackground {
             retryIntervalInMs: PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
             executeAction: (args) =>
                 keepWorkerAlive(this.processPersonalCloudAction(args), {
-                    runtimeAPI: options.runtimeAPI,
+                    runtimeAPI: options.webExtAPIs.runtime,
                 }),
             preprocessAction: this.preprocessAction,
             onSetupError: (err) => Raven.captureException(err),
             setTimeout: (job, timeout) => {
-                options.jobScheduler.scheduleJobOnce({
-                    name: 'personal-cloud-action-queue-retry',
-                    when: Date.now() + timeout,
-                    job,
-                })
+                function onAlarmListener({ name }: Alarms.Alarm) {
+                    if (name !== CLOUD_SYNC_RETRY_UL_ALARM_NAME) {
+                        return
+                    }
+                    job()
+                    options.webExtAPIs.alarms.onAlarm.removeListener(
+                        onAlarmListener,
+                    )
+                }
+                options.webExtAPIs.alarms.onAlarm.addListener(onAlarmListener)
+                options.webExtAPIs.alarms.create(
+                    CLOUD_SYNC_RETRY_UL_ALARM_NAME,
+                    {
+                        when: Date.now() + timeout,
+                    },
+                )
                 return -1
             },
         })
@@ -189,13 +200,6 @@ export class PersonalCloudBackground {
         })
 
         await this.startSync()
-
-        if (checkBrowser() !== 'firefox') {
-            await this.options.jobScheduler.scheduleJobHourly({
-                name: 'personal-cloud-periodic-sync-download',
-                job: this.invokeSyncDownload,
-            })
-        }
     }
 
     private async observeAuthChanges() {
@@ -278,7 +282,7 @@ export class PersonalCloudBackground {
                             await this.integrateUpdates(batch)
                             await settingStore.set('lastSeen', lastSeen)
                         })(),
-                        { runtimeAPI: this.options.runtimeAPI },
+                        { runtimeAPI: this.options.webExtAPIs.runtime },
                     )
                 } catch (err) {
                     if (this.strictErrorReporting) {
