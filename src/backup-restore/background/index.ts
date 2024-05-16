@@ -14,12 +14,12 @@ import type NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 import * as Raven from 'src/util/raven'
 import type { BackupInterface, LocalBackupSettings } from './types'
-import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { checkServerStatus } from '../../backup-restore/ui/utils'
 import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import type { Browser } from 'webextension-polyfill'
 import { keepWorkerAlive } from 'src/util/service-worker-utils'
+import { AUTOMATED_BACKUP_ALARM_NAME } from './constants'
 
 export * from './backend'
 
@@ -45,7 +45,6 @@ export class BackupBackgroundModule {
     scheduledAutomaticBackupTimestamp?: number
     notifications: NotificationBackground
     checkAuthorizedForAutoBackup: () => Promise<boolean>
-    jobScheduler: JobScheduler
 
     constructor(
         private options: {
@@ -53,8 +52,7 @@ export class BackupBackgroundModule {
             createQueue?: typeof Queue
             queueOpts?: QueueOpts
             notifications: NotificationBackground
-            jobScheduler: JobScheduler
-            browserAPIs: Pick<Browser, 'runtime' | 'storage'>
+            browserAPIs: Pick<Browser, 'runtime' | 'storage' | 'alarms'>
             localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
             checkAuthorizedForAutoBackup: () => Promise<boolean>
         },
@@ -69,7 +67,6 @@ export class BackupBackgroundModule {
             storageAPI: options.browserAPIs.storage,
             localBackupSettings: options.localBackupSettings,
         })
-        this.jobScheduler = options.jobScheduler
         this.storageManager = options.storageManager
         this.storage = new BackupStorage({
             storageManager: options.storageManager,
@@ -195,8 +192,6 @@ export class BackupBackgroundModule {
                         return false
                     }
                 },
-                scheduleAutomaticBackupIfEnabled: this
-                    .scheduleAutomaticBackupIfEnabled,
                 sendNotification: async (id: string) => {
                     const errorId = await this.backend.sendNotificationOnFailure(
                         id,
@@ -296,7 +291,7 @@ export class BackupBackgroundModule {
         }
 
         this.storage.startRecordingChanges()
-        this.scheduleAutomaticBackupIfEnabled()
+        this.scheduleAutomaticBackup()
     }
 
     isAutomaticBackupAllowed = async () => {
@@ -318,10 +313,6 @@ export class BackupBackgroundModule {
         await this.localBackupSettings.set('automaticBackupsEnabled', false)
     }
 
-    async scheduleAutomaticBackupIfEnabled() {
-        this.scheduleAutomaticBackup()
-    }
-
     scheduleAutomaticBackup() {
         if (
             this.automaticBackupTimeout != null ||
@@ -330,20 +321,18 @@ export class BackupBackgroundModule {
             return
         }
 
-        const msUntilNextBackup = 1000 * 60 * 15
-        // const msUntilNextBackup = 1000 * 30
-        this.scheduledAutomaticBackupTimestamp = Date.now() + msUntilNextBackup
-        this.jobScheduler.scheduleJobOnce({
-            name: 'automated-legacy-data-backup',
-            when: Date.now() + msUntilNextBackup,
-            job: () => this.doBackup(),
+        const backupDelayMins = 15
+        this.scheduledAutomaticBackupTimestamp =
+            Date.now() + backupDelayMins * 60 * 1000
+        this.options.browserAPIs.alarms.create(AUTOMATED_BACKUP_ALARM_NAME, {
+            delayInMinutes: backupDelayMins,
         })
         this.automaticBackupTimeout = -1
     }
 
     clearAutomaticBackupTimeout() {
         if (this.automaticBackupTimeout != null) {
-            this.jobScheduler.clearScheduledJob('automated-legacy-data-backup')
+            this.options.browserAPIs.alarms.clear(AUTOMATED_BACKUP_ALARM_NAME)
             this.automaticBackupTimeout = null
         }
     }
@@ -440,7 +429,7 @@ export class BackupBackgroundModule {
         }
         this.clearAutomaticBackupTimeout()
         const always = () => {
-            this.scheduleAutomaticBackupIfEnabled()
+            this.scheduleAutomaticBackup()
         }
         this.storage.startRecordingChanges()
         if (!(await this.backend.isReachable())) {
@@ -474,7 +463,7 @@ export class BackupBackgroundModule {
         this.restoreProcedure.events.once('success', async () => {
             // await this.lastBackupStorage.storeLastBackupTime(new Date())
             await this.startRecordingChangesIfNeeded()
-            await this.scheduleAutomaticBackupIfEnabled()
+            this.scheduleAutomaticBackup()
             this.resetRestoreProcedure()
         })
 

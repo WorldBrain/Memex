@@ -7,8 +7,6 @@ import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/annotations/background'
 import SearchBackground from 'src/search/background'
 import EventLogBackground from 'src/analytics/internal/background'
-import JobSchedulerBackground from 'src/job-scheduler/background'
-import { jobs } from 'src/job-scheduler/background/jobs'
 import CustomListBackground from 'src/custom-lists/background'
 import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
@@ -39,7 +37,6 @@ import { AuthBackground } from 'src/authentication/background'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { StorexHubBackground } from 'src/storex-hub/background'
-import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
 import { ContentScriptsBackground } from 'src/content-scripts/background'
 import { InPageUIBackground } from 'src/in-page-ui/background'
@@ -104,6 +101,14 @@ import { ImageSupportBackground } from 'src/image-support/background'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
 import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
+import { FOLLOWED_LIST_SYNC_ALARM_NAME } from 'src/page-activity-indicator/constants'
+import {
+    CLOUD_SYNC_PERIODIC_DL_ALARM_NAME,
+    CLOUD_SYNC_RETRY_UL_ALARM_NAME,
+} from 'src/personal-cloud/background/constants'
+import checkBrowser from 'src/util/check-browser'
+import { AUTOMATED_BACKUP_ALARM_NAME } from 'src/backup-restore/background/constants'
+import { AlarmJob, setupAlarms } from './alarms'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -121,7 +126,6 @@ export interface BackgroundModules {
     search: SearchBackground
     eventLog: EventLogBackground
     customLists: CustomListBackground
-    jobScheduler: JobSchedulerBackground
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
@@ -229,20 +233,11 @@ export function createBackgroundModules(options: {
 
     const notifications = new NotificationBackground({ storageManager })
 
-    const jobScheduler = new JobSchedulerBackground({
-        storagePrefix: JobScheduler.STORAGE_PREFIX,
-        storageAPI: options.browserAPIs.storage,
-        alarmsAPI: options.browserAPIs.alarms,
-        notifications,
-        jobs,
-    })
-
     const auth =
         options.auth ||
         new AuthBackground({
             runtimeAPI: options.browserAPIs.runtime,
             authServices: options.authServices,
-            jobScheduler: jobScheduler.scheduler,
             remoteEmitter: createRemoteEventEmitter('auth'),
             localStorageArea: options.browserAPIs.storage.local,
             getFCMRegistrationToken: options.getFCMRegistrationToken,
@@ -489,7 +484,6 @@ export function createBackgroundModules(options: {
         storageManager,
         getCurrentUserId,
         contentSharingBackend,
-        jobScheduler: jobScheduler.scheduler,
         pkmSyncBG,
     })
     const summarizeBG = new SummarizeBackground({
@@ -530,8 +524,7 @@ export function createBackgroundModules(options: {
         storageManager,
         syncSettingsStore,
         serverStorageManager: options.serverStorage.manager,
-        runtimeAPI: options.browserAPIs.runtime,
-        jobScheduler: jobScheduler.scheduler,
+        webExtAPIs: options.browserAPIs,
         persistentStorageManager: options.persistentStorageManager,
         mediaBackend:
             options.personalCloudMediaBackend ??
@@ -612,7 +605,6 @@ export function createBackgroundModules(options: {
         auth,
         social,
         analytics,
-        jobScheduler,
         analyticsBG,
         notifications,
         // connectivityChecker,
@@ -633,7 +625,6 @@ export function createBackgroundModules(options: {
         syncSettings,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
-            jobScheduler: jobScheduler.scheduler,
             browserAPIs: options.browserAPIs,
             localBackupSettings: new BrowserSettingsStore(
                 options.browserAPIs.storage.local,
@@ -756,8 +747,6 @@ export async function setupBackgroundModules(
         storageAPI: browserAPIs.storage,
     })
 
-    // TODO mv3: migrate web req APIs
-    // backgroundModules.auth.setupRequestInterceptor()
     backgroundModules.auth.registerRemoteEmitter()
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
@@ -784,10 +773,35 @@ export async function setupBackgroundModules(
     setupNotificationClickListener()
 
     backgroundModules.analytics.setup()
-    await backgroundModules.jobScheduler.setup()
-    await backgroundModules.pageActivityIndicator.setup()
 
     await backgroundModules.personalCloud.setup()
+
+    // Set up static alarm jobs
+    let alarmJobs: { [name: string]: AlarmJob } = {
+        [FOLLOWED_LIST_SYNC_ALARM_NAME]: {
+            alarmDefinition: { periodInMinutes: 20 },
+            job: () =>
+                backgroundModules.pageActivityIndicator.syncFollowedListEntriesWithNewActivity(),
+        },
+        [AUTOMATED_BACKUP_ALARM_NAME]: {
+            alarmDefinition: null, // Dynamically scheduled in the backups module
+            job: () => backgroundModules.backupModule.doBackup(),
+        },
+        [CLOUD_SYNC_RETRY_UL_ALARM_NAME]: {
+            alarmDefinition: null, // Dynamically scheduled in the personalCloud module
+            job: () =>
+                backgroundModules.personalCloud.actionQueue.executePendingActions(),
+        },
+    }
+
+    if (checkBrowser() !== 'firefox') {
+        alarmJobs[CLOUD_SYNC_PERIODIC_DL_ALARM_NAME] = {
+            alarmDefinition: { periodInMinutes: 60 },
+            job: () => backgroundModules.personalCloud.invokeSyncDownload(),
+        }
+    }
+
+    setupAlarms(browserAPIs.alarms, alarmJobs)
 }
 
 export function getBackgroundStorageModules(
