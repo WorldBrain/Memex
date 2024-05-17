@@ -70,7 +70,7 @@ import {
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import MarkdownIt from 'markdown-it'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import Raven from 'raven-js'
+import { captureException } from 'src/util/raven'
 import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import type { UnifiedSearchResult } from 'src/search/background/types'
@@ -2181,8 +2181,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
             }
         } catch (err) {
-            console.error('Something went really bad copying:', err.message)
-            Raven.captureException(err)
+            captureException(err)
             return false
         } finally {
             analytics.trackEvent({
