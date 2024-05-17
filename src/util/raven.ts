@@ -24,6 +24,7 @@ export default function initSentry({
                 shouldSendCallback: () => sentryEnabled,
                 whitelistUrls: [extUrlPattern],
                 includePaths: [extUrlPattern],
+                ignoreErrors: IGNORED_ERRORS,
             })
             .install()
 
@@ -48,3 +49,26 @@ export const captureException = (
 ) => raven.captureException(error, context)
 export const captureBreadcrumb = (details: any) =>
     raven.captureBreadcrumb(details)
+
+const IGNORED_ERRORS = [
+    `No registered remote function called handleHistoryStateUpdate`,
+    `No registered remote function called confirmTabScriptLoaded`,
+    `No registered remote function called teardownContentScripts`,
+    `Error: Could not get a port to content-script-background`,
+    `Cannot destructure property 'id' of 'i' as it is undefined.`,
+    `NotAllowedError: Registration failed - permission denied`,
+    `An error occurred. See https://git.io/JUIaE#17 for more information.`,
+    `AbortError: Registration failed - push service error`,
+    `Could not establish connection. Receiving end does not exist.`,
+    `Error: Cannot inject content-scripts into page`,
+    `Error: No tab with id:`,
+    `Unable to download all specified images.`,
+    `Could not establish connection. Receiving end does not exist.`,
+    `A listener indicated an asynchronous response by returning true`,
+    `DatabaseClosedError: UnknownError`,
+    `DatabaseClosedError: InvalidStateError`,
+    `DatabaseClosedError: UpgradeError`,
+    `UpgradeError Not yet support for changing primary key`,
+    `Tried to do 'findObjects' operation on non-existing collection: settings`,
+    `Invariant Violation: update(): You provided an invalid spec to update().`,
+]

@@ -95,7 +95,6 @@ import {
 } from 'src/custom-lists/ui/CollectionPicker/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { sleepPromise } from '@worldbrain/memex-common/lib/common-ui/utils/promises'
-import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { marked } from 'marked'
@@ -104,11 +103,9 @@ import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
-import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import Raven from 'raven-js'
+import { captureException } from 'src/util/raven'
 import analytics from 'src/analytics'
 
 import MarkdownIt from 'markdown-it'
@@ -3996,8 +3993,7 @@ export class SidebarContainerLogic extends UILogic<
             }
             return true
         } catch (err) {
-            console.error('Something went really bad copying:', err.message)
-            Raven.captureException(err)
+            captureException(err)
             return false
         } finally {
             analytics.trackEvent({

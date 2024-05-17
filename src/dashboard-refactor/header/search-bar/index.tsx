@@ -107,6 +107,9 @@ export default class SearchBar extends PureComponent<SearchBarProps, State> {
                                     e.stopPropagation()
                                 }
                             }}
+                            onKeyUp={(e) => {
+                                e.stopPropagation()
+                            }}
                             onChange={this.handleChange}
                             autoComplete="off"
                         />
