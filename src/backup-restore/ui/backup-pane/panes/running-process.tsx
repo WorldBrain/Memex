@@ -305,7 +305,9 @@ export default class RunningProcess extends React.Component<Props> {
         if (status === 'running') {
             return (
                 (info.processedChanges && info.totalChanges
-                    ? (info.processedChanges / info.totalChanges) * 100
+                    ? Math.floor(
+                          (info.processedChanges / info.totalChanges) * 100,
+                      )
                     : 0) + '%'
             )
         }
