@@ -78,10 +78,7 @@ import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import {
-    AIActionAllowed,
-    downloadMemexDesktop,
-} from 'src/util/subscriptions/storage'
+import { downloadMemexDesktop } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import {
     getListShareUrl,
     getSinglePageShareUrl,
@@ -91,14 +88,13 @@ import {
     convertMemexURLintoTelegramURL,
     getTelegramUserDisplayName,
 } from '@worldbrain/memex-common/lib/telegram/utils'
-import { enforceTrialPeriod30Days } from 'src/util/subscriptions/storage'
+import { enforceTrialPeriod30Days } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import {
     SpacePickerDependencies,
     SpacePickerEvent,
 } from 'src/custom-lists/ui/CollectionPicker/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { sleepPromise } from '@worldbrain/memex-common/lib/common-ui/utils/promises'
-import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { marked } from 'marked'
@@ -107,11 +103,9 @@ import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
-import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import Raven from 'raven-js'
+import { captureException } from 'src/util/raven'
 import analytics from 'src/analytics'
 
 import MarkdownIt from 'markdown-it'
@@ -284,7 +278,7 @@ export class SidebarContainerLogic extends UILogic<
             videoDetails: null,
             summaryModeActiveTab: 'Answer',
             isAutoAddEnabled: null,
-
+            pageAlreadySaved: false,
             showPageLinkShareMenu: false,
             showPageCitationMenu: false,
             isWidthLocked: false,
@@ -340,7 +334,8 @@ export class SidebarContainerLogic extends UILogic<
 
             confirmPrivatizeNoteArgs: null,
             confirmSelectNoteSpaceArgs: null,
-
+            pageMetaDataLoadingState: 'pristine',
+            BySpacesLoadingState: 'pristine',
             showLoginModal: false,
             showDisplayNameSetupModal: false,
             showAnnotationsShareModal: false,
@@ -890,7 +885,12 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             signupDate: { $set: signupDate },
-            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+            isTrial: {
+                $set: await enforceTrialPeriod30Days(
+                    this.options.browserAPIs,
+                    signupDate,
+                ),
+            },
         })
 
         const userReference = await this.options.getCurrentUser()
@@ -961,6 +961,15 @@ export class SidebarContainerLogic extends UILogic<
                 })
             }, 1000)
         }
+
+        const pageAlreadySaved =
+            (await this.options.pageIndexingBG.getPageMetadata({
+                normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+            })) != null
+
+        this.emitMutation({
+            pageAlreadySaved: { $set: pageAlreadySaved },
+        })
 
         const openAIKey = await this.syncSettings.openAI?.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
@@ -1474,6 +1483,49 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isWidthLocked: { $set: false } })
     }
 
+    bookmarkPage: EventHandler<'bookmarkPage'> = async ({ event }) => {
+        this.emitMutation({
+            pageMetaDataLoadingState: { $set: 'running' },
+        })
+        this.options.events.emit('bookmarkPage')
+        let pageAlreadySaved = false
+        let retries = 0
+        const maxRetries = 30
+        while (!pageAlreadySaved && retries < maxRetries) {
+            pageAlreadySaved =
+                (await this.options.pageIndexingBG.getPageMetadata({
+                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+                })) != null
+            await sleepPromise(100)
+        }
+
+        this.emitMutation({
+            pageMetaDataLoadingState: { $set: 'success' },
+            pageAlreadySaved: { $set: pageAlreadySaved },
+        })
+    }
+    openSpacePickerInRibbon: EventHandler<'openSpacePickerInRibbon'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            BySpacesLoadingState: { $set: 'running' },
+        })
+        this.options.events.emit('openSpacePickerInRibbon')
+        let pageAlreadySaved = false
+        let retries = 0
+        const maxRetries = 30
+        while (!pageAlreadySaved && retries < maxRetries) {
+            pageAlreadySaved =
+                (await this.options.customListsBG.fetchPageListEntriesByUrl({
+                    url: normalizeUrl(this.fullPageUrl),
+                })) != null
+            await sleepPromise(100)
+        }
+
+        this.emitMutation({
+            BySpacesLoadingState: { $set: 'success' },
+        })
+    }
     createCheckOutLink: EventHandler<'createCheckOutLink'> = async ({
         event,
     }) => {
@@ -3294,80 +3346,6 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    // saveAIPrompt: EventHandler<'saveAIPrompt'> = async ({
-    //     event,
-    //     previousState,
-    // }) => {
-    //     this.emitMutation({
-    //         showAISuggestionsDropDown: { $set: true },
-    //     })
-    //     let suggestions = this.AIpromptSuggestions
-
-    //     let newSuggestion = { prompt: event.prompt, focused: null }
-
-    //     suggestions.unshift(newSuggestion)
-
-    //     const newSuggestionsToSave = suggestions.map((item) => item.prompt)
-
-    //     await this.syncSettings.openAI.set(
-    //         'promptSuggestions',
-    //         newSuggestionsToSave,
-    //     )
-
-    //     this._updateFocusAISuggestions(-1, suggestions)
-
-    //     this.AIpromptSuggestions = suggestions
-    // }
-
-    // toggleAISuggestionsDropDown: EventHandler<
-    //     'toggleAISuggestionsDropDown'
-    // > = async ({ event, previousState }) => {
-    //     if (previousState.showAISuggestionsDropDown) {
-    //         this._updateFocusAISuggestions(-1, previousState.AIsuggestions)
-    //         this.emitMutation({
-    //             showAISuggestionsDropDown: {
-    //                 $set: false,
-    //             },
-    //         })
-    //         return
-    //     }
-
-    //     const rawSuggestions = await this.syncSettings.openAI.get(
-    //         'promptSuggestions',
-    //     )
-
-    //     let suggestions = []
-
-    //     if (!rawSuggestions) {
-    //         await this.syncSettings.openAI.set(
-    //             'promptSuggestions',
-    //             AI_PROMPT_DEFAULTS,
-    //         )
-
-    //         suggestions = AI_PROMPT_DEFAULTS.map((prompt: string) => {
-    //             return { prompt, focused: null }
-    //         })
-    //     } else {
-    //         suggestions = rawSuggestions.map((prompt: string) => ({
-    //             prompt,
-    //             focused: null,
-    //         }))
-    //     }
-
-    //     this.emitMutation({
-    //         showAISuggestionsDropDown: {
-    //             $set: !previousState.showAISuggestionsDropDown,
-    //         },
-    //     })
-
-    //     if (!previousState.showAISuggestionsDropDown) {
-    //         this.emitMutation({
-    //             AIsuggestions: { $set: suggestions },
-    //         })
-    //     }
-    //     this.AIpromptSuggestions = suggestions
-    // }
-
     private _updateFocusAISuggestions = (
         focusIndex: number | undefined,
         displayEntries?: { prompt: string; focused: boolean }[],
@@ -4015,8 +3993,7 @@ export class SidebarContainerLogic extends UILogic<
             }
             return true
         } catch (err) {
-            console.error('Something went really bad copying:', err.message)
-            Raven.captureException(err)
+            captureException(err)
             return false
         } finally {
             analytics.trackEvent({

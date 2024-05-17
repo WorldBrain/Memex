@@ -1,4 +1,5 @@
-import { checkStripePlan } from 'src/util/subscriptions/storage'
+import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
+
 import {
     PromptTemplatesEvent,
     PromptTemplatesDependencies,
@@ -31,7 +32,10 @@ export default class PromptTemplatesLogic extends UILogic<
 
         const userEmail = (await this.dependencies.authBG.getCurrentUser())
             ?.email
-        const activatedPowerUps = await checkStripePlan(userEmail)
+        const activatedPowerUps = await checkStripePlan(
+            userEmail,
+            this.dependencies.browserAPIs,
+        )
 
         this.emitMutation({
             activatedPowerUps: { $set: activatedPowerUps },
@@ -121,7 +125,10 @@ export default class PromptTemplatesLogic extends UILogic<
             })
             return
         } else if (upgradeResponse === 'success') {
-            const updatedPlans = await checkStripePlan(previousState.userEmail)
+            const updatedPlans = await checkStripePlan(
+                previousState.userEmail,
+                this.dependencies.browserAPIs,
+            )
             this.emitMutation({
                 activatedPowerUps: { $set: updatedPlans },
                 checkoutLoading: { $set: 'success' },

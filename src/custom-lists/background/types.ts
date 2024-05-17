@@ -7,7 +7,7 @@ import type {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { Orderable } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { ListShareResult } from 'src/content-sharing/background/types'
+import type { ListShareResult } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { SuggestionCard } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export interface PageList extends Orderable {

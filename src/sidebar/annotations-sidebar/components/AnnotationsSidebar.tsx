@@ -107,12 +107,11 @@ import {
 } from '@worldbrain/memex-common/lib/summarization/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/index'
-import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
-import browser from 'webextension-polyfill'
+import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/lib/subscriptions/constants'
+import browser, { Browser } from 'webextension-polyfill'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
-import { AIActionAllowed } from 'src/util/subscriptions/storage'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
@@ -300,6 +299,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     inPageMode?: boolean
     authBG: AuthRemoteFunctionsInterface
     analyticsBG: AnalyticsCoreInterface
+    browserAPIs: Browser
     pageIndexingBG: PageIndexingInterface<'caller'>
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
@@ -339,6 +339,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => void
+    bookmarkPage: () => void
+    openSpacePickerInRibbon: () => void
 }
 
 interface AnnotationsSidebarState {
@@ -379,8 +381,6 @@ export class AnnotationsSidebar extends React.Component<
         [annotationUrl: string]: React.RefObject<_AnnotationEditable>
     } = {}
     private sortDropDownButtonRef = React.createRef<HTMLDivElement>()
-    private copyButtonRef = React.createRef<HTMLDivElement>()
-    private pageSummaryText = React.createRef<HTMLDivElement>()
     private autoAddBulkButtonRef = React.createRef<HTMLDivElement>()
     private addSpaceBulkButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
@@ -872,9 +872,9 @@ export class AnnotationsSidebar extends React.Component<
             })
         }
 
-        let listAnnotations: JSX.Element | JSX.Element[]
+        let listAnnotations: JSX.Element[] = []
         if (!annotationsData?.length) {
-            listAnnotations = (
+            listAnnotations = [
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
                         <Icon
@@ -885,12 +885,57 @@ export class AnnotationsSidebar extends React.Component<
                         />
                     </IconBox>
                     <InfoText>
-                        {listData.type === 'page-link'
-                            ? 'Add new notes to this page link by highlighting text, or by adding existing notes to it via the Space selector on each note.'
-                            : 'This page is added to this Space, but has no notes yet.'}
+                        {listData.type === 'page-link' ? (
+                            <span>
+                                <EmptyMessageTitle>
+                                    No notes yet
+                                </EmptyMessageTitle>
+                                Every highlight you create while in this
+                                <br />
+                                view is only added to this Space.
+                            </span>
+                        ) : // 'Add new notes to this page link by highlighting text, or by adding existing notes to it via the Space selector on each note.'
+                        this.props.selectedListId != null ? (
+                            <span>
+                                <EmptyMessageTitle>
+                                    No notes yet in this Space
+                                </EmptyMessageTitle>
+                                Every highlight you create while in this
+                                <br />
+                                view is only added to this Space.
+                                <br />
+                                <br />
+                                Add highlights via the
+                                <Icon
+                                    icon="plus"
+                                    color="prime1"
+                                    heightAndWidth="20px"
+                                    hoverOff
+                                    inline
+                                />{' '}
+                                button the tooltip or annotation card, or by
+                                using [[WikiLinks]] or #hashtags in the note.
+                            </span>
+                        ) : (
+                            <span>
+                                <EmptyMessageTitle>
+                                    No notes yet in this Space
+                                </EmptyMessageTitle>
+                                Add highlights via the
+                                <Icon
+                                    icon="plus"
+                                    color="prime1"
+                                    heightAndWidth="24px"
+                                    hoverOff
+                                    inline
+                                />{' '}
+                                button the tooltip or annotation card, or by
+                                using [[WikiLinks]] or #hashtags in the note.
+                            </span>
+                        )}
                     </InfoText>
-                </EmptyMessageContainer>
-            )
+                </EmptyMessageContainer>,
+            ]
         } else {
             listAnnotations = annotationsData.map((annotation, i) => {
                 const instanceId = generateAnnotationCardInstanceId(
@@ -1184,97 +1229,100 @@ export class AnnotationsSidebar extends React.Component<
                                 !selectedListMode ? unifiedListId : undefined,
                             )}
                         </NewAnnotationBoxMyAnnotations>
-                        <RemoteOrLocalSwitcherContainer>
-                            <PrimaryAction
-                                size={'small'}
-                                active={
-                                    this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ] === 'all' ||
-                                    !this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ]
-                                }
-                                label={
-                                    <SwitcherButtonContent>
-                                        All
-                                        <SwitcherCounter>
-                                            {allCounter}
-                                        </SwitcherCounter>
-                                    </SwitcherButtonContent>
-                                }
-                                type={'tertiary'}
-                                onClick={() => {
-                                    this.setState({
-                                        othersOrOwnAnnotationsState: {
-                                            ...this.state
-                                                .othersOrOwnAnnotationsState,
-                                            [unifiedListId]: 'all',
-                                        },
-                                    })
-                                }}
-                            />
-                            <PrimaryAction
-                                size={'small'}
-                                active={
-                                    this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ] === 'othersAnnotations'
-                                }
-                                label={
-                                    <SwitcherButtonContent>
-                                        Others
-                                        <SwitcherCounter>
-                                            {othersCounter}
-                                        </SwitcherCounter>
-                                    </SwitcherButtonContent>
-                                }
-                                type={'tertiary'}
-                                onClick={() => {
-                                    this.setState({
-                                        othersOrOwnAnnotationsState: {
-                                            ...this.state
-                                                .othersOrOwnAnnotationsState,
-                                            [unifiedListId]:
-                                                'othersAnnotations',
-                                        },
-                                    })
-                                }}
-                            />
-                            <PrimaryAction
-                                size={'small'}
-                                active={
-                                    this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ] === 'ownAnnotations'
-                                }
-                                label={
-                                    <SwitcherButtonContent>
-                                        Yours
-                                        <SwitcherCounter>
-                                            {ownCounter}
-                                        </SwitcherCounter>
-                                    </SwitcherButtonContent>
-                                }
-                                type={'tertiary'}
-                                onClick={() => {
-                                    this.setState({
-                                        othersOrOwnAnnotationsState: {
-                                            ...this.state
-                                                .othersOrOwnAnnotationsState,
-                                            [unifiedListId]: 'ownAnnotations',
-                                        },
-                                    })
-                                }}
-                            />
-                        </RemoteOrLocalSwitcherContainer>
+                        {annotationsData?.length ? (
+                            <RemoteOrLocalSwitcherContainer>
+                                <PrimaryAction
+                                    size={'small'}
+                                    active={
+                                        this.state.othersOrOwnAnnotationsState[
+                                            unifiedListId
+                                        ] === 'all' ||
+                                        !this.state.othersOrOwnAnnotationsState[
+                                            unifiedListId
+                                        ]
+                                    }
+                                    label={
+                                        <SwitcherButtonContent>
+                                            All
+                                            <SwitcherCounter>
+                                                {allCounter}
+                                            </SwitcherCounter>
+                                        </SwitcherButtonContent>
+                                    }
+                                    type={'tertiary'}
+                                    onClick={() => {
+                                        this.setState({
+                                            othersOrOwnAnnotationsState: {
+                                                ...this.state
+                                                    .othersOrOwnAnnotationsState,
+                                                [unifiedListId]: 'all',
+                                            },
+                                        })
+                                    }}
+                                />
+                                <PrimaryAction
+                                    size={'small'}
+                                    active={
+                                        this.state.othersOrOwnAnnotationsState[
+                                            unifiedListId
+                                        ] === 'othersAnnotations'
+                                    }
+                                    label={
+                                        <SwitcherButtonContent>
+                                            Others
+                                            <SwitcherCounter>
+                                                {othersCounter}
+                                            </SwitcherCounter>
+                                        </SwitcherButtonContent>
+                                    }
+                                    type={'tertiary'}
+                                    onClick={() => {
+                                        this.setState({
+                                            othersOrOwnAnnotationsState: {
+                                                ...this.state
+                                                    .othersOrOwnAnnotationsState,
+                                                [unifiedListId]:
+                                                    'othersAnnotations',
+                                            },
+                                        })
+                                    }}
+                                />
+                                <PrimaryAction
+                                    size={'small'}
+                                    active={
+                                        this.state.othersOrOwnAnnotationsState[
+                                            unifiedListId
+                                        ] === 'ownAnnotations'
+                                    }
+                                    label={
+                                        <SwitcherButtonContent>
+                                            Yours
+                                            <SwitcherCounter>
+                                                {ownCounter}
+                                            </SwitcherCounter>
+                                        </SwitcherButtonContent>
+                                    }
+                                    type={'tertiary'}
+                                    onClick={() => {
+                                        this.setState({
+                                            othersOrOwnAnnotationsState: {
+                                                ...this.state
+                                                    .othersOrOwnAnnotationsState,
+                                                [unifiedListId]:
+                                                    'ownAnnotations',
+                                            },
+                                        })
+                                    }}
+                                />
+                            </RemoteOrLocalSwitcherContainer>
+                        ) : null}
                         {this.props.bulkSelectionState?.length > 0 &&
                             this.renderBulkEditBar()}
                     </>
                 )}
                 {listAnnotations}
                 {this.renderAnnotationDropdowns()}
-                <Spacer />
+                <Spacer height={120} />
             </FollowedNotesContainer>
         )
     }
@@ -1519,7 +1567,6 @@ export class AnnotationsSidebar extends React.Component<
                     listData,
                     this.spaceEditBtnRefs[listData.unifiedId],
                 )}
-                <Spacer />
             </FollowedListNotesContainer>
         )
     }
@@ -1618,8 +1665,8 @@ export class AnnotationsSidebar extends React.Component<
                     getRootElement={this.props.getRootElement}
                     defaultOpenTab={
                         this.props.showPageCitationMenu
-                            ? 'CopyToClipboard'
-                            : 'ShareViaLink'
+                            ? 'ShareViaLink'
+                            : 'CopyToClipboard'
                     }
                 />
                 {this.props.renderPageLinkMenuForList()}
@@ -1638,12 +1685,8 @@ export class AnnotationsSidebar extends React.Component<
         const allPageListIds = normalizedStateToArray(lists)
             .filter(
                 (listData) =>
-                    pageListIds.has(listData.unifiedId) &&
-                    (listData.unifiedAnnotationIds?.length > 0 ||
-                        listData.hasRemoteAnnotationsToLoad ||
-                        (listData.type === 'page-link' &&
-                            listData.normalizedPageUrl === normalizedPageUrl) ||
-                        pageActiveListIds.includes(listData.unifiedId)),
+                    pageListIds.has(listData.unifiedId) ||
+                    pageActiveListIds.includes(listData.unifiedId),
             )
             .map((listData) => listData.unifiedId)
         const allAnnotationListIds = normalizedStateToArray(annotations)
@@ -1675,17 +1718,17 @@ export class AnnotationsSidebar extends React.Component<
                     </IconBox>
                     <InfoText>
                         This page is not yet in a Space <br /> you created,
-                        follow or collaborate in. <b /> click on the
-                        <span>
-                            {' '}
-                            <Icon
-                                icon="plus"
-                                heightAndWidth="20px"
-                                hoverOff
-                            />{' '}
-                        </span>
-                        icon on the right
+                        follow or collaborate in.
                     </InfoText>
+                    <PrimaryAction
+                        size={'medium'}
+                        label={'Add page to Space'}
+                        onClick={() => {
+                            this.props.openSpacePickerInRibbon()
+                        }}
+                        icon={'plus'}
+                        type={'forth'}
+                    />
                 </EmptyMessageContainer>
             )
         }
@@ -1960,21 +2003,13 @@ export class AnnotationsSidebar extends React.Component<
                     updateAIChatHistoryState={
                         this.props.updateAIChatHistoryState
                     }
+                    analyticsBG={this.props.analyticsBG}
                     updateEditorContentState={
                         this.props.updateAIChatEditorState
                     }
                     createNewNoteFromAISummary={
                         this.props.createNewNoteFromAISummary
                     }
-                    isAIChatAllowed={async () => {
-                        const isAllowed = await AIActionAllowed(
-                            this.props.analyticsBG,
-                            this.props.hasKey,
-                            false,
-                        )
-
-                        return isAllowed
-                    }}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
                     aiChatStateExternal={{
@@ -1989,7 +2024,7 @@ export class AnnotationsSidebar extends React.Component<
                     signupDate={this.props.signupDate}
                     hasKey={this.props.hasKey}
                     syncSettingsBG={this.props.syncSettingsBG}
-                    browserAPIs={browser}
+                    browserAPIs={this.props.browserAPIs}
                     isKeyValid={this.props.isKeyValid}
                     checkIfKeyValid={this.props.checkIfKeyValid}
                     renderOptionsContainer={() => this.renderOptionsContainer()}
@@ -2162,10 +2197,36 @@ export class AnnotationsSidebar extends React.Component<
 
     renderCitations() {
         return (
-            <PageMetadataForm
-                pageIndexingBG={this.props.pageIndexingBG}
-                fullPageUrl={this.props.fullPageUrl}
-            />
+            <PageMetaDataContainer>
+                <PageMetadataFormTitle>Page Metadata</PageMetadataFormTitle>
+                {this.props.pageMetaDataLoadingState === 'running' ? (
+                    <LoadingBox3>
+                        <LoadingIndicator size={30} />
+                    </LoadingBox3>
+                ) : !this.props.pageAlreadySaved ? (
+                    <PageNotSavedContainer>
+                        <PageNotSavedText>
+                            Save this page to fetch metadata.
+                            <br /> Sorry for the extra step we know it could be
+                            better!
+                        </PageNotSavedText>
+                        <PrimaryAction
+                            size={'medium'}
+                            label={'Save Page'}
+                            onClick={() => {
+                                this.props.bookmarkPage()
+                            }}
+                            icon={'heartEmpty'}
+                            type={'forth'}
+                        />
+                    </PageNotSavedContainer>
+                ) : (
+                    <PageMetadataForm
+                        pageIndexingBG={this.props.pageIndexingBG}
+                        fullPageUrl={this.props.fullPageUrl}
+                    />
+                )}
+            </PageMetaDataContainer>
         )
     }
 
@@ -2263,7 +2324,7 @@ export class AnnotationsSidebar extends React.Component<
                                         this.renderSharedNotesByList()}
                                 </>
                             )}
-                            <Spacer />
+                            <Spacer height={120} />
                         </AnnotationSectionScrollContainer>
                     </AnnotationsSectionStyled>
                 )}
@@ -2615,7 +2676,7 @@ export class AnnotationsSidebar extends React.Component<
                             <AnnotationContainer>
                                 {this.renderAnnotationDropdowns()}
                                 {annots}
-                                <Spacer />
+                                <Spacer height={120} />
                             </AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
@@ -4263,6 +4324,16 @@ const FocusModeNotifTitle = styled.div`
     grid-gap: 5px;
     font-weight: 500;
 `
+const EmptyMessageTitle = styled.div`
+    display: flex;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 10px;
+`
 
 const FocusModeNotifExplainer = styled.div`
     display: flex;
@@ -4591,6 +4662,8 @@ const InfoText = styled.div`
     font-weight: 400;
     text-align: center;
     max-width: 80%;
+    margin-bottom: 10px;
+    line-height: 24px;
 `
 
 const FollowedListNotesContainer = styled(Margin)<{
@@ -5086,6 +5159,14 @@ const LoadingBox2 = styled.div`
     position: absolute;
     right: 25px;
 `
+const LoadingBox3 = styled.div`
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+`
 
 const RightSideContainer = styled.div`
     justify-content: flex-end;
@@ -5168,7 +5249,47 @@ const AutoAddBulkSelection = styled.div`
     color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
 `
-const Spacer = styled.div`
-    min-height: 120px;
+const Spacer = styled.div<{ height?: number }>`
+    min-height: ${(props) => props.height ?? '10'}px;
     width: 120px;
+`
+
+const PageMetaDataContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    width: fill-available;
+    width: -moz-available;
+`
+const PageMetadataFormTitle = styled.div`
+    background: ${(props) => props.theme.colors.headerGradient};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 18px;
+    font-weight: 700;
+    margin-left: 15px;
+    margin-bottom: 5px;
+`
+
+const PageNotSavedContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 5px;
+    grid-gap: 10px;
+`
+const PageNotSavedText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    font-weight: 400;
+    display: flex;
+    align-items: flex-start;
+    grid-gap: 5px;
+    margin-bottom: 10px;
+    padding: 0 5px;
+    width: 100%;
+    box-sizing: border-box;
 `

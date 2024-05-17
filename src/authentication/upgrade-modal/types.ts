@@ -5,25 +5,27 @@ import {
 } from '../../../external/@worldbrain/memex-common/ts/main-ui/classes/logic'
 import { PremiumPlans } from '../../../external/@worldbrain/memex-common/ts/subscriptions/availablePowerups'
 import { AuthRemoteFunctionsInterface } from '../background/types'
+import { Browser } from 'webextension-polyfill'
 
 export interface PromptTemplatesDependencies {
     powerUpType: PowerUpModalVersion
-    limitReachedNotif: PowerUpModalVersion
+    limitReachedNotif?: PowerUpModalVersion
     createCheckOutLink: (
         billingPeriod: 'monthly' | 'yearly',
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => Promise<'error' | 'success'>
-    componentVariant: 'Modal' | 'PricingList' | 'AccountPage'
-    getRootElement: () => HTMLElement
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
+    getRootElement?: () => HTMLElement
     closeComponent?: () => void
     authBG: AuthRemoteFunctionsInterface
+    browserAPIs: Browser
 }
 
 export interface PromptTemplatesState {
     billingPeriod: 'monthly' | 'yearly'
     checkoutLoading: UITaskState
-    componentVariant: 'Modal' | 'PricingList' | 'AccountPage'
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
     powerUpType: PowerUpModalVersion
     activatedPowerUps?: Record<PremiumPlans, any>
     authLoadState: UITaskState

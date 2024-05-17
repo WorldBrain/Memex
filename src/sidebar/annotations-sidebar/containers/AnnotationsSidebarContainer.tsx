@@ -81,6 +81,7 @@ export interface Props extends SidebarContainerOptions {
     highlightColorSettings?: HighlightColor[]
     getRootElement: () => HTMLElement
     inPageMode?: boolean
+    isOpenonDashboard?: boolean
 }
 
 export class AnnotationsSidebarContainer<
@@ -112,7 +113,6 @@ export class AnnotationsSidebarContainer<
                 },
                 imageSupportBG: props.imageSupport,
                 bgScriptBG: props.bgScriptBG,
-                storage: props.storageAPI,
                 pkmSyncBG: props.pkmSyncBG,
                 getRootElement: props.getRootElement,
             }),
@@ -897,6 +897,7 @@ export class AnnotationsSidebarContainer<
                 return 'success'
             }}
             authBG={this.props.authBG}
+            browserAPIs={this.props.browserAPIs}
         />
     )
 
@@ -1107,6 +1108,15 @@ export class AnnotationsSidebarContainer<
                                     chapterIndex,
                                 )
                             }}
+                            bookmarkPage={() => {
+                                this.processEvent('bookmarkPage', null)
+                            }}
+                            openSpacePickerInRibbon={() => {
+                                this.processEvent(
+                                    'openSpacePickerInRibbon',
+                                    null,
+                                )
+                            }}
                             pageIndexingBG={this.props.pageIndexingBG}
                             analyticsBG={this.props.analyticsBG}
                             copyToClipboard={this.props.copyToClipboard}
@@ -1154,6 +1164,7 @@ export class AnnotationsSidebarContainer<
                                     color: color,
                                 })
                             }}
+                            browserAPIs={this.props.browserAPIs}
                             syncSettingsBG={this.props.syncSettingsBG}
                             onGoToAnnotation={async (unifiedAnnotationId) =>
                                 this.processEvent('goToAnnotationInNewTab', {
@@ -1628,6 +1639,9 @@ export class AnnotationsSidebarContainer<
                                         }
                                         contentSharingBG={
                                             this.props.contentSharingBG
+                                        }
+                                        getRootElement={
+                                            this.props.getRootElement
                                         }
                                         spacesBG={this.props.customListsBG}
                                         listData={listData}

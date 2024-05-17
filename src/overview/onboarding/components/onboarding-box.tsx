@@ -27,7 +27,7 @@ const FlexLayout = styled.div`
     height: 100vh;
     align-items: center;
     overflow: hidden;
-    background-color: ${(props) => props.theme.colors.black};
+    background-color: ${(props) => props.theme.colors.black0};
     width: 100vw;
     position: absolute;
 

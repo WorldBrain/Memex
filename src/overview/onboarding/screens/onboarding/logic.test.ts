@@ -22,6 +22,8 @@ async function setupTest(
         navToDashboard: args?.onDashboardNav ?? (() => undefined),
         navToGuidedTutorial: () => undefined,
         contentScriptsBG: backgroundModules.contentScripts.remoteFunctions,
+        bgScriptsBG: backgroundModules.bgScript.remoteFunctions,
+        browserAPIs: null,
     })
 
     const logic = createElement(_logic)

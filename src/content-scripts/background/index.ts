@@ -10,6 +10,7 @@ import type { ContentSharingClientStorage } from 'src/content-sharing/background
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { isUrlSupported } from 'src/page-indexing/utils'
+import { updateTabAISessions } from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
@@ -71,6 +72,8 @@ export class ContentScriptsBackground {
             },
         }
 
+        this.options.browserAPIs.tabs.onRemoved.addListener(this.onTabClosed)
+
         this.options.browserAPIs.webNavigation.onHistoryStateUpdated.addListener(
             async ({ tabId, url }) => {
                 if (isUrlSupported({ fullUrl: url })) {
@@ -78,6 +81,7 @@ export class ContentScriptsBackground {
                         .handleHistoryStateUpdate(tabId)
                         .catch((error) => {}) // Swallow this error as it seems arise in uninteresting situations, creating a lot of noise in sentry
                 }
+                await updateTabAISessions(this.options.browserAPIs, tabId)
             },
         )
 
@@ -94,8 +98,13 @@ export class ContentScriptsBackground {
                         url: changeInfo?.url,
                     })
                 }
+                updateTabAISessions(this.options.browserAPIs, tabId)
             },
         )
+    }
+
+    onTabClosed = (tabId, removeInfo) => {
+        updateTabAISessions(this.options.browserAPIs, tabId)
     }
 
     setupRemoteFunctions() {

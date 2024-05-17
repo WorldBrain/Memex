@@ -138,7 +138,7 @@ function getShortcutHandlers({
             } else {
                 await annotationFunctions.createHighlight(
                     cloneSelectionAsPseudoObject(window.getSelection()),
-                    false,
+                    null,
                 )
             }
 
@@ -154,18 +154,26 @@ function getShortcutHandlers({
                 let executed = false
                 while (!executed) {
                     try {
-                        executed = inPageUI.events.emit('tooltipAction', {
-                            annotationCacheId: null,
-                            selection: window.getSelection(),
-                            openForSpaces: false,
-                        })
+                        executed = inPageUI.events.emit(
+                            'tooltipAction',
+                            {
+                                annotationCacheId: null,
+                                selection: cloneSelectionAsPseudoObject(
+                                    window.getSelection(),
+                                ),
+                                openForSpaces: false,
+                            },
+                            (success) => {
+                                executed = success
+                            },
+                        )
                     } catch (e) {}
                     if (!isToolTipEnabled) {
                         await sleepPromise(200)
                     }
                 }
             }
-            return // This ensures the function returns Promise<void>
+            return
         },
         addToCollection: async () => {
             const isToolTipEnabled = inPageUI.componentsShown.tooltip
@@ -176,11 +184,19 @@ function getShortcutHandlers({
                 let executed = false
                 while (!executed) {
                     try {
-                        executed = inPageUI.events.emit('tooltipAction', {
-                            annotationCacheId: null,
-                            selection: window.getSelection(),
-                            openForSpaces: true,
-                        })
+                        executed = inPageUI.events.emit(
+                            'tooltipAction',
+                            {
+                                annotationCacheId: null,
+                                selection: cloneSelectionAsPseudoObject(
+                                    window.getSelection(),
+                                ),
+                                openForSpaces: true,
+                            },
+                            (success) => {
+                                executed = success
+                            },
+                        )
                     } catch (e) {}
                     if (!isToolTipEnabled) {
                         await sleepPromise(200)

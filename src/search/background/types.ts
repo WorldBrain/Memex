@@ -3,8 +3,14 @@ import type SearchStorage from './storage'
 import type { Annotation } from 'src/annotations/types'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type { Annotation as _Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
-export interface AnnotPage {
+export type SearchResultAnnotation = Annotation & {
+    lists: number[]
+    privacyLevel: AnnotationPrivacyLevels
+}
+
+export interface SearchResultPage {
     url: string
     fullUrl: string | null
     fullPdfUrl?: string
@@ -12,7 +18,7 @@ export interface AnnotPage {
     /** Object URL to the in-memory location of the assoc. fav-icon. */
     favIcon?: string
     displayTime: number
-    annotations: Annotation[]
+    annotations: SearchResultAnnotation[]
     totalAnnotationsCount: number
     pageId?: string
     lists: number[]
@@ -77,7 +83,7 @@ export interface SocialSearchParams extends AnnotSearchParams {
 export interface StandardSearchResponse {
     resultsExhausted: boolean
     totalCount?: number
-    docs: AnnotPage[]
+    docs: SearchResultPage[]
     isBadTerm?: boolean
 }
 
@@ -88,6 +94,13 @@ export interface RemoteSearchInterface {
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
     delPages: PageIndexingBackground['delPages']
+    resolvePdfPageFullUrls: (
+        url: string,
+    ) => Promise<{
+        fullUrl: string
+        fullPdfUrl: string
+        originalLocation: string
+    }>
 }
 
 export type UnifiedSearchParams = TermsSearchOpts & {
@@ -146,7 +159,7 @@ export type UnifiedBlankSearchParams = UnifiedSearchParams &
     }
 
 export type UnifiedSearchResult = {
-    docs: AnnotPage[]
+    docs: SearchResultPage[]
     resultsExhausted: boolean
     oldestResultTimestamp: number
 }
@@ -172,4 +185,9 @@ export type UnifiedSearchPageResultData = {
      * Used for paging back through blank search results (oldest timestamp of batch N is the upper bound for batch N+1)
      */
     oldestTimestamp: number
+}
+
+export type UnifiedSearchLookupData = {
+    pages: Map<string, Omit<SearchResultPage, 'annotations' | 'hasBookmark'>>
+    annotations: Map<string, SearchResultAnnotation>
 }

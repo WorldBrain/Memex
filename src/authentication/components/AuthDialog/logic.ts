@@ -5,6 +5,7 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event, AuthDialogMode } from './types'
 import type { EmailPasswordCredentials } from 'src/authentication/background/types'
+import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -139,6 +140,10 @@ export default class Logic extends UILogic<State, Event> {
                     return
                 } else {
                     this.dependencies.onAuth?.({ reason: 'login' })
+                    await checkStripePlan(
+                        credentials.email,
+                        this.dependencies.browserAPIs,
+                    )
                 }
             }
         })
@@ -155,6 +160,9 @@ export default class Logic extends UILogic<State, Event> {
             this.emitMutation({ error: { $set: result.reason } })
         } else {
             this.dependencies.onAuth?.({ reason: 'login' })
+            const currentUser = await this.dependencies.authBG.getCurrentUser()
+            const email = currentUser.email
+            await checkStripePlan(email, this.dependencies.browserAPIs)
         }
     }
 }

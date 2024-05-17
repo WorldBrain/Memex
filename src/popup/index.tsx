@@ -13,6 +13,8 @@ import Popup from './container'
 import configureStore from './store'
 import { setupRpcConnection } from 'src/util/webextensionRPC'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { EventEmitter } from 'events'
 
 interface RootProps {
     store: ReturnType<typeof configureStore>

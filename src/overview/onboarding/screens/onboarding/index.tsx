@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled, { keyframes, css } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
@@ -17,6 +17,8 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 import Checkbox from 'src/common-ui/components/Checkbox'
+import UpgradeModal from 'src/authentication/upgrade-modal'
+import Browser from 'webextension-polyfill'
 
 export interface Props extends Dependencies {}
 
@@ -33,9 +35,12 @@ export default class OnboardingScreen extends StatefulUIElement<
         | 'navToGuidedTutorial'
         | 'contentScriptsBG'
         | 'analyticsBG'
+        | 'bgScriptsBG'
+        | 'browserAPIs'
     > = {
         authBG: runInBackground(),
         personalCloudBG: runInBackground(),
+        bgScriptsBG: runInBackground(),
         contentScriptsBG: runInBackground(),
         navToDashboard: () => {
             window.location.href = OVERVIEW_URL
@@ -45,6 +50,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             window.open(GUIDED_ONBOARDING_URL)
         },
         analyticsBG: runInBackground(),
+        browserAPIs: Browser,
     }
 
     constructor(props: Props) {
@@ -189,6 +195,65 @@ export default class OnboardingScreen extends StatefulUIElement<
             // )} */}
         </WelcomeBox>
     )
+    private renderPricingStep = () => (
+        <>
+            <WelcomeBox scale={this.state.scaleView}>
+                <Title>Pricing</Title>
+                <DescriptionText>
+                    Upgrade before your trial runs out in 30 days to{' '}
+                    <HighlightedText>get a 20% discount</HighlightedText>
+                </DescriptionText>
+                <UpgradeModalContainer>
+                    <UpgradeModal
+                        componentVariant="OnboardingStep"
+                        authBG={this.props.authBG}
+                        powerUpType="Bookmarks"
+                        createCheckOutLink={
+                            this.props.bgScriptsBG.createCheckoutLink
+                        }
+                        browserAPIs={this.props.browserAPIs}
+                    />
+                </UpgradeModalContainer>
+
+                {/* {this.state.hoveredOverOnboardingIcon ? ( */}
+
+                {/* // ) : (
+            //     <>
+            //         <MemexActionButtonIntro
+            //             onMouseEnter={() => {
+            //                 this.processEvent('hoverOverOnboardingIcon', null)
+            //             }}
+            //             src={'img/memexActionButtonIntro.svg'}
+            //         />
+            //         <ContinueButtonNotif>
+            //             Hover over the icon here to continue{' '}
+            //             <ContinueIcon>
+            //                 <Icon
+            //                     icon={'longArrowRight'}
+            //                     hoverOff
+            //                     heightAndWidth="24px"
+            //                     color="prime1"
+            //                 />
+            //             </ContinueIcon>
+            //         </ContinueButtonNotif>
+            //     </>
+            // )} */}
+            </WelcomeBox>
+            <ContinueButton>
+                <PrimaryAction
+                    label={'Continue'}
+                    icon={'longArrowRight'}
+                    onClick={() =>
+                        this.processEvent('goToNextOnboardingStep', {
+                            step: 'basicIntro',
+                        })
+                    }
+                    type="primary"
+                    size={'large'}
+                />
+            </ContinueButton>
+        </>
+    )
     private renderOnboardingOptions = () => (
         <WelcomeBox>
             <Title>Try it on real examples</Title>
@@ -327,6 +392,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     mode,
                                 })
                             }}
+                            browserAPIs={this.props.browserAPIs}
                         />
                     </>
                 </ContentBox>
@@ -338,158 +404,6 @@ export default class OnboardingScreen extends StatefulUIElement<
             )}
         </WelcomeContainer>
     )
-
-    private renderOnboardingSelection = () => {
-        const OnboardingTitles = [
-            'Interactive Tutorial',
-            'Watch a Video',
-            'Read Docs',
-            '15min Call',
-        ]
-        const OnboardingIcons = ['cursor', 'play', 'filePDF', 'peopleFine']
-
-        return (
-            <OnboardingOptionsContainer>
-                <Title>If you want </Title>
-                <DescriptionText>Don't forget the spam folder!</DescriptionText>
-                {this.state.showOnboardingVideo ? (
-                    <>
-                        {' '}
-                        {this.renderOnboardingVideo()}
-                        <PrimaryAction
-                            label="Go Back"
-                            onClick={() =>
-                                this.processEvent('showOnboardingVideo', null)
-                            }
-                            size="medium"
-                            type="tertiary"
-                            icon={'arrowLeft'}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <OnboardingContainer>
-                            <OnboardingOptionBox
-                                onClick={async () => {
-                                    this.props.navToGuidedTutorial()
-
-                                    if (this.props.analyticsBG) {
-                                        try {
-                                            await trackOnboardingPath(
-                                                this.props.analyticsBG,
-                                                {
-                                                    type: 'interactive',
-                                                },
-                                            )
-                                        } catch (error) {
-                                            console.error(
-                                                `Error tracking onboarding tutorial', ${error}`,
-                                            )
-                                        }
-                                    }
-                                }}
-                            >
-                                <RecommendedPill>Recommended</RecommendedPill>
-                                <OnboardingTitle>
-                                    Interactive Tutorial
-                                </OnboardingTitle>
-                                <Icon
-                                    icon={OnboardingIcons[0]}
-                                    heightAndWidth="40px"
-                                    color="prime1"
-                                    hoverOff
-                                />
-                            </OnboardingOptionBox>
-                            <OnboardingOptionBox
-                                onClick={async () => {
-                                    this.processEvent(
-                                        'showOnboardingVideo',
-                                        null,
-                                    )
-                                    if (this.props.analyticsBG) {
-                                        try {
-                                            await trackOnboardingPath(
-                                                this.props.analyticsBG,
-                                                {
-                                                    type: 'video',
-                                                },
-                                            )
-                                        } catch (error) {
-                                            console.error(
-                                                `Error tracking onboarding tutorial', ${error}`,
-                                            )
-                                        }
-                                    }
-                                }}
-                            >
-                                <OnboardingTitle>Watch a Video</OnboardingTitle>
-                                <Icon
-                                    icon={OnboardingIcons[1]}
-                                    heightAndWidth="40px"
-                                    color="prime1"
-                                    hoverOff
-                                />
-                            </OnboardingOptionBox>
-                            <OnboardingOptionBox
-                                onClick={async () => {
-                                    window.open(
-                                        'https://calendly.com/worldbrain/memex-onboarding-call',
-                                        '_blank',
-                                    )
-                                    if (this.props.analyticsBG) {
-                                        try {
-                                            await trackOnboardingPath(
-                                                this.props.analyticsBG,
-                                                {
-                                                    type: 'onboardingCall',
-                                                },
-                                            )
-                                        } catch (error) {
-                                            console.error(
-                                                `Error tracking onboarding tutorial', ${error}`,
-                                            )
-                                        }
-                                    }
-                                }}
-                            >
-                                <OnboardingTitle>15min Call</OnboardingTitle>
-                                <Icon
-                                    icon={OnboardingIcons[3]}
-                                    heightAndWidth="40px"
-                                    color="prime1"
-                                    hoverOff
-                                />
-                            </OnboardingOptionBox>
-                        </OnboardingContainer>
-                        <PrimaryAction
-                            type="tertiary"
-                            label="I'll just start by playing around"
-                            onClick={async () => {
-                                this.props.navToDashboard()
-                                if (this.props.analyticsBG) {
-                                    try {
-                                        await trackOnboardingPath(
-                                            this.props.analyticsBG,
-                                            {
-                                                type: 'skip',
-                                            },
-                                        )
-                                    } catch (error) {
-                                        console.error(
-                                            `Error tracking onboarding tutorial', ${error}`,
-                                        )
-                                    }
-                                }
-                            }}
-                            size="large"
-                            icon={'arrowRight'}
-                            iconPosition="right"
-                        />
-                    </>
-                )}
-            </OnboardingOptionsContainer>
-        )
-    }
 
     private renderOnboardingVideo = () => {
         return (
@@ -508,6 +422,8 @@ export default class OnboardingScreen extends StatefulUIElement<
         return (
             <OnboardingBox>
                 <OnboardingContent>
+                    {this.state.welcomeStep === 'pricingStep' &&
+                        this.renderPricingStep()}
                     {this.state.welcomeStep === 'basicIntro' &&
                         this.renderBasicIntro()}
                     {this.state.welcomeStep === 'ChooseOnboardingOption' &&
@@ -525,6 +441,18 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 }
+
+const UpgradeModalContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    max-width: 800px;
+    width: 60%;
+    min-width: 800px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    border-radius: 10px;
+`
 
 const OptionsBox = styled.div`
     display: flex;
@@ -637,15 +565,6 @@ const TitleBox = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-`
-
-const WelcomeBox = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
 `
 
 const BetaButton = styled.div`
@@ -823,9 +742,9 @@ const Title = styled.div`
 
 const DescriptionText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 300;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
     text-align: center;
 `
 
@@ -946,4 +865,35 @@ const VideoIntro = styled.iframe`
     border-radius: 10px;
     width: 800px;
     height: 450px;
+`
+
+const HighlightedText = styled.span`
+    color: ${(props) => props.theme.colors.prime1};
+    font-weight: 600;
+    display: inline;
+`
+const WelcomeBox = styled.div<{
+    scale?: number
+}>`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+
+    ${(props) =>
+        props.scale != null &&
+        css`
+            ${UpgradeModalContainer} {
+                scale: ${props.scale};
+            }
+            ${Title} {
+                scale: ${props.scale - 0.1};
+            }
+            ${DescriptionText} {
+                scale: ${props.scale - 0.1};
+            }
+        `}
 `

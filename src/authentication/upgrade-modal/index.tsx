@@ -12,6 +12,7 @@ import { UIElement } from 'ui-logic-react'
 import Icon from '../../../external/@worldbrain/memex-common/ts/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { DEFAULT_POWERUP_LIMITS } from '@worldbrain/memex-common/lib/subscriptions/constants'
 
 export default class UpgradeModal extends UIElement<
     PromptTemplatesDependencies,
@@ -51,7 +52,8 @@ export default class UpgradeModal extends UIElement<
                 {this.props.limitReachedNotif === 'AI' && (
                     <UpgradeOverlayTextContainer>
                         <UpgradeOverlayText>
-                            You reached the monthly limit of 25 AI queries
+                            You reached the monthly limit of $
+                            {DEFAULT_POWERUP_LIMITS.AIpowerup} AI sessions
                         </UpgradeOverlayText>
                         <UpgradeOverlaySubText>
                             Add the AI powerup to continue using the AI features
@@ -145,11 +147,26 @@ export default class UpgradeModal extends UIElement<
                             {powerUp.powerUps.pro.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>
-                        {this.state.billingPeriod === 'monthly'
-                            ? powerUp.powerUps.pro.pricing['monthly']
-                            : powerUp.powerUps.pro.pricing['yearly']}
-                    </PowerUpPricing>
+                    <PowerUpPricingBox>
+                        <PowerUpPricing
+                            componentVariant={this.props.componentVariant}
+                        >
+                            {this.state.billingPeriod === 'monthly'
+                                ? powerUp.powerUps.pro.pricing['monthly']
+                                : powerUp.powerUps.pro.pricing['yearly']}
+                        </PowerUpPricing>
+                        {this.props.componentVariant === 'OnboardingStep' && (
+                            <AlternativePricing>
+                                {this.state.billingPeriod === 'monthly'
+                                    ? powerUp.powerUps.pro.pricingDiscounted[
+                                          'monthly'
+                                      ]
+                                    : powerUp.powerUps.pro.pricingDiscounted[
+                                          'yearly'
+                                      ]}
+                            </AlternativePricing>
+                        )}
+                    </PowerUpPricingBox>
                 </PowerUpItem>
                 <PowerUpItem
                     onClick={() => {
@@ -178,11 +195,26 @@ export default class UpgradeModal extends UIElement<
                             {powerUp.powerUps.ownKey.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>
-                        {this.state.billingPeriod === 'monthly'
-                            ? powerUp.powerUps.ownKey.pricing['monthly']
-                            : powerUp.powerUps.ownKey.pricing['yearly']}
-                    </PowerUpPricing>
+                    <PowerUpPricingBox>
+                        <PowerUpPricing
+                            componentVariant={this.props.componentVariant}
+                        >
+                            {this.state.billingPeriod === 'monthly'
+                                ? powerUp.powerUps.ownKey.pricing['monthly']
+                                : powerUp.powerUps.ownKey.pricing['yearly']}
+                        </PowerUpPricing>
+                        {this.props.componentVariant === 'OnboardingStep' && (
+                            <AlternativePricing>
+                                {this.state.billingPeriod === 'monthly'
+                                    ? powerUp.powerUps.ownKey.pricingDiscounted[
+                                          'monthly'
+                                      ]
+                                    : powerUp.powerUps.ownKey.pricingDiscounted[
+                                          'yearly'
+                                      ]}
+                            </AlternativePricing>
+                        )}
+                    </PowerUpPricingBox>
                 </PowerUpItem>
             </PowerUpOptions>
         )
@@ -208,7 +240,9 @@ export default class UpgradeModal extends UIElement<
                 {this.props.limitReachedNotif === 'Bookmarks' && (
                     <UpgradeOverlayTextContainer>
                         <UpgradeOverlayText>
-                            You reached the monthly limit of 25 saved pages
+                            You reached the monthly limit of $
+                            {DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} saved
+                            pages
                         </UpgradeOverlayText>
                         <UpgradeOverlaySubText>
                             Add the bookmarking powerup to continue saving,
@@ -293,11 +327,26 @@ export default class UpgradeModal extends UIElement<
                             {powerUp.powerUps.pro.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>
-                        {this.state.billingPeriod === 'monthly'
-                            ? powerUp.powerUps.pro.pricing['monthly']
-                            : powerUp.powerUps.pro.pricing['yearly']}
-                    </PowerUpPricing>
+                    <PowerUpPricingBox>
+                        <PowerUpPricing
+                            componentVariant={this.props.componentVariant}
+                        >
+                            {this.state.billingPeriod === 'monthly'
+                                ? powerUp.powerUps.pro.pricing['monthly']
+                                : powerUp.powerUps.pro.pricing['yearly']}
+                        </PowerUpPricing>
+                        {this.props.componentVariant === 'OnboardingStep' && (
+                            <AlternativePricing>
+                                {this.state.billingPeriod === 'monthly'
+                                    ? powerUp.powerUps.pro.pricingDiscounted[
+                                          'monthly'
+                                      ]
+                                    : powerUp.powerUps.pro.pricingDiscounted[
+                                          'yearly'
+                                      ]}
+                            </AlternativePricing>
+                        )}
+                    </PowerUpPricingBox>
                 </PowerUpItem>
             </PowerUpOptions>
         )
@@ -352,7 +401,16 @@ export default class UpgradeModal extends UIElement<
                             Upgrade now and never pay for Memex again
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>$500</PowerUpPricing>
+                    <PowerUpPricingBox>
+                        <PowerUpPricing
+                            componentVariant={this.props.componentVariant}
+                        >
+                            $500
+                        </PowerUpPricing>
+                        {this.props.componentVariant === 'OnboardingStep' && (
+                            <AlternativePricing>$400</AlternativePricing>
+                        )}
+                    </PowerUpPricingBox>
                 </PowerUpItem>
             </PowerUpOptions>
         )
@@ -467,8 +525,7 @@ const Powerups = [
         powerUps: {
             basic: {
                 title: 'Basic',
-                subTitle:
-                    '25 uniquely new pages per month. Every page saved, annotated or added to a Space counts once, forever.',
+                subTitle: `${DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} uniquely new pages per month. Every page saved, annotated or added to a Space counts once, forever.`,
                 pricing: 'Free',
             },
             pro: {
@@ -477,6 +534,10 @@ const Powerups = [
                 pricing: {
                     monthly: '$4',
                     yearly: '$40',
+                },
+                pricingDiscounted: {
+                    monthly: '$3.20',
+                    yearly: '$32',
                 },
             },
         },
@@ -488,26 +549,33 @@ const Powerups = [
         powerUps: {
             basic: {
                 title: 'Basic',
-                subTitle:
-                    '25 queries per month with Claude-3-Haiku and GPT-3.5-Turbo',
+                subTitle: `${DEFAULT_POWERUP_LIMITS.AIpowerup} page sessions per month with Claude-3-Haiku and GPT-3.5-Turbo`,
                 pricing: 'Free',
             },
             pro: {
                 title: 'Pro',
                 subTitle:
-                    'Unlimited queries with Claude-3-Haiku and GPT-3.5-Turbo, and GPT-4 with own key',
+                    'Unlimited sessions with Claude-3-Haiku and GPT-3.5-Turbo, and GPT-4 with own key',
                 pricing: {
                     monthly: '$6',
                     yearly: '$60',
+                },
+                pricingDiscounted: {
+                    monthly: '$4.80',
+                    yearly: '$48',
                 },
             },
             ownKey: {
                 title: 'Bring your own Key',
                 subTitle:
-                    'Unlimited queries with GPT-3.5 and GPT-4, at your own cost of the OpenAI API.',
+                    'Unlimited sessions with GPT-3.5 and GPT-4, at your own cost of the OpenAI API.',
                 pricing: {
                     monthly: '$2.50',
                     yearly: '$25',
+                },
+                pricingDiscounted: {
+                    monthly: '$2.00',
+                    yearly: '$20',
                 },
             },
         },
@@ -625,7 +693,35 @@ const PowerUpSubTitle = styled.div`
     width: 100%;
     font-size: 13px;
 `
-const PowerUpPricing = styled.div`
+
+const PowerUpPricingBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    grid-gap: 3px;
+    align-items: flex-end;
+`
+
+const PowerUpPricing = styled.div<{
+    componentVariant?: string
+}>`
+    color: ${(props) => props.theme.colors.prime1};
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: right;
+
+    ${(props) =>
+        props.componentVariant === 'OnboardingStep' &&
+        css`
+            text-decoration: line-through;
+            color: ${(props) => props.theme.colors.greyScale5};
+            font-size: 15px;
+        `}
+`
+const AlternativePricing = styled.div<{
+    componentVariant?: string
+}>`
     color: ${(props) => props.theme.colors.prime1};
     font-size: 18px;
     font-weight: 700;

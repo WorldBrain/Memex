@@ -99,10 +99,6 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
                     operation: 'createObject',
                 },
-                createListTree: {
-                    collection: CustomListStorage.LIST_TREES_COLL,
-                    operation: 'createObject',
-                },
                 countListEntries: {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'countObjects',
@@ -920,11 +916,7 @@ export default class CustomListStorage extends StorageModule {
                     await trackSpaceEntryCreate(analyticsBG, {
                         type: isShared ? 'shared' : 'private',
                     })
-                } catch (error) {
-                    console.error(
-                        `Error tracking space Entry create event', ${error}`,
-                    )
-                }
+                } catch (error) {}
             }
 
             if (isPkmSyncEnabled({ storageAPI: this.options.___storageAPI })) {

@@ -15,7 +15,7 @@ import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import Checkbox from 'src/common-ui/components/Checkbox'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
-import { downloadMemexDesktop } from 'src/util/subscriptions/storage'
+import { downloadMemexDesktop } from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 const localStyles = require('./Import.css')
 

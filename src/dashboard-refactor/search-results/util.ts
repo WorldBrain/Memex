@@ -1,7 +1,8 @@
 import type {
     StandardSearchResponse,
-    AnnotPage,
+    SearchResultPage,
     UnifiedSearchPaginationParams,
+    SearchResultAnnotation,
 } from 'src/search/background/types'
 import type {
     PageData,
@@ -26,6 +27,7 @@ import type {
     PageAnnotationsCacheInterface,
     RGBAColor,
 } from 'src/annotations/cache/types'
+import { getAnnotationPrivacyState } from 'src/content-sharing/utils'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -109,7 +111,7 @@ export const getInitialPageResultState = (
     pageResultId,
     notesType: 'user',
     activePage: undefined,
-    areNotesShown: false,
+    areNotesShown: true,
     isTagPickerShown: false,
     isShareMenuShown: false,
     isCopyPasterShown: false,
@@ -138,7 +140,7 @@ export const getInitialNoteResultState = (
 })
 
 const pageResultToPageData = (
-    pageResult: AnnotPage,
+    pageResult: SearchResultPage,
     cache: PageAnnotationsCacheInterface,
 ): PageData => {
     const isPdf = isMemexPageAPdf(pageResult)
@@ -162,7 +164,7 @@ const pageResultToPageData = (
 }
 
 const annotationToNoteData = (
-    annotation: Annotation,
+    annotation: SearchResultAnnotation,
     cache: PageAnnotationsCacheInterface,
 ): NoteData & NoteResult => {
     const lists =
@@ -171,6 +173,7 @@ const annotationToNoteData = (
                 (localListId) => cache.getListByLocalId(localListId)?.unifiedId,
             )
             .filter((id) => id != null) ?? []
+    const privacyState = getAnnotationPrivacyState(annotation.privacyLevel)
     return {
         url: annotation.url,
         pageUrl: annotation.pageUrl,
@@ -185,8 +188,8 @@ const annotationToNoteData = (
             annotation.lastEdited ?? annotation.createdWhen,
         ).getTime(),
         isEdited: annotation.lastEdited != null,
-        isShared: annotation.isShared,
-        isBulkShareProtected: !!annotation.isBulkShareProtected,
+        isShared: privacyState.public,
+        isBulkShareProtected: privacyState.protected,
         ...getInitialNoteResultState(),
         editNoteForm: {
             inputValue: annotation.comment ?? '',

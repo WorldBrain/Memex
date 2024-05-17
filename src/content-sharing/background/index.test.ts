@@ -115,7 +115,7 @@ async function setupTest(options: {
         const listShareResult = await contentSharing.scheduleListShare({
             localListId: testData.localListId,
         })
-        await contentSharing.waitForListShare({
+        await contentSharing.waitForListShareSideEffects({
             localListId: testData.localListId,
         })
         testData.remoteListId = listShareResult.remoteListId

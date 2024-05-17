@@ -70,11 +70,12 @@ import {
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import MarkdownIt from 'markdown-it'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import Raven from 'raven-js'
+import { captureException } from 'src/util/raven'
 import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import type { UnifiedSearchResult } from 'src/search/background/types'
 import { BulkEditCollection } from 'src/bulk-edit/types'
+import checkBrowser from 'src/util/check-browser'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -140,12 +141,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     private setupRemoteEventListeners() {
         this.personalCloudEvents = getRemoteEventEmitter('personalCloud')
         this.personalCloudEvents.on('cloudStatsUpdated', async ({ stats }) => {
-            const dateNow = Date.now()
             this.emitMutation({
                 syncMenu: {
-                    pendingLocalChangeCount: { $set: stats.pendingUploads },
+                    pendingLocalChangeCount: {
+                        $set: stats.pendingUploads ?? null,
+                    },
                     // TODO: re-implement pending download count
-                    // pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                    pendingRemoteChangeCount: {
+                        $set: stats.pendingDownloads ?? null,
+                    },
                 },
             })
 
@@ -162,9 +166,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         this.personalCloudEvents.on('downloadStarted', () => {
-            this.emitMutation({
-                syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
-            })
+            // this.emitMutation({
+            //     syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+            // })
             this.toggleSyncDownloadActive()
         })
         // this.personalCloudEvents.on('downloadStopped', () => {
@@ -180,16 +184,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         //     'downloadStopped',
         //     this.toggleSyncDownloadActive,
         // )
-        this.emitMutation({
-            syncMenu: {
-                pendingLocalChangeCount: {
-                    $set: 0,
-                },
-                pendingRemoteChangeCount: {
-                    $set: 0,
-                },
-            },
-        })
     }
 
     getInitialState(): State {
@@ -383,24 +377,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.observeBlurContainer()
             }
             await this.initThemeVariant()
-
-            this.emitMutation({
-                listsSidebar: { listLoadState: { $set: 'running' } },
-                loadState: { $set: 'running' },
-            })
-
-            /// Sometimes the service worker is not ready yet, causing the user to stay null, leading to downstream issues with the sync and other parts
-            const maxRetriesForUser = 20
-            let retries = 1
-            let user = await authBG.getCurrentUser()
-            while (user == null && retries < maxRetriesForUser) {
-                const waitTime = retries * 20 // increasingly more wait time
-                await new Promise((resolve) => setTimeout(resolve, waitTime))
-                user = await authBG.getCurrentUser()
-                retries++
-            }
-            //////
-
+            const user = await authBG.getCurrentUser()
             setSentryUserContext(user)
             this.emitMutation({
                 currentUser: { $set: user },
@@ -457,9 +434,14 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
+            await this.getDownloadStats()
             if (user) {
-                this.processUIEvent('syncNow', { previousState, event: null })
+                this.processUIEvent('syncNow', {
+                    previousState,
+                    event: { preventUpdateStats: true },
+                })
             }
+
             const syncSettings = createSyncSettingsStore<'highlightColors'>({
                 syncSettingsBG: this.options.syncSettingsBG,
             })
@@ -499,6 +481,25 @@ export class DashboardLogic extends UILogic<State, Events> {
     //  A rough test got me delays of 1-8s between docs created at roughly the same time, which is why the 8s wait was chosen.
 
     private downloadStoppedTimeout: any | null = null
+
+    getDownloadStats = async () => {
+        const pendingDownloads = await this.options.personalCloudBG.countPendingSyncDownloads()
+        this.emitMutation({
+            syncMenu: {
+                pendingRemoteChangeCount: { $set: pendingDownloads },
+            },
+        })
+        if (pendingDownloads === 0) {
+            const dateNow = Date.now()
+            this.emitMutation({
+                syncMenu: {
+                    lastSuccessfulSyncDate: {
+                        $set: new Date(dateNow),
+                    },
+                },
+            })
+        }
+    }
 
     private toggleSyncDownloadActive = () => {
         // Clear any existing timeout to reset the debounce timer
@@ -1437,17 +1438,41 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
-    setShowLoginModal: EventHandler<'setShowLoginModal'> = ({ event }) => {
+    setShowLoginModal: EventHandler<'setShowLoginModal'> = async ({
+        event,
+    }) => {
+        const isNotFirefox = checkBrowser() !== 'firefox'
+
+        if (isNotFirefox) {
+            const isStaging = process.env.NODE_ENV === 'development'
+
+            let url = ''
+
+            if (isStaging) {
+                url = 'https://staging.memex.social/auth'
+            } else {
+                url = 'https://memex.social/auth'
+            }
+
+            window.open(url, '_blank')
+        } else {
+            this.emitMutation({
+                modals: {
+                    showLogin: { $set: event.isShown },
+                },
+            })
+        }
+    }
+    syncNow: EventHandler<'syncNow'> = async ({ event }) => {
         this.emitMutation({
-            modals: {
-                showLogin: { $set: event.isShown },
+            syncMenu: {
+                pendingLocalChangeCount: { $set: null },
+                pendingRemoteChangeCount: { $set: null },
             },
         })
-    }
-    syncNow: EventHandler<'syncNow'> = ({ event }) => {
-        this.emitMutation({
-            syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
-        })
+        if (!event.preventUpdateStats) {
+            await this.getDownloadStats()
+        }
         this.options.personalCloudBG.invokeSyncDownload()
     }
 
@@ -2156,8 +2181,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
             }
         } catch (err) {
-            console.error('Something went really bad copying:', err.message)
-            Raven.captureException(err)
+            captureException(err)
             return false
         } finally {
             analytics.trackEvent({
@@ -4729,18 +4753,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const pageData =
-            previousState?.searchResults?.pageData?.byId[event.pageResultId]
+        const id = event.pageResultId.split('-')[1]
+
+        const pageData = previousState?.searchResults?.pageData?.byId[id]
 
         if (!pageData) {
             return
         }
 
-        if (pageData?.fullPdfUrl) {
+        if (pageData?.fullUrl.includes('memex.cloud/')) {
             // This event will be assigned to an anchor <a> el, so we need to override that for PDFs
             event.synthEvent.preventDefault()
 
-            const memexCloudUrl = new URL(pageData?.fullPdfUrl!)
+            const pdfUrl = pageData.fullUrl
+            const PDFurlwithID = await this.options.searchBG.resolvePdfPageFullUrls(
+                pdfUrl,
+            )
+
+            const memexCloudUrl = new URL(PDFurlwithID.originalLocation)
             const uploadId = memexCloudUrl?.searchParams.get('upload_id')
 
             // Uploaded PDFs need to have temporary access URLs fetched
@@ -4759,7 +4789,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         searchResults: {
                             pageData: {
                                 byId: {
-                                    [event.pageResultId]: {
+                                    [id]: {
                                         uploadedPdfLinkLoadState: {
                                             $set: taskState,
                                         },
@@ -4807,15 +4837,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({ showDropArea: { $set: true } })
             }
 
-            await openPDFInViewer(pageData.fullPdfUrl!, {
+            await openPDFInViewer(PDFurlwithID.originalLocation, {
                 tabsAPI: this.options.tabsAPI,
                 runtimeAPI: this.options.runtimeAPI,
             })
         }
 
-        if (pageData?.fullUrl && !pageData?.fullPdfUrl) {
-            window.open(pageData.fullUrl, '_blank')
-        }
+        // if (pageData?.fullUrl && !pageData?.fullUrl) {
+        //     window.open(pageData.fullUrl, '_blank')
+        // }
     }
 
     dropPdfFile: EventHandler<'dropPdfFile'> = async ({ event }) => {

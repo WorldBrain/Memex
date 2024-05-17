@@ -49,6 +49,7 @@ export default class Logic extends UILogic<State, Event> {
         welcomeStep: 'login',
         enableNudges: true,
         hoveredOverOnboardingIcon: false,
+        scaleView: 1,
     })
 
     async init() {
@@ -80,6 +81,16 @@ export default class Logic extends UILogic<State, Event> {
                     this.isExistingUser = true
                     await this._onUserLogIn(false)
                 }
+            })
+        }
+        if (document.body.clientWidth < 1000) {
+            this.emitMutation({
+                scaleView: { $set: 0.9 },
+            })
+        }
+        if (document.body.clientWidth < 1200) {
+            this.emitMutation({
+                scaleView: { $set: 0.95 },
             })
         }
     }
@@ -194,7 +205,7 @@ export default class Logic extends UILogic<State, Event> {
                 window.close()
             } else {
                 this.emitMutation({
-                    welcomeStep: { $set: 'basicIntro' },
+                    welcomeStep: { $set: 'pricingStep' },
                 })
                 // // check if user has been coming from Google or Twitter login & if they account creation was in the last 10s
                 // if (!newSignUp) {
@@ -279,7 +290,7 @@ export default class Logic extends UILogic<State, Event> {
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
         this.emitMutation({
-            welcomeStep: { $set: 'basicIntro' },
+            welcomeStep: { $set: 'pricingStep' },
         })
         // this.emitMutation({
         //     loadState: { $set: 'running' },

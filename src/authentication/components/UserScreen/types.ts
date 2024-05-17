@@ -4,12 +4,14 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { Browser } from 'webextension-polyfill'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
     personalCloudBG: PersonalCloudRemoteInterface
     navToDashboard: () => void
     navToGuidedTutorial: () => void
+    browserAPIs: Browser
 }
 
 export interface State {

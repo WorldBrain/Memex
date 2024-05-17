@@ -5,7 +5,8 @@ import { InPageUIInterface } from './types'
 import { InPageUIContentScriptRemoteInterface } from '../content_script/types'
 // import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { OVERVIEW_URL } from 'src/constants'
-import { checkStripePlan } from 'src/util/subscriptions/storage'
+import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
+
 import { blobToDataURL } from 'src/util/blob-utils'
 
 export const CONTEXT_MENU_ID_PREFIX = '@memexContextMenu:'
@@ -112,7 +113,7 @@ export class InPageUIBackground {
         await this.options.tabsAPI.create({ url: OVERVIEW_URL })
     }
     async checkStripePlan(email: string) {
-        await checkStripePlan(email)
+        await checkStripePlan(email, this.options.browserAPIs)
     }
     async getCurrentTabURL() {
         const tabs = await this.options.tabsAPI.query({

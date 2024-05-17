@@ -5,6 +5,8 @@ import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background
 import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
+import { Browser } from 'webextension-polyfill'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -13,6 +15,8 @@ export interface Dependencies {
     navToGuidedTutorial: () => void
     contentScriptsBG: ContentScriptsInterface<'caller'>
     analyticsBG?: AnalyticsCoreInterface
+    bgScriptsBG: RemoteBGScriptInterface
+    browserAPIs: Browser
 }
 
 export interface State {
@@ -36,6 +40,7 @@ export interface State {
     welcomeStep: string
     enableNudges: boolean
     hoveredOverOnboardingIcon: boolean
+    scaleView: number
 }
 
 export type Event = UIEvent<{

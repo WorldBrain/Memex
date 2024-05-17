@@ -1,26 +1,16 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
 import type {
-    SharedListData,
     ListKeysServiceInterface,
     AnnotationSharingServiceInterface,
+    ListShareResult,
 } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type {
     RemoteFunction,
     RemoteFunctionRole,
 } from 'src/util/webextensionRPC'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import type { SharedListMetadata } from './types'
-import { PageList } from 'src/custom-lists/background/types'
-
-export type ListShareResult = Omit<
-    SharedListData,
-    'annotationSharingStatesPromise'
-> & {
-    collabKey: string
-    annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
-}
 
 export interface ContentSharingInterface
     extends Pick<
@@ -47,7 +37,7 @@ export interface ContentSharingInterface
         remoteListId?: string
         collabKey?: string
     }): Promise<ListShareResult>
-    waitForListShare(params: { localListId: number }): Promise<void>
+    waitForListShareSideEffects(params: { localListId: number }): Promise<void>
     deleteListAndAllAssociatedData(params: {
         localListId: number
     }): Promise<void>

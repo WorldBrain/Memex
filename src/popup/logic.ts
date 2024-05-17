@@ -15,6 +15,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { setUserContext as setSentryUserContext } from 'src/util/raven'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
@@ -34,6 +35,7 @@ export interface Event {
     togglePDFReaderEnabled: null
     addPageList: { listId: number }
     delPageList: { listId: number }
+    showUpgradeNotif: boolean
 }
 
 export interface State {
@@ -50,6 +52,7 @@ export interface State {
     showAutoSaved: boolean
     analyticsBG: AnalyticsCoreInterface
     isSavedPage: boolean
+    showUpgradeNotif: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -76,6 +79,7 @@ export default class PopupLogic extends UILogic<State, Event> {
         showAutoSaved: false,
         analyticsBG: null,
         isSavedPage: false,
+        showUpgradeNotif: false,
     })
 
     async init() {
@@ -186,6 +190,12 @@ export default class PopupLogic extends UILogic<State, Event> {
         this.emitMutation({ currentTabFullUrl: { $set: nextPageUrl } })
     }
 
+    showUpgradeNotif: EventHandler<'showUpgradeNotif'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({ showUpgradeNotif: { $set: event } })
+    }
     addPageList: EventHandler<'addPageList'> = async ({
         event,
         previousState,

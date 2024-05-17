@@ -5,7 +5,12 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import React from 'react'
 import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
-import { COUNTER_STORAGE_KEY, FREE_PLAN_LIMIT } from './constants'
+import {
+    COUNTER_STORAGE_KEY,
+    DEFAULT_POWERUP_LIMITS,
+} from '@worldbrain/memex-common/lib/subscriptions/constants'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { DEFAULT_TRIAL_PERIOD } from '@worldbrain/memex-common/lib/subscriptions/constants'
 
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
@@ -13,6 +18,8 @@ interface Props {
     isTrial?: boolean
     signupDate?: number
     getRootElement: () => HTMLElement
+    events: AnnotationsSidebarInPageEventEmitter
+    forceRibbonShow: (force: boolean) => void
 }
 
 export class BlockCounterIndicator extends React.Component<Props> {
@@ -30,7 +37,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
             if (!result[COUNTER_STORAGE_KEY].pU.bookmarksPowerUp) {
                 this.setState({
                     shouldShow: true,
-                    totalCount: FREE_PLAN_LIMIT,
+                    totalCount: DEFAULT_POWERUP_LIMITS.bookmarksPowerUp,
                     currentCount: result[COUNTER_STORAGE_KEY].c,
                 })
                 browser.storage.onChanged.addListener((changes) =>
@@ -39,15 +46,6 @@ export class BlockCounterIndicator extends React.Component<Props> {
             }
         })
     }
-
-    private whichCheckOutURL = () => {
-        if (process.env.NODE_ENV === 'production') {
-            return 'https://memex.garden/upgrade'
-        } else {
-            return 'https://memex.garden/upgradeStaging'
-        }
-    }
-
     async componentWillUnmount() {
         if (this.state.shouldShow) {
             browser.storage.onChanged.removeListener((changes) =>
@@ -60,7 +58,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
             this.setState({
                 currentCount: changes[COUNTER_STORAGE_KEY].newValue.c,
-                totalCount: parseInt(changes[COUNTER_STORAGE_KEY].newValue.s),
+                totalCount: DEFAULT_POWERUP_LIMITS.bookmarksPowerUp,
             })
         }
 
@@ -105,7 +103,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
         )
 
         // Calculate the days remaining to complete 30 days
-        const remainingDays = 30 - elapsedDays
+        const remainingDays = DEFAULT_TRIAL_PERIOD - elapsedDays
 
         return remainingDays
     }
@@ -120,7 +118,10 @@ export class BlockCounterIndicator extends React.Component<Props> {
                     topRight ? 'bottom' : bottomRight ? 'top' : 'left-start'
                 }
                 targetElementRef={this.tooltipButtonRef.current}
-                closeComponent={() => this.setState({ showTooltip: false })}
+                closeComponent={() => {
+                    this.props.forceRibbonShow(false)
+                    this.setState({ showTooltip: false })
+                }}
                 offsetX={20}
                 getPortalRoot={this.props.getRootElement}
             >
@@ -143,10 +144,9 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                 icon={'longArrowRight'}
                                 padding="0px 5px 0 10px"
                                 onClick={() => {
-                                    window.open(
-                                        this.whichCheckOutURL(),
-                                        '_blank',
-                                    )
+                                    this.props.events.emit('showPowerUpModal', {
+                                        limitReachedNotif: 'Bookmarks',
+                                    })
                                 }}
                                 size="medium"
                                 type="primary"
@@ -181,7 +181,9 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     <br />
                                     After the trial: 60 days
                                     money-back-guarantee and a free tier with 25
-                                    saved pages & 25 AI queries per month.
+                                    saved pages & $
+                                    {DEFAULT_POWERUP_LIMITS.AIpowerup} AI page
+                                    sessions per month.
                                     <br />
                                     Each saved page counts only once - forever.
                                 </InfoTooltipSubTitle>
@@ -199,8 +201,10 @@ export class BlockCounterIndicator extends React.Component<Props> {
                 (this.state.currentCount / parseInt(this.state.totalCount)) *
                     100) *
             3.6
-        const leftOverBlocks = this.state.totalCount - this.state.currentCount
-
+        const leftOverBlocks = Math.max(
+            0,
+            this.state.totalCount - this.state.currentCount,
+        )
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
@@ -247,7 +251,10 @@ export class BlockCounterIndicator extends React.Component<Props> {
                         <CounterContainer
                             progress={progressPercentNumber}
                             ref={this.tooltipButtonRef}
-                            onClick={() => this.setState({ showTooltip: true })}
+                            onClick={() => {
+                                this.props.forceRibbonShow(true)
+                                this.setState({ showTooltip: true })
+                            }}
                         >
                             <InnerContainer>
                                 {' '}

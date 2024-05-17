@@ -34,3 +34,8 @@ export const CLOUD_SYNCED_COLLECTIONS: string[] = [
     FOLLOWED_LISTS_COLLECTION_NAMES.followedList,
     FOLLOWED_LISTS_COLLECTION_NAMES.followedListEntry,
 ]
+
+export const CLOUD_SYNC_PERIODIC_DL_ALARM_NAME =
+    'personal-cloud-periodic-sync-download'
+export const CLOUD_SYNC_RETRY_UL_ALARM_NAME =
+    'personal-cloud-action-queue-retry'

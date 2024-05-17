@@ -119,6 +119,7 @@ export type DashboardDependencies = {
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
     runtimeAPI: Browser['runtime']
+    browserAPIs: Browser
     tabsAPI: Browser['tabs']
     openSpaceInWebUI: (remoteCollectionId: string) => void
     renderUpdateNotifBanner: () => JSX.Element
@@ -187,7 +188,7 @@ export type DashboardModalsEvents = UIEvent<{
     }
     saveHighlightColorSettings: { newState: HighlightColor[] }
     setShowDisplayNameSetupModal: { isShown: boolean }
-    syncNow: null
+    syncNow: { preventUpdateStats?: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 
     setDeletingListId: { listId: string }

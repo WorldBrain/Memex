@@ -178,7 +178,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
                 ? this.events.emit('sidebarAction', params)
                 : params.type === 'ribbonAction'
                 ? this.events.emit('ribbonAction', params)
-                : this.events.emit('tooltipAction', params)
+                : this.events.emit('tooltipAction', params, () => {})
 
         if (!handled) {
             this._pendingEvents[params.type] = {

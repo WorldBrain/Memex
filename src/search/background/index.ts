@@ -6,13 +6,14 @@ import SearchStorage from './storage'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import type {
     RemoteSearchInterface,
-    AnnotPage,
+    SearchResultPage,
     UnifiedSearchParams,
     UnifiedBlankSearchParams,
     UnifiedTermsSearchParams,
     ResultDataByPage,
     IntermediarySearchResult,
     UnifiedSearchPaginationParams,
+    UnifiedSearchLookupData,
 } from './types'
 import { SearchError, BadTermError } from './errors'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
@@ -59,11 +60,7 @@ import { intersectSets } from 'src/util/map-set-helpers'
 import { PDF_PAGE_URL_PREFIX } from '@worldbrain/memex-common/lib/page-indexing/constants'
 import { EVENT_PROVIDER_URLS } from '@worldbrain/memex-common/lib/constants'
 import { TWITTER_URLS } from '@worldbrain/memex-common/lib/twitter-integration/constants'
-
-type UnifiedSearchLookupData = {
-    pages: Map<string, Omit<AnnotPage, 'annotations' | 'hasBookmark'>>
-    annotations: Map<string, Annotation & { lists: number[] }>
-}
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export default class SearchBackground {
     storage: SearchStorage
@@ -88,7 +85,11 @@ export default class SearchBackground {
         }
     }
 
-    static shapePageResult(results: AnnotPage[], limit: number, extra = {}) {
+    static shapePageResult(
+        results: SearchResultPage[],
+        limit: number,
+        extra = {},
+    ) {
         return {
             resultsExhausted: results.length < limit,
             totalCount: null, // TODO: try to get this implemented
@@ -113,6 +114,7 @@ export default class SearchBackground {
             unifiedSearch: this.unifiedSearch,
             extendedSuggest: this.storage.suggestExtended,
             delPages: this.options.pages.delPages.bind(this.options.pages),
+            resolvePdfPageFullUrls: this.resolvePdfPageFullUrls.bind(this),
         }
     }
 
@@ -810,6 +812,7 @@ export default class SearchBackground {
         const [
             pages,
             annotations,
+            annotPrivacyLevels,
             pageListEntries,
             annotListEntries,
         ] = await Promise.all([
@@ -817,6 +820,11 @@ export default class SearchBackground {
             //  Need to fix the bug in storex-backend-dexie when it comes time to port this and revert them to storex queries
             dexie.table<Page>('pages').bulkGet(pageIds),
             dexie.table<Annotation>('annotations').bulkGet(annotIds),
+            dexie
+                .table<AnnotationPrivacyLevel>('annotationPrivacyLevels')
+                .where('annotation')
+                .anyOf(annotIds)
+                .toArray(),
             dexie
                 .table<PageListEntry, [number, string]>('pageListEntries')
                 .where('pageUrl')
@@ -888,6 +896,9 @@ export default class SearchBackground {
             annotListEntries,
             ([, pageUrl]) => pageUrl,
         )
+        const privacyLevelByAnnot = fromPairs(
+            annotPrivacyLevels.map((l) => [l.annotation, l.privacyLevel]),
+        )
 
         const lookups: UnifiedSearchLookupData = {
             annotations: new Map(),
@@ -908,6 +919,9 @@ export default class SearchBackground {
         for (const annotation of annotations) {
             lookups.annotations.set(annotation.url, {
                 ...annotation,
+                privacyLevel:
+                    privacyLevelByAnnot[annotation.url] ??
+                    AnnotationPrivacyLevels.PROTECTED,
                 lists: (listIdsByAnnot[annotation.url] ?? []).map(
                     ([listId]) => listId,
                 ),
@@ -917,38 +931,35 @@ export default class SearchBackground {
         return lookups
     }
 
-    private async resolvePdfPageFullUrls(
-        docs: AnnotPage[],
-    ): Promise<AnnotPage[]> {
-        const toReturn: AnnotPage[] = []
-        for (const doc of docs) {
-            if (!isMemexPageAPdf(doc)) {
-                toReturn.push(doc)
-                continue
-            }
-
-            const locators = await this.options.pages.findLocatorsByNormalizedUrl(
-                doc.url,
-            )
-            const mainLocator = pickBestLocator(locators, {
-                priority: ContentLocatorType.Remote,
-            })
-
-            // If this is an uploaded PDF, we need to flag it for grabbing a temporary access URL when clicked via the `upload_id` param
-            if (
-                mainLocator &&
-                mainLocator.locationScheme === LocationSchemeType.UploadStorage
-            ) {
-                doc.fullPdfUrl =
-                    mainLocator.originalLocation +
-                    '?upload_id=' +
-                    mainLocator.location
-            } else {
-                doc.fullPdfUrl = mainLocator?.originalLocation ?? undefined
-            }
-
-            toReturn.push(doc)
+    async resolvePdfPageFullUrls(url: string): Promise<any> {
+        const page = {
+            url: url,
         }
-        return toReturn
+
+        const locators = await this.options.pages.findLocatorsByNormalizedUrl(
+            normalizeUrl(page.url),
+        )
+
+        const mainLocator = pickBestLocator(locators, {
+            priority: ContentLocatorType.Remote,
+        })
+
+        let document = mainLocator
+
+        // If this is an uploaded PDF, we need to flag it for grabbing a temporary access URL when clicked via the `upload_id` param
+        if (
+            mainLocator &&
+            mainLocator.locationScheme === LocationSchemeType.UploadStorage
+        ) {
+            document.originalLocation =
+                mainLocator.originalLocation +
+                '?upload_id=' +
+                mainLocator.location
+        } else {
+            document.originalLocation =
+                mainLocator?.originalLocation ?? undefined
+        }
+
+        return document
     }
 }

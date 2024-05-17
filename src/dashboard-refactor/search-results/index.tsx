@@ -581,7 +581,8 @@ export default class SearchResultsContainer extends React.Component<
         day: number,
         { onShareBtnClick }: PageInteractionProps,
     ) {
-        const shouldShow = areNotesShown || noteIds[notesType]?.length > 0
+        const shouldShow =
+            areNotesShown === true && noteIds[notesType]?.length > 0
         if (!shouldShow) {
             return null
         }
@@ -768,6 +769,9 @@ export default class SearchResultsContainer extends React.Component<
                     isBulkSelected={this.props.selectedItems?.includes(
                         page.normalizedUrl,
                     )}
+                    onClick={(event) => {
+                        interactionProps.onClick(event)
+                    }}
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
                     getRootElement={this.props.getRootElement}

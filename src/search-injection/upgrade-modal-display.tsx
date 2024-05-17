@@ -11,6 +11,7 @@ import UpgradeModal from 'src/authentication/upgrade-modal'
 import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import { Browser } from 'webextension-polyfill'
 
 type RootProps = {
     rootEl: HTMLElement
@@ -22,6 +23,7 @@ type RootProps = {
     ) => Promise<'error' | 'success'>
     authBG: AuthRemoteFunctionsInterface
     limitReachedNotif: PowerUpModalVersion
+    browserAPIs: Browser
 }
 
 interface RootState {
@@ -68,6 +70,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
                         componentVariant="Modal"
                         closeComponent={this.removeRoot}
                         limitReachedNotif={this.props.limitReachedNotif}
+                        browserAPIs={this.props.browserAPIs}
                     />
                 </ThemeProvider>
             </StyleSheetManager>

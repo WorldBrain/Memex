@@ -40,10 +40,11 @@ export interface PersonalCloudRemoteInterface {
     isPassiveDataRemovalNeeded: () => Promise<boolean>
     runDataMigration: () => Promise<void>
     invokeSyncDownload: () => Promise<void>
+    countPendingSyncDownloads: () => Promise<number>
 }
 export interface PersonalCloudStats {
     // countingDownloads: boolean
     // countingUploads: boolean
-    pendingDownloads: number
-    pendingUploads: number
+    pendingDownloads?: number
+    pendingUploads?: number
 }

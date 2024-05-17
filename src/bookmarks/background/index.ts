@@ -5,7 +5,7 @@ import { isFullUrl } from '@worldbrain/memex-common/lib/url-utils/normalize/util
 
 import BookmarksStorage from './storage'
 import { BookmarksInterface } from './types'
-import Raven from 'raven-js'
+import { captureException } from 'src/util/raven'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import pick from 'lodash/pick'
 import { Analytics } from 'src/analytics/types'
@@ -174,7 +174,7 @@ export default class BookmarksBackground {
         try {
             await this.delPageBookmark({ url: node.url })
         } catch (err) {
-            Raven.captureException(err)
+            captureException(err)
         }
     }
 

@@ -8,12 +8,12 @@ import {
     SyncSettingsStore,
 } from 'src/sync-settings/util'
 import styled, { css } from 'styled-components'
-import browser, { Storage } from 'webextension-polyfill'
+import browser, { Browser, Storage } from 'webextension-polyfill'
 import {
     COUNTER_STORAGE_KEY,
-    DEFAULT_COUNTER_STORAGE_KEY,
+    DEFAULT_COUNTER_STORAGE_VALUE,
     DEFAULT_POWERUP_LIMITS,
-} from './constants'
+} from '@worldbrain/memex-common/lib/subscriptions/constants'
 import { TaskState } from 'ui-logic-core/lib/types'
 import {
     CustomerPowerUps,
@@ -36,6 +36,7 @@ export interface Props {
         doNotOpen: boolean,
     ) => Promise<'success' | 'error'>
     authBG: AuthRemoteFunctionsInterface
+    browserAPIs: Browser
 }
 
 interface State {
@@ -56,7 +57,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
     private syncSettings: SyncSettingsStore<'openAI'>
 
     state: State = {
-        currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
+        currentCount: DEFAULT_COUNTER_STORAGE_VALUE.cQ,
         shouldShow: true,
         showTooltip: false,
         openAIKey: '',
@@ -209,6 +210,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                     }}
                     limitReachedNotif={null}
                     authBG={this.props.authBG}
+                    browserAPIs={this.props.browserAPIs}
                 />
             )
         }
@@ -284,7 +286,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         ? 0
                                         : this.leftOverBlocks}
                                 </strong>{' '}
-                                AI queries left this month
+                                AI sessions left this month
                             </InfoTooltipTitle>
                         )}
                         {/*Is NOT in Trial anymore, has Key and no AI ownkey powerup */}
@@ -301,7 +303,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         ? 0
                                         : this.leftOverBlocks}
                                 </strong>{' '}
-                                Claude queries left this month
+                                Claude sessions left this month
                             </InfoTooltipTitle>
                         )}
                         <PrimaryAction
@@ -322,9 +324,10 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         {/* Is in Trial */}
                         {scenario === 'InTrial' && (
                             <InfoTooltipSubTitle>
-                                Unlimited queries.
+                                Unlimited sessions.
                                 <br />
-                                <strong>After trial:</strong> 25 queries per
+                                <strong>After trial:</strong> $
+                                {DEFAULT_POWERUP_LIMITS.AIpowerup} sessions per
                                 month & 60 days money-back-guarantee
                             </InfoTooltipSubTitle>
                         )}
@@ -347,7 +350,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         ? 0
                                         : this.leftOverBlocks}
                                 </strong>{' '}
-                                GPT-3, Claude-Haiki & Image queries left this
+                                GPT-3, Claude-Haiki & Image sessions left this
                                 month. Resets in{' '}
                                 <strong>
                                     {this.daysUntilNextMonth()} days.
@@ -359,8 +362,8 @@ export class AICounterIndicator extends React.Component<Props, State> {
 
                         {scenario === 'NoTrialHasKeyHasOwnKeyPowerUp' && (
                             <InfoTooltipSubTitle>
-                                Unlimited queries with GPT-3 and GPT-4 at your
-                                own cost. Claude queries reset in{' '}
+                                Unlimited sessions with GPT-3 and GPT-4 at your
+                                own cost. Claude sessions reset in{' '}
                                 <strong>
                                     {this.daysUntilNextMonth()} days.
                                 </strong>
