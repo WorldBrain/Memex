@@ -905,6 +905,18 @@ export class SidebarContainerLogic extends UILogic<
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? true
         // this.readingViewStorageListener(true)
 
+        const openAIKey = await this.syncSettings.openAI?.get('apiKey')
+        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
+
+        const selectedModel = await this.syncSettings.openAI.get(
+            'selectedModel',
+        )
+
+        this.emitMutation({
+            hasKey: { $set: hasAPIKey },
+            AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
+        })
+
         await loadInitial<SidebarContainerState>(this, async () => {
             this.showState = initialState ?? 'hidden'
             this.emitMutation({
@@ -969,18 +981,6 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             pageAlreadySaved: { $set: pageAlreadySaved },
-        })
-
-        const openAIKey = await this.syncSettings.openAI?.get('apiKey')
-        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
-
-        const selectedModel = await this.syncSettings.openAI.get(
-            'selectedModel',
-        )
-
-        this.emitMutation({
-            hasKey: { $set: hasAPIKey },
-            AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
         })
 
         const highlightColors = await this.fetchHighlightColors()
