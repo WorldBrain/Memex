@@ -221,21 +221,21 @@ export class RibbonContainerLogic extends UILogic<
         })
 
         try {
-            const signupDate = new Date(
-                await (await this.dependencies.authBG.getCurrentUser())
-                    .creationTime,
-            ).getTime()
-            const isTrial =
-                (await enforceTrialPeriod30Days(
-                    this.dependencies.browserAPIs,
-                    signupDate,
-                )) ?? null
+            const currentUser = await this.dependencies.authBG.getCurrentUser()
+            if (currentUser) {
+                const signupDate = new Date(currentUser?.creationTime).getTime()
+                const isTrial =
+                    (await enforceTrialPeriod30Days(
+                        this.dependencies.browserAPIs,
+                        signupDate,
+                    )) ?? null
 
-            if (isTrial) {
-                this.emitMutation({
-                    isTrial: { $set: isTrial },
-                    signupDate: { $set: signupDate },
-                })
+                if (isTrial) {
+                    this.emitMutation({
+                        isTrial: { $set: isTrial },
+                        signupDate: { $set: signupDate },
+                    })
+                }
             }
         } catch (error) {
             console.error('error in updatePageCounter', error)
