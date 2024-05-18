@@ -229,8 +229,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
     private handleExternalAction = async (event: SidebarActionOptions) => {
         // instantl load page summaries bc they are not dependent on initlogicpromise
+        await Promise.all([this.initLogicPromise])
+        await this.processEvent('setSidebarVisible', null)
 
         if (event.action === 'show_page_summary') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
             await this.processEvent('askAIviaInPageInteractions', {
                 textToProcess: event.highlightedText,
                 prompt: event.prompt,
@@ -270,7 +275,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 await this.processEvent('setActiveSidebarTab', {
                     tab: 'annotations',
                 })
-                await sleepPromise(100)
             }
 
             this.processEvent('createYoutubeTimestampWithScreenshot', {
@@ -311,18 +315,24 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
 
         // Don't handle any external action that depend on cache until init logic has completed
-        await Promise.all([
-            this.initLogicPromise,
-            this.props.inPageUI.cacheLoadPromise,
-        ])
+        await Promise.all([this.props.inPageUI.cacheLoadPromise])
         if (event.action === 'selected_list_mode_from_web_ui') {
+            if (this.state.activeTab !== 'spaces') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'spaces',
+                })
+            }
             await this.processEvent('setSelectedListFromWebUI', {
                 sharedListId: event.sharedListId,
                 manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
         } else if (event.action === 'show_annotation') {
+            if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+            }
             await this.activateAnnotation(event.annotationCacheId, 'show')
-            await sleepPromise(500)
             if (
                 this.state.selectedListId &&
                 this.state.activeTab === 'spaces'
@@ -336,6 +346,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 })
             }
         } else if (event.action === 'edit_annotation') {
+            if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+            }
             await this.processEvent('setAnnotationEditMode', {
                 instanceLocation:
                     this.state.selectedListId &&
@@ -359,6 +374,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 'edit_spaces',
             )
         } else if (event.action === 'set_sharing_access') {
+            // if (this.state.activeTab !== 'annotations') {
+            //     await this.processEvent('setActiveSidebarTab', {
+            //         tab: 'annotations',
+            //     })
+            // }
             await this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,
             })
@@ -370,15 +390,18 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
         } else if (event.action === 'cite_page') {
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
-            await sleepPromise(300)
             await this.processEvent('openPageCitationMenu', null)
         } else if (event.action === 'share_page_link') {
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
-            await sleepPromise(300)
             await this.processEvent('openPageLinkShareMenu', null)
         } else if (event.action === 'check_sidebar_status') {
             return true
         } else if (event.action === 'set_focus_mode') {
+            if (this.state.activeTab !== 'spaces') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'spaces',
+                })
+            }
             const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
                 event.listId,
             ).unifiedId
