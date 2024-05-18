@@ -12,7 +12,8 @@ export class ProcedureUiCommunication {
     sendEvent(eventType, event) {
         for (const tabId of Object.keys(this._uiTabIds)) {
             try {
-                globalThis['browser'].tabs.sendMessage(parseInt(tabId, 10), {
+                const webExtAPIs = globalThis['browser'] ?? globalThis['chrome']
+                webExtAPIs.tabs.sendMessage(parseInt(tabId, 10), {
                     type: this.eventName,
                     event: { type: eventType, ...(event || {}) },
                 })
