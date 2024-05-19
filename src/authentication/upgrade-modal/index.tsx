@@ -52,7 +52,7 @@ export default class UpgradeModal extends UIElement<
                 {this.props.limitReachedNotif === 'AI' && (
                     <UpgradeOverlayTextContainer>
                         <UpgradeOverlayText>
-                            You reached the monthly limit of $
+                            You reached the daily limit of{' '}
                             {DEFAULT_POWERUP_LIMITS.AIpowerup} AI sessions
                         </UpgradeOverlayText>
                         <UpgradeOverlaySubText>
@@ -240,7 +240,7 @@ export default class UpgradeModal extends UIElement<
                 {this.props.limitReachedNotif === 'Bookmarks' && (
                     <UpgradeOverlayTextContainer>
                         <UpgradeOverlayText>
-                            You reached the monthly limit of $
+                            You reached the daily limit of{' '}
                             {DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} saved
                             pages
                         </UpgradeOverlayText>
