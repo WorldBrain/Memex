@@ -15,10 +15,14 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { GUIDED_ONBOARDING_URL } from '../../constants'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
+import {
+    trackOnboardingPath,
+    trackOnboardingSelection,
+} from '@worldbrain/memex-common/lib/analytics/events'
 import Checkbox from 'src/common-ui/components/Checkbox'
 import UpgradeModal from 'src/authentication/upgrade-modal'
 import Browser from 'webextension-polyfill'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 export interface Props extends Dependencies {}
 
@@ -256,17 +260,21 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
     private renderOnboardingOptions = () => (
         <WelcomeBox>
-            <Title>Try it on real examples</Title>
+            <Title size="45px">
+                Select the most important workflow you want from Memex?
+            </Title>
             <DescriptionText>
-                Annotate, Summarise, Share & Collaborate
+                So we can get you from Zero to Aha! in the quickest way possible
             </DescriptionText>
             <OptionsBox>
                 <OptionsContainer
-                    onClick={() => {
-                        window.open(
-                            'https://links.memex.garden/onboarding_web',
-                            '_blank',
-                        )
+                    onClick={async () => {
+                        this.processEvent('setOnboardingTutorial', {
+                            tutorialId: 'savePages',
+                        })
+                        await trackOnboardingPath(this.props.analyticsBG, {
+                            type: 'Bookmarking',
+                        })
                     }}
                 >
                     <OptionTitle>
@@ -276,18 +284,22 @@ export default class OnboardingScreen extends StatefulUIElement<
                             color="prime1"
                             hoverOff
                         />
-                        <OptionTitleText>Web Article</OptionTitleText>
+                        <OptionTitleText>
+                            Organising & Annotating websites, PDFs and Videos
+                        </OptionTitleText>
                     </OptionTitle>
                     {/* <OptionDescription>
                         Highlight text on a page and add tags
                     </OptionDescription> */}
                 </OptionsContainer>
                 <OptionsContainer
-                    onClick={() => {
-                        window.open(
-                            'https://links.memex.garden/onboarding_youtube',
-                            '_blank',
-                        )
+                    onClick={async () => {
+                        this.processEvent('setOnboardingTutorial', {
+                            tutorialId: 'askAI',
+                        })
+                        await trackOnboardingPath(this.props.analyticsBG, {
+                            type: 'AI',
+                        })
                     }}
                 >
                     <OptionTitle>
@@ -297,18 +309,22 @@ export default class OnboardingScreen extends StatefulUIElement<
                             color="prime1"
                             hoverOff
                         />
-                        <OptionTitleText>YouTube Video</OptionTitleText>
+                        <OptionTitleText>
+                            Summarizing & analysing content with AI
+                        </OptionTitleText>
                     </OptionTitle>
                     {/* <OptionDescription>
                         Highlight text on a page and add tags
                     </OptionDescription> */}
                 </OptionsContainer>
                 <OptionsContainer
-                    onClick={() => {
-                        window.open(
-                            'https://links.memex.garden/onboarding_pdf',
-                            '_blank',
-                        )
+                    onClick={async () => {
+                        this.processEvent('setOnboardingTutorial', {
+                            tutorialId: 'sharePages',
+                        })
+                        await trackOnboardingPath(this.props.analyticsBG, {
+                            type: 'Sharing',
+                        })
                     }}
                 >
                     <OptionTitle>
@@ -318,11 +334,10 @@ export default class OnboardingScreen extends StatefulUIElement<
                             color="prime1"
                             hoverOff
                         />
-                        <OptionTitleText>PDF</OptionTitleText>
+                        <OptionTitleText>
+                            Sharing & collaborating with peers
+                        </OptionTitleText>
                     </OptionTitle>
-                    {/* <OptionDescription>
-                        Highlight text on a page and add tags
-                    </OptionDescription> */}
                 </OptionsContainer>
             </OptionsBox>
             <PrimaryAction
@@ -336,6 +351,18 @@ export default class OnboardingScreen extends StatefulUIElement<
                 type="tertiary"
                 size={'large'}
             />
+            {this.state.tutorialId != null ? (
+                <TutorialBox
+                    getRootElement={this.props.getRootElement}
+                    tutorialId={this.state.tutorialId}
+                    isHeadless={true}
+                    onTutorialClose={() => {
+                        this.processEvent('setOnboardingTutorial', {
+                            tutorialId: null,
+                        })
+                    }}
+                />
+            ) : null}
         </WelcomeBox>
     )
 
@@ -422,12 +449,12 @@ export default class OnboardingScreen extends StatefulUIElement<
         return (
             <OnboardingBox>
                 <OnboardingContent>
-                    {this.state.welcomeStep === 'pricingStep' &&
-                        this.renderPricingStep()}
+                    {/* {this.state.welcomeStep === 'pricingStep' &&
+                        this.renderPricingStep()} */}
                     {this.state.welcomeStep === 'basicIntro' &&
-                        this.renderBasicIntro()}
-                    {this.state.welcomeStep === 'ChooseOnboardingOption' &&
                         this.renderOnboardingOptions()}
+                    {/* {this.state.welcomeStep === 'ChooseOnboardingOption' &&
+                        this.renderOnboardingOptions()} */}
                     {this.state.showSyncNotification &&
                         this.state.welcomeStep === 'finish' &&
                         this.renderSyncNotif()}
@@ -461,14 +488,13 @@ const OptionsBox = styled.div`
     grid-gap: 15px;
     flex-direction: column;
     position: relative;
-    width: 300px;
     margin-top: 20px;
     margin-bottom: 50px;
 `
 
 const OptionsContainer = styled.div`
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     height: 80px;
     border-radius: 8px;
@@ -476,7 +502,8 @@ const OptionsContainer = styled.div`
     grid-gap: 15px;
     flex-direction: row;
     position: relative;
-    width: 300px;
+    width: 500px;
+    padding: 0 30px;
 
     background: transparent;
     background-size: 0 0;
@@ -492,8 +519,8 @@ const OptionTitle = styled.div`
     display: flex;
     align-items: center;
     grid-gap: 10px;
-    position: absolute;
     z-index: 2;
+    white-space: nowrap;
 `
 
 const OptionTitleText = styled.div`
@@ -501,19 +528,6 @@ const OptionTitleText = styled.div`
     font-size: 18px;
 `
 
-const OptionDescription = styled.div``
-
-const ContinueButtonNotif = styled.div`
-    display: flex;
-    align-items: center;
-    grid-gap: 10px;
-    position: absolute;
-    bottom: 20px;
-    z-index: 2;
-    font-size: 18px;
-    color: ${(props) => props.theme.colors.prime1};
-    right: 15%;
-`
 const ContinueButton = styled.div`
     display: flex;
     align-items: center;
@@ -544,14 +558,9 @@ const OnboardingContent = styled.div`
     position: relative;
     height: 100vh;
     width: 100vw;
-`
-
-const MemexActionButtonIntro = styled.img`
-    height: 50px;
-    width: auto;
-    position: absolute;
-    right: 0;
-    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 const CheckBoxContainer = styled.div`
@@ -614,38 +623,6 @@ const OnboardingVideo = styled.iframe`
     border-radius: 20px;
 `
 
-const OnboardingOptionsContainer = styled.div`
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    grid-gap: 20px;
-    flex-direction: column;
-`
-
-const OnboardingOptionBox = styled.div`
-    border: 1px solid ${(props) => props.theme.colors.greyScale2};
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    height: 200px;
-    width: 200px;
-    justify-content: center;
-    align-items: center;
-    grid-gap: 15px;
-    position: relative;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale1};
-        border: 1px solid ${(props) => props.theme.colors.greyScale2};
-        cursor: pointer;
-        & * {
-            cursor: pointer;
-        }
-    }
-`
-
 const OnboardingContainer = styled.div`
     display: flex;
     flex-direction: row;
@@ -653,14 +630,6 @@ const OnboardingContainer = styled.div`
     justify-content: space-between;
     width: fit-content;
     gap: 10px;
-`
-const OnboardingTitle = styled.div`
-    background: linear-gradient(225deg, #6ae394 0%, #fff 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 18px;
-    text-align: center;
 `
 
 const AuthErrorMessage = styled.div`
@@ -711,11 +680,6 @@ const WelcomeContainer = styled.div`
     width: 100vw;
 `
 
-const LogoImg = styled.img`
-    height: 50px;
-    width: auto;
-`
-
 const ContentBox = styled.div`
     display: flex;
     flex-direction: column;
@@ -728,16 +692,17 @@ const ContentBox = styled.div`
     height: 100vh;
 `
 
-const Title = styled.div`
+const Title = styled.div<{
+    size?: string
+}>`
     background: ${(props) => props.theme.colors.headerGradient};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
     background-clip: text;
-    font-size: 60px;
+    font-size: ${(props) => (props.size ? props.size : '60px')};
     font-weight: 800;
     margin-bottom: 20px;
-    margin-top: 30px;
 `
 
 const DescriptionText = styled.div`
@@ -773,86 +738,6 @@ const CommentDemo = styled.img`
     opacity: 0.4;
 `
 
-const TitleSmall = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 22px;
-    font-weight: 800;
-    text-align: center;
-`
-
-const StyledAuthDialog = styled.div`
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-`
-const Header = styled.div`
-    text-align: center;
-    font-size: 16px;
-    font-weight: bold;
-`
-const AuthenticationMethods = styled.div`
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    width: 100%;
-`
-const EmailPasswordLogin = styled.div`
-    display: grid;
-    grid-auto-flow: row;
-    grid-gap: 15px;
-    justify-content: center;
-    align-items: center;
-`
-const EmailPasswordError = styled.div`
-    color: red;
-    font-weight: bold;
-    text-align: center;
-`
-
-const FormTitle = styled.div`
-    font-weight: bold;
-    font-size: 24px;
-    color: ${(props) => props.theme.colors.primary};
-    text-align: center;
-`
-const FormSubtitle = styled.div`
-    font-weight: 500;
-    font-size: 16px;
-    text-align: center;
-    color: ${(props) => props.theme.colors.secondary};
-`
-
-const AuthBox = styled(Margin)`
-    display: flex;
-    justify-content: center;
-    width: 100%;
-`
-
-const Footer = styled.div`
-    text-align: center;
-    user-select: none;
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 14px;
-    opacity: 0.8;
-`
-const ModeSwitch = styled.span`
-    cursor: pointer;
-    font-weight: bold;
-    color: ${(props) => props.theme.colors.prime1};
-    font-weight: 14px;
-`
-
-const GoToDashboard = styled.span`
-    cursor: pointer;
-    font-weight: bold;
-    color: ${(props) => props.theme.colors.prime1};
-    font-size: 15px;
-`
-
 const VideoBox = styled.div`
     display: flex;
     justify-content: center;
@@ -881,7 +766,7 @@ const WelcomeBox = styled.div<{
     flex-direction: column;
     height: 100%;
     width: 100%;
-    overflow-y: auto;
+    max-width: 900px;
 
     ${(props) =>
         props.scale != null &&

@@ -17,6 +17,7 @@ export interface Dependencies {
     analyticsBG?: AnalyticsCoreInterface
     bgScriptsBG: RemoteBGScriptInterface
     browserAPIs: Browser
+    getRootElement: () => HTMLElement
 }
 
 export interface State {
@@ -41,6 +42,7 @@ export interface State {
     enableNudges: boolean
     hoveredOverOnboardingIcon: boolean
     scaleView: number
+    tutorialId: string
 }
 
 export type Event = UIEvent<{
@@ -53,4 +55,5 @@ export type Event = UIEvent<{
     goToNextOnboardingStep: { step: string }
     enableNudges: null
     hoverOverOnboardingIcon: null
+    setOnboardingTutorial: { tutorialId: string }
 }>

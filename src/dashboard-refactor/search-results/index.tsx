@@ -1309,7 +1309,7 @@ export default class SearchResultsContainer extends React.Component<
                         id="ResultsScrollContainer"
                         ref={this.ResultsScrollContainerRef}
                     >
-                        {this.renderOnboardingTutorials()}
+                        {/* {this.renderOnboardingTutorials()} */}
                         {this.renderTutorialBox()}
                         {this.renderResultsByDay()}
                         {this.props.areResultsExhausted &&

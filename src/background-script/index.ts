@@ -213,9 +213,7 @@ class BackgroundScript {
     }
 
     private async trackInstallTime() {
-        await trackOnboardingPath(this.deps.analyticsBG, {
-            type: 'interactive',
-        })
+        return null
     }
 
     private async checkForUpdates() {
