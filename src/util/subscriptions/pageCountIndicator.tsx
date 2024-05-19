@@ -236,7 +236,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     <TooltipTextTop>
                                         You have{' '}
                                         <strong>{leftOverBlocks}</strong> pages
-                                        left this month
+                                        left today
                                     </TooltipTextTop>
                                 )}
 
