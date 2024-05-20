@@ -526,6 +526,7 @@ export class SharingTestHelper {
                 createdWhen: expect.any(Number),
                 updatedWhen: expect.any(Number),
                 title: this.lists[listId].name,
+                private: true,
                 description: null,
                 type: null,
             })),
@@ -574,6 +575,7 @@ export class SharingTestHelper {
             options.ids.map((id) => ({
                 localId: this.lists[id].localId,
                 remoteId: this.lists[id].remoteId,
+                private: true,
             })),
         )
     }
@@ -599,6 +601,7 @@ export class SharingTestHelper {
                 updatedWhen: expect.any(Number),
                 comment: this.annotations[id].comment,
                 body: this.annotations[id].body,
+                color: null,
                 selector: JSON.stringify(this.annotations[id].selector),
             })),
         )
