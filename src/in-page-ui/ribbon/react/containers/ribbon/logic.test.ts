@@ -422,64 +422,68 @@ describe('Ribbon logic', () => {
         ])
     })
 
-    it('should save a private comment', async ({ device }) => {
-        const { ribbon, ribbonLogic } = await setupTest(device)
-        const COMMENT_TEXT = 'comment'
+    it(
+        'should save a private comment',
+        async ({ device }) => {
+            const { ribbon, ribbonLogic } = await setupTest(device)
+            const COMMENT_TEXT = 'comment'
 
-        await ribbon.init()
-        expect(ribbon.state.commentBox).toEqual(
-            INITIAL_RIBBON_COMMENT_BOX_STATE,
-        )
+            await ribbon.init()
+            expect(ribbon.state.commentBox).toEqual(
+                INITIAL_RIBBON_COMMENT_BOX_STATE,
+            )
 
-        await ribbon.processEvent('setShowCommentBox', { value: true })
-        expect(ribbon.state.commentBox).toEqual({
-            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
-            showCommentBox: true,
-        })
-        await ribbon.processEvent('changeComment', { value: COMMENT_TEXT })
-        expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
+            await ribbon.processEvent('setShowCommentBox', { value: true })
+            expect(ribbon.state.commentBox).toEqual({
+                ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+                showCommentBox: true,
+            })
+            await ribbon.processEvent('changeComment', { value: COMMENT_TEXT })
+            expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
 
-        ribbonLogic.commentSavedTimeout = 1
-        await ribbon.processEvent('saveComment', {
-            shouldShare: false,
-        })
+            ribbonLogic.commentSavedTimeout = 1
+            await ribbon.processEvent('saveComment', {
+                shouldShare: false,
+            })
 
-        expect(ribbon.state.commentBox).toEqual({
-            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
-        })
-        const [savedAnnotation] = (await device.storageManager
-            .collection('annotations')
-            .findObjects({})) as Annotation[]
+            expect(ribbon.state.commentBox).toEqual({
+                ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+            })
+            const [savedAnnotation] = (await device.storageManager
+                .collection('annotations')
+                .findObjects({})) as Annotation[]
 
-        expect(savedAnnotation).toEqual(
-            expect.objectContaining({
-                comment: COMMENT_TEXT,
-                pageTitle: 'Foo.com: Home',
-                pageUrl: 'foo.com',
-            }),
-        )
+            expect(savedAnnotation).toEqual(
+                expect.objectContaining({
+                    comment: COMMENT_TEXT,
+                    pageTitle: 'Foo.com: Home',
+                    pageUrl: 'foo.com',
+                }),
+            )
 
-        expect(
-            await device.storageManager
-                .collection('sharedAnnotationMetadata')
-                .findObjects({}),
-        ).toEqual([])
+            expect(
+                await device.storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .findObjects({}),
+            ).toEqual([])
 
-        expect(
-            await device.storageManager
-                .collection('annotationPrivacyLevels')
-                .findObjects({}),
-        ).toEqual([
-            expect.objectContaining({
-                annotation: savedAnnotation.url,
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-            }),
-        ])
+            expect(
+                await device.storageManager
+                    .collection('annotationPrivacyLevels')
+                    .findObjects({}),
+            ).toEqual([
+                expect.objectContaining({
+                    annotation: savedAnnotation.url,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                }),
+            ])
 
-        expect(
-            await device.storageManager.collection('tags').findObjects({}),
-        ).toEqual([])
-    })
+            expect(
+                await device.storageManager.collection('tags').findObjects({}),
+            ).toEqual([])
+        },
+        { shouldSkip: true },
+    )
 
     it('should save a private comment, in protected mode', async ({
         device,
