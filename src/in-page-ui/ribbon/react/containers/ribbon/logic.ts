@@ -221,21 +221,21 @@ export class RibbonContainerLogic extends UILogic<
         })
 
         try {
-            const signupDate = new Date(
-                await (await this.dependencies.authBG.getCurrentUser())
-                    .creationTime,
-            ).getTime()
-            const isTrial =
-                (await enforceTrialPeriod30Days(
-                    this.dependencies.browserAPIs,
-                    signupDate,
-                )) ?? null
+            const currentUser = await this.dependencies.authBG.getCurrentUser()
+            if (currentUser) {
+                const signupDate = new Date(currentUser?.creationTime).getTime()
+                const isTrial =
+                    (await enforceTrialPeriod30Days(
+                        this.dependencies.browserAPIs,
+                        signupDate,
+                    )) ?? null
 
-            if (isTrial) {
-                this.emitMutation({
-                    isTrial: { $set: isTrial },
-                    signupDate: { $set: signupDate },
-                })
+                if (isTrial) {
+                    this.emitMutation({
+                        isTrial: { $set: isTrial },
+                        signupDate: { $set: signupDate },
+                    })
+                }
             }
         } catch (error) {
             console.error('error in updatePageCounter', error)
@@ -279,10 +279,12 @@ export class RibbonContainerLogic extends UILogic<
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
         event: { url },
     }) => {
+        // Stage 1: All relevant metadata
         let lists = []
         let interActionTimestamps = []
 
         this.emitMutation({
+            fullPageUrl: { $set: url },
             bookmark: {
                 isBookmarked: { $set: false },
                 lastBookmarkTimestamp: { $set: null },
@@ -313,11 +315,16 @@ export class RibbonContainerLogic extends UILogic<
         )
 
         // this section is there because sometimes when switching pages in web apps, the cache is still the old one when trying to see if the page has annotations
-
         annotationsByURL.map((annotation) => {
             return interActionTimestamps.push(
                 Math.floor(annotation.createdWhen / 1000),
             )
+        })
+
+        // Set data for lists and annotations
+        this.emitMutation({
+            lists: { pageListIds: { $set: lists } },
+            annotations: { $set: annotationsByURL.length },
         })
 
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
@@ -329,23 +336,30 @@ export class RibbonContainerLogic extends UILogic<
             interActionTimestamps.push(bookmark.time)
         }
         const saveTime = Math.min.apply(Math, interActionTimestamps)
-
-        const activityStatus = await this.dependencies.syncSettings.activityIndicator.get(
-            'feedHasActivity',
-        )
         this.emitMutation({
-            fullPageUrl: { $set: url },
-            pausing: {
-                isPaused: {
-                    $set: true,
-                },
-            },
             bookmark: {
                 isBookmarked: { $set: !!isBookmarked },
                 lastBookmarkTimestamp: { $set: saveTime },
             },
+        })
+
+        // Enable Ribbon after everything set
+        this.emitMutation({
             isRibbonEnabled: {
                 $set: await this.dependencies.getSidebarEnabled(),
+            },
+        })
+
+        const activityStatus = await this.dependencies.syncSettings.activityIndicator.get(
+            'feedHasActivity',
+        )
+
+        // set general settings that are not important for first load
+        this.emitMutation({
+            pausing: {
+                isPaused: {
+                    $set: true,
+                },
             },
             tooltip: {
                 isTooltipEnabled: {
@@ -357,8 +371,6 @@ export class RibbonContainerLogic extends UILogic<
                     $set: await this.dependencies.highlights.getState(),
                 },
             },
-            lists: { pageListIds: { $set: lists } },
-            annotations: { $set: annotationsByURL.length },
             hasFeedActivity: { $set: activityStatus },
         })
     }

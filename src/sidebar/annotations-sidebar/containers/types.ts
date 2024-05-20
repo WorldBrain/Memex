@@ -205,7 +205,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     prompt: string
 
     /** TODO: Properly set up logic to use this state instead of querying for user each time. */
-    currentUserReference: UserReference | null
+    currentUserId: string | null
     users: {
         [userId: string]: {
             name: string
@@ -588,6 +588,8 @@ interface SidebarEvents {
         skipListsLoad?: boolean
         rerenderHighlights?: boolean
     }
+
+    setSidebarVisible: null
 
     bookmarkPage: null
     openSpacePickerInRibbon: null

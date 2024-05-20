@@ -50,6 +50,7 @@ export default class Logic extends UILogic<State, Event> {
         enableNudges: true,
         hoveredOverOnboardingIcon: false,
         scaleView: 1,
+        tutorialId: null,
     })
 
     async init() {
@@ -205,7 +206,7 @@ export default class Logic extends UILogic<State, Event> {
                 window.close()
             } else {
                 this.emitMutation({
-                    welcomeStep: { $set: 'pricingStep' },
+                    welcomeStep: { $set: 'basicIntro' },
                 })
                 // // check if user has been coming from Google or Twitter login & if they account creation was in the last 10s
                 // if (!newSignUp) {
@@ -271,6 +272,14 @@ export default class Logic extends UILogic<State, Event> {
         }
     }
 
+    setOnboardingTutorial: EventHandler<'setOnboardingTutorial'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            tutorialId: { $set: event.tutorialId },
+        })
+    }
     showOnboardingVideo: EventHandler<'showOnboardingVideo'> = async ({
         previousState,
         event,
@@ -290,7 +299,7 @@ export default class Logic extends UILogic<State, Event> {
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
         this.emitMutation({
-            welcomeStep: { $set: 'pricingStep' },
+            welcomeStep: { $set: 'basicIntro' },
         })
         // this.emitMutation({
         //     loadState: { $set: 'running' },

@@ -136,7 +136,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                             ) : (
                                 <InfoTooltipTitle>
                                     <strong>{leftOverBlocks}</strong> pages left
-                                    this month
+                                    today
                                 </InfoTooltipTitle>
                             )}
                             <PrimaryAction
@@ -162,7 +162,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     pages you have already saved.
                                     <br />
                                     <br />
-                                    Resets in {this.daysUntilNextMonth()} days.
+                                    Resets at midnight.
                                 </InfoTooltipSubTitle>
                             )}
                             {leftOverBlocks > 0 && !this.props.isTrial && (
@@ -170,8 +170,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     Pages you save, annotate or add to Spaces.{' '}
                                     <br />
                                     Counts only once per page - forever!
-                                    <br /> <br /> Resets in{' '}
-                                    {this.daysUntilNextMonth()} days.
+                                    <br /> <br /> Resets at midnight.
                                 </InfoTooltipSubTitle>
                             )}
                             {this.props.isTrial && (
@@ -237,7 +236,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     <TooltipTextTop>
                                         You have{' '}
                                         <strong>{leftOverBlocks}</strong> pages
-                                        left this month
+                                        left today
                                     </TooltipTextTop>
                                 )}
 

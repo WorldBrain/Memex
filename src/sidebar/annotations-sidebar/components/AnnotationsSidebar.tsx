@@ -4715,7 +4715,7 @@ const AnnotationContainer = styled(Margin)`
     }
 
     animation-name: ${sidebarContentOpen};
-    animation-duration: 800ms;
+    animation-duration: 200ms;
     animation-timing-function: cubic-bezier(0.3, 0.35, 0.14, 0.8);
     animation-fill-mode: both;
 `
@@ -4733,11 +4733,11 @@ const AnnotationBox = styled.div<{
     width: 100%;
     z-index: ${(props) => props.zIndex};
 
-    animation-name: ${openAnimation};
-    animation-duration: 600ms;
+    /* animation-name: ${openAnimation};
+    animation-duration: 100ms;
     animation-delay: ${(props) => props.order * 20}ms;
     animation-timing-function: cubic-bezier(0.3, 0.35, 0.14, 0.8);
-    animation-fill-mode: forwards;
+    animation-fill-mode: forwards; */
     position: relative;
     margin-bottom: 5px;
 `

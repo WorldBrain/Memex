@@ -1287,7 +1287,7 @@ export class AnnotationsSidebarContainer<
                                             reply.reference.id ===
                                             replyReference.id,
                                     )?.userReference?.id ===
-                                    this.state.currentUserReference?.id,
+                                    this.state.currentUserId,
                                 comment:
                                     this.state.replyEditStates[
                                         replyReference.id

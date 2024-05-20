@@ -24,6 +24,7 @@ async function setupTest(
         contentScriptsBG: backgroundModules.contentScripts.remoteFunctions,
         bgScriptsBG: backgroundModules.bgScript.remoteFunctions,
         browserAPIs: null,
+        getRootElement: () => null,
     })
 
     const logic = createElement(_logic)
