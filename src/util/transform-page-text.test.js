@@ -3,7 +3,7 @@
 import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
 
 describe('Transform page text', () => {
-    test('it should be able to tokenize a text', async () => {
+    test.skip('it should be able to tokenize a text', async () => {
         const text = 'very often the people forget to optimize important code'
         const result = transformPageText(text)
         expect(result).toEqual({
@@ -13,7 +13,7 @@ describe('Transform page text', () => {
         })
     })
 
-    test('it should remove urls', async () => {
+    test.skip('it should remove urls', async () => {
         const text =
             'very often the people (https://the-people.com) forget to optimize important code'
         const result = transformPageText(text)

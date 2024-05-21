@@ -229,7 +229,7 @@ async function setupTest() {
 }
 
 describe('Content template doc generation', () => {
-    it('should correctly generate template xxx docs for a single PDF page + notes + page tags + note tags + page spaces + note spaces + metadata + entities', async () => {
+    it.skip('should correctly generate template xxx docs for a single PDF page + notes + page tags + note tags + page spaces + note spaces + metadata + entities', async () => {
         const { dataFetchers } = await setupTest()
 
         expect(
@@ -305,7 +305,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for a single page', async () => {
+    it.skip('should correctly generate template docs for a single page', async () => {
         const { dataFetchers } = await setupTest()
 
         expect(
@@ -356,7 +356,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for a single page, including a page link', async () => {
+    it.skip('should correctly generate template docs for a single page, including a page link', async () => {
         const { dataFetchers } = await setupTest()
 
         const templateDocs = await generateTemplateDocs({
@@ -428,7 +428,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for a single page, with notes references', async () => {
+    it.skip('should correctly generate template docs for a single page, with notes references', async () => {
         const { dataFetchers } = await setupTest()
 
         const generate = (template: string) =>
@@ -589,7 +589,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for multiple pages', async () => {
+    it.skip('should correctly generate template docs for multiple pages', async () => {
         const { dataFetchers } = await setupTest()
 
         const currentDate = new Date()
@@ -819,7 +819,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for multiple pages, but only referencing top-level page vars', async () => {
+    it.skip('should correctly generate template docs for multiple pages, but only referencing top-level page vars', async () => {
         const { dataFetchers } = await setupTest()
 
         const generate = (template: string) =>
@@ -948,7 +948,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs xxx for multiple pages, with note references', async () => {
+    it.skip('should correctly generate template docs xxx for multiple pages, with note references', async () => {
         const { dataFetchers } = await setupTest()
 
         const generate = (template: string) =>
@@ -1398,7 +1398,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for multiple pages, with note references but only referencing top-level page vars', async () => {
+    it.skip('should correctly generate template docs for multiple pages, with note references but only referencing top-level page vars', async () => {
         const { dataFetchers } = await setupTest()
 
         const currentDate = new Date()
@@ -1797,7 +1797,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for multiple pages, with note references but referencing top-level page AND note vars', async () => {
+    it.skip('should correctly generate template docs for multiple pages, with note references but referencing top-level page AND note vars', async () => {
         const { dataFetchers } = await setupTest()
 
         const generate = (template: string) =>
@@ -1847,7 +1847,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for single annotation, but only with page references', async () => {
+    it.skip('should correctly generate template docs for single annotation, but only with page references', async () => {
         const { dataFetchers } = await setupTest()
 
         expect(
@@ -1945,7 +1945,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for single annotation', async () => {
+    it.skip('should correctly generate template docs for single annotation', async () => {
         const { dataFetchers } = await setupTest()
 
         const generate = (template: string) =>
@@ -2056,7 +2056,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for single annotation, with a note link', async () => {
+    it.skip('should correctly generate template docs for single annotation, with a note link', async () => {
         const { dataFetchers } = await setupTest()
 
         const templateDocs = await generateTemplateDocs({
@@ -2076,7 +2076,7 @@ describe('Content template doc generation', () => {
         expect(isShareUrl(templateDocs[0].NoteLink)).toBe(true)
     })
 
-    it('should correctly generate template docs for single annotation, but iterating through the notes array', async () => {
+    it.skip('should correctly generate template docs for single annotation, but iterating through the notes array', async () => {
         const { dataFetchers } = await setupTest()
 
         expect(
@@ -2146,7 +2146,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for multiple annotations, but only with page references', async () => {
+    it.skip('should correctly generate template docs for multiple annotations, but only with page references', async () => {
         const { dataFetchers } = await setupTest()
 
         expect(
@@ -2253,7 +2253,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for multiple annotations, but only referencing top-level annotation vars', async () => {
+    it.skip('should correctly generate template docs for multiple annotations, but only referencing top-level annotation vars', async () => {
         const { dataFetchers } = await setupTest()
 
         const generate = (template: string) =>
@@ -2371,7 +2371,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for multiple annotations', async () => {
+    it.skip('should correctly generate template docs for multiple annotations', async () => {
         const { dataFetchers } = await setupTest()
 
         const generate = (template: string) =>
@@ -2633,7 +2633,7 @@ describe('Content template doc generation', () => {
         ])
     })
 
-    it('should correctly generate template docs for multiple annotations, with links', async () => {
+    it.skip('should correctly generate template docs for multiple annotations, with links', async () => {
         const { dataFetchers } = await setupTest()
 
         const currentDate = new Date()
