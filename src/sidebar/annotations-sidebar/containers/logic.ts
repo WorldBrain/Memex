@@ -114,8 +114,9 @@ import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat'
+
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat/utils'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
