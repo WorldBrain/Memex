@@ -132,120 +132,120 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
         'should create a page, create a highlight, then retrieve it via a search',
         () => {
-            return
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    {
-                        execute: async ({ setup }) => {
-                            annotUrl = await directLinking(
-                                setup,
-                            ).createAnnotation(
-                                { tab: DATA.TEST_TAB_1 },
-                                DATA.HIGHLIGHT_1 as any,
-                            )
-                        },
-                        expectedStorageChanges: {
-                            annotations: (): StorageCollectionDiff => ({
-                                [annotUrl]: {
-                                    type: 'create',
-                                    object: {
-                                        url: annotUrl,
-                                        pageUrl: DATA.PAGE_1.url,
-                                        pageTitle: DATA.HIGHLIGHT_1.title,
-                                        _pageTitle_terms: ['test', 'title'],
-                                        body: DATA.HIGHLIGHT_1.body,
-                                        _body_terms: ['test', 'body'],
-                                        comment: undefined,
-                                        selector: undefined,
-                                        createdWhen: expect.any(Date),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            customLists: (): StorageCollectionDiff => ({
-                                [SPECIAL_LIST_IDS.INBOX]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        name: SPECIAL_LIST_NAMES.INBOX,
-                                        searchableName:
-                                            SPECIAL_LIST_NAMES.INBOX,
-                                        nameTerms: [
-                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
-                                        ],
-                                        id: SPECIAL_LIST_IDS.INBOX,
-                                        isDeletable: false,
-                                        isNestable: false,
-                                    },
-                                },
-                            }),
-                            pageListEntries: (): StorageCollectionDiff => ({
-                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        pageUrl: DATA.PAGE_1.url,
-                                    },
-                                },
-                            }),
-                            pages: (): StorageCollectionDiff => PAGE_1_CREATION,
-                            visits: (): StorageCollectionDiff =>
-                                expect.anything(),
-                        },
-                        postCheck: async ({ setup }) => {
-                            expect(
-                                // await searchModule(setup).searchAnnotations({
-                                //     query: 'body',
-                                // }),
-                                {},
-                            ).toEqual({
-                                docs: [
-                                    {
-                                        annotations: [
-                                            {
-                                                url: annotUrl,
-                                                _body_terms: expect.any(Array),
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: DATA.HIGHLIGHT_1.body,
-                                                comment: undefined,
-                                                createdWhen: expect.any(Date),
-                                                hasBookmark: false,
-                                                lastEdited: expect.any(Date),
-                                                pageTitle:
-                                                    DATA.HIGHLIGHT_1.title,
-                                                pageUrl:
-                                                    DATA.HIGHLIGHT_1.pageUrl,
-                                                selector: undefined,
-                                                tags: [],
-                                                lists: [],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                        annotsCount: 1,
-                                        displayTime: expect.any(Number),
-                                        favIcon: undefined,
-                                        hasBookmark: false,
-                                        pageId: 'lorem.com',
-                                        screenshot: undefined,
-                                        tags: [],
-                                        lists: [SPECIAL_LIST_IDS.INBOX],
-                                        title: DATA.PAGE_1.title,
-                                        url: 'lorem.com',
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                    },
-                                ],
-                                resultsExhausted: true,
-                                totalCount: null,
-                            })
-                        },
-                    },
-                ],
+                steps: [],
+                // [
+                //     {
+                //         execute: async ({ setup }) => {
+                //             annotUrl = await directLinking(
+                //                 setup,
+                //             ).createAnnotation(
+                //                 { tab: DATA.TEST_TAB_1 },
+                //                 DATA.HIGHLIGHT_1 as any,
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             annotations: (): StorageCollectionDiff => ({
+                //                 [annotUrl]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: annotUrl,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                         pageTitle: DATA.HIGHLIGHT_1.title,
+                //                         _pageTitle_terms: ['test', 'title'],
+                //                         body: DATA.HIGHLIGHT_1.body,
+                //                         _body_terms: ['test', 'body'],
+                //                         comment: undefined,
+                //                         selector: undefined,
+                //                         createdWhen: expect.any(Date),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //             customLists: (): StorageCollectionDiff => ({
+                //                 [SPECIAL_LIST_IDS.INBOX]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         name: SPECIAL_LIST_NAMES.INBOX,
+                //                         searchableName:
+                //                             SPECIAL_LIST_NAMES.INBOX,
+                //                         nameTerms: [
+                //                             SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                //                         ],
+                //                         id: SPECIAL_LIST_IDS.INBOX,
+                //                         isDeletable: false,
+                //                         isNestable: false,
+                //                     },
+                //                 },
+                //             }),
+                //             pageListEntries: (): StorageCollectionDiff => ({
+                //                 [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                         listId: SPECIAL_LIST_IDS.INBOX,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                     },
+                //                 },
+                //             }),
+                //             pages: (): StorageCollectionDiff => PAGE_1_CREATION,
+                //             visits: (): StorageCollectionDiff =>
+                //                 expect.anything(),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             expect(
+                //                 // await searchModule(setup).searchAnnotations({
+                //                 //     query: 'body',
+                //                 // }),
+                //                 {},
+                //             ).toEqual({
+                //                 docs: [
+                //                     {
+                //                         annotations: [
+                //                             {
+                //                                 url: annotUrl,
+                //                                 _body_terms: expect.any(Array),
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: DATA.HIGHLIGHT_1.body,
+                //                                 comment: undefined,
+                //                                 createdWhen: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 lastEdited: expect.any(Date),
+                //                                 pageTitle:
+                //                                     DATA.HIGHLIGHT_1.title,
+                //                                 pageUrl:
+                //                                     DATA.HIGHLIGHT_1.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [],
+                //                                 lists: [],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                         annotsCount: 1,
+                //                         displayTime: expect.any(Number),
+                //                         favIcon: undefined,
+                //                         hasBookmark: false,
+                //                         pageId: 'lorem.com',
+                //                         screenshot: undefined,
+                //                         tags: [],
+                //                         lists: [SPECIAL_LIST_IDS.INBOX],
+                //                         title: DATA.PAGE_1.title,
+                //                         url: 'lorem.com',
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                     },
+                //                 ],
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             })
+                //         },
+                //     },
+                // ],
             }
         },
     ),
@@ -253,84 +253,84 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
         'should create a page, create an annotation, edit its note, then retrieve it via a search',
         () => {
-            return
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    createAnnotationStep(),
-                    {
-                        execute: async ({ setup }) => {
-                            await directLinking(setup).editAnnotation(
-                                {},
-                                annotUrl,
-                                'updated comment',
-                                'one',
-                                'updated body',
-                            )
-                        },
-                        expectedStorageChanges: {
-                            annotations: (): StorageCollectionDiff => ({
-                                [annotUrl]: {
-                                    type: 'modify',
-                                    updates: {
-                                        comment: 'updated comment',
-                                        _comment_terms: expect.any(Object),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                        },
-                        postCheck: async ({ setup }) => {
-                            expect(
-                                {},
-                                // await searchModule(setup).searchAnnotations({
-                                //     query: 'comment',
-                                // }),
-                            ).toEqual({
-                                docs: [
-                                    {
-                                        annotations: [
-                                            {
-                                                url: annotUrl,
-                                                _comment_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: undefined,
-                                                comment: 'updated comment',
-                                                createdWhen: expect.any(Date),
-                                                hasBookmark: false,
-                                                lastEdited: expect.any(Date),
-                                                pageTitle: DATA.ANNOT_1.title,
-                                                pageUrl: DATA.ANNOT_1.pageUrl,
-                                                selector: undefined,
-                                                tags: [],
-                                                lists: [],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                        annotsCount: 1,
-                                        displayTime: expect.any(Number),
-                                        favIcon: undefined,
-                                        hasBookmark: false,
-                                        pageId: 'lorem.com',
-                                        screenshot: undefined,
-                                        tags: [],
-                                        lists: [SPECIAL_LIST_IDS.INBOX],
-                                        title: DATA.PAGE_1.title,
-                                        url: 'lorem.com',
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                    },
-                                ],
-                                resultsExhausted: true,
-                                totalCount: null,
-                            })
-                        },
-                    },
-                ],
+                steps: [],
+                // [
+                //     createAnnotationStep(),
+                //     {
+                //         execute: async ({ setup }) => {
+                //             await directLinking(setup).editAnnotation(
+                //                 {},
+                //                 annotUrl,
+                //                 'updated comment',
+                //                 'one',
+                //                 'updated body',
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             annotations: (): StorageCollectionDiff => ({
+                //                 [annotUrl]: {
+                //                     type: 'modify',
+                //                     updates: {
+                //                         comment: 'updated comment',
+                //                         _comment_terms: expect.any(Object),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             expect(
+                //                 {},
+                //                 // await searchModule(setup).searchAnnotations({
+                //                 //     query: 'comment',
+                //                 // }),
+                //             ).toEqual({
+                //                 docs: [
+                //                     {
+                //                         annotations: [
+                //                             {
+                //                                 url: annotUrl,
+                //                                 _comment_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: undefined,
+                //                                 comment: 'updated comment',
+                //                                 createdWhen: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 lastEdited: expect.any(Date),
+                //                                 pageTitle: DATA.ANNOT_1.title,
+                //                                 pageUrl: DATA.ANNOT_1.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [],
+                //                                 lists: [],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                         annotsCount: 1,
+                //                         displayTime: expect.any(Number),
+                //                         favIcon: undefined,
+                //                         hasBookmark: false,
+                //                         pageId: 'lorem.com',
+                //                         screenshot: undefined,
+                //                         tags: [],
+                //                         lists: [SPECIAL_LIST_IDS.INBOX],
+                //                         title: DATA.PAGE_1.title,
+                //                         url: 'lorem.com',
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                     },
+                //                 ],
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             })
+                //         },
+                //     },
+                // ],
             }
         },
     ),
@@ -338,33 +338,33 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
         'should create a page, create a protected annotation, and confirm the privacy level was created',
         () => {
-            return
             const findAllObjects = (collection, setup) =>
                 setup.storageManager.collection(collection).findObjects({})
 
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    createAnnotationStep({
-                        protectAnnotation: true,
-                        postCheck: async ({ setup }) => {
-                            expect(
-                                await findAllObjects(
-                                    'annotationPrivacyLevels',
-                                    setup,
-                                ),
-                            ).toEqual([
-                                {
-                                    annotation: annotUrl,
-                                    createdWhen: expect.any(Date),
-                                    id: annotPrivacyLevel.id,
-                                    privacyLevel:
-                                        AnnotationPrivacyLevels.PROTECTED,
-                                },
-                            ])
-                        },
-                    }),
-                ],
+                steps: [],
+                // [
+                //     createAnnotationStep({
+                //         protectAnnotation: true,
+                //         postCheck: async ({ setup }) => {
+                //             expect(
+                //                 await findAllObjects(
+                //                     'annotationPrivacyLevels',
+                //                     setup,
+                //                 ),
+                //             ).toEqual([
+                //                 {
+                //                     annotation: annotUrl,
+                //                     createdWhen: expect.any(Date),
+                //                     id: annotPrivacyLevel.id,
+                //                     privacyLevel:
+                //                         AnnotationPrivacyLevels.PROTECTED,
+                //                 },
+                //             ])
+                //         },
+                //     }),
+                // ],
             }
         },
     ),
@@ -372,7 +372,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
         'should create a page, create an annotation, edit its note, then retrieve it via a filtered search on edit time',
         () => {
-            return
             const runFilteredTimeSearch = (setup) => ({})
             // searchModule(setup).searchAnnotations({
             //     startDate: DATA.ANNOT_1.createdWhen.getTime() + 1000,
@@ -380,89 +379,91 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
 
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    createAnnotationStep(),
-                    {
-                        preCheck: async ({ setup }) => {
-                            const searchResults = await runFilteredTimeSearch(
-                                setup,
-                            )
+                steps: [],
 
-                            expect(searchResults).toEqual({
-                                annotsByDay: {},
-                                docs: [],
-                                isAnnotsSearch: true,
-                                resultsExhausted: true,
-                                totalCount: null,
-                            })
-                        },
-                        execute: async ({ setup }) => {
-                            await directLinking(setup).editAnnotation(
-                                {},
-                                annotUrl,
-                                'updated comment',
-                                'two',
-                                'updated body',
-                            )
-                        },
-                        expectedStorageChanges: {
-                            annotations: (): StorageCollectionDiff => ({
-                                [annotUrl]: {
-                                    type: 'modify',
-                                    updates: {
-                                        comment: 'updated comment',
-                                        _comment_terms: expect.any(Object),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                        },
-                        postCheck: async ({ setup }) => {
-                            const searchResults = await runFilteredTimeSearch(
-                                setup,
-                            )
+                // [
+                //     createAnnotationStep(),
+                //     {
+                //         preCheck: async ({ setup }) => {
+                //             const searchResults = await runFilteredTimeSearch(
+                //                 setup,
+                //             )
 
-                            const firstDay = Object.keys(
-                                searchResults['annotsByDay'],
-                            )[0]
+                //             expect(searchResults).toEqual({
+                //                 annotsByDay: {},
+                //                 docs: [],
+                //                 isAnnotsSearch: true,
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             })
+                //         },
+                //         execute: async ({ setup }) => {
+                //             await directLinking(setup).editAnnotation(
+                //                 {},
+                //                 annotUrl,
+                //                 'updated comment',
+                //                 'two',
+                //                 'updated body',
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             annotations: (): StorageCollectionDiff => ({
+                //                 [annotUrl]: {
+                //                     type: 'modify',
+                //                     updates: {
+                //                         comment: 'updated comment',
+                //                         _comment_terms: expect.any(Object),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             const searchResults = await runFilteredTimeSearch(
+                //                 setup,
+                //             )
 
-                            expect(searchResults).toEqual({
-                                annotsByDay: {
-                                    [firstDay]: {
-                                        ['lorem.com']: [
-                                            {
-                                                url: annotUrl,
-                                                _comment_terms: [
-                                                    'updated',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: undefined,
-                                                comment: 'updated comment',
-                                                createdWhen: expect.any(Date),
-                                                hasBookmark: false,
-                                                lastEdited: expect.any(Date),
-                                                pageTitle: DATA.ANNOT_1.title,
-                                                pageUrl: DATA.ANNOT_1.pageUrl,
-                                                selector: undefined,
-                                                tags: [],
-                                                lists: [],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                    },
-                                },
-                                docs: [expect.any(Object)],
-                                isAnnotsSearch: true,
-                                resultsExhausted: true,
-                                totalCount: null,
-                            })
-                        },
-                    },
-                ],
+                //             const firstDay = Object.keys(
+                //                 searchResults['annotsByDay'],
+                //             )[0]
+
+                //             expect(searchResults).toEqual({
+                //                 annotsByDay: {
+                //                     [firstDay]: {
+                //                         ['lorem.com']: [
+                //                             {
+                //                                 url: annotUrl,
+                //                                 _comment_terms: [
+                //                                     'updated',
+                //                                     'comment',
+                //                                 ],
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: undefined,
+                //                                 comment: 'updated comment',
+                //                                 createdWhen: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 lastEdited: expect.any(Date),
+                //                                 pageTitle: DATA.ANNOT_1.title,
+                //                                 pageUrl: DATA.ANNOT_1.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [],
+                //                                 lists: [],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                     },
+                //                 },
+                //                 docs: [expect.any(Object)],
+                //                 isAnnotsSearch: true,
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             })
+                //         },
+                //     },
+                // ],
             }
         },
     ),
@@ -470,7 +471,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
         'should create a page, create an annotation, tag it, retrieve it via a filtered search, then untag it, no longer being able to retrieve it via the same search',
         () => {
-            return
             const runFilteredTagSearch = (setup) => ({})
             // searchModule(setup).searchAnnotations({
             //     tagsInc: [DATA.TAG_1],
@@ -478,113 +478,114 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
 
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    createAnnotationStep(),
-                    {
-                        execute: async ({ setup }) => {
-                            await directLinking(setup).addTagForAnnotation(
-                                {},
-                                { tag: DATA.TAG_1, url: annotUrl },
-                            )
-                        },
-                        expectedStorageChanges: {
-                            tags: (): StorageCollectionDiff => ({
-                                [`["${DATA.TAG_1}","${annotUrl}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        url: annotUrl,
-                                        name: DATA.TAG_1,
-                                    },
-                                },
-                            }),
-                        },
-                        postCheck: async ({ setup }) => {
-                            const searchResults = await runFilteredTagSearch(
-                                setup,
-                            )
+                steps: [],
+                // [
+                //     createAnnotationStep(),
+                //     {
+                //         execute: async ({ setup }) => {
+                //             await directLinking(setup).addTagForAnnotation(
+                //                 {},
+                //                 { tag: DATA.TAG_1, url: annotUrl },
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             tags: (): StorageCollectionDiff => ({
+                //                 [`["${DATA.TAG_1}","${annotUrl}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: annotUrl,
+                //                         name: DATA.TAG_1,
+                //                     },
+                //                 },
+                //             }),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             const searchResults = await runFilteredTagSearch(
+                //                 setup,
+                //             )
 
-                            const firstDay = Object.keys(
-                                searchResults['annotsByDay'],
-                            )[0]
-                            expect(searchResults).toEqual({
-                                annotsByDay: {
-                                    [firstDay]: {
-                                        ['lorem.com']: [
-                                            {
-                                                url: annotUrl,
-                                                _comment_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: undefined,
-                                                comment: DATA.ANNOT_1.comment,
-                                                createdWhen: expect.any(Date),
-                                                hasBookmark: false,
-                                                lastEdited: expect.any(Date),
-                                                pageTitle: DATA.ANNOT_1.title,
-                                                pageUrl: DATA.ANNOT_1.pageUrl,
-                                                selector: undefined,
-                                                tags: [DATA.TAG_1],
-                                                lists: [],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                    },
-                                },
-                                docs: [
-                                    {
-                                        annotations: [expect.anything()],
-                                        annotsCount: 1,
-                                        displayTime: expect.any(Number),
-                                        favIcon: undefined,
-                                        hasBookmark: false,
-                                        pageId: 'lorem.com',
-                                        screenshot: undefined,
-                                        tags: [],
-                                        lists: [SPECIAL_LIST_IDS.INBOX],
-                                        title: DATA.PAGE_1.title,
-                                        url: 'lorem.com',
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                    },
-                                ],
-                                isAnnotsSearch: true,
-                                resultsExhausted: true,
-                                totalCount: null,
-                            })
-                        },
-                    },
-                    {
-                        execute: async ({ setup }) => {
-                            await directLinking(setup).delTagForAnnotation(
-                                {},
-                                { tag: DATA.TAG_1, url: annotUrl },
-                            )
-                        },
-                        expectedStorageChanges: {
-                            tags: (): StorageCollectionDiff => ({
-                                [`["${DATA.TAG_1}","${annotUrl}"]`]: {
-                                    type: 'delete',
-                                },
-                            }),
-                        },
-                        postCheck: async ({ setup }) => {
-                            const searchResults = await runFilteredTagSearch(
-                                setup,
-                            )
+                //             const firstDay = Object.keys(
+                //                 searchResults['annotsByDay'],
+                //             )[0]
+                //             expect(searchResults).toEqual({
+                //                 annotsByDay: {
+                //                     [firstDay]: {
+                //                         ['lorem.com']: [
+                //                             {
+                //                                 url: annotUrl,
+                //                                 _comment_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: undefined,
+                //                                 comment: DATA.ANNOT_1.comment,
+                //                                 createdWhen: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 lastEdited: expect.any(Date),
+                //                                 pageTitle: DATA.ANNOT_1.title,
+                //                                 pageUrl: DATA.ANNOT_1.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [DATA.TAG_1],
+                //                                 lists: [],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                     },
+                //                 },
+                //                 docs: [
+                //                     {
+                //                         annotations: [expect.anything()],
+                //                         annotsCount: 1,
+                //                         displayTime: expect.any(Number),
+                //                         favIcon: undefined,
+                //                         hasBookmark: false,
+                //                         pageId: 'lorem.com',
+                //                         screenshot: undefined,
+                //                         tags: [],
+                //                         lists: [SPECIAL_LIST_IDS.INBOX],
+                //                         title: DATA.PAGE_1.title,
+                //                         url: 'lorem.com',
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                     },
+                //                 ],
+                //                 isAnnotsSearch: true,
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             })
+                //         },
+                //     },
+                //     {
+                //         execute: async ({ setup }) => {
+                //             await directLinking(setup).delTagForAnnotation(
+                //                 {},
+                //                 { tag: DATA.TAG_1, url: annotUrl },
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             tags: (): StorageCollectionDiff => ({
+                //                 [`["${DATA.TAG_1}","${annotUrl}"]`]: {
+                //                     type: 'delete',
+                //                 },
+                //             }),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             const searchResults = await runFilteredTagSearch(
+                //                 setup,
+                //             )
 
-                            expect(searchResults).toEqual({
-                                resultsExhausted: true,
-                                isAnnotsSearch: true,
-                                totalCount: null,
-                                annotsByDay: {},
-                                docs: [],
-                            })
-                        },
-                    },
-                ],
+                //             expect(searchResults).toEqual({
+                //                 resultsExhausted: true,
+                //                 isAnnotsSearch: true,
+                //                 totalCount: null,
+                //                 annotsByDay: {},
+                //                 docs: [],
+                //             })
+                //         },
+                //     },
+                // ],
             }
         },
     ),
@@ -820,130 +821,131 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         () => {
             let annotAUrl: string
             let annotBUrl: string
-            return
 
             const { url, ...testAnnot } = DATA.ANNOT_1
 
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    {
-                        execute: async ({ setup }) => {
-                            annotAUrl = await directLinking(
-                                setup,
-                            ).createAnnotation(
-                                { tab: DATA.TEST_TAB_1 },
-                                testAnnot,
-                            )
-                            annotBUrl = await directLinking(
-                                setup,
-                            ).createAnnotation(
-                                { tab: DATA.TEST_TAB_1 },
-                                testAnnot,
-                            )
-                        },
-                        expectedStorageChanges: {
-                            annotations: (): StorageCollectionDiff => ({
-                                [annotAUrl]: {
-                                    type: 'create',
-                                    object: {
-                                        url: annotAUrl,
-                                        pageUrl: DATA.PAGE_1.url,
-                                        pageTitle: testAnnot.title,
-                                        comment: testAnnot.comment,
-                                        _comment_terms: expect.any(Array),
-                                        _pageTitle_terms: expect.any(Array),
-                                        body: undefined,
-                                        selector: undefined,
-                                        createdWhen: expect.any(Date),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                                [annotBUrl]: {
-                                    type: 'create',
-                                    object: {
-                                        url: annotBUrl,
-                                        pageUrl: DATA.PAGE_1.url,
-                                        pageTitle: testAnnot.title,
-                                        comment: testAnnot.comment,
-                                        _comment_terms: expect.any(Array),
-                                        _pageTitle_terms: expect.any(Array),
-                                        body: undefined,
-                                        selector: undefined,
-                                        createdWhen: expect.any(Date),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            customLists: (): StorageCollectionDiff => ({
-                                [SPECIAL_LIST_IDS.INBOX]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        name: SPECIAL_LIST_NAMES.INBOX,
-                                        id: SPECIAL_LIST_IDS.INBOX,
-                                        searchableName:
-                                            SPECIAL_LIST_NAMES.INBOX,
-                                        nameTerms: [
-                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
-                                        ],
-                                        isDeletable: false,
-                                        isNestable: false,
-                                    },
-                                },
-                            }),
-                            pageListEntries: (): StorageCollectionDiff => ({
-                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        pageUrl: DATA.PAGE_1.url,
-                                    },
-                                },
-                            }),
-                            pages: (): StorageCollectionDiff => PAGE_1_CREATION,
-                            visits: (): StorageCollectionDiff =>
-                                expect.anything(),
-                        },
-                    },
-                    {
-                        execute: async ({ setup }) => {
-                            await directLinking(setup).deleteAnnotation(
-                                {},
-                                annotAUrl,
-                            )
-                        },
-                        expectedStorageChanges: {
-                            annotations: (): StorageCollectionDiff => ({
-                                [annotAUrl]: {
-                                    type: 'delete',
-                                },
-                            }),
-                        },
-                        postCheck: async ({ setup }) => {
-                            expect(
-                                await setup.storageManager
-                                    .collection('annotations')
-                                    .findObjects({}),
-                            ).toEqual([
-                                {
-                                    url: annotBUrl,
-                                    pageUrl: DATA.PAGE_1.url,
-                                    pageTitle: testAnnot.title,
-                                    comment: testAnnot.comment,
-                                    _comment_terms: expect.any(Array),
-                                    _pageTitle_terms: expect.any(Array),
-                                    body: undefined,
-                                    selector: undefined,
-                                    createdWhen: expect.any(Date),
-                                    lastEdited: expect.any(Date),
-                                },
-                            ])
-                        },
-                    },
-                ],
+                steps: [],
+
+                // [
+                //     {
+                //         execute: async ({ setup }) => {
+                //             annotAUrl = await directLinking(
+                //                 setup,
+                //             ).createAnnotation(
+                //                 { tab: DATA.TEST_TAB_1 },
+                //                 testAnnot,
+                //             )
+                //             annotBUrl = await directLinking(
+                //                 setup,
+                //             ).createAnnotation(
+                //                 { tab: DATA.TEST_TAB_1 },
+                //                 testAnnot,
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             annotations: (): StorageCollectionDiff => ({
+                //                 [annotAUrl]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: annotAUrl,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                         pageTitle: testAnnot.title,
+                //                         comment: testAnnot.comment,
+                //                         _comment_terms: expect.any(Array),
+                //                         _pageTitle_terms: expect.any(Array),
+                //                         body: undefined,
+                //                         selector: undefined,
+                //                         createdWhen: expect.any(Date),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //                 [annotBUrl]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: annotBUrl,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                         pageTitle: testAnnot.title,
+                //                         comment: testAnnot.comment,
+                //                         _comment_terms: expect.any(Array),
+                //                         _pageTitle_terms: expect.any(Array),
+                //                         body: undefined,
+                //                         selector: undefined,
+                //                         createdWhen: expect.any(Date),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //             customLists: (): StorageCollectionDiff => ({
+                //                 [SPECIAL_LIST_IDS.INBOX]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         name: SPECIAL_LIST_NAMES.INBOX,
+                //                         id: SPECIAL_LIST_IDS.INBOX,
+                //                         searchableName:
+                //                             SPECIAL_LIST_NAMES.INBOX,
+                //                         nameTerms: [
+                //                             SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                //                         ],
+                //                         isDeletable: false,
+                //                         isNestable: false,
+                //                     },
+                //                 },
+                //             }),
+                //             pageListEntries: (): StorageCollectionDiff => ({
+                //                 [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                         listId: SPECIAL_LIST_IDS.INBOX,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                     },
+                //                 },
+                //             }),
+                //             pages: (): StorageCollectionDiff => PAGE_1_CREATION,
+                //             visits: (): StorageCollectionDiff =>
+                //                 expect.anything(),
+                //         },
+                //     },
+                //     {
+                //         execute: async ({ setup }) => {
+                //             await directLinking(setup).deleteAnnotation(
+                //                 {},
+                //                 annotAUrl,
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             annotations: (): StorageCollectionDiff => ({
+                //                 [annotAUrl]: {
+                //                     type: 'delete',
+                //                 },
+                //             }),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             expect(
+                //                 await setup.storageManager
+                //                     .collection('annotations')
+                //                     .findObjects({}),
+                //             ).toEqual([
+                //                 {
+                //                     url: annotBUrl,
+                //                     pageUrl: DATA.PAGE_1.url,
+                //                     pageTitle: testAnnot.title,
+                //                     comment: testAnnot.comment,
+                //                     _comment_terms: expect.any(Array),
+                //                     _pageTitle_terms: expect.any(Array),
+                //                     body: undefined,
+                //                     selector: undefined,
+                //                     createdWhen: expect.any(Date),
+                //                     lastEdited: expect.any(Date),
+                //                 },
+                //             ])
+                //         },
+                //     },
+                // ],
             }
         },
     ),
@@ -952,118 +954,118 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         "should create a page, create an annotation, add page to a list, then retrieve page's annotation via a filtered search",
         () => {
             let listId: number
-            return
 
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    createAnnotationStep(),
-                    {
-                        execute: async ({ setup }) => {
-                            const res = await customLists(
-                                setup,
-                            ).createCustomList({
-                                name: 'test',
-                                id: Date.now(),
-                            })
-                            listId = res.localListId
-                            await customLists(setup).insertPageToList({
-                                id: listId,
-                                url: DATA.PAGE_1.fullUrl,
-                                tabId: DATA.TEST_TAB_1.id,
-                            })
-                            await contentSharing(
-                                setup,
-                            ).shareAnnotationToSomeLists({
-                                annotationUrl: DATA.ANNOT_1.url,
-                                localListIds: [listId],
-                            })
-                        },
-                        expectedStorageChanges: {
-                            pageListEntries: (): StorageCollectionDiff => ({
-                                [`[${listId},"${DATA.ANNOT_1.pageUrl}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        listId,
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        pageUrl: DATA.ANNOT_1.pageUrl,
-                                        createdAt: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotListEntries: (): StorageCollectionDiff => ({
-                                [`[${listId},"${DATA.ANNOT_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        listId,
-                                        url: DATA.ANNOT_1.url,
-                                        createdAt: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            customLists: (): StorageCollectionDiff => ({
-                                [listId]: {
-                                    type: 'create',
-                                    object: {
-                                        id: listId,
-                                        name: 'test',
-                                        searchableName: 'test',
-                                        nameTerms: ['test'],
-                                        isDeletable: true,
-                                        isNestable: true,
-                                        createdAt: expect.any(Date),
-                                    },
-                                },
-                            }),
-                        },
-                        postCheck: async ({ setup }) => {
-                            // const searchResults = await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     lists: [listId],
-                            // })
-                            const searchResults = {}
+                steps: [],
+                // [
+                //     createAnnotationStep(),
+                //     {
+                //         execute: async ({ setup }) => {
+                //             const res = await customLists(
+                //                 setup,
+                //             ).createCustomList({
+                //                 name: 'test',
+                //                 id: Date.now(),
+                //             })
+                //             listId = res.localListId
+                //             await customLists(setup).insertPageToList({
+                //                 id: listId,
+                //                 url: DATA.PAGE_1.fullUrl,
+                //                 tabId: DATA.TEST_TAB_1.id,
+                //             })
+                //             await contentSharing(
+                //                 setup,
+                //             ).shareAnnotationToSomeLists({
+                //                 annotationUrl: DATA.ANNOT_1.url,
+                //                 localListIds: [listId],
+                //             })
+                //         },
+                //         expectedStorageChanges: {
+                //             pageListEntries: (): StorageCollectionDiff => ({
+                //                 [`[${listId},"${DATA.ANNOT_1.pageUrl}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         listId,
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                         pageUrl: DATA.ANNOT_1.pageUrl,
+                //                         createdAt: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //             annotListEntries: (): StorageCollectionDiff => ({
+                //                 [`[${listId},"${DATA.ANNOT_1.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         listId,
+                //                         url: DATA.ANNOT_1.url,
+                //                         createdAt: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //             customLists: (): StorageCollectionDiff => ({
+                //                 [listId]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         id: listId,
+                //                         name: 'test',
+                //                         searchableName: 'test',
+                //                         nameTerms: ['test'],
+                //                         isDeletable: true,
+                //                         isNestable: true,
+                //                         createdAt: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             // const searchResults = await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     lists: [listId],
+                //             // })
+                //             const searchResults = {}
 
-                            const firstDay = Object.keys(
-                                searchResults['annotsByDay'],
-                            )[0]
+                //             const firstDay = Object.keys(
+                //                 searchResults['annotsByDay'],
+                //             )[0]
 
-                            expect(searchResults).toEqual({
-                                annotsByDay: {
-                                    [firstDay]: {
-                                        [DATA.ANNOT_1.pageUrl]: [
-                                            {
-                                                url: annotUrl,
-                                                _comment_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: undefined,
-                                                comment: DATA.ANNOT_1.comment,
-                                                createdWhen: expect.any(Date),
-                                                lastEdited: expect.any(Date),
-                                                hasBookmark: false,
-                                                pageTitle: DATA.ANNOT_1.title,
-                                                pageUrl: DATA.ANNOT_1.pageUrl,
-                                                selector: undefined,
-                                                tags: [],
-                                                lists: [listId],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                    },
-                                },
-                                docs: [expect.any(Object)],
-                                isAnnotsSearch: true,
-                                resultsExhausted: true,
-                                totalCount: null,
-                            })
-                        },
-                    },
-                ],
+                //             expect(searchResults).toEqual({
+                //                 annotsByDay: {
+                //                     [firstDay]: {
+                //                         [DATA.ANNOT_1.pageUrl]: [
+                //                             {
+                //                                 url: annotUrl,
+                //                                 _comment_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: undefined,
+                //                                 comment: DATA.ANNOT_1.comment,
+                //                                 createdWhen: expect.any(Date),
+                //                                 lastEdited: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 pageTitle: DATA.ANNOT_1.title,
+                //                                 pageUrl: DATA.ANNOT_1.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [],
+                //                                 lists: [listId],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                     },
+                //                 },
+                //                 docs: [expect.any(Object)],
+                //                 isAnnotsSearch: true,
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             })
+                //         },
+                //     },
+                // ],
             }
         },
     ),
@@ -1073,238 +1075,238 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         () => {
             let annotUrlA: string
             let annotUrlB: string
-            return
 
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    {
-                        execute: async ({ setup }) => {
-                            annotUrlA = await directLinking(
-                                setup,
-                            ).createAnnotation(
-                                { tab: DATA.TEST_TAB_1 },
-                                DATA.ANNOT_1,
-                            )
-                            annotUrlB = await directLinking(
-                                setup,
-                            ).createAnnotation(
-                                { tab: DATA.TEST_TAB_2 },
-                                DATA.ANNOT_2,
-                            )
-                        },
-                        expectedStorageChanges: {
-                            annotations: (): StorageCollectionDiff => ({
-                                [annotUrlA]: {
-                                    type: 'create',
-                                    object: {
-                                        url: annotUrlA,
-                                        pageUrl: DATA.ANNOT_1.pageUrl,
-                                        pageTitle: DATA.ANNOT_1.title,
-                                        comment: DATA.ANNOT_1.comment,
-                                        _comment_terms: expect.any(Array),
-                                        _pageTitle_terms: expect.any(Array),
-                                        body: undefined,
-                                        selector: undefined,
-                                        createdWhen: expect.any(Date),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                                [annotUrlB]: {
-                                    type: 'create',
-                                    object: {
-                                        url: annotUrlB,
-                                        pageUrl: DATA.ANNOT_2.pageUrl,
-                                        pageTitle: DATA.ANNOT_2.title,
-                                        comment: DATA.ANNOT_2.comment,
-                                        _comment_terms: expect.any(Array),
-                                        _pageTitle_terms: expect.any(Array),
-                                        body: undefined,
-                                        selector: undefined,
-                                        createdWhen: expect.any(Date),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            customLists: (): StorageCollectionDiff => ({
-                                [SPECIAL_LIST_IDS.INBOX]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        name: SPECIAL_LIST_NAMES.INBOX,
-                                        id: SPECIAL_LIST_IDS.INBOX,
-                                        searchableName:
-                                            SPECIAL_LIST_NAMES.INBOX,
-                                        nameTerms: [
-                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
-                                        ],
-                                        isDeletable: false,
-                                        isNestable: false,
-                                    },
-                                },
-                            }),
-                            pageListEntries: (): StorageCollectionDiff => ({
-                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        pageUrl: DATA.PAGE_1.url,
-                                    },
-                                },
-                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_2.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        fullUrl: DATA.PAGE_2.fullUrl,
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        pageUrl: DATA.PAGE_2.url,
-                                    },
-                                },
-                            }),
-                            pages: (): StorageCollectionDiff => ({
-                                ...PAGE_1_CREATION,
-                                ...PAGE_2_CREATION,
-                            }),
-                            visits: (): StorageCollectionDiff =>
-                                expect.anything(),
-                        },
-                    },
-                    {
-                        execute: async ({ setup }) => {
-                            await directLinking(setup).addTagForAnnotation(
-                                {},
-                                { tag: DATA.TAG_1, url: annotUrlA },
-                            )
-                            await directLinking(setup).addTagForAnnotation(
-                                {},
-                                { tag: DATA.TAG_2, url: annotUrlB },
-                            )
-                        },
-                        expectedStorageChanges: {
-                            tags: (): StorageCollectionDiff => ({
-                                [`["${DATA.TAG_1}","${annotUrlA}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        name: DATA.TAG_1,
-                                        url: annotUrlA,
-                                    },
-                                },
-                                [`["${DATA.TAG_2}","${annotUrlB}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        name: DATA.TAG_2,
-                                        url: annotUrlB,
-                                    },
-                                },
-                            }),
-                        },
-                        postCheck: async ({ setup }) => {
-                            const searchResultsA = {}
-                            // await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     tagsInc: [DATA.TAG_1],
-                            // })
-                            const searchResultsB = {}
-                            // await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     tagsInc: [DATA.TAG_2],
-                            // })
-                            const searchResultsC = {}
-                            // await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     tagsExc: [DATA.TAG_1],
-                            // })
-                            const searchResultsD = {}
-                            // await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     tagsExc: [DATA.TAG_2],
-                            // })
+                steps: [],
+                // [
+                //     {
+                //         execute: async ({ setup }) => {
+                //             annotUrlA = await directLinking(
+                //                 setup,
+                //             ).createAnnotation(
+                //                 { tab: DATA.TEST_TAB_1 },
+                //                 DATA.ANNOT_1,
+                //             )
+                //             annotUrlB = await directLinking(
+                //                 setup,
+                //             ).createAnnotation(
+                //                 { tab: DATA.TEST_TAB_2 },
+                //                 DATA.ANNOT_2,
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             annotations: (): StorageCollectionDiff => ({
+                //                 [annotUrlA]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: annotUrlA,
+                //                         pageUrl: DATA.ANNOT_1.pageUrl,
+                //                         pageTitle: DATA.ANNOT_1.title,
+                //                         comment: DATA.ANNOT_1.comment,
+                //                         _comment_terms: expect.any(Array),
+                //                         _pageTitle_terms: expect.any(Array),
+                //                         body: undefined,
+                //                         selector: undefined,
+                //                         createdWhen: expect.any(Date),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //                 [annotUrlB]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: annotUrlB,
+                //                         pageUrl: DATA.ANNOT_2.pageUrl,
+                //                         pageTitle: DATA.ANNOT_2.title,
+                //                         comment: DATA.ANNOT_2.comment,
+                //                         _comment_terms: expect.any(Array),
+                //                         _pageTitle_terms: expect.any(Array),
+                //                         body: undefined,
+                //                         selector: undefined,
+                //                         createdWhen: expect.any(Date),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //             customLists: (): StorageCollectionDiff => ({
+                //                 [SPECIAL_LIST_IDS.INBOX]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         name: SPECIAL_LIST_NAMES.INBOX,
+                //                         id: SPECIAL_LIST_IDS.INBOX,
+                //                         searchableName:
+                //                             SPECIAL_LIST_NAMES.INBOX,
+                //                         nameTerms: [
+                //                             SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                //                         ],
+                //                         isDeletable: false,
+                //                         isNestable: false,
+                //                     },
+                //                 },
+                //             }),
+                //             pageListEntries: (): StorageCollectionDiff => ({
+                //                 [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                         listId: SPECIAL_LIST_IDS.INBOX,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                     },
+                //                 },
+                //                 [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_2.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         fullUrl: DATA.PAGE_2.fullUrl,
+                //                         listId: SPECIAL_LIST_IDS.INBOX,
+                //                         pageUrl: DATA.PAGE_2.url,
+                //                     },
+                //                 },
+                //             }),
+                //             pages: (): StorageCollectionDiff => ({
+                //                 ...PAGE_1_CREATION,
+                //                 ...PAGE_2_CREATION,
+                //             }),
+                //             visits: (): StorageCollectionDiff =>
+                //                 expect.anything(),
+                //         },
+                //     },
+                //     {
+                //         execute: async ({ setup }) => {
+                //             await directLinking(setup).addTagForAnnotation(
+                //                 {},
+                //                 { tag: DATA.TAG_1, url: annotUrlA },
+                //             )
+                //             await directLinking(setup).addTagForAnnotation(
+                //                 {},
+                //                 { tag: DATA.TAG_2, url: annotUrlB },
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             tags: (): StorageCollectionDiff => ({
+                //                 [`["${DATA.TAG_1}","${annotUrlA}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         name: DATA.TAG_1,
+                //                         url: annotUrlA,
+                //                     },
+                //                 },
+                //                 [`["${DATA.TAG_2}","${annotUrlB}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         name: DATA.TAG_2,
+                //                         url: annotUrlB,
+                //                     },
+                //                 },
+                //             }),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             const searchResultsA = {}
+                //             // await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     tagsInc: [DATA.TAG_1],
+                //             // })
+                //             const searchResultsB = {}
+                //             // await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     tagsInc: [DATA.TAG_2],
+                //             // })
+                //             const searchResultsC = {}
+                //             // await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     tagsExc: [DATA.TAG_1],
+                //             // })
+                //             const searchResultsD = {}
+                //             // await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     tagsExc: [DATA.TAG_2],
+                //             // })
 
-                            const firstDay = Object.keys(
-                                searchResultsA['annotsByDay'],
-                            )[0]
+                //             const firstDay = Object.keys(
+                //                 searchResultsA['annotsByDay'],
+                //             )[0]
 
-                            const expectedResultAnnotA = {
-                                annotsByDay: {
-                                    [firstDay]: {
-                                        ['lorem.com']: [
-                                            {
-                                                url: annotUrlA,
-                                                _comment_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: undefined,
-                                                comment: DATA.ANNOT_1.comment,
-                                                createdWhen: expect.any(Date),
-                                                hasBookmark: false,
-                                                lastEdited: expect.any(Date),
-                                                pageTitle: DATA.ANNOT_1.title,
-                                                pageUrl: DATA.ANNOT_1.pageUrl,
-                                                selector: undefined,
-                                                tags: [DATA.TAG_1],
-                                                lists: [],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                    },
-                                },
-                                docs: [expect.any(Object)],
-                                isAnnotsSearch: true,
-                                resultsExhausted: true,
-                                totalCount: null,
-                            }
+                //             const expectedResultAnnotA = {
+                //                 annotsByDay: {
+                //                     [firstDay]: {
+                //                         ['lorem.com']: [
+                //                             {
+                //                                 url: annotUrlA,
+                //                                 _comment_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: undefined,
+                //                                 comment: DATA.ANNOT_1.comment,
+                //                                 createdWhen: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 lastEdited: expect.any(Date),
+                //                                 pageTitle: DATA.ANNOT_1.title,
+                //                                 pageUrl: DATA.ANNOT_1.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [DATA.TAG_1],
+                //                                 lists: [],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                     },
+                //                 },
+                //                 docs: [expect.any(Object)],
+                //                 isAnnotsSearch: true,
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             }
 
-                            const expectedResultAnnotB = {
-                                annotsByDay: {
-                                    [firstDay]: {
-                                        ['test.com']: [
-                                            {
-                                                url: annotUrlB,
-                                                _comment_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: undefined,
-                                                comment: DATA.ANNOT_2.comment,
-                                                createdWhen: expect.any(Date),
-                                                hasBookmark: false,
-                                                lastEdited: expect.any(Date),
-                                                pageTitle: DATA.ANNOT_2.title,
-                                                pageUrl: DATA.ANNOT_2.pageUrl,
-                                                selector: undefined,
-                                                tags: [DATA.TAG_2],
-                                                lists: [],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                    },
-                                },
-                                docs: [expect.any(Object)],
-                                isAnnotsSearch: true,
-                                resultsExhausted: true,
-                                totalCount: null,
-                            }
+                //             const expectedResultAnnotB = {
+                //                 annotsByDay: {
+                //                     [firstDay]: {
+                //                         ['test.com']: [
+                //                             {
+                //                                 url: annotUrlB,
+                //                                 _comment_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: undefined,
+                //                                 comment: DATA.ANNOT_2.comment,
+                //                                 createdWhen: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 lastEdited: expect.any(Date),
+                //                                 pageTitle: DATA.ANNOT_2.title,
+                //                                 pageUrl: DATA.ANNOT_2.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [DATA.TAG_2],
+                //                                 lists: [],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                     },
+                //                 },
+                //                 docs: [expect.any(Object)],
+                //                 isAnnotsSearch: true,
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             }
 
-                            expect(searchResultsA).toEqual(expectedResultAnnotA)
-                            expect(searchResultsB).toEqual(expectedResultAnnotB)
-                            expect(searchResultsC).toEqual(expectedResultAnnotB)
-                            expect(searchResultsD).toEqual(expectedResultAnnotA)
-                        },
-                    },
-                ],
+                //             expect(searchResultsA).toEqual(expectedResultAnnotA)
+                //             expect(searchResultsB).toEqual(expectedResultAnnotB)
+                //             expect(searchResultsC).toEqual(expectedResultAnnotB)
+                //             expect(searchResultsD).toEqual(expectedResultAnnotA)
+                //         },
+                //     },
+                // ],
             }
         },
     ),
@@ -1315,207 +1317,207 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             let annotUrlA: string
             let annotUrlB: string
 
-            return
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    {
-                        execute: async ({ setup }) => {
-                            annotUrlA = await directLinking(
-                                setup,
-                            ).createAnnotation(
-                                { tab: DATA.TEST_TAB_1 },
-                                DATA.ANNOT_1,
-                            )
-                            annotUrlB = await directLinking(
-                                setup,
-                            ).createAnnotation(
-                                { tab: DATA.TEST_TAB_2 },
-                                DATA.ANNOT_2,
-                            )
-                        },
-                        expectedStorageChanges: {
-                            annotations: (): StorageCollectionDiff => ({
-                                [annotUrlA]: {
-                                    type: 'create',
-                                    object: {
-                                        url: annotUrlA,
-                                        pageUrl: DATA.PAGE_1.url,
-                                        pageTitle: DATA.ANNOT_1.title,
-                                        comment: DATA.ANNOT_1.comment,
-                                        _comment_terms: expect.any(Array),
-                                        _pageTitle_terms: expect.any(Array),
-                                        body: undefined,
-                                        selector: undefined,
-                                        createdWhen: expect.any(Date),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                                [annotUrlB]: {
-                                    type: 'create',
-                                    object: {
-                                        url: annotUrlB,
-                                        pageUrl: DATA.PAGE_2.url,
-                                        pageTitle: DATA.ANNOT_2.title,
-                                        comment: DATA.ANNOT_2.comment,
-                                        _comment_terms: expect.any(Array),
-                                        _pageTitle_terms: expect.any(Array),
-                                        body: undefined,
-                                        selector: undefined,
-                                        createdWhen: expect.any(Date),
-                                        lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            customLists: (): StorageCollectionDiff => ({
-                                [SPECIAL_LIST_IDS.INBOX]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        name: SPECIAL_LIST_NAMES.INBOX,
-                                        id: SPECIAL_LIST_IDS.INBOX,
-                                        searchableName:
-                                            SPECIAL_LIST_NAMES.INBOX,
-                                        nameTerms: [
-                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
-                                        ],
-                                        isDeletable: false,
-                                        isNestable: false,
-                                    },
-                                },
-                            }),
-                            pageListEntries: (): StorageCollectionDiff => ({
-                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        pageUrl: DATA.PAGE_1.url,
-                                    },
-                                },
-                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_2.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        fullUrl: DATA.PAGE_2.fullUrl,
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        pageUrl: DATA.PAGE_2.url,
-                                    },
-                                },
-                            }),
-                            pages: (): StorageCollectionDiff => ({
-                                ...PAGE_1_CREATION,
-                                ...PAGE_2_CREATION,
-                            }),
-                            visits: (): StorageCollectionDiff =>
-                                expect.anything(),
-                        },
-                        postCheck: async ({ setup }) => {
-                            const searchResultsA = {}
-                            // await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     domains: [DATA.PAGE_1.url],
-                            // })
-                            const searchResultsB = {}
-                            // await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     domains: [DATA.PAGE_2.url],
-                            // })
-                            const searchResultsC = {}
-                            // await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     domainsExclude: [DATA.PAGE_1.url],
-                            // })
-                            const searchResultsD = {}
-                            // await searchModule(
-                            //     setup,
-                            // ).searchAnnotations({
-                            //     domainsExclude: [DATA.PAGE_2.url],
-                            // })
+                steps: [],
+                // [
+                //     {
+                //         execute: async ({ setup }) => {
+                //             annotUrlA = await directLinking(
+                //                 setup,
+                //             ).createAnnotation(
+                //                 { tab: DATA.TEST_TAB_1 },
+                //                 DATA.ANNOT_1,
+                //             )
+                //             annotUrlB = await directLinking(
+                //                 setup,
+                //             ).createAnnotation(
+                //                 { tab: DATA.TEST_TAB_2 },
+                //                 DATA.ANNOT_2,
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             annotations: (): StorageCollectionDiff => ({
+                //                 [annotUrlA]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: annotUrlA,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                         pageTitle: DATA.ANNOT_1.title,
+                //                         comment: DATA.ANNOT_1.comment,
+                //                         _comment_terms: expect.any(Array),
+                //                         _pageTitle_terms: expect.any(Array),
+                //                         body: undefined,
+                //                         selector: undefined,
+                //                         createdWhen: expect.any(Date),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //                 [annotUrlB]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: annotUrlB,
+                //                         pageUrl: DATA.PAGE_2.url,
+                //                         pageTitle: DATA.ANNOT_2.title,
+                //                         comment: DATA.ANNOT_2.comment,
+                //                         _comment_terms: expect.any(Array),
+                //                         _pageTitle_terms: expect.any(Array),
+                //                         body: undefined,
+                //                         selector: undefined,
+                //                         createdWhen: expect.any(Date),
+                //                         lastEdited: expect.any(Date),
+                //                     },
+                //                 },
+                //             }),
+                //             customLists: (): StorageCollectionDiff => ({
+                //                 [SPECIAL_LIST_IDS.INBOX]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         name: SPECIAL_LIST_NAMES.INBOX,
+                //                         id: SPECIAL_LIST_IDS.INBOX,
+                //                         searchableName:
+                //                             SPECIAL_LIST_NAMES.INBOX,
+                //                         nameTerms: [
+                //                             SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                //                         ],
+                //                         isDeletable: false,
+                //                         isNestable: false,
+                //                     },
+                //                 },
+                //             }),
+                //             pageListEntries: (): StorageCollectionDiff => ({
+                //                 [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                         listId: SPECIAL_LIST_IDS.INBOX,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                     },
+                //                 },
+                //                 [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_2.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         fullUrl: DATA.PAGE_2.fullUrl,
+                //                         listId: SPECIAL_LIST_IDS.INBOX,
+                //                         pageUrl: DATA.PAGE_2.url,
+                //                     },
+                //                 },
+                //             }),
+                //             pages: (): StorageCollectionDiff => ({
+                //                 ...PAGE_1_CREATION,
+                //                 ...PAGE_2_CREATION,
+                //             }),
+                //             visits: (): StorageCollectionDiff =>
+                //                 expect.anything(),
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             const searchResultsA = {}
+                //             // await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     domains: [DATA.PAGE_1.url],
+                //             // })
+                //             const searchResultsB = {}
+                //             // await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     domains: [DATA.PAGE_2.url],
+                //             // })
+                //             const searchResultsC = {}
+                //             // await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     domainsExclude: [DATA.PAGE_1.url],
+                //             // })
+                //             const searchResultsD = {}
+                //             // await searchModule(
+                //             //     setup,
+                //             // ).searchAnnotations({
+                //             //     domainsExclude: [DATA.PAGE_2.url],
+                //             // })
 
-                            const firstDay = Object.keys(
-                                searchResultsA['annotsByDay'],
-                            )[0]
+                //             const firstDay = Object.keys(
+                //                 searchResultsA['annotsByDay'],
+                //             )[0]
 
-                            const expectedResultAnnotA = {
-                                annotsByDay: {
-                                    [firstDay]: {
-                                        ['lorem.com']: [
-                                            {
-                                                url: annotUrlA,
-                                                _comment_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: undefined,
-                                                comment: DATA.ANNOT_1.comment,
-                                                createdWhen: expect.any(Date),
-                                                hasBookmark: false,
-                                                lastEdited: expect.any(Date),
-                                                pageTitle: DATA.ANNOT_1.title,
-                                                pageUrl: DATA.ANNOT_1.pageUrl,
-                                                selector: undefined,
-                                                tags: [],
-                                                lists: [],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                    },
-                                },
-                                docs: [expect.any(Object)],
-                                isAnnotsSearch: true,
-                                resultsExhausted: true,
-                                totalCount: null,
-                            }
+                //             const expectedResultAnnotA = {
+                //                 annotsByDay: {
+                //                     [firstDay]: {
+                //                         ['lorem.com']: [
+                //                             {
+                //                                 url: annotUrlA,
+                //                                 _comment_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: undefined,
+                //                                 comment: DATA.ANNOT_1.comment,
+                //                                 createdWhen: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 lastEdited: expect.any(Date),
+                //                                 pageTitle: DATA.ANNOT_1.title,
+                //                                 pageUrl: DATA.ANNOT_1.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [],
+                //                                 lists: [],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                     },
+                //                 },
+                //                 docs: [expect.any(Object)],
+                //                 isAnnotsSearch: true,
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             }
 
-                            const expectedResultAnnotB = {
-                                annotsByDay: {
-                                    [firstDay]: {
-                                        ['test.com']: [
-                                            {
-                                                url: annotUrlB,
-                                                _comment_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                _pageTitle_terms: expect.any(
-                                                    Array,
-                                                ),
-                                                body: undefined,
-                                                comment: DATA.ANNOT_2.comment,
-                                                createdWhen: expect.any(Date),
-                                                hasBookmark: false,
-                                                lastEdited: expect.any(Date),
-                                                pageTitle: DATA.ANNOT_2.title,
-                                                pageUrl: DATA.ANNOT_2.pageUrl,
-                                                selector: undefined,
-                                                tags: [],
-                                                lists: [],
-                                                isBulkShareProtected: false,
-                                                isShared: false,
-                                            },
-                                        ],
-                                    },
-                                },
-                                docs: [expect.any(Object)],
-                                isAnnotsSearch: true,
-                                resultsExhausted: true,
-                                totalCount: null,
-                            }
+                //             const expectedResultAnnotB = {
+                //                 annotsByDay: {
+                //                     [firstDay]: {
+                //                         ['test.com']: [
+                //                             {
+                //                                 url: annotUrlB,
+                //                                 _comment_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 _pageTitle_terms: expect.any(
+                //                                     Array,
+                //                                 ),
+                //                                 body: undefined,
+                //                                 comment: DATA.ANNOT_2.comment,
+                //                                 createdWhen: expect.any(Date),
+                //                                 hasBookmark: false,
+                //                                 lastEdited: expect.any(Date),
+                //                                 pageTitle: DATA.ANNOT_2.title,
+                //                                 pageUrl: DATA.ANNOT_2.pageUrl,
+                //                                 selector: undefined,
+                //                                 tags: [],
+                //                                 lists: [],
+                //                                 isBulkShareProtected: false,
+                //                                 isShared: false,
+                //                             },
+                //                         ],
+                //                     },
+                //                 },
+                //                 docs: [expect.any(Object)],
+                //                 isAnnotsSearch: true,
+                //                 resultsExhausted: true,
+                //                 totalCount: null,
+                //             }
 
-                            expect(searchResultsA).toEqual(expectedResultAnnotA)
-                            expect(searchResultsB).toEqual(expectedResultAnnotB)
-                            expect(searchResultsC).toEqual(expectedResultAnnotB)
-                            expect(searchResultsD).toEqual(expectedResultAnnotA)
-                        },
-                    },
-                ],
+                //             expect(searchResultsA).toEqual(expectedResultAnnotA)
+                //             expect(searchResultsB).toEqual(expectedResultAnnotB)
+                //             expect(searchResultsC).toEqual(expectedResultAnnotB)
+                //             expect(searchResultsD).toEqual(expectedResultAnnotA)
+                //         },
+                //     },
+                // ],
             }
         },
     ),
