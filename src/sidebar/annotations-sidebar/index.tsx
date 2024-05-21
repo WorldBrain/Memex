@@ -16,6 +16,7 @@ import {
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import browser from 'webextension-polyfill'
+import { getWindow } from 'src/util/get-Window'
 
 interface RootProps {
     mount: InPageUIRootMount
@@ -71,6 +72,7 @@ class Root extends React.Component<RootProps, RootState> {
                     <AnnotationsSidebarInPage
                         {...props.dependencies}
                         theme={this.state.theme}
+                        windowAPI={getWindow()}
                     />
                 </ThemeProvider>
             </StyleSheetManager>

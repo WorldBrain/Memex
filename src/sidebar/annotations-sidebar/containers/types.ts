@@ -83,6 +83,7 @@ export interface SidebarContainerDependencies {
     pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
     browserAPIs: Browser
+    windowAPI: Window
     bgScriptBG: RemoteBGScriptInterface
     pkmSyncBG: PkmSyncInterface
     subscription: SubscriptionsService

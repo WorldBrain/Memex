@@ -29,7 +29,6 @@ import type {
 } from 'src/content-sharing/background/types'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
 import { theme } from 'src/common-ui/components/design-library/theme'
-import { UnifiedAnnotation } from 'src/annotations/cache/types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -115,6 +114,7 @@ const setupLogicHelper = async ({
             backgroundModules.summarizeBG.remoteFunctions,
         ) as any,
         browserAPIs: device.browserAPIs,
+        windowAPI: device.windowAPI,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         contentSharingBG: backgroundModules.contentSharing.remoteFunctions,
         contentSharingByTabsBG: insertBackgroundFunctionTab(
