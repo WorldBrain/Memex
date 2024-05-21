@@ -58,7 +58,6 @@
         "@josephg/resolvable": "^1.0.0",
         "@popperjs/core": "^2.11.6",
         "@sentry/node": "^6.14.3",
-        "@tiptap-pro/extension-mathematics": "^2.7.5",
         "@tiptap/extension-code-block": "^2.2.4",
         "@tiptap/extension-heading": "^2.2.4",
         "@tiptap/extension-highlight": "^2.2.1",
@@ -171,6 +170,9 @@
         "when-all-settled": "^0.1.1",
         "worker-loader": "^3.0.7",
         "xhr-shim": "^0.1.2"
+    },
+    "optionalDependencies": {
+        "@tiptap-pro/extension-mathematics": "^2.7.5"
     },
     "devDependencies": {
         "@babel/core": "^7.9.0",
