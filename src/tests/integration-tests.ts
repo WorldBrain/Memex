@@ -64,7 +64,6 @@ export interface BackgroundIntegrationTestSetup {
     persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
     browserAPIs: Browser
-    windowAPI: Window
     services: Services
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector

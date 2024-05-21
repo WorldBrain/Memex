@@ -366,7 +366,7 @@ export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
     options: BackgroundIntegrationTestSetupOpts = {},
 ) {
-    it.skip(test.description + ' - single device', async () => {
+    it(test.description + ' - single device', async () => {
         await runBackgroundIntegrationTest(test, {
             ...options,
             ...(test.customTestOpts ?? {}),

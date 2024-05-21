@@ -114,7 +114,7 @@ const setupLogicHelper = async ({
             backgroundModules.summarizeBG.remoteFunctions,
         ) as any,
         browserAPIs: device.browserAPIs,
-        windowAPI: device.windowAPI,
+        windowAPI: window,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         contentSharingBG: backgroundModules.contentSharing.remoteFunctions,
         contentSharingByTabsBG: insertBackgroundFunctionTab(
