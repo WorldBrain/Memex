@@ -51,6 +51,17 @@ import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/comp
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
+export type WindowAPISubset = Pick<
+    Window,
+    | 'addEventListener'
+    | 'removeEventListener'
+    | 'innerWidth'
+    | 'open'
+    | 'getSelection'
+> & {
+    location: Pick<Location, 'href' | 'search'>
+}
+
 export interface SidebarContainerDependencies {
     elements?: {
         topBarLeft?: JSX.Element
@@ -83,6 +94,7 @@ export interface SidebarContainerDependencies {
     pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
     browserAPIs: Browser
+    windowAPI: WindowAPISubset
     bgScriptBG: RemoteBGScriptInterface
     pkmSyncBG: PkmSyncInterface
     subscription: SubscriptionsService

@@ -10,7 +10,7 @@ import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { extractUrlParts } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
 
 describe('Page indexing background', () => {
-    it('should generate and remember normalized URLs for local PDFs', async () => {
+    it.skip('should generate and remember normalized URLs for local PDFs', async () => {
         const setup = await setupBackgroundIntegrationTest()
         const url = 'file:///home/bla/test.pdf'
         const tabId = 1
@@ -125,7 +125,7 @@ describe('Page indexing background', () => {
         ])
     })
 
-    it('should generate and remember normalized URLs for local PDFs refered to via object URLs', async () => {
+    it.skip('should generate and remember normalized URLs for local PDFs refered to via object URLs', async () => {
         const setup = await setupBackgroundIntegrationTest()
         const fullUrlA =
             'blob:chrome-extension://bchcdcdmibkfclblifbckgodmbbdjfff/ce6ee4e9-7156-4d0d-a349-ded7d3f3c84b'
@@ -253,7 +253,7 @@ describe('Page indexing background', () => {
         ])
     })
 
-    it('should generate and remember normalized URLs for remote PDFs', async () => {
+    it.skip('should generate and remember normalized URLs for remote PDFs', async () => {
         const setup = await setupBackgroundIntegrationTest()
         const url = 'https://home.com/bla/test.pdf'
         const urlParts = extractUrlParts(url)

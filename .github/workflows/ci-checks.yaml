@@ -29,5 +29,5 @@ jobs:
                   node-version: 16
                   cache: 'yarn'
 
-            - run: yarn install --ignore-scripts
+            - run: yarn install --ignore-scripts --ignore-optional --non-interactive
             - run: yarn test

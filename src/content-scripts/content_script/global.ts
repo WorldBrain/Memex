@@ -1093,6 +1093,7 @@ export async function main(
                 imageSupport: runInBackground(),
                 pkmSyncBG: runInBackground(),
                 getRootElement: null,
+                windowAPI: window,
             })
             components.sidebar?.resolve()
         },
