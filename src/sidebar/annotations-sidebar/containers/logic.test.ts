@@ -29,6 +29,7 @@ import type {
 } from 'src/content-sharing/background/types'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
 import { theme } from 'src/common-ui/components/design-library/theme'
+import { WindowMock } from 'src/util/window-api-mock'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -98,6 +99,8 @@ const setupLogicHelper = async ({
         await setupTestData(device)
     }
 
+    const windowAPI = new WindowMock({ fullPageUrl })
+
     const analytics = new FakeAnalytics()
     const sidebarLogic = new SidebarContainerLogic({
         theme: theme({ variant: 'dark' }),
@@ -114,7 +117,7 @@ const setupLogicHelper = async ({
             backgroundModules.summarizeBG.remoteFunctions,
         ) as any,
         browserAPIs: device.browserAPIs,
-        windowAPI: window,
+        windowAPI,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         contentSharingBG: backgroundModules.contentSharing.remoteFunctions,
         contentSharingByTabsBG: insertBackgroundFunctionTab(

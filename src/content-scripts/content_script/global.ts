@@ -125,7 +125,6 @@ import {
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
-import { getWindow } from 'src/util/get-Window'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -1094,7 +1093,7 @@ export async function main(
                 imageSupport: runInBackground(),
                 pkmSyncBG: runInBackground(),
                 getRootElement: null,
-                windowAPI: getWindow(),
+                windowAPI: window,
             })
             components.sidebar?.resolve()
         },
