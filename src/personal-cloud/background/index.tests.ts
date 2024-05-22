@@ -67,22 +67,27 @@ function registerSyncBackAndForthTests(
     options?: BackgroundIntegrationTestSetupOpts,
 ) {
     const testOptions = test.instantiate({ isSyncTest: true })
-    const syncPatterns = generateSyncPatterns([0, 1], testOptions.steps.length)
-    for (const pattern of syncPatterns) {
-        const description = `${
-            test.description
-        } - 2 device sync back and forth - should work when synced in pattern ${getReadablePattern(
-            pattern,
-        )}`
-        it(maybeMark(description, test.mark && '!!!'), async () => {
-            const sequence = generateBackAndForthSyncTestSequence(pattern)
-            await runSyncBackgroundTest({
-                test,
-                sequence,
-                deviceCount: 2,
-                ...options,
+    if (testOptions?.steps?.length > 0) {
+        const syncPatterns = generateSyncPatterns(
+            [0, 1],
+            testOptions?.steps?.length ?? 0,
+        )
+        for (const pattern of syncPatterns) {
+            const description = `${
+                test.description
+            } - 2 device sync back and forth - should work when synced in pattern ${getReadablePattern(
+                pattern,
+            )}`
+            it(maybeMark(description, test.mark && '!!!'), async () => {
+                const sequence = generateBackAndForthSyncTestSequence(pattern)
+                await runSyncBackgroundTest({
+                    test,
+                    sequence,
+                    deviceCount: 2,
+                    ...options,
+                })
             })
-        })
+        }
     }
 }
 

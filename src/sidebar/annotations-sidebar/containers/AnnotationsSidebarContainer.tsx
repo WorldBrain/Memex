@@ -115,6 +115,7 @@ export class AnnotationsSidebarContainer<
                 bgScriptBG: props.bgScriptBG,
                 pkmSyncBG: props.pkmSyncBG,
                 getRootElement: props.getRootElement,
+                windowAPI: props.windowAPI,
             }),
         )
 

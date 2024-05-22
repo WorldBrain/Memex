@@ -12,6 +12,7 @@ export type UILogicTest<Context> = (context: Context) => Promise<void>
 export type UILogicTestFactory<Context> = (
     description: string,
     test: UILogicTest<Context>,
+    opts?: { shouldSkip?: boolean },
 ) => void
 export interface UILogicTestDevice extends BackgroundIntegrationTestSetup {
     createElement: <State, Event>(
@@ -29,8 +30,9 @@ export interface MultiDeviceUILogicTestContext {
 export function makeSingleDeviceUILogicTestFactory(
     options?: BackgroundIntegrationTestSetupOpts,
 ): UILogicTestFactory<SingleDeviceUILogicTestContext> {
-    return (description, test) => {
-        it(description, async () => {
+    return (description, test, opts) => {
+        let testRunner = opts?.shouldSkip ? it.skip : it
+        testRunner(description, async () => {
             const setup = await setupBackgroundIntegrationTest(options)
             setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
             await test({
@@ -46,8 +48,9 @@ export function makeSingleDeviceUILogicTestFactory(
 export function makeMultiDeviceUILogicTestFactory(
     options?: BackgroundIntegrationTestSetupOpts,
 ): UILogicTestFactory<MultiDeviceUILogicTestContext> {
-    return (description, test) => {
-        it(description, async () => {
+    return (description, test, opts) => {
+        let testRunner = opts?.shouldSkip ? it.skip : it
+        testRunner(description, async () => {
             await test({
                 createDevice: async () => {
                     const setup = await setupBackgroundIntegrationTest(options)

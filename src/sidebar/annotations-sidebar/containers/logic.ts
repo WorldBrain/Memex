@@ -244,7 +244,9 @@ export class SidebarContainerLogic extends UILogic<
 
     getInitialState(): SidebarContainerState {
         let sidebarWidth = SIDEBAR_WIDTH_STORAGE_KEY
-        if (window.location.href.includes('youtube.com/watch')) {
+        if (
+            this.options.windowAPI.location.href.includes('youtube.com/watch')
+        ) {
             const sidebarContainerWidth = document.getElementById('secondary')
                 .clientWidth
             sidebarWidth = sidebarContainerWidth - 50 + 'px'
@@ -936,7 +938,11 @@ export class SidebarContainerLogic extends UILogic<
                 this.readingViewStorageListener(true)
             }
 
-            if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
+            if (
+                isUrlPDFViewerUrl(this.options.windowAPI.location.href, {
+                    runtimeAPI,
+                })
+            ) {
                 const width = SIDEBAR_WIDTH_STORAGE_KEY
 
                 this.emitMutation({
@@ -1184,7 +1190,10 @@ export class SidebarContainerLogic extends UILogic<
                     readingView: { $set: true },
                 })
                 this.resizeObserver.observe(this.sidebar)
-                window.addEventListener('resize', this.debounceReadingWidth)
+                this.options.windowAPI.addEventListener(
+                    'resize',
+                    this.debounceReadingWidth,
+                )
                 this.setReadingWidth()
             }
             if (!this.readingViewState['@Sidebar-reading_view']) {
@@ -1217,28 +1226,39 @@ export class SidebarContainerLogic extends UILogic<
                     this.showState = 'visible'
                     this.setReadingWidth()
                     if (
-                        !window.location.href.startsWith(
+                        !this.options.windowAPI.location.href.startsWith(
                             'https://www.youtube.com',
                         )
                     ) {
                         document.body.style.position = 'relative'
                     }
-                    if (window.location.href.includes('mail.google.com')) {
+                    if (
+                        this.options.windowAPI.location.href.includes(
+                            'mail.google.com',
+                        )
+                    ) {
                         this.adjustGmailWidth('initial')
                     }
                     this.resizeObserver.observe(this.sidebar)
-                    window.addEventListener('resize', this.debounceReadingWidth)
+                    this.options.windowAPI.addEventListener(
+                        'resize',
+                        this.debounceReadingWidth,
+                    )
                 } else {
                     document.body.style.width = 'initial'
                     document.body.style.position = 'initial'
                     if (document.body.offsetWidth === 0) {
                         document.body.style.width = '100%'
                     }
-                    if (window.location.href.includes('mail.google.com')) {
+                    if (
+                        this.options.windowAPI.location.href.includes(
+                            'mail.google.com',
+                        )
+                    ) {
                         this.adjustGmailWidth('initial')
                     }
                     this.resizeObserver.disconnect()
-                    window.removeEventListener(
+                    this.options.windowAPI.removeEventListener(
                         'resize',
                         this.debounceReadingWidth,
                     )
@@ -1249,16 +1269,22 @@ export class SidebarContainerLogic extends UILogic<
 
     private setReadingWidth() {
         if (this.showState === 'visible') {
-            if (!window.location.href.startsWith('https://www.youtube.com')) {
+            if (
+                !this.options.windowAPI.location.href.startsWith(
+                    'https://www.youtube.com',
+                )
+            ) {
                 document.body.style.position = 'relative'
             }
             const sidebar = this.sidebar
             let currentsidebarWidth = sidebar.offsetWidth
-            let currentWindowWidth = window.innerWidth
+            let currentWindowWidth = this.options.windowAPI.innerWidth
             let readingWidth = currentWindowWidth - currentsidebarWidth - 40
 
             document.body.style.width = readingWidth + 'px'
-            if (window.location.href.includes('mail.google.com')) {
+            if (
+                this.options.windowAPI.location.href.includes('mail.google.com')
+            ) {
                 this.adjustGmailWidth(readingWidth + 'px')
             }
         }
@@ -1395,7 +1421,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // if (event.isWidthLocked) {
         //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
-        //     let windowWidth = window.innerWidth
+        //     let windowWidth = this.options.windowAPI.innerWidth
         //     let width = (windowWidth - sidebarWidth).toString()
         //     width = width + 'px'
         //     document.body.style.width = width
@@ -1411,7 +1437,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // if (event.isWidthLocked) {
         //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
-        //     let windowWidth = window.innerWidth
+        //     let windowWidth = this.options.windowAPI.innerWidth
         //     let width = (windowWidth - sidebarWidth).toString()
         //     width = width + 'px'
         //     document.body.style.width = width
@@ -1441,7 +1467,11 @@ export class SidebarContainerLogic extends UILogic<
                 ? event.existingWidthState
                 : SIDEBAR_WIDTH_STORAGE_KEY
 
-        if (!window.location.href.startsWith('https://www.youtube.com')) {
+        if (
+            !this.options.windowAPI.location.href.startsWith(
+                'https://www.youtube.com',
+            )
+        ) {
             document.body.style.position = 'relative'
         }
 
@@ -1469,7 +1499,7 @@ export class SidebarContainerLogic extends UILogic<
             document.body.style.width = '100%'
         }
 
-        if (window.location.href.includes('mail.google.com')) {
+        if (this.options.windowAPI.location.href.includes('mail.google.com')) {
             this.adjustGmailWidth('initial')
         }
     }
@@ -1595,7 +1625,7 @@ export class SidebarContainerLogic extends UILogic<
         } else if (listData.type === 'page-link') {
             webUIUrl = webUIUrl + '?noAutoOpen=true'
         }
-        window.open(webUIUrl, '_blank')
+        this.options.windowAPI.open(webUIUrl, '_blank')
     }
 
     openContextMenuForList: EventHandler<'openContextMenuForList'> = async ({
@@ -2654,16 +2684,24 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             let title: string | null = null
-            if (window.location.href.includes('web.telegram.org')) {
+            if (
+                this.options.windowAPI.location.href.includes(
+                    'web.telegram.org',
+                )
+            ) {
                 title = getTelegramUserDisplayName(
                     document,
-                    window.location.href,
+                    this.options.windowAPI.location.href,
                 )
             }
 
             if (
-                window.location.href.includes('x.com/messages/') ||
-                window.location.href.includes('twitter.com/messages/')
+                this.options.windowAPI.location.href.includes(
+                    'x.com/messages/',
+                ) ||
+                this.options.windowAPI.location.href.includes(
+                    'twitter.com/messages/',
+                )
             ) {
                 title = document.title
             }
@@ -3436,10 +3474,14 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     async getLocalContent() {
-        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
+        let isPagePDF = this.options.windowAPI.location.href.includes(
+            '/pdfjs/viewer.html?',
+        )
         let fullTextToProcess
         if (isPagePDF) {
-            const searchParams = new URLSearchParams(window.location.search)
+            const searchParams = new URLSearchParams(
+                this.options.windowAPI.location.search,
+            )
             const filePath = searchParams.get('file')
             const pdf: PDFDocumentProxy = await (globalThis as any)[
                 'pdfjsLib'
@@ -3495,10 +3537,14 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         if (event.prompt?.length > 0 || previousState.prompt?.length > 0) {
-            let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
+            let isPagePDF = this.options.windowAPI.location.href.includes(
+                '/pdfjs/viewer.html?',
+            )
             let fullTextToProcess
             if (isPagePDF) {
-                const searchParams = new URLSearchParams(window.location.search)
+                const searchParams = new URLSearchParams(
+                    this.options.windowAPI.location.search,
+                )
                 const filePath = searchParams.get('file')
                 const pdf: PDFDocumentProxy = await (globalThis as any)[
                     'pdfjsLib'
@@ -3638,7 +3684,7 @@ export class SidebarContainerLogic extends UILogic<
                 try {
                     executed = this.options.events.emit(
                         'addPageUrlToEditor',
-                        event.url ?? window.location.href,
+                        event.url ?? this.options.windowAPI.location.href,
                         prompt,
                         event.instaExecutePrompt,
                         (success) => {
@@ -3847,7 +3893,7 @@ export class SidebarContainerLogic extends UILogic<
                 activeTab: 'askAI',
             })
             if (previousState.pageSummary?.length === 0) {
-                let isPagePDF = window.location.href.includes(
+                let isPagePDF = this.options.windowAPI.location.href.includes(
                     '/pdfjs/viewer.html?',
                 )
                 let fullTextToProcess
@@ -3883,7 +3929,10 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     async listenToTextHighlightSuggestions() {
-        const selectedText = window.getSelection().toString().trim()
+        const selectedText = this.options.windowAPI
+            .getSelection()
+            .toString()
+            .trim()
         if (selectedText?.length > 0) {
             this.emitMutation({
                 suggestionsResultsLoadState: { $set: 'running' },
@@ -3977,7 +4026,7 @@ export class SidebarContainerLogic extends UILogic<
         // Select the content of the hidden div
         const range = document.createRange()
         range.selectNodeContents(hiddenDiv)
-        const selection = window.getSelection()
+        const selection = this.options.windowAPI.getSelection()
         selection.removeAllRanges()
         selection.addRange(range)
 
@@ -4654,7 +4703,9 @@ export class SidebarContainerLogic extends UILogic<
         let videoDetails = null
         if (previousState.videoDetails == null) {
             videoDetails = JSON.parse(
-                await this.getYoutubeDetails(window.location.href),
+                await this.getYoutubeDetails(
+                    this.options.windowAPI.location.href,
+                ),
             )
             if (videoDetails.details.chapters.length === 0) {
                 this.emitMutation({
@@ -4682,7 +4733,7 @@ export class SidebarContainerLogic extends UILogic<
             const timestampElementsReadable = this.secondsToHMS(chapterStart)
 
             const videoURLWithTime = constructVideoURLwithTimeStamp(
-                window.location.href,
+                this.options.windowAPI.location.href,
                 chapterStart,
             )
 
@@ -4726,7 +4777,9 @@ export class SidebarContainerLogic extends UILogic<
         })
         let transcript = null
         if (previousState.youtubeTranscriptJSON == null) {
-            transcript = await this.getYoutubeTranscript(window.location.href)
+            transcript = await this.getYoutubeTranscript(
+                this.options.windowAPI.location.href,
+            )
             this.emitMutation({
                 youtubeTranscriptJSON: { $set: transcript },
             })
@@ -4833,13 +4886,13 @@ export class SidebarContainerLogic extends UILogic<
 
         const humanTimestampStart = this.createHumanTimestamp(from)
         const videoURLWithTimeStart = constructVideoURLwithTimeStamp(
-            window.location.href,
+            this.options.windowAPI.location.href,
             from,
         )
         const humanTimestampEnd = this.createHumanTimestamp(to)
 
         const videoURLWithTimeEnd = constructVideoURLwithTimeStamp(
-            window.location.href,
+            this.options.windowAPI.location.href,
             to,
         )
 
@@ -4893,7 +4946,7 @@ export class SidebarContainerLogic extends UILogic<
             chatId: null,
             context: {
                 mediaRanges: {
-                    url: window.location.href,
+                    url: this.options.windowAPI.location.href,
                     ranges: [
                         {
                             from: from,

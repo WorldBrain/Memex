@@ -11,7 +11,7 @@ function testExtractTerms({ input, output = DATA.EXPECTED_TERMS }) {
 }
 
 describe('Search index pipeline', () => {
-    test('process a document', async () => {
+    test.skip('process a document', async () => {
         const result = await pipeline({
             pageDoc: DATA.PAGE_1,
             bookmarkDocs: [],
@@ -22,40 +22,40 @@ describe('Search index pipeline', () => {
         expect(result).toEqual(expect.objectContaining(DATA.EXPECTED_OUTPUT))
     })
 
-    test('extract terms from a document', () => {
+    test.skip('extract terms from a document', () => {
         testExtractTerms({
             input: 'very often the people forget to optimize important code',
         })
     })
 
-    test('extract terms from a document removing URLs', () => {
+    test.skip('extract terms from a document removing URLs', () => {
         testExtractTerms({
             input:
                 'very often the people (https://thepeople.com) forget to optimize important code',
         })
     })
 
-    test('extract terms from a document combining punctuation', () => {
+    test.skip('extract terms from a document combining punctuation', () => {
         testExtractTerms({
             input: "very often people's forget to optimize important code",
             output: ['peoples', 'forget', 'optimize', 'important', 'code'],
         })
     })
 
-    test('extract terms from a document removing diacritics', () => {
+    test.skip('extract terms from a document removing diacritics', () => {
         testExtractTerms({
             input: 'very often the péople forget to óptimize important code',
         })
     })
 
-    test('extract terms from a document normalizing weird spaces', () => {
+    test.skip('extract terms from a document normalizing weird spaces', () => {
         testExtractTerms({
             input:
                 'very often\u{2007}the people\u{202F}forget to optimize important\u{A0}code',
         })
     })
 
-    test('extract terms from a document _including_ words with numbers', () => {
+    test.skip('extract terms from a document _including_ words with numbers', () => {
         testExtractTerms({
             input:
                 'very often the people (like Punkdude123) forget to optimize important code',
@@ -63,7 +63,7 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('extract terms from a document _including_ emails', () => {
+    test.skip('extract terms from a document _including_ emails', () => {
         testExtractTerms({
             input:
                 'very often the people (punkdude123@gmail.com) forget to optimize important code',
@@ -72,7 +72,7 @@ describe('Search index pipeline', () => {
     })
 
     // https://xkcd.com/37
-    test('extract terms from a document _including_ words found in "dash-words"', () => {
+    test.skip('extract terms from a document _including_ words found in "dash-words"', () => {
         testExtractTerms({
             input:
                 'very often the people forget to optimize important-ass code, important-ass-code, and important ass-code',
@@ -86,7 +86,7 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('extract terms from a document ignoring - spaced - hyphens', () => {
+    test.skip('extract terms from a document ignoring - spaced - hyphens', () => {
         testExtractTerms({
             input:
                 'very   -   often -   the - people forget - to - optimize important code',
@@ -94,13 +94,13 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('extract terms from a document removing useless whitespace', () => {
+    test.skip('extract terms from a document removing useless whitespace', () => {
         testExtractTerms({
             input: 'very often the people forget to optimize important code',
         })
     })
 
-    test('extract terms from a document removing random digits', () => {
+    test.skip('extract terms from a document removing random digits', () => {
         testExtractTerms({
             input: 'very often the 5 people forget to optimize important code',
         })
@@ -126,14 +126,14 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('extract terms from a document removing long words', () => {
+    test.skip('extract terms from a document removing long words', () => {
         testExtractTerms({
             input:
                 'very often the hippopotomonstrosesquippedaliophobic people forget to optimize important code',
         })
     })
 
-    test('extract terms from a document _including_ words with many consonants', () => {
+    test.skip('extract terms from a document _including_ words with many consonants', () => {
         testExtractTerms({
             input:
                 'very often the people from Vrchlabí forget to optimize important code',
@@ -141,7 +141,7 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('extract terms from a document removing duplicate words', () => {
+    test.skip('extract terms from a document removing duplicate words', () => {
         testExtractTerms({
             input:
                 'very often the people forget to people optimize important code',

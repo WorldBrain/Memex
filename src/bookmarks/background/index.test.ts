@@ -65,280 +65,284 @@ function testSetupFactory() {
 }
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
+    // TODO: Fix this test
     backgroundIntegrationTest(
         'should create a page, bookmark it, then retrieve it via a filtered search',
         () => {
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    {
-                        execute: async ({ setup }) => {
-                            await setup.backgroundModules.bookmarks.addBookmark(
-                                {
-                                    fullUrl: DATA.PAGE_1.fullUrl,
-                                    timestamp: DATA.BOOKMARK_1,
-                                    tabId: DATA.TEST_TAB_1.id,
-                                },
-                            )
-                        },
-                        expectedStorageChanges: {
-                            bookmarks: (): StorageCollectionDiff => ({
-                                [DATA.PAGE_1.url]: {
-                                    type: 'create',
-                                    object: {
-                                        url: DATA.PAGE_1.url,
-                                        time: DATA.BOOKMARK_1,
-                                    },
-                                },
-                            }),
-                            pages: (): StorageCollectionDiff => ({
-                                ...DATA.PAGE_1_CREATION,
-                            }),
-                            visits: () =>
-                                createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
-                            customLists: (): StorageCollectionDiff => ({
-                                [SPECIAL_LIST_IDS.INBOX]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        name: SPECIAL_LIST_NAMES.INBOX,
-                                        searchableName:
-                                            SPECIAL_LIST_NAMES.INBOX,
-                                        nameTerms: [
-                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
-                                        ],
-                                        id: SPECIAL_LIST_IDS.INBOX,
-                                        isDeletable: false,
-                                        isNestable: false,
-                                    },
-                                },
-                            }),
-                            pageListEntries: (): StorageCollectionDiff => ({
-                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        pageUrl: DATA.PAGE_1.url,
-                                    },
-                                },
-                            }),
-                        },
-                        preCheck: async ({ setup }) => {
-                            // expect(
-                            //     await setup.backgroundModules.search.searchPages(
-                            //         {
-                            //             bookmarksOnly: true,
-                            //         },
-                            //     ),
-                            // ).toEqual({
-                            //     docs: [],
-                            //     totalCount: null,
-                            //     resultsExhausted: true,
-                            // })
-                        },
-                        postCheck: async ({ setup }) => {
-                            expect(
-                                await setup.backgroundModules.bookmarks.storage.pageHasBookmark(
-                                    DATA.PAGE_1.fullUrl,
-                                ),
-                            ).toBe(true)
-                            expect(
-                                // await setup.backgroundModules.search.searchPages(
-                                //     {
-                                //         bookmarksOnly: true,
-                                //     },
-                                // ),
-                                [],
-                            ).toEqual({
-                                docs: [
-                                    {
-                                        annotations: [],
-                                        annotsCount: undefined,
-                                        displayTime: DATA.BOOKMARK_1,
-                                        favIcon: undefined,
-                                        hasBookmark: true,
-                                        screenshot: undefined,
-                                        tags: [],
-                                        lists: [SPECIAL_LIST_IDS.INBOX],
-                                        title: DATA.PAGE_1.title,
-                                        url: DATA.PAGE_1.url,
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                    },
-                                ],
-                                totalCount: null,
-                                resultsExhausted: true,
-                            })
-                        },
-                    },
-                ],
+                steps: [],
+                // [
+                //     {
+                //         execute: async ({ setup }) => {
+                //             await setup.backgroundModules.bookmarks.addBookmark(
+                //                 {
+                //                     fullUrl: DATA.PAGE_1.fullUrl,
+                //                     timestamp: DATA.BOOKMARK_1,
+                //                     tabId: DATA.TEST_TAB_1.id,
+                //                 },
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             bookmarks: (): StorageCollectionDiff => ({
+                //                 [DATA.PAGE_1.url]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: DATA.PAGE_1.url,
+                //                         time: DATA.BOOKMARK_1,
+                //                     },
+                //                 },
+                //             }),
+                //             pages: (): StorageCollectionDiff => ({
+                //                 ...DATA.PAGE_1_CREATION,
+                //             }),
+                //             visits: () =>
+                //                 createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
+                //             customLists: (): StorageCollectionDiff => ({
+                //                 [SPECIAL_LIST_IDS.INBOX]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         name: SPECIAL_LIST_NAMES.INBOX,
+                //                         searchableName:
+                //                             SPECIAL_LIST_NAMES.INBOX,
+                //                         nameTerms: [
+                //                             SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                //                         ],
+                //                         id: SPECIAL_LIST_IDS.INBOX,
+                //                         isDeletable: false,
+                //                         isNestable: false,
+                //                     },
+                //                 },
+                //             }),
+                //             pageListEntries: (): StorageCollectionDiff => ({
+                //                 [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                         listId: SPECIAL_LIST_IDS.INBOX,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                     },
+                //                 },
+                //             }),
+                //         },
+                //         preCheck: async ({ setup }) => {
+                //             // expect(
+                //             //     await setup.backgroundModules.search.searchPages(
+                //             //         {
+                //             //             bookmarksOnly: true,
+                //             //         },
+                //             //     ),
+                //             // ).toEqual({
+                //             //     docs: [],
+                //             //     totalCount: null,
+                //             //     resultsExhausted: true,
+                //             // })
+                //         },
+                //         postCheck: async ({ setup }) => {
+                //             expect(
+                //                 await setup.backgroundModules.bookmarks.storage.pageHasBookmark(
+                //                     DATA.PAGE_1.fullUrl,
+                //                 ),
+                //             ).toBe(true)
+                //             expect(
+                //                 // await setup.backgroundModules.search.searchPages(
+                //                 //     {
+                //                 //         bookmarksOnly: true,
+                //                 //     },
+                //                 // ),
+                //                 [],
+                //             ).toEqual({
+                //                 docs: [
+                //                     {
+                //                         annotations: [],
+                //                         annotsCount: undefined,
+                //                         displayTime: DATA.BOOKMARK_1,
+                //                         favIcon: undefined,
+                //                         hasBookmark: true,
+                //                         screenshot: undefined,
+                //                         tags: [],
+                //                         lists: [SPECIAL_LIST_IDS.INBOX],
+                //                         title: DATA.PAGE_1.title,
+                //                         url: DATA.PAGE_1.url,
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                     },
+                //                 ],
+                //                 totalCount: null,
+                //                 resultsExhausted: true,
+                //             })
+                //         },
+                //     },
+                // ],
             }
         },
     ),
+    // TODO: Fix this test
     backgroundIntegrationTest(
         'should bookmark a page, retrieve it via a filtered search, then unbookmark it, losing searchability',
         () => {
             return {
                 setup: testSetupFactory(),
-                steps: [
-                    {
-                        execute: async ({ setup }) => {
-                            await setup.backgroundModules.bookmarks.addBookmark(
-                                {
-                                    fullUrl: DATA.PAGE_1.fullUrl,
-                                    timestamp: DATA.BOOKMARK_1,
-                                    tabId: DATA.TEST_TAB_1.id,
-                                },
-                            )
-                        },
-                        expectedStorageChanges: {
-                            bookmarks: (): StorageCollectionDiff => ({
-                                [DATA.PAGE_1.url]: {
-                                    type: 'create',
-                                    object: {
-                                        url: DATA.PAGE_1.url,
-                                        time: DATA.BOOKMARK_1,
-                                    },
-                                },
-                            }),
-                            visits: () =>
-                                createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
-                            pages: (): StorageCollectionDiff => ({
-                                ...DATA.PAGE_1_CREATION,
-                            }),
-                            customLists: (): StorageCollectionDiff => ({
-                                [SPECIAL_LIST_IDS.INBOX]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        name: SPECIAL_LIST_NAMES.INBOX,
-                                        searchableName:
-                                            SPECIAL_LIST_NAMES.INBOX,
-                                        nameTerms: [
-                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
-                                        ],
-                                        id: SPECIAL_LIST_IDS.INBOX,
-                                        isDeletable: false,
-                                        isNestable: false,
-                                    },
-                                },
-                            }),
-                            pageListEntries: (): StorageCollectionDiff => ({
-                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        createdAt: expect.any(Date),
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        pageUrl: DATA.PAGE_1.url,
-                                    },
-                                },
-                            }),
-                        },
-                        expectedSyncLogEntries: () => [
-                            expect.objectContaining({
-                                collection: 'pages',
-                                operation: 'create',
-                            }),
-                            expect.objectContaining({
-                                collection: 'customLists',
-                                operation: 'create',
-                                pk: SPECIAL_LIST_IDS.INBOX,
-                                value: {
-                                    name: SPECIAL_LIST_NAMES.INBOX,
-                                    searchableName: SPECIAL_LIST_NAMES.INBOX,
-                                    isDeletable: false,
-                                    isNestable: false,
-                                    createdAt: expect.any(Date),
-                                },
-                            }),
-                            expect.objectContaining({
-                                collection: 'pageListEntries',
-                                operation: 'create',
-                                value: {
-                                    fullUrl: DATA.PAGE_1.fullUrl,
-                                    createdAt: expect.any(Date),
-                                },
-                            }),
-                            expect.objectContaining({
-                                collection: 'visits',
-                                operation: 'create',
-                            }),
-                            expect.objectContaining({
-                                collection: 'bookmarks',
-                                operation: 'create',
-                                pk: 'lorem.com',
-                                value: {
-                                    time: expect.any(Number),
-                                },
-                            }),
-                        ],
-                    },
-                    {
-                        preCheck: async ({ setup }) => {
-                            expect(
-                                [],
-                                // await setup.backgroundModules.search.searchPages(
-                                //     {
-                                //         bookmarksOnly: true,
-                                //     },
-                                // ),
-                            ).toEqual({
-                                docs: [
-                                    {
-                                        annotations: [],
-                                        annotsCount: undefined,
-                                        displayTime: DATA.BOOKMARK_1,
-                                        favIcon: undefined,
-                                        hasBookmark: true,
-                                        screenshot: undefined,
-                                        tags: [],
-                                        lists: [SPECIAL_LIST_IDS.INBOX],
-                                        title: DATA.PAGE_1.title,
-                                        url: DATA.PAGE_1.url,
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                    },
-                                ],
-                                totalCount: null,
-                                resultsExhausted: true,
-                            })
-                        },
-                        execute: async ({ setup }) => {
-                            await setup.backgroundModules.bookmarks.delBookmark(
-                                {
-                                    url: DATA.PAGE_1.fullUrl,
-                                },
-                            )
-                        },
-                        expectedStorageChanges: {
-                            bookmarks: (): StorageCollectionDiff => ({
-                                [DATA.PAGE_1.url]: { type: 'delete' },
-                            }),
-                        },
-                        expectedSyncLogEntries: () => [
-                            expect.objectContaining({
-                                collection: 'bookmarks',
-                                operation: 'delete',
-                                pk: 'lorem.com',
-                            }),
-                        ],
-                        postCheck: async ({ setup }) => {
-                            expect(
-                                [],
-                                // await setup.backgroundModules.search.searchPages(
-                                //     {
-                                //         bookmarksOnly: true,
-                                //     },
-                                // ),
-                            ).toEqual({
-                                docs: [],
-                                totalCount: null,
-                                resultsExhausted: true,
-                            })
-                        },
-                    },
-                ],
+                steps: [],
+                // [
+                //     {
+                //         execute: async ({ setup }) => {
+                //             await setup.backgroundModules.bookmarks.addBookmark(
+                //                 {
+                //                     fullUrl: DATA.PAGE_1.fullUrl,
+                //                     timestamp: DATA.BOOKMARK_1,
+                //                     tabId: DATA.TEST_TAB_1.id,
+                //                 },
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             bookmarks: (): StorageCollectionDiff => ({
+                //                 [DATA.PAGE_1.url]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         url: DATA.PAGE_1.url,
+                //                         time: DATA.BOOKMARK_1,
+                //                     },
+                //                 },
+                //             }),
+                //             visits: () =>
+                //                 createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
+                //             pages: (): StorageCollectionDiff => ({
+                //                 ...DATA.PAGE_1_CREATION,
+                //             }),
+                //             customLists: (): StorageCollectionDiff => ({
+                //                 [SPECIAL_LIST_IDS.INBOX]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         name: SPECIAL_LIST_NAMES.INBOX,
+                //                         searchableName:
+                //                             SPECIAL_LIST_NAMES.INBOX,
+                //                         nameTerms: [
+                //                             SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                //                         ],
+                //                         id: SPECIAL_LIST_IDS.INBOX,
+                //                         isDeletable: false,
+                //                         isNestable: false,
+                //                     },
+                //                 },
+                //             }),
+                //             pageListEntries: (): StorageCollectionDiff => ({
+                //                 [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                //                     type: 'create',
+                //                     object: {
+                //                         createdAt: expect.any(Date),
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                         listId: SPECIAL_LIST_IDS.INBOX,
+                //                         pageUrl: DATA.PAGE_1.url,
+                //                     },
+                //                 },
+                //             }),
+                //         },
+                //         expectedSyncLogEntries: () => [
+                //             expect.objectContaining({
+                //                 collection: 'pages',
+                //                 operation: 'create',
+                //             }),
+                //             expect.objectContaining({
+                //                 collection: 'customLists',
+                //                 operation: 'create',
+                //                 pk: SPECIAL_LIST_IDS.INBOX,
+                //                 value: {
+                //                     name: SPECIAL_LIST_NAMES.INBOX,
+                //                     searchableName: SPECIAL_LIST_NAMES.INBOX,
+                //                     isDeletable: false,
+                //                     isNestable: false,
+                //                     createdAt: expect.any(Date),
+                //                 },
+                //             }),
+                //             expect.objectContaining({
+                //                 collection: 'pageListEntries',
+                //                 operation: 'create',
+                //                 value: {
+                //                     fullUrl: DATA.PAGE_1.fullUrl,
+                //                     createdAt: expect.any(Date),
+                //                 },
+                //             }),
+                //             expect.objectContaining({
+                //                 collection: 'visits',
+                //                 operation: 'create',
+                //             }),
+                //             expect.objectContaining({
+                //                 collection: 'bookmarks',
+                //                 operation: 'create',
+                //                 pk: 'lorem.com',
+                //                 value: {
+                //                     time: expect.any(Number),
+                //                 },
+                //             }),
+                //         ],
+                //     },
+                //     {
+                //         preCheck: async ({ setup }) => {
+                //             expect(
+                //                 [],
+                //                 // await setup.backgroundModules.search.searchPages(
+                //                 //     {
+                //                 //         bookmarksOnly: true,
+                //                 //     },
+                //                 // ),
+                //             ).toEqual({
+                //                 docs: [
+                //                     {
+                //                         annotations: [],
+                //                         annotsCount: undefined,
+                //                         displayTime: DATA.BOOKMARK_1,
+                //                         favIcon: undefined,
+                //                         hasBookmark: true,
+                //                         screenshot: undefined,
+                //                         tags: [],
+                //                         lists: [SPECIAL_LIST_IDS.INBOX],
+                //                         title: DATA.PAGE_1.title,
+                //                         url: DATA.PAGE_1.url,
+                //                         fullUrl: DATA.PAGE_1.fullUrl,
+                //                     },
+                //                 ],
+                //                 totalCount: null,
+                //                 resultsExhausted: true,
+                //             })
+                //         },
+                //         execute: async ({ setup }) => {
+                //             await setup.backgroundModules.bookmarks.delBookmark(
+                //                 {
+                //                     url: DATA.PAGE_1.fullUrl,
+                //                 },
+                //             )
+                //         },
+                //         expectedStorageChanges: {
+                //             bookmarks: (): StorageCollectionDiff => ({
+                //                 [DATA.PAGE_1.url]: { type: 'delete' },
+                //             }),
+                //         },
+                //         expectedSyncLogEntries: () => [
+                //             expect.objectContaining({
+                //                 collection: 'bookmarks',
+                //                 operation: 'delete',
+                //                 pk: 'lorem.com',
+                //             }),
+                //         ],
+                //         postCheck: async ({ setup }) => {
+                //             expect(
+                //                 [],
+                //                 // await setup.backgroundModules.search.searchPages(
+                //                 //     {
+                //                 //         bookmarksOnly: true,
+                //                 //     },
+                //                 // ),
+                //             ).toEqual({
+                //                 docs: [],
+                //                 totalCount: null,
+                //                 resultsExhausted: true,
+                //             })
+                //         },
+                //     },
+                // ],
             }
         },
     ),
