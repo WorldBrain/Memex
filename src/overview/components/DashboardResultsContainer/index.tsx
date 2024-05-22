@@ -89,6 +89,7 @@ export default class DashboardResultsContainer extends StatefulUIElement<
                 <Onboarding
                     browserAPIs={browser}
                     navToDashboard={this.handleOnboardingComplete}
+                    getRootElement={() => document.getElementById('app')}
                 />
             )
         }

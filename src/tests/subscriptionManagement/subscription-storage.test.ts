@@ -321,6 +321,38 @@ describe('Ribbon logic', () => {
 
             expect(result).toBe(false)
         })
+
+        it('should allow action if user has AIpowerupOwnKey powerup AND has key AND using GPT-3 but over free tier limit', async ({
+            device,
+        }) => {
+            const { browserAPIs, analytics, collectionsBG } = await setupTest(
+                device,
+            )
+
+            const fakeStorageEntry = {
+                ...DEFAULT_COUNTER_STORAGE_VALUE,
+                cQ: DEFAULT_POWERUP_LIMITS.AIpowerup + 10,
+                pU: {
+                    ...DEFAULT_COUNTER_STORAGE_VALUE.pU,
+                    AIpowerupOwnKey: true,
+                },
+            }
+
+            await browserAPIs.storage.local.set({
+                [COUNTER_STORAGE_KEY]: fakeStorageEntry,
+            })
+
+            const result = await AIActionAllowed(
+                browserAPIs,
+                analytics,
+                true,
+                false,
+                'gpt-3',
+            )
+
+            expect(result).toBe(true)
+        })
+
         it('should prevent action if user has NO AI powerup AND no Key AND hit the limit', async ({
             device,
         }) => {

@@ -194,9 +194,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             return (
                 <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>
-                        You've reached the limit of
-                        <br /> ${DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} saved
-                        pages per month
+                        You've reached the daily limit of <br />
+                        {DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} saved pages
                     </NoticeTitle>
                     <NoticeSubTitle>
                         Upgrade to continue to save, annotate and organise.

@@ -114,7 +114,9 @@ import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat'
+
+import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat/utils'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -273,7 +275,7 @@ export class SidebarContainerLogic extends UILogic<
             aiQueryEditorState: null,
 
             users: {},
-            currentUserReference: null,
+            currentUserId: null,
             pillVisibility: 'unhover',
             videoDetails: null,
             summaryModeActiveTab: 'Answer',
@@ -879,32 +881,7 @@ export class SidebarContainerLogic extends UILogic<
             runtimeAPI,
         } = this.options
 
-        const signupDate = new Date(
-            await (await this.options.authBG.getCurrentUser())?.creationTime,
-        ).getTime()
-
-        this.emitMutation({
-            signupDate: { $set: signupDate },
-            isTrial: {
-                $set: await enforceTrialPeriod30Days(
-                    this.options.browserAPIs,
-                    signupDate,
-                ),
-            },
-        })
-
-        const userReference = await this.options.getCurrentUser()
-        this.emitMutation({
-            currentUserReference: { $set: userReference ?? null },
-        })
-
-        this.sidebar = document
-            .getElementById('memex-sidebar-container')
-            ?.shadowRoot.getElementById('annotationSidebarContainer')
-        this.readingViewState =
-            (await browser.storage.local.get('@Sidebar-reading_view')) ?? true
-        // this.readingViewStorageListener(true)
-
+        // All the things necessary for the sidebar to function
         await loadInitial<SidebarContainerState>(this, async () => {
             this.showState = initialState ?? 'hidden'
             this.emitMutation({
@@ -912,24 +889,109 @@ export class SidebarContainerLogic extends UILogic<
                 loadState: { $set: 'running' },
             })
 
+            if (fullPageUrl == null) {
+                return
+            }
+            this.fullPageUrl = fullPageUrl
+
+            const currentUser = await this.options.authBG.getCurrentUser()
+            if (currentUser) {
+                this.emitMutation({
+                    currentUserId: { $set: currentUser.id ?? null },
+                })
+                const signupDate = new Date(currentUser?.creationTime).getTime()
+                this.emitMutation({
+                    signupDate: { $set: signupDate },
+                    isTrial: {
+                        $set: await enforceTrialPeriod30Days(
+                            this.options.browserAPIs,
+                            signupDate,
+                        ),
+                    },
+                })
+            }
+
+            // add trigger for signing up if the current user is not available
+
+            const openAIKey = await this.syncSettings.openAI?.get('apiKey')
+            const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
+
+            const selectedModel = await this.syncSettings.openAI.get(
+                'selectedModel',
+            )
+
+            this.emitMutation({
+                hasKey: { $set: hasAPIKey },
+                AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
+            })
+
+            this.sidebar = document
+                .getElementById('memex-sidebar-container')
+                ?.shadowRoot.getElementById('annotationSidebarContainer')
+            this.readingViewState =
+                (await browser.storage.local.get('@Sidebar-reading_view')) ??
+                true
+
             if (initialState === 'visible') {
                 this.readingViewStorageListener(true)
             }
 
-            if (fullPageUrl == null) {
-                return
+            if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
+                const width = SIDEBAR_WIDTH_STORAGE_KEY
+
+                this.emitMutation({
+                    showState: { $set: 'visible' },
+                    sidebarWidth: { $set: width },
+                })
+
+                setTimeout(async () => {
+                    await storageAPI.local.set({
+                        '@Sidebar-reading_view': true,
+                    })
+                }, 1000)
             }
 
-            this.fullPageUrl = fullPageUrl
-            if (shouldHydrateCacheOnInit) {
-                await this.hydrateAnnotationsCache(this.fullPageUrl, {
-                    renderHighlights: true,
+            const pageAlreadySaved =
+                (await this.options.pageIndexingBG.getPageMetadata({
+                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+                })) != null
+
+            this.emitMutation({
+                pageAlreadySaved: { $set: pageAlreadySaved },
+            })
+
+            const highlightColors = await this.fetchHighlightColors()
+
+            this.emitMutation({ highlightColors: { $set: highlightColors } })
+
+            // Load the setting for the auto-adding of notes to spaces
+            const isAutoAddEnabled = await this.syncSettings.extension.get(
+                'shouldAutoAddSpaces',
+            )
+
+            if (isAutoAddEnabled == null) {
+                this.emitMutation({
+                    isAutoAddEnabled: { $set: true },
+                })
+                return this.syncSettings.extension.set(
+                    'shouldAutoAddSpaces',
+                    true,
+                )
+            } else {
+                this.emitMutation({
+                    isAutoAddEnabled: { $set: isAutoAddEnabled },
                 })
             }
-            this.syncCachePageListsState(this.fullPageUrl)
-            await this.setPageActivityState(this.fullPageUrl)
         })
 
+        // after sidebar is ready load the annotations cache
+
+        if (shouldHydrateCacheOnInit) {
+            await this.hydrateAnnotationsCache(this.fullPageUrl, {
+                renderHighlights: true,
+            })
+        }
+        this.syncCachePageListsState(this.fullPageUrl)
         this.setupRemoteEventListeners()
         annotationsCache.events.addListener(
             'newAnnotationsState',
@@ -946,62 +1008,6 @@ export class SidebarContainerLogic extends UILogic<
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
-
-        if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
-            const width = SIDEBAR_WIDTH_STORAGE_KEY
-
-            this.emitMutation({
-                showState: { $set: 'visible' },
-                sidebarWidth: { $set: width },
-            })
-
-            setTimeout(async () => {
-                await storageAPI.local.set({
-                    '@Sidebar-reading_view': true,
-                })
-            }, 1000)
-        }
-
-        const pageAlreadySaved =
-            (await this.options.pageIndexingBG.getPageMetadata({
-                normalizedPageUrl: normalizeUrl(this.fullPageUrl),
-            })) != null
-
-        this.emitMutation({
-            pageAlreadySaved: { $set: pageAlreadySaved },
-        })
-
-        const openAIKey = await this.syncSettings.openAI?.get('apiKey')
-        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
-
-        const selectedModel = await this.syncSettings.openAI.get(
-            'selectedModel',
-        )
-
-        this.emitMutation({
-            hasKey: { $set: hasAPIKey },
-            AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
-        })
-
-        const highlightColors = await this.fetchHighlightColors()
-
-        this.emitMutation({ highlightColors: { $set: highlightColors } })
-
-        // Load the setting for the auto-adding of notes to spaces
-        const isAutoAddEnabled = await this.syncSettings.extension.get(
-            'shouldAutoAddSpaces',
-        )
-
-        if (isAutoAddEnabled == null) {
-            this.emitMutation({
-                isAutoAddEnabled: { $set: true },
-            })
-            return this.syncSettings.extension.set('shouldAutoAddSpaces', true)
-        } else {
-            this.emitMutation({
-                isAutoAddEnabled: { $set: isAutoAddEnabled },
-            })
-        }
     }
 
     cleanup = () => {
@@ -2871,6 +2877,11 @@ export class SidebarContainerLogic extends UILogic<
             name: event.spaceName,
         })
 
+        const userReference = {
+            id: previousState.currentUserId,
+            type: 'user-reference',
+        } as UserReference
+
         this.options.annotationsCache.addList({
             name: event.spaceName,
             collabKey,
@@ -2879,7 +2890,7 @@ export class SidebarContainerLogic extends UILogic<
             hasRemoteAnnotationsToLoad: false,
             type: 'user-list',
             unifiedAnnotationIds: [],
-            creator: previousState.currentUserReference ?? undefined,
+            creator: userReference ?? undefined,
             parentLocalId: null,
             isPrivate: true,
         })
@@ -2905,6 +2916,11 @@ export class SidebarContainerLogic extends UILogic<
             name: event.spaceName,
         })
 
+        const userReference = {
+            id: previousState.currentUserId,
+            type: 'user-reference',
+        } as UserReference
+
         this.options.annotationsCache.addList({
             name: event.spaceName,
             collabKey,
@@ -2913,7 +2929,7 @@ export class SidebarContainerLogic extends UILogic<
             hasRemoteAnnotationsToLoad: false,
             type: 'user-list',
             unifiedAnnotationIds: [],
-            creator: previousState.currentUserReference ?? undefined,
+            creator: userReference ?? undefined,
             parentLocalId: null,
             isPrivate: true,
         })
@@ -3765,6 +3781,16 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             activeAITab: { $set: event.tab },
+        })
+    }
+
+    setSidebarVisible: EventHandler<'setSidebarVisible'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.showState = 'visible'
+        this.emitMutation({
+            showState: { $set: 'visible' },
         })
     }
 

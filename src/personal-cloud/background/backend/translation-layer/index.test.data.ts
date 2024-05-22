@@ -53,7 +53,6 @@ const LOCAL_PAGES_V24 = {
         text: '',
         lang: 'en-GB',
         canonicalUrl: 'https://www.getmemexed.com/test',
-        description: 'getmemexed.com description',
     },
     second: {
         url: 'notionized.com/foo',
@@ -64,7 +63,6 @@ const LOCAL_PAGES_V24 = {
         text: '',
         lang: 'en-US',
         canonicalUrl: 'https://www.notionized.com/foo',
-        description: 'notionized.com/foo description',
     },
     third: {
         url: 'memex.cloud/ct/test1.pdf',
@@ -75,7 +73,6 @@ const LOCAL_PAGES_V24 = {
         text: '',
         lang: undefined,
         canonicalUrl: 'https://memex.cloud/ct/test1.pdf',
-        description: undefined,
     },
     fourth: {
         url: 'memex.cloud/ct/test2.pdf',
@@ -86,7 +83,6 @@ const LOCAL_PAGES_V24 = {
         text: '',
         lang: undefined,
         canonicalUrl: 'https://memex.cloud/ct/test2.pdf',
-        description: undefined,
     },
     twitter_a: {
         url: 'twitter.com/zzzzz/status/1111011338575481374',
@@ -97,7 +93,6 @@ const LOCAL_PAGES_V24 = {
         text: '',
         lang: undefined,
         canonicalUrl: 'https://twitter.com/zzzzz/status/1111011338575481374',
-        description: undefined,
     },
     twitter_b: {
         url: 'mobile.twitter.com/zzzzz/status/1111011338575481355',
@@ -109,7 +104,6 @@ const LOCAL_PAGES_V24 = {
         lang: undefined,
         canonicalUrl:
             'https://mobile.twitter.com/zzzzz/status/1111011338575481355',
-        description: undefined,
     },
 }
 
@@ -610,9 +604,7 @@ const REMOTE_METADATA_V24 = {
         canonicalUrl: LOCAL_TEST_DATA_V24.pages.first.canonicalUrl,
         title: LOCAL_TEST_DATA_V24.pages.first.fullTitle,
         lang: LOCAL_TEST_DATA_V24.pages.first.lang,
-        description: LOCAL_TEST_DATA_V24.pages.first.description,
     },
-
     second: {
         id: 2,
         createdWhen: 557,
@@ -622,7 +614,6 @@ const REMOTE_METADATA_V24 = {
         canonicalUrl: LOCAL_TEST_DATA_V24.pages.second.canonicalUrl,
         title: LOCAL_TEST_DATA_V24.pages.second.fullTitle,
         lang: LOCAL_TEST_DATA_V24.pages.second.lang,
-        description: LOCAL_TEST_DATA_V24.pages.second.description,
     },
     third: {
         id: 3,
@@ -633,7 +624,6 @@ const REMOTE_METADATA_V24 = {
         canonicalUrl: LOCAL_TEST_DATA_V24.pages.third.canonicalUrl,
         title: LOCAL_TEST_DATA_V24.pages.third.fullTitle,
         lang: LOCAL_TEST_DATA_V24.pages.third.lang ?? null,
-        description: LOCAL_TEST_DATA_V24.pages.third.description ?? null,
     },
     fourth: {
         id: 4,
@@ -644,7 +634,6 @@ const REMOTE_METADATA_V24 = {
         canonicalUrl: LOCAL_TEST_DATA_V24.pages.fourth.canonicalUrl,
         title: LOCAL_TEST_DATA_V24.pages.fourth.fullTitle,
         lang: LOCAL_TEST_DATA_V24.pages.fourth.lang ?? null,
-        description: LOCAL_TEST_DATA_V24.pages.fourth.description ?? null,
     },
     twitter_a: {
         id: 1,
@@ -655,7 +644,6 @@ const REMOTE_METADATA_V24 = {
         canonicalUrl: LOCAL_TEST_DATA_V24.pages.twitter_a.canonicalUrl,
         title: LOCAL_TEST_DATA_V24.pages.twitter_a.fullTitle,
         lang: LOCAL_TEST_DATA_V24.pages.twitter_a.lang ?? null,
-        description: LOCAL_TEST_DATA_V24.pages.twitter_a.description ?? null,
     },
     twitter_b: {
         id: 2,
@@ -666,7 +654,6 @@ const REMOTE_METADATA_V24 = {
         canonicalUrl: LOCAL_TEST_DATA_V24.pages.twitter_b.canonicalUrl,
         title: LOCAL_TEST_DATA_V24.pages.twitter_b.fullTitle,
         lang: LOCAL_TEST_DATA_V24.pages.twitter_b.lang ?? null,
-        description: LOCAL_TEST_DATA_V24.pages.twitter_b.description ?? null,
     },
 }
 
