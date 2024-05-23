@@ -820,7 +820,9 @@ export default class CustomListStorage extends StorageModule {
             localListId: params.rootLocalListId,
         })
         if (!listTree) {
-            throw new Error('Could not find root data of tree to traverse')
+            throw new Error(
+                `Could not find root list data of tree to traverse - list ID: ${params.rootLocalListId}`,
+            )
         }
         // Link nodes are always leaves
         if (listTree.linkTarget != null) {
