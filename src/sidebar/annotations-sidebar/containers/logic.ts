@@ -938,11 +938,16 @@ export class SidebarContainerLogic extends UILogic<
                 this.readingViewStorageListener(true)
             }
 
-            if (
-                isUrlPDFViewerUrl(this.options.windowAPI.location.href, {
-                    runtimeAPI,
+            if (shouldHydrateCacheOnInit) {
+                await this.hydrateAnnotationsCache(this.fullPageUrl, {
+                    renderHighlights: true,
                 })
-            ) {
+            }
+            this.syncCachePageListsState(this.fullPageUrl)
+            await this.setPageActivityState(this.fullPageUrl)
+            this.setupRemoteEventListeners()
+
+            if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
                 const width = SIDEBAR_WIDTH_STORAGE_KEY
 
                 this.emitMutation({
@@ -989,16 +994,6 @@ export class SidebarContainerLogic extends UILogic<
                 })
             }
         })
-
-        // after sidebar is ready load the annotations cache
-
-        if (shouldHydrateCacheOnInit) {
-            await this.hydrateAnnotationsCache(this.fullPageUrl, {
-                renderHighlights: true,
-            })
-        }
-        this.syncCachePageListsState(this.fullPageUrl)
-        this.setupRemoteEventListeners()
         annotationsCache.events.addListener(
             'newAnnotationsState',
             this.cacheAnnotationsSubscription,
