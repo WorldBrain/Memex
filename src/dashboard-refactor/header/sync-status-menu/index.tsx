@@ -243,8 +243,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     </Row>
 
                     {/* TODO: Re-implement this */}
-                    {this.props.syncStatusIconState !== 'yellow' &&
-                    this.props.syncStatusIconState !== 'red' ? (
+                    {this.props.syncStatusIconState !== 'red' ? (
                         <Row>
                             <InfoText> pending downloads</InfoText>
                             {pendingRemoteChangeCount == null ? (
