@@ -405,7 +405,7 @@ export default class UpgradeModal extends UIElement<
                         <PowerUpPricing
                             componentVariant={this.props.componentVariant}
                         >
-                            $500
+                            $450
                         </PowerUpPricing>
                         {this.props.componentVariant === 'OnboardingStep' && (
                             <AlternativePricing>$400</AlternativePricing>
