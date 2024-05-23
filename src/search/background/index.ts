@@ -883,10 +883,12 @@ export default class SearchBackground {
             .bulkGet(hostnames)
 
         const favIconDataURLs = await Promise.all(
-            favIcons.filter(Boolean).map(async (f) => ({
-                hostname: f.hostname,
-                favIconDataURL: await blobToDataURL(f.favIcon),
-            })),
+            favIcons
+                .filter((f) => f?.favIcon != null)
+                .map(async (f) => ({
+                    hostname: f.hostname,
+                    favIconDataURL: await blobToDataURL(f.favIcon),
+                })),
         )
         const favIconByHostname = fromPairs(
             favIconDataURLs.map((f) => [f.hostname, f.favIconDataURL]),
