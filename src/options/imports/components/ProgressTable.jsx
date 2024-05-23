@@ -127,7 +127,7 @@ const InfoBlock = styled.div`
 const Progress = styled.div`
     display: grid;
     grid-auto-flow: column;
-    grid-gap: 3px;
+    grid-gap: 5px;
     align-items: flex-end;
 `
 
@@ -135,7 +135,6 @@ const Number = styled.div`
     color: ${(props) => props.theme.colors.white};
     font-size: 22px;
     font-weight: bold;
-    width: 0px;
     line-height: 28px;
 `
 

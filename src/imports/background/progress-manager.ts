@@ -185,7 +185,7 @@ export default class ImportProgressManager {
                 // Create custom lists for bookmark folders
 
                 let localListId = null
-                let map = []
+                let map = {}
                 const existing = await this.options.customListsModule.fetchListByName(
                     {
                         name: 'Browser Bookmarks',
@@ -282,7 +282,7 @@ export default class ImportProgressManager {
                     const existingPath = existingListTree.pathListIds
                     if (existingPath.includes(map[-1])) {
                         map[parentId] = existingList.id
-                        return
+                        continue // Use continue instead of return
                     }
                 }
 
