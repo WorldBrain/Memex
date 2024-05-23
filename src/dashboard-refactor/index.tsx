@@ -1955,6 +1955,7 @@ export class DashboardContainer extends StatefulUIElement<
                             )}
                         </MainContent>
                         <NotesSidebar
+                            windowAPI={window}
                             storageAPI={this.props.browserAPIs.storage}
                             inPageMode={this.props.inPageMode}
                             imageSupport={this.props.imageSupportBG}
