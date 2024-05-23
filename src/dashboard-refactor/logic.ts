@@ -2398,6 +2398,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
+        const pageId =
+            previousState.searchResults.pageIdToResultIds[event.activePageID][0]
+
         this.emitMutation({
             activeDay: { $set: event.activeDay },
             activePageID: { $set: event.activePageID },
@@ -2406,20 +2409,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.activeDay]: {
                         pages: {
                             byId: {
-                                [event.activePageID]: {
+                                [pageId]: {
                                     activePage: {
                                         $set: event.activePage,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    [previousState.activeDay]: {
-                        pages: {
-                            byId: {
-                                [previousState.activePageID]: {
-                                    activePage: {
-                                        $set: false,
                                     },
                                 },
                             },
@@ -2428,6 +2420,31 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
         })
+
+        const previousPageId =
+            previousState.searchResults.pageIdToResultIds[
+                previousState.activePageID
+            ][0]
+
+        if (previousPageId) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [previousState.activeDay]: {
+                            pages: {
+                                byId: {
+                                    [previousPageId]: {
+                                        activePage: {
+                                            $set: false,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
     }
 
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {

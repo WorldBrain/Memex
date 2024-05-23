@@ -748,7 +748,7 @@ export default class SearchResultsContainer extends React.Component<
                     resultsRef={this.ResultsScrollContainerRef}
                     inPageMode={this.props.inPageMode}
                     index={index}
-                    activePage={this.props.activePage}
+                    activePage={pageResult.activePage}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={
                         this.props.listData.byId[this.props.selectedListId]
