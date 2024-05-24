@@ -1,4 +1,7 @@
-import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import {
+    checkStripePlan,
+    pageActionAllowed,
+} from '@worldbrain/memex-common/lib/subscriptions/storage'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
@@ -241,6 +244,39 @@ describe('Ribbon logic', () => {
 
             expect(result).toBe(true)
         })
+        it('should allow action if user has lifetime plan, set a key and is over the daily limit (theoretically)', async ({
+            device,
+        }) => {
+            const { browserAPIs, analytics, collectionsBG } = await setupTest(
+                device,
+            )
+
+            const fakeStorageEntry = {
+                ...DEFAULT_COUNTER_STORAGE_VALUE,
+                cQ: DEFAULT_POWERUP_LIMITS.AIpowerup - 10,
+                pU: {
+                    AIpowerup: true,
+                    Unlimited: true,
+                    AIpowerupOwnKey: true,
+                    bookmarksPowerUp: true,
+                    lifetime: true,
+                },
+            }
+
+            await browserAPIs.storage.local.set({
+                [COUNTER_STORAGE_KEY]: fakeStorageEntry,
+            })
+
+            const result = await AIActionAllowed(
+                browserAPIs,
+                analytics,
+                true,
+                false,
+                'claude-3-haiku',
+            )
+
+            expect(result).toBe(true)
+        })
         it('should allow action if user has AI own key powerup and key', async ({
             device,
         }) => {
@@ -270,7 +306,7 @@ describe('Ribbon logic', () => {
 
             expect(result).toBe(true)
         })
-        it('should allow action if user has AIpowerupOwnKey powerup AND no key AND not hit free quota', async ({
+        it('should allow action if user has AIpowerupOwnKey powerup AND NO key AND NOT hit free quota', async ({
             device,
         }) => {
             const { browserAPIs, analytics, collectionsBG } = await setupTest(
@@ -370,7 +406,6 @@ describe('Ribbon logic', () => {
         it('should prevent action if user has NO AI powerup AND no Key AND hit the limit', async ({
             device,
         }) => {
-            return
             const { browserAPIs, analytics, collectionsBG } = await setupTest(
                 device,
             )
@@ -378,11 +413,17 @@ describe('Ribbon logic', () => {
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
                 cQ: DEFAULT_POWERUP_LIMITS.AIpowerup + 10,
+                m: new Date().getDate(),
             }
 
             await browserAPIs.storage.local.set({
                 [COUNTER_STORAGE_KEY]: fakeStorageEntry,
             })
+
+            const local = await browserAPIs.storage.local.get(
+                COUNTER_STORAGE_KEY,
+            )
+            const localDAta = local[COUNTER_STORAGE_KEY]
 
             const result = await AIActionAllowed(
                 browserAPIs,
