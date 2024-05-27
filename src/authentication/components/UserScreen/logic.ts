@@ -6,6 +6,8 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
 import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import checkBrowser from 'src/util/check-browser'
+import browser from 'webextension-polyfill'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -46,27 +48,57 @@ export default class Logic extends UILogic<State, Event> {
         systemSelectMenuState: false,
         generateTokenDisplay: null,
         copyToClipBoardState: 'pristine',
-        isStagingEnv: process.env.NODE_ENV === 'development',
+        isStagingEnv: false,
+        isFirefox: false,
     })
 
     async init() {
         const { authBG } = this.dependencies
-        this.emitMutation({
-            loadState: { $set: 'running' },
-        })
-
-        this.emitMutation({
-            mode: { $set: 'signup' },
-        })
-
         await loadInitial(this, async () => {
             const user = await authBG.getCurrentUser()
-            this.emitMutation({
-                loadState: { $set: 'success' },
-            })
+
             if (user != null) {
                 this.isExistingUser = true
                 await this._onUserLogIn(false)
+                this.emitMutation({
+                    loadState: { $set: 'success' },
+                    currentUser: { $set: user },
+                })
+            } else {
+                this.emitMutation({
+                    loadState: { $set: 'running' },
+                    mode: { $set: 'signup' },
+                })
+
+                const browserName = checkBrowser()
+                const isFirefox = browserName === 'firefox'
+                const isStaging = process.env.NODE_ENV === 'development'
+
+                if (isStaging) {
+                    this.emitMutation({
+                        isStagingEnv: { $set: true },
+                    })
+                }
+                if (isFirefox) {
+                    this.emitMutation({
+                        isFirefox: { $set: true },
+                        loadState: { $set: 'success' },
+                    })
+                    return
+                }
+
+                if (!(isFirefox || isStaging)) {
+                    const env = process.env.NODE_ENV
+                    let memexSocialUrl: string
+                    if (env === 'production') {
+                        memexSocialUrl = 'https://memex.social/'
+                    } else {
+                        memexSocialUrl = 'https://staging.memex.social/'
+                    }
+                    await browser.tabs.create({
+                        url: `${memexSocialUrl}auth`,
+                    })
+                }
             }
         })
     }

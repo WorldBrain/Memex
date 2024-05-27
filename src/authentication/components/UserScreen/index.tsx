@@ -33,33 +33,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     async componentDidMount() {
-        const user = await this.props.authBG.getCurrentUser()
-
-        if (user == null) {
-            const browserName = checkBrowser()
-            const isFirefox = browserName === 'firefox'
-
-            const isStaging = process.env.NODE_ENV === 'development'
-
-            if (isFirefox || isStaging) {
-                window.location.href = LOGIN_URL
-            } else {
-                const env = process.env.NODE_ENV
-                let memexSocialUrl: string
-                if (env === 'production') {
-                    memexSocialUrl = 'https://memex.social/'
-                } else {
-                    memexSocialUrl = 'https://staging.memex.social/'
-                }
-                await browser.tabs.create({
-                    url: `${memexSocialUrl}auth`,
-                })
-            }
-
-            window.location.href = LOGIN_URL
-        }
-
-        this.processEvent('getCurrentUser', { currentUser: user })
+        super.componentDidMount()
     }
 
     constructor(props: Props) {
@@ -123,7 +97,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     render() {
         return (this.state.loadState === 'running' ||
             this.state.currentUser == null) &&
-            !this.state.isStagingEnv ? (
+            !(this.state.isStagingEnv || this.state.isFirefox) ? (
             <LoadingContainer>
                 {this.state.currentUser === null && (
                     <InfoText>

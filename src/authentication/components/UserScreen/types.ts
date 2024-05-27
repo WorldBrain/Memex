@@ -40,6 +40,7 @@ export interface State {
     systemSelectMenuState: boolean
     copyToClipBoardState: UITaskState
     isStagingEnv: boolean
+    isFirefox: boolean
 }
 
 export type Event = UIEvent<{
