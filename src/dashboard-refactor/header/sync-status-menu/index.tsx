@@ -236,7 +236,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                             <LoadingIndicator size={14} />
                         ) : (
                             <SectionCircle>
-                                {pendingLocalChangeCount}
+                                {Math.max(0, pendingLocalChangeCount)}
                             </SectionCircle>
                         )}
                         {/* This is a hack to make sure we don't show negative numbers but it'll hide some problems away */}
@@ -250,7 +250,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                                 <LoadingIndicator size={14} />
                             ) : (
                                 <SectionCircle>
-                                    {pendingRemoteChangeCount}
+                                    {Math.max(0, pendingRemoteChangeCount)}
                                 </SectionCircle>
                             )}
                         </Row>

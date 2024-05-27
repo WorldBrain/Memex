@@ -1653,7 +1653,10 @@ export class DashboardContainer extends StatefulUIElement<
                     <LoginModal
                         authBG={this.props.authBG}
                         contentSharingBG={this.props.contentShareBG}
-                        onSuccess={() =>
+                        onSuccess={() => {
+                            this.processEvent('setShowLoginModal', {
+                                isShown: false,
+                            })
                             setTimeout(
                                 () =>
                                     this.processEvent(
@@ -1662,7 +1665,7 @@ export class DashboardContainer extends StatefulUIElement<
                                     ),
                                 1000,
                             )
-                        }
+                        }}
                         browserAPIs={this.props.browserAPIs}
                     />
                 </OverlayModals>
