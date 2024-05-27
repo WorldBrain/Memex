@@ -12,7 +12,10 @@ import {
 } from '@worldbrain/memex-common/lib/editor/utils'
 import React, { Component } from 'react'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { SyncSettingsStore } from 'src/sync-settings/util'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
 import { Range } from 'react-range'
@@ -48,9 +51,14 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     summarizeButtonRef = React.createRef<HTMLDivElement>() // Assuming you have a ref to the parent container
     AIButtonRef = React.createRef<HTMLDivElement>() // Assuming you have a ref to the parent container
     summarizePromptRef = React.createRef<HTMLInputElement>() // Assuming you have a ref to the parent container
+    syncSettings: SyncSettingsStore<'openAI'>
 
     constructor(props) {
         super(props)
+
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.props.syncSettingsBG,
+        })
 
         this.state = {
             YTChapterContainerVisible: false,
@@ -68,16 +76,17 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     }
 
     async componentDidMount() {
-        if (this.props.syncSettings != null) {
+        this.getYoutubeVideoDuration()
+
+        if (this.syncSettings != null) {
             let summarizeVideoPromptSetting
-            let apikey = await this.props.syncSettings.openAI?.get('apiKey')
             try {
-                summarizeVideoPromptSetting = await this.props.syncSettings.openAI?.get(
+                summarizeVideoPromptSetting = await this.syncSettings.openAI?.get(
                     'videoPromptSetting',
                 )
             } catch (e) {
                 if (summarizeVideoPromptSetting == null) {
-                    await this.props.syncSettings.openAI?.set(
+                    await this.syncSettings.openAI?.set(
                         'videoPromptSetting',
                         'Summarise this video and include timestamps',
                     )
@@ -93,7 +102,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 summarizePrompt: summarizeVideoPromptSetting,
             })
         }
-        this.getYoutubeVideoDuration()
+
         // Logic to check for YTChapterContainer and existingMemexButtons
         // Logic to retrieve smartNoteSeconds and noteSeconds from storage
         this.adjustScaleToFitParent()
@@ -273,6 +282,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             showSummarizeTooltip: false,
             showAINoteTooltip: false,
         })
+
+        await this.syncSettings.openAI?.set(
+            'videoPromptSetting',
+            this.state.summarizePrompt,
+        )
 
         const from = this.state.fromSecondsPosition
         const to = this.state.toSecondsPosition

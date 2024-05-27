@@ -33,18 +33,17 @@ export class BlockCounterIndicator extends React.Component<Props> {
     private tooltipButtonRef = React.createRef<HTMLDivElement>()
 
     async componentDidMount() {
-        await browser.storage.local.get(COUNTER_STORAGE_KEY).then((result) => {
-            if (!result[COUNTER_STORAGE_KEY].pU.bookmarksPowerUp) {
-                this.setState({
-                    shouldShow: true,
-                    totalCount: DEFAULT_POWERUP_LIMITS.bookmarksPowerUp,
-                    currentCount: result[COUNTER_STORAGE_KEY].c,
-                })
-                browser.storage.onChanged.addListener((changes) =>
-                    this.counterStorageListenerExecution(changes),
-                )
-            }
-        })
+        const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
+        if (!result[COUNTER_STORAGE_KEY]?.pU?.bookmarksPowerUp) {
+            this.setState({
+                shouldShow: true,
+                totalCount: DEFAULT_POWERUP_LIMITS.bookmarksPowerUp,
+                currentCount: result[COUNTER_STORAGE_KEY].c,
+            })
+            browser.storage.onChanged.addListener(
+                this.counterStorageListenerExecution,
+            )
+        }
     }
     async componentWillUnmount() {
         if (this.state.shouldShow) {
