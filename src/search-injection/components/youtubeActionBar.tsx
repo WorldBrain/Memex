@@ -68,9 +68,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     }
 
     async componentDidMount() {
+        this.getYoutubeVideoDuration()
         if (this.props.syncSettings != null) {
             let summarizeVideoPromptSetting
-            let apikey = await this.props.syncSettings.openAI?.get('apiKey')
             try {
                 summarizeVideoPromptSetting = await this.props.syncSettings.openAI?.get(
                     'videoPromptSetting',
@@ -93,7 +93,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 summarizePrompt: summarizeVideoPromptSetting,
             })
         }
-        this.getYoutubeVideoDuration()
+
         // Logic to check for YTChapterContainer and existingMemexButtons
         // Logic to retrieve smartNoteSeconds and noteSeconds from storage
         this.adjustScaleToFitParent()
@@ -292,6 +292,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             false,
             false,
             this.getTimestampNoteContentForYoutubeNotes(),
+        )
+
+        await this.props.syncSettings.openAI?.set(
+            'videoPromptSetting',
+            this.state.summarizePrompt,
         )
     }
 
