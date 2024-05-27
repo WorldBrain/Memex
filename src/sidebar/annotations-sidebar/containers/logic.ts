@@ -579,7 +579,6 @@ export class SidebarContainerLogic extends UILogic<
                 this.tokenBufferEditor =
                     (this.tokenBufferEditor || '') + newToken
 
-                console.log('tokenBufferEditor', this.tokenBufferEditor)
                 // Check if the buffer has balanced brackets and all markdown links are closed
                 if (this.bracketsAreBalanced(this.tokenBufferEditor)) {
                     let executed = false

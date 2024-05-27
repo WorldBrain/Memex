@@ -4,7 +4,6 @@ export type BrowserName = 'chrome' | 'firefox' | 'brave'
  * NOTE: Does not work from the content-script.
  */
 function checkBrowser(): BrowserName {
-    console.log('navigator.userAgent:', navigator.userAgent)
     // `runtime.getBrowserInfo` is only available on FF web ext API
     if (navigator.userAgent.includes('Firefox')) {
         return 'firefox'

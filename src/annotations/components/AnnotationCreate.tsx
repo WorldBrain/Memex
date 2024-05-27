@@ -132,7 +132,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                     } else if (!(await this.editor.checkIfReady())) {
                         callback(false)
                     } else {
-                        console.log('Adding to buffer', text)
                         this.eventBuffer.push({
                             text,
                             showLoadingSpinner,
