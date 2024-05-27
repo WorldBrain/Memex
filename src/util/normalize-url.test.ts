@@ -47,9 +47,21 @@ describe('URL normalization tests', () => {
             expect(normalizeUrl(url)).toEqual('twitter.com/search?q=test')
         })
 
-        it('should keep all query params apart from "taken-by" on instagram URLs', () => {
-            const url = 'https://www.instagram.com/?hl=en&taken-by=test'
-            expect(normalizeUrl(url)).toEqual('instagram.com/?hl=en')
+        it('should remove all query params apart from "img_index" on instagram URLs', () => {
+            const urlA =
+                'https://www.instagram.com/?hl=en&taken-by=test&fake=foo'
+            const urlB = 'https://www.instagram.com/p/C6M13dHL-zi/'
+            const urlC = 'https://www.instagram.com/p/C6M13dHL-zi/?img_index=1'
+            const urlD =
+                'https://www.instagram.com/p/C6M13dHL-zi/?img_index=1&hl=en&taken-by=test'
+            expect(normalizeUrl(urlA)).toEqual('instagram.com/')
+            expect(normalizeUrl(urlB)).toEqual('instagram.com/p/C6M13dHL-zi')
+            expect(normalizeUrl(urlC)).toEqual(
+                'instagram.com/p/C6M13dHL-zi?img_index=1',
+            )
+            expect(normalizeUrl(urlD)).toEqual(
+                'instagram.com/p/C6M13dHL-zi?img_index=1',
+            )
         })
     })
 })
