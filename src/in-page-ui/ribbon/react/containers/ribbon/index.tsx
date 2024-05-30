@@ -36,7 +36,7 @@ export default class RibbonContainer extends StatefulUIElement<
 > {
     private ribbonRef = React.createRef<Ribbon>()
 
-    constructor(props) {
+    constructor(props: RibbonContainerProps) {
         super(
             props,
             new RibbonContainerLogic({
@@ -48,6 +48,15 @@ export default class RibbonContainer extends StatefulUIElement<
                     this.ribbonRef?.current?.focusCreateForm(),
             }),
         )
+
+        props.events.on('bookmarkPage', () =>
+            this.processEvent('toggleBookmark', null),
+        )
+        props.events.on('openSpacePickerInRibbon', () =>
+            this.processEvent('setShowListsPicker', { value: true }),
+        )
+        props.inPageUI.events.on('ribbonAction', this.handleExternalAction)
+        window.addEventListener('beforeunload', this.handleBeforeUnload)
     }
 
     private get normalizedPageUrl(): string | null {
@@ -56,24 +65,13 @@ export default class RibbonContainer extends StatefulUIElement<
             : null
     }
 
-    async componentDidMount() {
-        await super.componentDidMount()
-        this.props.inPageUI.events.on('ribbonAction', this.handleExternalAction)
-
-        this.props.events.on('bookmarkPage', () =>
-            this.processEvent('toggleBookmark', null),
-        )
-        this.props.events.on('openSpacePickerInRibbon', () =>
-            this.processEvent('setShowListsPicker', { value: true }),
-        )
-    }
-
     async componentWillUnmount() {
-        await super.componentWillUnmount()
         this.props.inPageUI.events.removeListener(
             'ribbonAction',
             this.handleExternalAction,
         )
+        window.removeEventListener('beforeunload', this.handleBeforeUnload)
+        await super.componentWillUnmount()
     }
 
     componentDidUpdate(prevProps: RibbonContainerProps) {
@@ -87,6 +85,14 @@ export default class RibbonContainer extends StatefulUIElement<
 
         if (currentTab.url !== prevProps.currentTab.url) {
             this.processEvent('hydrateStateFromDB', { url: currentTab.url })
+        }
+    }
+
+    // Block user nav away when some write RPC op is occurring
+    private handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        let shouldBlockUnload = this.state.bookmark.loadState === 'running'
+        if (shouldBlockUnload) {
+            e.preventDefault()
         }
     }
 

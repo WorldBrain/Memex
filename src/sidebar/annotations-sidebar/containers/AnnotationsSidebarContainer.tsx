@@ -120,18 +120,35 @@ export class AnnotationsSidebarContainer<
         )
 
         window['_getState'] = () => ({ ...this.state })
-        this.listenToWindowChanges()
+
+        window.addEventListener('beforeunload', this.handleBeforeUnload)
+        window.addEventListener('resize', this.handleWindowResize)
     }
 
-    listenToWindowChanges() {
-        window.addEventListener('resize', () => {
-            if (this.state.isWidthLocked) {
-                this.processEvent('adjustSidebarWidth', {
-                    newWidth: this.state.sidebarWidth,
-                    isWidthLocked: true,
-                })
-            }
-        })
+    async componentWillUnmount(): Promise<void> {
+        window.removeEventListener('beforeunload', this.handleBeforeUnload)
+        window.removeEventListener('resize', this.handleWindowResize)
+        await super.componentWillUnmount()
+    }
+
+    private handleWindowResize = async () => {
+        if (this.state.isWidthLocked) {
+            await this.processEvent('adjustSidebarWidth', {
+                newWidth: this.state.sidebarWidth,
+                isWidthLocked: true,
+            })
+        }
+    }
+
+    // Block user nav away when some write RPC op is occurring
+    private handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        let shouldBlockUnload =
+            this.state.noteEditState === 'running' ||
+            this.state.noteCreateState === 'running' ||
+            this.state.noteColorUpdateState === 'running'
+        if (shouldBlockUnload) {
+            e.preventDefault()
+        }
     }
 
     private getListDetailsById: ListDetailsGetter = (listId) => {

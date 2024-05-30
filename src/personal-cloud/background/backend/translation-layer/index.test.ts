@@ -472,7 +472,7 @@ async function setup(options?: {
         ) => {
             const clientSchemaVersion =
                 downloadOptions?.clientSchemaVersion ??
-                STORAGE_VERSIONS[37].version
+                STORAGE_VERSIONS[38].version
             const { batch } = await downloadClientUpdates({
                 getNow,
                 startTime: 0,
