@@ -117,6 +117,7 @@ import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/comp
 
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat/utils'
+import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -131,6 +132,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
     getRootElement: () => HTMLElement
+    highlighter: HighlightRendererInterface
 }
 
 type EventHandler<
@@ -3036,6 +3038,11 @@ export class SidebarContainerLogic extends UILogic<
 
     deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({ event }) => {
         const { annotationsCache, annotationsBG } = this.options
+
+        this.options.highlighter.removeAnnotationHighlight({
+            id: event.unifiedAnnotationId,
+        })
+
         const existing =
             annotationsCache.annotations.byId[event.unifiedAnnotationId]
         annotationsCache.removeAnnotation({
