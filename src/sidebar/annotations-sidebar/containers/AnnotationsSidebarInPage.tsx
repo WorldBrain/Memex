@@ -60,6 +60,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 this.processEvent('setAnnotationShareModalShown', {
                     shown: true,
                 }),
+            highlighter: props.highlighter,
         })
     }
 

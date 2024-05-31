@@ -2389,11 +2389,15 @@ const ListSidebarContent = styled(Rnd)<{
         `}
     ${(props) =>
         props.peeking &&
-        css`
+        css<any>`
             position: absolute
             height: max-content;
-            background-color: ${(props) => props.theme.colors.greyScale1}98;
-            backdrop-filter: blur(30px);
+            background-color: ${(props) =>
+                props.inPageMode
+                    ? props.theme.colors.greyScale1
+                    : props.theme.colors.greyScale1 + '98'};
+            backdrop-filter: ${(props) =>
+                props.inPageMode ? 'unset' : 'blur(30px)'};
             //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
             margin-top: 50px;
             margin-bottom: 9px;

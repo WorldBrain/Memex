@@ -97,7 +97,6 @@ import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui
 import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { injectTelegramCustomUI } from './injectionUtils/telegram'
 import { renderSpacesBar } from './injectionUtils/utils'
-import { getTimestampedNoteWithAIsummaryForYoutubeNotes } from './injectionUtils/youtube'
 import {
     injectTwitterProfileUI,
     trackTwitterMessageList,
@@ -113,7 +112,6 @@ import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
-import type { Storage } from 'webextension-polyfill'
 import type { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import {
     cloneSelectionAsPseudoObject,
@@ -125,6 +123,7 @@ import {
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
+import type { TaskState } from 'ui-logic-core/lib/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -214,6 +213,22 @@ export async function main(
                     await annotationsBG.deleteAnnotation(existing.localId)
                 }
             }
+        }
+    }
+
+    const deleteAnnotation = async (annotationId: string) => {
+        const annotation = annotationsCache.annotations.byId[annotationId]
+        const { localId } = annotation
+
+        highlightRenderer.removeAnnotationHighlight({
+            id: annotationId,
+        })
+
+        annotationsCache.removeAnnotation({
+            unifiedId: annotation.unifiedId,
+        })
+        if (localId != null) {
+            await annotationsBG.deleteAnnotation(localId)
         }
     }
 
@@ -578,7 +593,17 @@ export async function main(
             quality: 100,
         })
 
+    let highlightCreateState: TaskState = 'pristine'
+    // Block nav away from current page while highlight being created
+    window.addEventListener('beforeunload', (e) => {
+        let shouldBlockUnload = highlightCreateState === 'running'
+        if (shouldBlockUnload) {
+            e.preventDefault()
+        }
+    })
+
     const annotationsFunctions = {
+        // TODO: Simplify and move this logic away from here
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (
@@ -589,6 +614,7 @@ export async function main(
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
+            highlightCreateState = 'running'
             let anchor: Anchor
             let quote: string
 
@@ -603,6 +629,7 @@ export async function main(
                 anchor = { quote, descriptor }
             }
             if (quote?.length === 0 && !drawRectangle) {
+                highlightCreateState = 'success'
                 return
             }
 
@@ -618,7 +645,7 @@ export async function main(
                 sidebarEvents.emit('showPowerUpModal', {
                     limitReachedNotif: 'Bookmarks',
                 })
-
+                highlightCreateState = 'error'
                 return
             }
 
@@ -647,6 +674,7 @@ export async function main(
                     screenshotGrabResult == null ||
                     screenshotGrabResult.anchor == null
                 ) {
+                    highlightCreateState = 'success'
                     return
                 }
 
@@ -722,8 +750,10 @@ export async function main(
                 }
             }
 
+            highlightCreateState = 'success'
             return annotationId
         },
+        // TODO: Simplify and move this logic away from here
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
         ) => async (
@@ -734,8 +764,10 @@ export async function main(
             commentText?: string,
             highlightColorSetting?: HighlightColor,
         ) => {
+            highlightCreateState = 'running'
             const selectionEmpty = !selection?.toString().length
             if (selectionEmpty) {
+                highlightCreateState = 'success'
                 return
             }
 
@@ -761,6 +793,7 @@ export async function main(
                 sidebarEvents.emit('showPowerUpModal', {
                     limitReachedNotif: 'Bookmarks',
                 })
+                highlightCreateState = 'error'
                 return
             }
 
@@ -787,6 +820,7 @@ export async function main(
                     screenshotGrabResult == null ||
                     screenshotGrabResult.anchor == null
                 ) {
+                    highlightCreateState = 'success'
                     return
                 }
 
@@ -868,6 +902,7 @@ export async function main(
                     )
                 }
             }
+            highlightCreateState = 'success'
         },
         askAI: () => (
             highlightedText: string,
@@ -893,6 +928,9 @@ export async function main(
                 prompt,
                 instaExecutePrompt: instaExecutePrompt ?? false,
             })
+        },
+        deleteAnnotation: async (annotationId: string) => {
+            await deleteAnnotation(annotationId)
         },
         createYoutubeTimestamp: async (commentText: string) => {
             await inPageUI.showSidebar({
@@ -1116,6 +1154,9 @@ export async function main(
                     await contentScriptsBG.openPdfInViewer({
                         fullPageUrl: originalPageURL,
                     })
+                },
+                deleteAnnotation: async (annotationId) => {
+                    await annotationsFunctions.deleteAnnotation(annotationId)
                 },
                 annotationsBG,
                 annotationsCache,
