@@ -216,6 +216,22 @@ export async function main(
         }
     }
 
+    const deleteAnnotation = async (annotationId: string) => {
+        const annotation = annotationsCache.annotations.byId[annotationId]
+        const { localId } = annotation
+
+        highlightRenderer.removeAnnotationHighlight({
+            id: annotationId,
+        })
+
+        annotationsCache.removeAnnotation({
+            unifiedId: annotation.unifiedId,
+        })
+        if (localId != null) {
+            await annotationsBG.deleteAnnotation(localId)
+        }
+    }
+
     const pageInfo = new PageInfo(params)
 
     // 1. Create a local object with promises to track each content script
@@ -913,6 +929,9 @@ export async function main(
                 instaExecutePrompt: instaExecutePrompt ?? false,
             })
         },
+        deleteAnnotation: async (annotationId: string) => {
+            await deleteAnnotation(annotationId)
+        },
         createYoutubeTimestamp: async (commentText: string) => {
             await inPageUI.showSidebar({
                 action: 'youtube_timestamp',
@@ -1135,6 +1154,9 @@ export async function main(
                     await contentScriptsBG.openPdfInViewer({
                         fullPageUrl: originalPageURL,
                     })
+                },
+                deleteAnnotation: async (annotationId) => {
+                    await annotationsFunctions.deleteAnnotation(annotationId)
                 },
                 annotationsBG,
                 annotationsCache,

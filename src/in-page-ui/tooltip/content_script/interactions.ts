@@ -87,6 +87,9 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             createHighlight: async (...args) => {
                 return await params.createHighlight(...args)
             },
+            deleteAnnotation: async (annotationId: string) => {
+                return await params.deleteAnnotation(annotationId)
+            },
             askAI: params.askAI,
             getKBShortcuts: async () => {
                 const state = await getKeyboardShortcutsState()
