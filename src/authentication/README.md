@@ -2,7 +2,7 @@
 
 Our production authentication implementation is provided by Firebase Auth. Auth is registered in the background script and can be used by content scripts over the remote functions interface.
 
-Authentication allows privileged and authorized access of specific features. Including the setup of user-protected multi-device synchronisation channels, and granting premium features to verified subscribed users. As well as a Single Sign-On experience across other Memex services, e.g. posting the the support forum.
+Authentication allows privileged and authorized access of specific features. Including the setup of user-protected multi-device synchronisation channels, and granting premium features to verified subscribed users. As well as a Single Sign-On experience across other Memex services, e.g. posting the support forum.
 
 ## Consuming Auth
 
@@ -70,7 +70,7 @@ Providing an interface to login is most easily handled by delegating to the UI l
 
 We import a `StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'`. The slight caveat here is the Firebase app object needs to be re-initialised in this script's scope, so that this UI library can use it directly (using the Firebase app already setup in the background script and trying to serialise it over the ipc channel is problematic). This just means importing firebase with it's config by way of `import { firebase } from 'src/util/firebase-app-initialized'` and providing the `StyledFirebaseAuth` with the param `firebaseAuth={firebase.auth()}`.
 
-The backend Firebase app will will react to changes in the Authentication triggered above.
+The backend Firebase app will react to changes in the Authentication triggered above.
 
 ## Subscription
 

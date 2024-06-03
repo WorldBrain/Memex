@@ -295,7 +295,7 @@ class TextInputControlled extends React.Component<
     }
 
     private handleInputTextEvent(e: ReTargetedTextElementEvent) {
-        // Here we take advantage of the the e.key either being a single character descriptor like 'A','?','0',etc
+        // Here we take advantage of the e.key either being a single character descriptor like 'A','?','0',etc
         // or a key description like 'Enter', 'Backspace', etc. Single chars are for input, others are not.
         if (e.key.length <= 1 && !(e.ctrlKey || e.metaKey)) {
             this.handleInput(e.key)
