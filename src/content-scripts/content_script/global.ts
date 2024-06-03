@@ -242,7 +242,7 @@ export async function main(
     // 2. Initialise dependencies required by content scripts
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
-    const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
+    const bgScriptBG = runInBackground<RemoteBGScriptInterface<'caller'>>()
     const pkmSyncBG = runInBackground<PKMSyncBackgroundModule>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
@@ -1797,7 +1797,7 @@ class PageInfo {
 export function setupWebUIActions(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
 }) {
     const confirmRequest = (requestId: number) => {
         const detail: MemexRequestHandledDetail = { requestId }
@@ -1873,8 +1873,8 @@ export function setupWebUIActions(args: {
 export async function injectCustomUIperPage(
     annotationsFunctions,
     pkmSyncBG,
-    collectionsBG,
-    bgScriptBG,
+    collectionsBG: RemoteCollectionsInterface,
+    bgScriptBG: RemoteBGScriptInterface<'caller'>,
     pageInfo,
     inPageUI,
 ) {

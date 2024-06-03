@@ -6,7 +6,11 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import type { RemoteFunctionRole } from 'src/util/webextensionRPC'
+import type {
+    RemoteFunctionRole,
+    RemoteFunctionWithExtraArgs,
+    RemoteFunctionWithoutExtraArgs,
+} from 'src/util/webextensionRPC'
 
 export type GenerateServerID = (collectionName: string) => number | string
 export interface LocalExtensionSettings {
@@ -17,30 +21,38 @@ export interface OpenTabParams {
     openInSameTab?: boolean
 }
 
-export interface RemoteBGScriptInterface {
-    openOptionsTab: (query: string, params?: OpenTabParams) => Promise<void>
-    openOverviewTab: (
-        params?: OpenTabParams & {
+export interface RemoteBGScriptInterface<Role extends RemoteFunctionRole> {
+    openOptionsTab: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { query: string; params?: OpenTabParams }
+    >
+    openOverviewTab: RemoteFunctionWithoutExtraArgs<
+        Role,
+        OpenTabParams & {
             missingPdf?: boolean
             selectedSpace?: number
+        }
+    >
+    createCheckoutLink: RemoteFunctionWithoutExtraArgs<
+        Role,
+        {
+            billingPeriod: 'monthly' | 'yearly'
+            selectedPremiumPlans: PremiumPlans[]
+            doNotOpen: boolean
         },
-    ) => Promise<void>
-    createCheckoutLink: (
-        billingPeriod: 'monthly' | 'yearly',
-        selectedPremiumPlans: PremiumPlans[],
-        doNotOpen: boolean,
-    ) => Promise<'error' | 'success'>
-    broadcastListChangeToAllTabs: (
-        params:
-            | {
-                  type: 'create'
-                  list: UnifiedList<'user-list' | 'page-link'>
-              }
-            | {
-                  type: 'delete'
-                  localListId: number
-              },
-    ) => Promise<void>
+        'error' | 'success'
+    >
+    broadcastListChangeToAllTabs: RemoteFunctionWithExtraArgs<
+        Role,
+        | {
+              type: 'create'
+              list: UnifiedList<'user-list' | 'page-link'>
+          }
+        | {
+              type: 'delete'
+              localListId: number
+          }
+    >
 }
 
 // TODO: Fill in this type with remaining BG modules
@@ -53,5 +65,5 @@ export interface BackgroundModuleRemoteInterfaces<
     pageActivityIndicator: RemotePageActivityIndicatorInterface
     imageSupport: ImageSupportInterface<Role>
     syncSettings: RemoteSyncSettingsInterface
-    bgScript: RemoteBGScriptInterface
+    bgScript: RemoteBGScriptInterface<Role>
 }

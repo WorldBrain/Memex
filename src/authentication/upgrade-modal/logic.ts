@@ -113,11 +113,11 @@ export default class PromptTemplatesLogic extends UILogic<
             newSelection.push(event)
         }
 
-        const upgradeResponse = await this.dependencies.createCheckOutLink(
-            billingPeriod,
-            newSelection,
+        const upgradeResponse = await this.dependencies.createCheckOutLink({
             doNotOpen,
-        )
+            billingPeriod,
+            selectedPremiumPlans: newSelection,
+        })
 
         if (upgradeResponse === 'error') {
             this.emitMutation({

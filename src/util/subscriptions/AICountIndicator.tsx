@@ -14,13 +14,11 @@ import {
     DEFAULT_COUNTER_STORAGE_VALUE,
     DEFAULT_POWERUP_LIMITS,
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
-import { TaskState } from 'ui-logic-core/lib/types'
-import {
-    CustomerPowerUps,
-    PremiumPlans,
-} from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import type { CustomerPowerUps } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 import UpgradeModal from 'src/authentication/upgrade-modal'
-import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props {
     syncSettingsBG: RemoteSyncSettingsInterface
@@ -30,11 +28,7 @@ export interface Props {
     getRootElement: () => HTMLElement
     checkIfKeyValid: (apiKey: string) => Promise<void>
     isKeyValid: boolean
-    createCheckOutLink: (
-        billingPeriod: 'monthly' | 'yearly',
-        selectedPremiumPlans: PremiumPlans[],
-        doNotOpen: boolean,
-    ) => Promise<'success' | 'error'>
+    createCheckOutLink: RemoteBGScriptInterface<'caller'>['createCheckoutLink']
     authBG: AuthRemoteFunctionsInterface
     browserAPIs: Browser
 }

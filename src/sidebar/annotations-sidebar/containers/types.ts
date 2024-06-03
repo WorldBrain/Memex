@@ -50,7 +50,7 @@ import type { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/av
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 
 export type WindowAPISubset = Pick<
     Window,
@@ -97,7 +97,7 @@ export interface SidebarContainerDependencies {
     authBG: AuthRemoteFunctionsInterface
     browserAPIs: Browser
     windowAPI: WindowAPISubset
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     pkmSyncBG: PkmSyncInterface
     subscription: SubscriptionsService
     theme: MemexTheme & Partial<SidebarTheme>

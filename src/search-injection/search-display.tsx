@@ -62,7 +62,9 @@ class Root extends React.PureComponent<RootProps, RootState> {
                             onResultSelect={(exportedResultText) => null}
                             closeInPageMode={this.removeRoot}
                             openSettings={() => {
-                                this.props.bgScriptBG.openOptionsTab('settings')
+                                this.props.bgScriptBG.openOptionsTab({
+                                    query: 'settings',
+                                })
                             }}
                         />
                     </InPageSearchModal>

@@ -3,10 +3,10 @@ import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
-import { ContentScriptsInterface } from 'src/content-scripts/background/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
-import { Browser } from 'webextension-polyfill'
+import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { Browser } from 'webextension-polyfill'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -15,7 +15,7 @@ export interface Dependencies {
     navToGuidedTutorial: () => void
     contentScriptsBG: ContentScriptsInterface<'caller'>
     analyticsBG?: AnalyticsCoreInterface
-    bgScriptsBG: RemoteBGScriptInterface
+    bgScriptsBG: RemoteBGScriptInterface<'caller'>
     browserAPIs: Browser
     getRootElement: () => HTMLElement
 }

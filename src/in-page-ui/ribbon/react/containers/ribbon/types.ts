@@ -12,9 +12,9 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { RemoteSearchInterface } from 'src/search/background/types'
-import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { Browser } from 'webextension-polyfill'
+import type { RemoteSearchInterface } from 'src/search/background/types'
+import type { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import type { Browser } from 'webextension-polyfill'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -35,7 +35,7 @@ export interface RibbonContainerDependencies {
     contentSharing: ContentSharingInterface
     annotations: AnnotationInterface<'caller'>
     annotationsCache: PageAnnotationsCacheInterface
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     searchBG: RemoteSearchInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface

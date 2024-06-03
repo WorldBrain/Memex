@@ -38,7 +38,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
@@ -80,7 +80,7 @@ export interface Props extends RibbonSubcomponentProps {
     signupDate?: number
     toggleTheme: () => void
     getRootElement: () => HTMLElement
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     setWriteError: (error: string) => void
     showRabbitHoleButton: boolean
     tutorialIdToOpen: string
@@ -618,7 +618,9 @@ export default class Ribbon extends Component<Props, State> {
                                     <ExtraButtonRow
                                         onClick={() =>
                                             this.props.bgScriptBG.openOptionsTab(
-                                                'settings',
+                                                {
+                                                    query: 'settings',
+                                                },
                                             )
                                         }
                                     >
@@ -637,9 +639,9 @@ export default class Ribbon extends Component<Props, State> {
                                     getKeyboardShortcutsState
                                 }
                                 onSettingsClick={() =>
-                                    this.props.bgScriptBG.openOptionsTab(
-                                        'settings',
-                                    )
+                                    this.props.bgScriptBG.openOptionsTab({
+                                        query: 'settings',
+                                    })
                                 }
                                 hideEditorTutorials
                                 getRootElement={this.props.getRootElement}
@@ -854,9 +856,9 @@ export default class Ribbon extends Component<Props, State> {
                             >
                                 <Icon
                                     onClick={() =>
-                                        this.props.bgScriptBG.openOptionsTab(
-                                            'blocklist',
-                                        )
+                                        this.props.bgScriptBG.openOptionsTab({
+                                            query: 'blocklist',
+                                        })
                                     }
                                     filePath={'settings'}
                                     heightAndWidth={'22px'}
@@ -1495,7 +1497,7 @@ export default class Ribbon extends Component<Props, State> {
                         onClick={(e) => {
                             if (e.shiftKey) {
                                 e.stopPropagation()
-                                this.props.bgScriptBG.openOverviewTab()
+                                this.props.bgScriptBG.openOverviewTab({})
                             } else if (e.altKey) {
                                 e.stopPropagation()
                                 this.props.setTutorialIdToOpen('savePages')
@@ -1511,7 +1513,7 @@ export default class Ribbon extends Component<Props, State> {
                         onClick={(e) => {
                             if (e.shiftKey) {
                                 e.stopPropagation()
-                                this.props.bgScriptBG.openOverviewTab()
+                                this.props.bgScriptBG.openOverviewTab({})
                             } else if (e.altKey) {
                                 e.stopPropagation()
                                 this.props.setTutorialIdToOpen('savePages')
@@ -2396,7 +2398,7 @@ const IconContainer = styled.div<{ ribbonPosition; isYoutube: boolean }>`
         css`
             backdrop-filter: blur(4px);
         `}
-    
+
 `
 
 const SupportContainer = styled.div`
@@ -2821,7 +2823,7 @@ const InnerRibbon = styled.div<{
         css`
             backdrop-filter: blur(30px);
         `}
-    
+
 
 `
 
