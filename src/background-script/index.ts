@@ -14,7 +14,6 @@ import {
     OVERVIEW_URL,
     __OLD_INSTALL_TIME_KEY,
     OPTIONS_URL,
-    LEARN_MORE_URL,
 } from 'src/constants'
 import analytics from 'src/analytics'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
@@ -79,10 +78,8 @@ class BackgroundScript {
         this.remoteFunctions = {
             openOptionsTab: this.openOptionsPage,
             openOverviewTab: this.openDashboardPage,
-            openLearnMoreTab: this.openLearnMorePage,
             createCheckoutLink: this.createCheckoutLink,
             broadcastListChangeToAllTabs: this.broadcastSpaceChangeToAllTabs,
-            confirmBackgroundScriptLoaded: async () => {},
         }
 
         // window['___removeDupeSpaces'] = () =>
@@ -454,14 +451,6 @@ class BackgroundScript {
     ) => {
         await this.chooseTabOpenFn(params)({
             url: `${OPTIONS_URL}#${query}`,
-        })
-    }
-
-    private openLearnMorePage: RemoteBGScriptInterface['openLearnMoreTab'] = async (
-        params,
-    ) => {
-        await this.chooseTabOpenFn(params)({
-            url: LEARN_MORE_URL,
         })
     }
 

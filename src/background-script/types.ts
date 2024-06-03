@@ -25,8 +25,6 @@ export interface RemoteBGScriptInterface {
             selectedSpace?: number
         },
     ) => Promise<void>
-    openLearnMoreTab: (params?: OpenTabParams) => Promise<void>
-    confirmBackgroundScriptLoaded: () => Promise<void>
     createCheckoutLink: (
         billingPeriod: 'monthly' | 'yearly',
         selectedPremiumPlans: PremiumPlans[],
