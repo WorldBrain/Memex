@@ -881,21 +881,6 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const isAllowed = await pageActionAllowed(
-            this.dependencies.browserAPIs,
-            this.dependencies.analyticsBG,
-            this.dependencies.customLists,
-            previousState.fullPageUrl,
-            false,
-        )
-
-        if (!isAllowed) {
-            this.dependencies.events.emit('showPowerUpModal', {
-                limitReachedNotif: 'Bookmarks',
-            })
-            return
-        }
-
         const pageListsSet = new Set(previousState.lists.pageListIds)
         if (event.value.added != null) {
             pageListsSet.add(event.value.added)

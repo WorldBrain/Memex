@@ -304,7 +304,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             null,
                             this.props.customLists,
                             this.state.fullPageUrl,
-                            true,
+                            false,
                         )
 
                         if (!isAllowed) {
@@ -328,13 +328,29 @@ export default class RibbonContainer extends StatefulUIElement<
                             value: { added: null, deleted: id, selected: [] },
                         }),
                     onSpaceCreate: async ({ localListId }) => {
-                        await this.processEvent('updateLists', {
-                            value: {
-                                added: localListId,
-                                deleted: null,
-                                selected: [],
-                            },
-                        })
+                        const isAllowed = await pageActionAllowed(
+                            this.props.browserAPIs,
+                            null,
+                            this.props.customLists,
+                            this.state.fullPageUrl,
+                            false,
+                        )
+
+                        if (!isAllowed) {
+                            this.props.events.emit('showPowerUpModal', {
+                                limitReachedNotif: 'Bookmarks',
+                            })
+                            return false
+                        } else {
+                            this.processEvent('updateLists', {
+                                value: {
+                                    added: localListId,
+                                    deleted: null,
+                                    selected: [],
+                                },
+                            })
+                            return true
+                        }
                     },
                 }}
                 search={{
