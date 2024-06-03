@@ -9,9 +9,7 @@ import Logic from './logic'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import { LoadingContainer } from 'src/dashboard-refactor/styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
-import { LOGIN_URL } from 'src/constants'
-import checkBrowser from 'src/util/check-browser'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import browser, { Browser } from 'webextension-polyfill'
 
 // interface Props {
@@ -23,7 +21,7 @@ import browser, { Browser } from 'webextension-polyfill'
 export interface Props extends Dependencies {
     refreshUser?: boolean
     getRootElement: () => HTMLElement
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     browserAPIs: Browser
 }
 

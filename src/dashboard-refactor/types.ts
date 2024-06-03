@@ -130,7 +130,7 @@ export type DashboardDependencies = {
     imageSupportBG: ImageSupportInterface<'caller'>
     closeInPageMode?: () => void
     openSettings?: () => void
-    bgScriptBG?: RemoteBGScriptInterface
+    bgScriptBG?: RemoteBGScriptInterface<'caller'>
     getPortalElement?: () => HTMLElement
 } & (
     | {

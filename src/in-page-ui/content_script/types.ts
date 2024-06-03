@@ -4,7 +4,10 @@ import type {
     SidebarActionOptions,
 } from '../shared-state/types'
 import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexing/types'
-import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 
 export interface InPageUIContentScriptRemoteInterface {
     showSidebar(options?: SidebarActionOptions): Promise<void>
@@ -39,6 +42,12 @@ export interface InPageUIContentScriptRemoteInterface {
     teardownContentScripts(): Promise<void>
     handleHistoryStateUpdate(tabId: number): Promise<void>
     extractRawPageContent: () => Promise<RawPageContent>
+
+    // Cache updates
+    addListToCache(params: {
+        list: UnifiedList<'user-list' | 'page-link'>
+    }): Promise<void>
+    removeListFromCache(params: { localListId: number }): Promise<void>
 
     /**
      * Acts as a way for the BG script to check if the content script is

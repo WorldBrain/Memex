@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
@@ -12,7 +12,6 @@ import {
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { UnifiedAnnotation, UnifiedList } from 'src/annotations/cache/types'
 import { PageAnnotationsCache } from 'src/annotations/cache'
@@ -22,7 +21,6 @@ import { AuthRemoteFunctionsInterface } from 'src/authentication/background/type
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { Storage } from 'webextension-polyfill'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
@@ -44,7 +42,7 @@ interface TooltipRootProps {
     contentSharingBG: ContentSharingInterface
     authBG: AuthRemoteFunctionsInterface
     spacesBG: RemoteCollectionsInterface
-    bgScriptsBG: RemoteBGScriptInterface
+    bgScriptsBG: RemoteBGScriptInterface<'caller'>
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     localStorageAPI: Storage.LocalStorageArea
     getRootElement: () => HTMLElement

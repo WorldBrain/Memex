@@ -233,6 +233,7 @@ export default class SpacePickerLogic extends UILogic<
                     user: currentUser,
                     cache: this.dependencies.annotationsCache,
                     bgModules: {
+                        bgScript: this.dependencies.bgScriptBG,
                         customLists: this.dependencies.spacesBG,
                         contentSharing: this.dependencies.contentSharingBG,
                         pageActivityIndicator: this.dependencies

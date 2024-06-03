@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import styled, { StyleSheetManager, ThemeProvider } from 'styled-components'
+import { StyleSheetManager, ThemeProvider } from 'styled-components'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import {
     loadThemeVariant,
@@ -8,19 +8,15 @@ import {
 } from 'src/common-ui/components/design-library/theme'
 import { createInPageUI } from 'src/in-page-ui/utils'
 import UpgradeModal from 'src/authentication/upgrade-modal'
-import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
-import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
-import { Browser } from 'webextension-polyfill'
+import type { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { Browser } from 'webextension-polyfill'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 type RootProps = {
     rootEl: HTMLElement
     shadowRoot: ShadowRoot
-    createCheckOutLink: (
-        billingPeriod: 'monthly' | 'yearly',
-        selectedPremiumPlans: PremiumPlans[],
-        doNotOpen: boolean,
-    ) => Promise<'error' | 'success'>
+    createCheckOutLink: RemoteBGScriptInterface<'caller'>['createCheckoutLink']
     authBG: AuthRemoteFunctionsInterface
     limitReachedNotif: PowerUpModalVersion
     browserAPIs: Browser

@@ -263,7 +263,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         sharedListReference: SharedListReference,
     ) => RepliesProps['getReplyEditProps']
     imageSupport: ImageSupportInterface<'caller'>
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
     setAIModel: (AImodel) => void

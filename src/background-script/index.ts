@@ -3,7 +3,12 @@ import type { Browser, Runtime, Storage, Tabs } from 'webextension-polyfill'
 import type { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
 
 import * as utils from './utils'
-import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
+import {
+    registerRemoteFunctions,
+    remoteFunctionWithExtraArgs,
+    remoteFunctionWithoutExtraArgs,
+    runInTab,
+} from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import { generateUserId } from 'src/analytics/utils'
@@ -14,7 +19,6 @@ import {
     OVERVIEW_URL,
     __OLD_INSTALL_TIME_KEY,
     OPTIONS_URL,
-    LEARN_MORE_URL,
 } from 'src/constants'
 import analytics from 'src/analytics'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
@@ -36,9 +40,7 @@ import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/conten
 import { captureException } from 'src/util/raven'
 import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
-import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 import checkBrowser from 'src/util/check-browser'
 
 interface Dependencies {
@@ -73,19 +75,23 @@ interface Dependencies {
 }
 
 class BackgroundScript {
-    remoteFunctions: RemoteBGScriptInterface
+    remoteFunctions: RemoteBGScriptInterface<'provider'>
 
     constructor(public deps: Dependencies) {
         this.remoteFunctions = {
-            openOptionsTab: this.openOptionsPage,
-            openOverviewTab: this.openDashboardPage,
-            openLearnMoreTab: this.openLearnMorePage,
-            createCheckoutLink: this.createCheckoutLink,
-            confirmBackgroundScriptLoaded: async () => {},
+            openOptionsTab: remoteFunctionWithoutExtraArgs(
+                this.openOptionsPage,
+            ),
+            openOverviewTab: remoteFunctionWithoutExtraArgs(
+                this.openDashboardPage,
+            ),
+            createCheckoutLink: remoteFunctionWithoutExtraArgs(
+                this.createCheckoutLink,
+            ),
+            broadcastListChangeToAllTabs: remoteFunctionWithExtraArgs(
+                this.broadcastSpaceChangeToAllTabs,
+            ),
         }
-
-        // window['___removeDupeSpaces'] = () =>
-        // removeDupeSpaces({ storageManager: deps.storageManager })
     }
 
     get defaultUninstallURL() {
@@ -325,7 +331,7 @@ class BackgroundScript {
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable(this.remoteFunctions)
+        registerRemoteFunctions(this.remoteFunctions)
     }
 
     setupWebExtAPIHandlers() {
@@ -372,14 +378,54 @@ class BackgroundScript {
         runtimeAPI.reload()
     }
 
+    broadcastSpaceChangeToAllTabs: RemoteBGScriptInterface<
+        'provider'
+    >['broadcastListChangeToAllTabs']['function'] = async (
+        { tab: originatingTab },
+        params,
+    ) => {
+        let { bgModules } = this.deps
+        try {
+            await bgModules.tabManagement.mapTabChunks(
+                async (tab) => {
+                    if (
+                        tab.id === originatingTab.id ||
+                        !bgModules.tabManagement.canTabRunContentScripts(tab)
+                    ) {
+                        return
+                    }
+
+                    if (params.type === 'create') {
+                        await runInTab<InPageUIContentScriptRemoteInterface>(
+                            tab.id,
+                        ).addListToCache({ list: params.list })
+                    } else if (params.type === 'delete') {
+                        await runInTab<InPageUIContentScriptRemoteInterface>(
+                            tab.id,
+                        ).removeListFromCache({
+                            localListId: params.localListId,
+                        })
+                    }
+                },
+                {
+                    onError: () => {
+                        // Ignore errors
+                    },
+                },
+            )
+        } catch (err) {
+            captureException(err)
+        }
+    }
+
     private chooseTabOpenFn = (params?: OpenTabParams) =>
         params?.openInSameTab
             ? this.deps.tabsAPI.update
             : this.deps.tabsAPI.create
 
-    private openDashboardPage: RemoteBGScriptInterface['openOverviewTab'] = async (
-        params,
-    ) => {
+    private openDashboardPage: RemoteBGScriptInterface<
+        'provider'
+    >['openOverviewTab']['function'] = async (params) => {
         let addedQuery
         if (params?.selectedSpace) {
             addedQuery = `selectedSpace=${params.selectedSpace}`
@@ -414,28 +460,21 @@ class BackgroundScript {
         }
     }
 
-    private openOptionsPage: RemoteBGScriptInterface['openOptionsTab'] = async (
-        query,
-        params,
-    ) => {
+    private openOptionsPage: RemoteBGScriptInterface<
+        'provider'
+    >['openOptionsTab']['function'] = async ({ query, params }) => {
         await this.chooseTabOpenFn(params)({
             url: `${OPTIONS_URL}#${query}`,
         })
     }
 
-    private openLearnMorePage: RemoteBGScriptInterface['openLearnMoreTab'] = async (
-        params,
-    ) => {
-        await this.chooseTabOpenFn(params)({
-            url: LEARN_MORE_URL,
-        })
-    }
-
-    private createCheckoutLink: RemoteBGScriptInterface['createCheckoutLink'] = async (
-        billingPeriod: 'monthly' | 'yearly',
-        selectedPremiumPlans: PremiumPlans[],
-        doNotOpen: boolean,
-    ) => {
+    private createCheckoutLink: RemoteBGScriptInterface<
+        'provider'
+    >['createCheckoutLink']['function'] = async ({
+        billingPeriod,
+        selectedPremiumPlans,
+        doNotOpen,
+    }) => {
         const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
         const creationTime = currentUser?.creationTime
         const currentTime = Date.now()

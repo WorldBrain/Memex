@@ -76,7 +76,9 @@ describe('Ribbon logic', () => {
             currentTab,
             searchBG: runInBackground(),
             highlighter,
-            bgScriptBG: backgroundModules.bgScript['remoteFunctions'],
+            bgScriptBG: insertBackgroundFunctionTab(
+                backgroundModules.bgScript.remoteFunctions,
+            ) as any,
             bookmarks: backgroundModules.bookmarks.remoteFunctions,
             pageActivityIndicatorBG:
                 backgroundModules.pageActivityIndicator.remoteFunctions,

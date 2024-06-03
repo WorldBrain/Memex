@@ -242,7 +242,7 @@ export async function main(
     // 2. Initialise dependencies required by content scripts
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
-    const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
+    const bgScriptBG = runInBackground<RemoteBGScriptInterface<'caller'>>()
     const pkmSyncBG = runInBackground<PKMSyncBackgroundModule>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
@@ -292,6 +292,7 @@ export async function main(
         user: currentUser,
         cache: annotationsCache,
         bgModules: {
+            bgScript: bgScriptBG,
             annotations: annotationsBG,
             customLists: collectionsBG,
             syncSettings: syncSettingsBG,
@@ -1341,6 +1342,27 @@ export async function main(
 
             await pageInfo.refreshIfNeeded()
         },
+        addListToCache: async ({ list }) => {
+            annotationsCache.addList(
+                {
+                    ...list,
+                    unifiedAnnotationIds: [],
+                    hasRemoteAnnotationsToLoad: false,
+                },
+                { skipEventEmission: true },
+            )
+        },
+        removeListFromCache: async ({ localListId }) => {
+            let list = annotationsCache.getListByLocalId(localListId)
+            if (list != null) {
+                annotationsCache.removeList(
+                    {
+                        unifiedId: list.unifiedId,
+                    },
+                    { skipEventEmission: true },
+                )
+            }
+        },
     })
 
     // 6. Setup other interactions with this page (things that always run)
@@ -1775,7 +1797,7 @@ class PageInfo {
 export function setupWebUIActions(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
 }) {
     const confirmRequest = (requestId: number) => {
         const detail: MemexRequestHandledDetail = { requestId }
@@ -1851,8 +1873,8 @@ export function setupWebUIActions(args: {
 export async function injectCustomUIperPage(
     annotationsFunctions,
     pkmSyncBG,
-    collectionsBG,
-    bgScriptBG,
+    collectionsBG: RemoteCollectionsInterface,
+    bgScriptBG: RemoteBGScriptInterface<'caller'>,
     pageInfo,
     inPageUI,
 ) {

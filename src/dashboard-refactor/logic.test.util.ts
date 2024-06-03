@@ -206,7 +206,9 @@ export async function setupTest(
         imageSupportBG: insertBackgroundFunctionTab(
             device.backgroundModules.imageSupport,
         ) as any,
-        bgScriptBG: device.backgroundModules.bgScript.remoteFunctions,
+        bgScriptBG: insertBackgroundFunctionTab(
+            device.backgroundModules.bgScript.remoteFunctions,
+        ) as any,
         browserAPIs: device.browserAPIs,
     })
 

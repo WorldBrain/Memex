@@ -113,7 +113,9 @@ const setupLogicHelper = async ({
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
         copyPasterBG: backgroundModules.copyPaster.remoteFunctions,
-        bgScriptBG: backgroundModules.bgScript.remoteFunctions,
+        bgScriptBG: insertBackgroundFunctionTab(
+            backgroundModules.bgScript.remoteFunctions,
+        ) as any,
         pkmSyncBG: backgroundModules.pkmSyncBG.remoteFunctions,
         highlighter: null,
         summarizeBG: insertBackgroundFunctionTab(

@@ -18,8 +18,8 @@ import QRCanvas from 'src/common-ui/components/qr-canvas'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import UpgradeModal from '../upgrade-modal'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
-import { Browser } from 'webextension-polyfill'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { Browser } from 'webextension-polyfill'
 
 const styles = require('./styles.css')
 
@@ -30,7 +30,7 @@ const DisplayNameBox = styled.div`
 export interface Props extends Dependencies {
     setAuthMode: (mode) => void
     getRootElement: () => HTMLElement
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     browserAPIs: Browser
 }
 

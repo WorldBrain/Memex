@@ -1,5 +1,5 @@
-import { UnifiedList } from 'src/annotations/cache/types'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { UnifiedList } from 'src/annotations/cache/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export async function findClassElementSWithRetries(className, retries, delay) {
     return new Promise((resolve, reject) => {
@@ -23,7 +23,7 @@ export async function findClassElementSWithRetries(className, retries, delay) {
 
 export function renderSpacesBar(
     lists: UnifiedList[],
-    bgScriptBG: RemoteBGScriptInterface,
+    bgScriptBG: RemoteBGScriptInterface<'caller'>,
     url?: string,
 ) {
     let spacesBar: HTMLElement

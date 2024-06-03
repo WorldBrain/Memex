@@ -205,6 +205,7 @@ interface CacheHydratorDeps<
 // NOTE: this is tested as part of the sidebar logic tests
 export async function hydrateCacheForPageAnnotations(
     args: CacheHydratorDeps<
+        | 'bgScript'
         | 'customLists'
         | 'annotations'
         | 'syncSettings'
@@ -306,7 +307,7 @@ export async function hydrateCacheForPageAnnotations(
 // NOTE: this is tested as part of the dashboard + space-picker logic tests
 export async function hydrateCacheForListUsage(
     args: CacheHydratorDeps<
-        'contentSharing' | 'customLists' | 'pageActivityIndicator'
+        'bgScript' | 'contentSharing' | 'customLists' | 'pageActivityIndicator'
     >,
 ): Promise<void> {
     const localListsData = await args.bgModules.customLists.fetchAllLists({
@@ -341,7 +342,7 @@ async function hydrateCacheLists(
                 Partial<Pick<FollowedListEntry, 'hasAnnotationsFromOthers'>>
         }
     } & CacheHydratorDeps<
-        'contentSharing' | 'customLists' | 'pageActivityIndicator'
+        'bgScript' | 'contentSharing' | 'customLists' | 'pageActivityIndicator'
     >,
 ): Promise<void> {
     // Get all the IDs of page link lists
@@ -438,6 +439,24 @@ async function hydrateCacheLists(
         })
 
     args.cache.setLists(listsToCache)
+
+    // Set up list change side-effects
+    args.cache.events.addListener('addedList', async (list) => {
+        if (list.type !== 'special-list') {
+            await args.bgModules.bgScript.broadcastListChangeToAllTabs({
+                type: 'create',
+                list,
+            })
+        }
+    })
+    args.cache.events.addListener('removedList', async (list) => {
+        if (list.localId != null) {
+            await args.bgModules.bgScript.broadcastListChangeToAllTabs({
+                type: 'delete',
+                localListId: list.localId,
+            })
+        }
+    })
 }
 
 export function deriveListOwnershipStatus(

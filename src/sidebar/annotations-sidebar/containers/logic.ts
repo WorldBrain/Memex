@@ -412,6 +412,7 @@ export class SidebarContainerLogic extends UILogic<
                 skipListHydration: this.options.sidebarContext === 'dashboard',
                 keepExistingAnnotationData: true,
                 bgModules: {
+                    bgScript: this.options.bgScriptBG,
                     customLists: this.options.customListsBG,
                     annotations: this.options.annotationsBG,
                     syncSettings: this.options.syncSettingsBG,
@@ -1562,11 +1563,11 @@ export class SidebarContainerLogic extends UILogic<
     createCheckOutLink: EventHandler<'createCheckOutLink'> = async ({
         event,
     }) => {
-        this.options.bgScriptBG.createCheckoutLink(
-            event.billingPeriod,
-            event.selectedPremiumPlans,
-            event.doNotOpen,
-        )
+        this.options.bgScriptBG.createCheckoutLink({
+            billingPeriod: event.billingPeriod,
+            selectedPremiumPlans: event.selectedPremiumPlans,
+            doNotOpen: event.doNotOpen,
+        })
     }
 
     copyPageLink: EventHandler<'copyPageLink'> = async ({

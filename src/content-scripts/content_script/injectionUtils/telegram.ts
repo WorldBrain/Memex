@@ -1,9 +1,10 @@
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { findClassElementSWithRetries, renderSpacesBar } from './utils'
 
 export async function injectTelegramCustomUI(
-    collectionsBG,
-    bgScriptBG: RemoteBGScriptInterface,
+    collectionsBG: RemoteCollectionsInterface,
+    bgScriptBG: RemoteBGScriptInterface<'caller'>,
     url: string,
 ) {
     try {

@@ -1,5 +1,6 @@
 import SpacePickerLogic from './logic'
 import {
+    insertBackgroundFunctionTab,
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
@@ -98,7 +99,9 @@ const setupLogicHelper = async ({
         unselectEntry: args.unselectEntry ?? (async (id) => {}),
         initialSelectedListIds: async () => initialSelectedListIds ?? [],
         actOnAllTabs: async (entry) => null,
-        bgScriptBG: device.backgroundModules.bgScript.remoteFunctions,
+        bgScriptBG: insertBackgroundFunctionTab(
+            device.backgroundModules.bgScript.remoteFunctions,
+        ) as any,
         contentSharingBG:
             device.backgroundModules.contentSharing.remoteFunctions,
         spacesBG: device.backgroundModules.customLists.remoteFunctions,
