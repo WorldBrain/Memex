@@ -292,6 +292,7 @@ export async function main(
         user: currentUser,
         cache: annotationsCache,
         bgModules: {
+            bgScript: bgScriptBG,
             annotations: annotationsBG,
             customLists: collectionsBG,
             syncSettings: syncSettingsBG,
@@ -1340,6 +1341,27 @@ export async function main(
             await sleepPromise(500)
 
             await pageInfo.refreshIfNeeded()
+        },
+        addListToCache: async ({ list }) => {
+            annotationsCache.addList(
+                {
+                    ...list,
+                    unifiedAnnotationIds: [],
+                    hasRemoteAnnotationsToLoad: false,
+                },
+                { skipEventEmission: true },
+            )
+        },
+        removeListFromCache: async ({ localListId }) => {
+            let list = annotationsCache.getListByLocalId(localListId)
+            if (list != null) {
+                annotationsCache.removeList(
+                    {
+                        unifiedId: list.unifiedId,
+                    },
+                    { skipEventEmission: true },
+                )
+            }
         },
     })
 

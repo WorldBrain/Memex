@@ -1,5 +1,6 @@
-import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import type { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 import type { AnnotationInterface } from 'src/annotations/background/types'
+import type { UnifiedList } from 'src/annotations/cache/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
@@ -31,6 +32,17 @@ export interface RemoteBGScriptInterface {
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => Promise<'error' | 'success'>
+    broadcastListChangeToAllTabs: (
+        params:
+            | {
+                  type: 'create'
+                  list: UnifiedList<'user-list' | 'page-link'>
+              }
+            | {
+                  type: 'delete'
+                  localListId: number
+              },
+    ) => Promise<void>
 }
 
 // TODO: Fill in this type with remaining BG modules
@@ -43,4 +55,5 @@ export interface BackgroundModuleRemoteInterfaces<
     pageActivityIndicator: RemotePageActivityIndicatorInterface
     imageSupport: ImageSupportInterface<Role>
     syncSettings: RemoteSyncSettingsInterface
+    bgScript: RemoteBGScriptInterface
 }

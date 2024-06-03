@@ -394,6 +394,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             ? { type: 'user-reference', id: user.id }
                             : undefined,
                         bgModules: {
+                            bgScript: this.options.bgScriptBG,
                             customLists: this.options.listsBG,
                             contentSharing: this.options.contentShareBG,
                             pageActivityIndicator: this.options

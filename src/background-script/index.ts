@@ -81,6 +81,7 @@ class BackgroundScript {
             openOverviewTab: this.openDashboardPage,
             openLearnMoreTab: this.openLearnMorePage,
             createCheckoutLink: this.createCheckoutLink,
+            broadcastListChangeToAllTabs: this.broadcastSpaceChangeToAllTabs,
             confirmBackgroundScriptLoaded: async () => {},
         }
 
@@ -370,6 +371,39 @@ class BackgroundScript {
 
         // This call prompts the extension to reload, updating the scripts to the newest versions
         runtimeAPI.reload()
+    }
+
+    broadcastSpaceChangeToAllTabs: RemoteBGScriptInterface['broadcastListChangeToAllTabs'] = async (
+        params,
+    ) => {
+        let { bgModules } = this.deps
+        try {
+            await bgModules.tabManagement.mapTabChunks(
+                async (tab) => {
+                    if (!bgModules.tabManagement.canTabRunContentScripts(tab)) {
+                        return
+                    }
+                    if (params.type === 'create') {
+                        await runInTab<InPageUIContentScriptRemoteInterface>(
+                            tab.id,
+                        ).addListToCache({ list: params.list })
+                    } else if (params.type === 'delete') {
+                        await runInTab<InPageUIContentScriptRemoteInterface>(
+                            tab.id,
+                        ).removeListFromCache({
+                            localListId: params.localListId,
+                        })
+                    }
+                },
+                {
+                    onError: () => {
+                        // Ignore errors
+                    },
+                },
+            )
+        } catch (err) {
+            captureException(err)
+        }
     }
 
     private chooseTabOpenFn = (params?: OpenTabParams) =>

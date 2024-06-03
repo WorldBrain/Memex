@@ -46,6 +46,9 @@ export interface PageAnnotationsCacheInterface {
     ) => { unifiedId: UnifiedAnnotation['unifiedId'] }
     addList: <T extends UnifiedListType>(
         list: UnifiedListForCache<T>,
+        opts?: {
+            skipEventEmission?: boolean
+        },
     ) => { unifiedId: UnifiedList['unifiedId'] }
     updateAnnotation: (
         updates: Pick<
@@ -86,7 +89,12 @@ export interface PageAnnotationsCacheInterface {
     removeAnnotation: (
         annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'localId'>,
     ) => void
-    removeList: (list: Pick<UnifiedList, 'unifiedId'>) => void
+    removeList: (
+        list: Pick<UnifiedList, 'unifiedId'>,
+        opts?: {
+            skipEventEmission?: boolean
+        },
+    ) => void
     sortLists: (sortingFn?: any) => void
     sortAnnotations: (sortingFn?: AnnotationsSorter) => void
 

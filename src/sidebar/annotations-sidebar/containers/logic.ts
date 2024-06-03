@@ -412,6 +412,7 @@ export class SidebarContainerLogic extends UILogic<
                 skipListHydration: this.options.sidebarContext === 'dashboard',
                 keepExistingAnnotationData: true,
                 bgModules: {
+                    bgScript: this.options.bgScriptBG,
                     customLists: this.options.customListsBG,
                     annotations: this.options.annotationsBG,
                     syncSettings: this.options.syncSettingsBG,
