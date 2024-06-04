@@ -37,11 +37,12 @@ import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 import type { BackgroundModules } from './setup'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { captureException } from 'src/util/raven'
+import type { captureException } from 'src/util/raven'
 import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import checkBrowser from 'src/util/check-browser'
+import { ensureDataLossFlagSet } from './db-data-loss-check'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -50,6 +51,7 @@ interface Dependencies {
     >
     urlNormalizer: URLNormalizer
     storageChangesMan: StorageChangesManager
+    captureException: typeof captureException
     storageAPI: Storage.Static
     runtimeAPI: Runtime.Static
     browserAPIs: Browser
@@ -130,6 +132,11 @@ class BackgroundScript {
 
         // Store the timestamp of when the extension was installed
         await this.deps.localExtSettingStore.set('installTimestamp', Date.now())
+
+        await ensureDataLossFlagSet({
+            captureException: this.deps.captureException,
+            db: this.deps.storageManager.backend['dexie'],
+        })
 
         // Disable PDF integration by default
         await this.deps.syncSettingsStore.pdfIntegration.set(
@@ -267,6 +274,7 @@ class BackgroundScript {
             bgModules: this.deps.bgModules,
             storex: this.deps.storageManager,
             db: this.deps.storageManager.backend['dexieInstance'],
+            captureException: this.deps.captureException,
             localStorage: this.deps.storageAPI.local,
             normalizeUrl: this.deps.urlNormalizer,
             syncSettingsStore: this.deps.syncSettingsStore,
@@ -292,6 +300,7 @@ class BackgroundScript {
                 bgModules: this.deps.bgModules,
                 storex: this.deps.storageManager,
                 db: this.deps.storageManager.backend['dexieInstance'],
+                captureException: this.deps.captureException,
                 localStorage: this.deps.storageAPI.local,
                 normalizeUrl: this.deps.urlNormalizer,
                 syncSettingsStore: this.deps.syncSettingsStore,
@@ -362,7 +371,7 @@ class BackgroundScript {
                             `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
                             err.message,
                         )
-                        captureException(err)
+                        this.deps.captureException(err)
                     },
                 },
             )
@@ -371,7 +380,7 @@ class BackgroundScript {
                 'Error encountered attempting to teardown content scripts for extension update:',
                 err.message,
             )
-            captureException(err)
+            this.deps.captureException(err)
         }
 
         // This call prompts the extension to reload, updating the scripts to the newest versions
@@ -414,7 +423,7 @@ class BackgroundScript {
                 },
             )
         } catch (err) {
-            captureException(err)
+            this.deps.captureException(err)
         }
     }
 

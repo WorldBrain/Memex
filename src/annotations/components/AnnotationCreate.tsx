@@ -202,7 +202,8 @@ export class AnnotationCreate extends React.Component<Props, State>
                             this.setState({ onEditClick: true }, async () => {
                                 await delay(300)
                                 if (commentText) {
-                                    this.editor?.addYoutubeTimestampWithText(
+                                    this.editor?.insertContentAt(
+                                        null,
                                         commentText,
                                     )
                                 } else {
@@ -212,9 +213,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             })
                         } else {
                             if (commentText) {
-                                this.editor?.addYoutubeTimestampWithText(
-                                    commentText,
-                                )
+                                this.editor?.insertContentAt(null, commentText)
                             } else {
                                 this.editor?.addYoutubeTimestamp()
                             }
