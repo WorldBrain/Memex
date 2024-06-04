@@ -61,8 +61,8 @@ import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import SummarizeBackground from 'src/summarization-llm/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { SyncSettingsBackground } from 'src/sync-settings/background'
-import { AuthServices, Services } from 'src/services/types'
-import { captureException } from 'src/util/raven'
+import type { AuthServices, Services } from 'src/services/types'
+import type { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
 // import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
 // import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
@@ -285,9 +285,10 @@ export function createBackgroundModules(options: {
     })
 
     const search = new SearchBackground({
-        storageManager,
         pages,
         analyticsBG,
+        storageManager,
+        captureException: options.captureException,
     })
 
     const tags = new TagsBackground({

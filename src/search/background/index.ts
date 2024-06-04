@@ -61,6 +61,7 @@ import { PDF_PAGE_URL_PREFIX } from '@worldbrain/memex-common/lib/page-indexing/
 import { EVENT_PROVIDER_URLS } from '@worldbrain/memex-common/lib/constants'
 import { TWITTER_URLS } from '@worldbrain/memex-common/lib/twitter-integration/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import type { captureException } from 'src/util/raven'
 
 export default class SearchBackground {
     storage: SearchStorage
@@ -103,6 +104,7 @@ export default class SearchBackground {
             storageManager: Storex
             pages: PageIndexingBackground
             analyticsBG: AnalyticsCoreInterface
+            captureException: typeof captureException
         },
     ) {
         this.storage = new SearchStorage({
@@ -520,11 +522,30 @@ export default class SearchBackground {
             .table<Annotation>('annotations')
             .bulkGet([...validAnnotIds])
 
+        let anyNonExistentAnnot = false
         // Add in all the annotations to the results
         const annotsByPage = groupBy(
-            [...autoSharedAnnots, ...selectivelySharedAnnots],
+            [...autoSharedAnnots, ...selectivelySharedAnnots]
+                // Sometimes annotListEntries can refer to annotations that were deleted due to old buggy delete logic
+                .filter((annot) => {
+                    let annotExists = annot != null
+                    if (annotExists) {
+                        anyNonExistentAnnot = true
+                    }
+                    return annotExists
+                }),
             (a) => a.pageUrl,
         )
+
+        // Log it in sentry so we get an idea of how many times users have this case
+        if (anyNonExistentAnnot) {
+            this.options.captureException(
+                new Error(
+                    `OwnError: Encountered annotListEntry referencing non-existent annotation`,
+                ),
+            )
+        }
+
         for (const [pageId, annots] of Object.entries(annotsByPage)) {
             const descOrderedAnnots = annots.sort(
                 (a, b) => b.lastEdited.valueOf() - a.lastEdited.valueOf(),
