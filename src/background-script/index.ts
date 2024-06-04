@@ -42,6 +42,8 @@ import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/stor
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import checkBrowser from 'src/util/check-browser'
+import type Dexie from 'dexie'
+import { DB_DATA_LOSS_FLAG } from './constants'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -130,6 +132,11 @@ class BackgroundScript {
 
         // Store the timestamp of when the extension was installed
         await this.deps.localExtSettingStore.set('installTimestamp', Date.now())
+
+        // Add this to an unused table to periodically check and see if all data has ever been evicted
+        await (this.deps.storageManager.backend['dexie'] as Dexie)
+            .table('socialTags')
+            .add(DB_DATA_LOSS_FLAG)
 
         // Disable PDF integration by default
         await this.deps.syncSettingsStore.pdfIntegration.set(

@@ -35,6 +35,7 @@ import type { SyncSettingsByFeature } from 'src/sync-settings/background/types'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import type { CustomListTree } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { Template } from 'src/copy-paster/types'
+import { DB_DATA_LOSS_FLAG } from '../constants'
 
 export interface MigrationProps {
     db: Dexie
@@ -69,6 +70,20 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This exists as we had a suspicion that sometimes browsers would forcefully evict all extension data.
+     * To in/validate that we put this flag and periodically check it to see if it's still there. In
+     * the case of a full data eviction, it should be gone.
+     */
+    [MIGRATION_PREFIX + 'add-db-data-loss-check-flag-01']: async ({ db }) => {
+        let [existing] = await db
+            .table('socialTags')
+            .where({ postId: DB_DATA_LOSS_FLAG.postId })
+            .primaryKeys()
+        if (!existing) {
+            await db.table('socialTags').add(DB_DATA_LOSS_FLAG)
+        }
+    },
     /*
      * This exists as we released the templates with a new order field, same as cuomstListTrees,
      * though we set the values for the static default templates to be less than the default space between.
