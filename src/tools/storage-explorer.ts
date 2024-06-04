@@ -13,6 +13,7 @@ import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import DeprecatedStorageModules from 'src/background-script/deprecated-storage-modules'
 import { createAuthServices } from 'src/services/local-services'
 import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
+import type { ExceptionCapturer } from '@worldbrain/memex-common/lib/firebase-backend/types'
 
 type CommandLineArguments =
     | { command: 'list-collections' }
@@ -53,6 +54,9 @@ async function main() {
     if (typeof window === 'undefined') {
         global['URL'] = URL
     }
+    const captureException: ExceptionCapturer = async (err) => {
+        console.warn('Got error in content sharing backend', err.message)
+    }
 
     const authServices = createAuthServices({
         backend: 'memory',
@@ -76,6 +80,7 @@ async function main() {
         services,
         analyticsManager: null,
         storageManager,
+        captureException,
         persistentStorageManager,
         localStorageChangesManager: null,
         browserAPIs: {

@@ -176,7 +176,7 @@ export function createBackgroundModules(options: {
     fetchPDFData: (fullPageUrl: string) => Promise<ExtractedPDFData>
     auth?: AuthBackground
     analyticsManager: Analytics
-    captureException?: typeof captureException
+    captureException: typeof captureException
     // userMessageService?: UserMessageService
     getNow?: () => number
     fetch: typeof fetch

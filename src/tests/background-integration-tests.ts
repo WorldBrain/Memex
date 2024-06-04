@@ -226,6 +226,7 @@ export async function setupBackgroundIntegrationTest(
         persistentStorageManager,
         analyticsManager,
         localStorageChangesManager: null,
+        captureException,
         serverStorage,
         browserAPIs,
         services,
