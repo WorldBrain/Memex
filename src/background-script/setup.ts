@@ -62,7 +62,7 @@ import SummarizeBackground from 'src/summarization-llm/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { SyncSettingsBackground } from 'src/sync-settings/background'
 import type { AuthServices, Services } from 'src/services/types'
-import type { captureException } from 'src/util/raven'
+import { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
 // import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
 // import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
@@ -109,6 +109,10 @@ import {
 import checkBrowser from 'src/util/check-browser'
 import { AUTOMATED_BACKUP_ALARM_NAME } from 'src/backup-restore/background/constants'
 import { AlarmJob, setupAlarms } from './alarms'
+import {
+    DB_DATA_LOSS_CHECK_ALARM_NAME,
+    checkDataLoss,
+} from './db-data-loss-check'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -582,6 +586,7 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         storageAPI: options.browserAPIs.storage,
         tabsAPI: options.browserAPIs.tabs,
+        captureException: options.captureException,
         localExtSettingStore,
         syncSettingsStore,
         storageManager,
@@ -792,6 +797,14 @@ export async function setupBackgroundModules(
             alarmDefinition: null, // Dynamically scheduled in the personalCloud module
             job: () =>
                 backgroundModules.personalCloud.actionQueue.executePendingActions(),
+        },
+        [DB_DATA_LOSS_CHECK_ALARM_NAME]: {
+            alarmDefinition: { periodInMinutes: 15 },
+            job: () =>
+                checkDataLoss({
+                    captureException,
+                    db: storageManager.backend['dexie'],
+                }),
         },
     }
 
