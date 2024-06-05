@@ -7,6 +7,9 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { SETTINGS_URL } from 'src/constants'
 
 export interface Props {
     theme: MemexThemeVariant
@@ -20,6 +23,8 @@ export interface State {
     showChat: boolean
     showFeedbackForm: boolean
     showChangeLog: boolean
+    showTutorialBox: boolean
+    currentUser: AuthenticatedUser | null
 }
 
 export class HelpBtn extends React.PureComponent<Props, State> {
@@ -30,12 +35,29 @@ export class HelpBtn extends React.PureComponent<Props, State> {
         showChat: false,
         showFeedbackForm: false,
         showChangeLog: false,
+        showTutorialBox: false,
+        currentUser: null,
     }
 
     private handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
         e.preventDefault()
 
         this.setState((state) => ({ isOpen: !state.isOpen }))
+    }
+
+    renderTutorialBox() {
+        if (this.state.showTutorialBox) {
+            return (
+                <TutorialBox
+                    tutorialId="all"
+                    getRootElement={this.props.getRootElement}
+                    onTutorialClose={() => {
+                        this.setState({ showTutorialBox: false })
+                    }}
+                    isHeadless
+                />
+            )
+        }
     }
 
     private renderMenu() {
@@ -95,9 +117,10 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         </MenuItem>
                         <MenuItem
                             onClick={() =>
-                                window.open(
-                                    'https://tutorials.memex.garden/tutorials',
-                                )
+                                this.setState({
+                                    showTutorialBox: !this.state
+                                        .showTutorialBox,
+                                })
                             }
                         >
                             <Icon
@@ -106,6 +129,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                 hoverOff
                             />
                             Tutorials and FAQs
+                            {this.renderTutorialBox()}
                         </MenuItem>
                         <MenuItem
                             onClick={() =>
@@ -121,7 +145,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         </MenuItem>
                         <MenuItem
                             onClick={() =>
-                                window.open('https://community.memex.garden')
+                                window.open('https://feedback.memex.garden')
                             }
                         >
                             <Icon
@@ -132,9 +156,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                             Community Forum
                         </MenuItem>
                         <MenuItem
-                            onClick={() =>
-                                window.open('https://worldbrain.io/changelog')
-                            }
+                            onClick={() => window.open(SETTINGS_URL, '_blank')}
                         >
                             <Icon
                                 filePath={icons.command}
@@ -171,7 +193,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         </MenuItem>
                         <MenuItem
                             onClick={() =>
-                                window.open('https://twitter.com/memexgarden')
+                                window.open('https://x.com/memexgarden')
                             }
                         >
                             <Icon
@@ -179,7 +201,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                 heightAndWidth="22px"
                                 hoverOff
                             />
-                            Twitter - @memexgarden
+                            Twitter/X - @memexgarden
                         </MenuItem>
                         <FooterText>
                             Memex {browser.runtime.getManifest().version}
