@@ -2060,6 +2060,7 @@ export class DashboardContainer extends StatefulUIElement<
                     </MainFrame>
                     {this.renderModals()}
                     <HelpBtn
+                        currentUser={this.state.currentUser}
                         theme={this.state.themeVariant}
                         toggleTheme={() =>
                             this.processEvent('toggleTheme', null)

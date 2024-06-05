@@ -143,6 +143,7 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                currentUser={this.state.currentUser}
                 getRootElement={this.props.getRootElement}
                 setWriteError={() =>
                     this.processEvent('setWriteError', {

@@ -48,8 +48,10 @@ import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface Props extends RibbonSubcomponentProps {
+    currentUser: AuthenticatedUser
     setRef?: (el: HTMLElement) => void
     isExpanded: boolean
     theme: MemexThemeVariant
@@ -430,9 +432,7 @@ export default class Ribbon extends Component<Props, State> {
                         <ChatBox>
                             <LoadingIndicator size={30} />
                             <ChatFrame
-                                src={
-                                    'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599'
-                                }
+                                src={`https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${this.props.currentUser.email}`}
                                 height={600}
                                 width={500}
                             />

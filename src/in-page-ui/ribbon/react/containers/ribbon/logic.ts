@@ -22,6 +22,7 @@ import { sleepPromise } from 'src/util/promises'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -47,6 +48,7 @@ type SubcomponentHandlers<
 > = HandlersOf<componentTypes.RibbonSubcomponentProps[Subcomponent]>
 
 export interface RibbonContainerState {
+    currentUser: AuthenticatedUser | null
     fullPageUrl: string
     loadState: TaskState
     isRibbonEnabled: boolean | null
@@ -155,6 +157,7 @@ export class RibbonContainerLogic extends UILogic<
 
     getInitialState(): RibbonContainerState {
         return {
+            currentUser: null,
             fullPageUrl: null,
             loadState: 'pristine',
             areExtraButtonsShown: false,
@@ -234,6 +237,7 @@ export class RibbonContainerLogic extends UILogic<
                     this.emitMutation({
                         isTrial: { $set: isTrial },
                         signupDate: { $set: signupDate },
+                        currentUser: { $set: currentUser },
                     })
                 }
             }
