@@ -225,7 +225,12 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             return
         }
 
-        await this._setState('ribbon', true)
+        if (options?.action === 'bookmarksNudge') {
+            await this._setState('ribbon', false)
+        } else {
+            await this._setState('ribbon', true)
+        }
+
         maybeEmitAction()
     }
 

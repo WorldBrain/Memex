@@ -1,6 +1,7 @@
 import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 import type { ErrorDisplayProps } from './error-display'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 
 export type SearchEngineName = 'google' | 'duckduckgo' | 'brave' | 'bing'
 export interface SearchEngineInfo {
@@ -32,6 +33,9 @@ export interface OnDemandInPageUIProps {
         limitReachedNotif: PowerUpModalVersion
         authBG: AuthRemoteFunctionsInterface
     }
+    embedElements?: HTMLCollectionOf<HTMLEmbedElement>
+    imageElements?: HTMLCollectionOf<HTMLImageElement>
+    contentScriptsBG?: ContentScriptsInterface<'caller'>
 }
 
 export type OnDemandInPageUIComponents =
@@ -40,3 +44,5 @@ export type OnDemandInPageUIComponents =
     | 'dashboard'
     | 'error-display'
     | 'upgrade-modal'
+    | 'pdf-open-button'
+    | 'img-action-buttons'

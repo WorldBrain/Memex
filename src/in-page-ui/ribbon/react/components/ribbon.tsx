@@ -49,10 +49,12 @@ import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { renderNudgeTooltip } from 'src/util/nudges-utils'
 
 export interface Props extends RibbonSubcomponentProps {
     currentUser: AuthenticatedUser
     setRef?: (el: HTMLElement) => void
+    ribbonRef: React.RefObject<Ribbon>
     isExpanded: boolean
     theme: MemexThemeVariant
     isRibbonEnabled: boolean
@@ -72,6 +74,8 @@ export interface Props extends RibbonSubcomponentProps {
     toggleFeed: () => void
     showFeed: boolean
     toggleAskAI: (instaExecute: boolean) => void
+    showBookmarksNudge: boolean
+    setShowBookmarksNudge: (value: boolean, snooze: boolean) => void
     toggleRabbitHole: () => void
     toggleQuickSearch: () => void
     openPDFinViewer: () => void
@@ -116,7 +120,7 @@ export default class Ribbon extends Component<Props, State> {
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
     private spacePickerRef = createRef<HTMLDivElement>()
-    private bookmarkButtonRef = createRef<HTMLDivElement>()
+    private memexLogoRef = createRef<HTMLDivElement>()
 
     private tutorialButtonRef = createRef<HTMLDivElement>()
     private feedButtonRef = createRef<HTMLDivElement>()
@@ -270,6 +274,45 @@ export default class Ribbon extends Component<Props, State> {
                 {
                     <KeyboardShortcuts
                         size={'small'}
+                        keys={short.shortcut.split('+')}
+                        getRootElement={this.props.getRootElement}
+                    />
+                }
+            </TooltipContent>
+        ) : (
+            source
+        )
+    }
+
+    private getHotKey(
+        name: string,
+        size: 'small' | 'medium',
+    ): JSX.Element | string {
+        const elData = this.shortcutsData.get(name)
+        const short: Shortcut = this.keyboardShortcuts[name]
+
+        if (!elData) {
+            return null
+        }
+
+        let source = elData.tooltip
+
+        if (['createBookmark'].includes(name)) {
+            source = this.props.bookmark.isBookmarked
+                ? elData.toggleOff
+                : elData.toggleOn
+        }
+        if (['toggleSidebar'].includes(name)) {
+            source = this.props.sidebar.isSidebarOpen
+                ? elData.toggleOff
+                : elData.toggleOn
+        }
+
+        return short.shortcut && short.enabled ? (
+            <TooltipContent>
+                {
+                    <KeyboardShortcuts
+                        size={size ?? 'small'}
                         keys={short.shortcut.split('+')}
                         getRootElement={this.props.getRootElement}
                     />
@@ -907,6 +950,22 @@ export default class Ribbon extends Component<Props, State> {
                 </RemoveMenuContainer>
             </PopoutBox>
         )
+    }
+
+    renderBookmarksNudge = () => {
+        if (this.props.showBookmarksNudge) {
+            return renderNudgeTooltip(
+                'Looks like an article worth saving!',
+                'Hover over the brain icon or use hotkeys to save with Memex.',
+                this.getHotKey('createBookmark', 'medium'),
+                '450px',
+                () => this.props.setShowBookmarksNudge(false, false), // hide forever
+                () => this.props.setShowBookmarksNudge(false, true), // snooze
+                this.props.getRootElement,
+                this.memexLogoRef.current,
+                'top-end',
+            )
+        }
     }
 
     renderFeedButton() {
@@ -1987,6 +2046,8 @@ export default class Ribbon extends Component<Props, State> {
                     ribbonPosition={this.props.ribbonPosition}
                     isYoutube={isYoutube}
                 >
+                    {this.renderBookmarksNudge()}
+
                     {this.props.hasFeedActivity && (
                         <FeedActivityDotBox>
                             <FeedActivityDot
@@ -2020,6 +2081,7 @@ export default class Ribbon extends Component<Props, State> {
                                     ? 'greyScale7'
                                     : 'greyScale5'
                             }
+                            containerRef={this.memexLogoRef}
                         />
                     )}
                 </IconContainer>

@@ -27,6 +27,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     analyticsBG: AnalyticsCoreInterface
     theme: MemexThemeVariant
     browserAPIs: Browser
+    // setVisibility: (visibility: boolean) => void
 }
 
 export default class RibbonContainer extends StatefulUIElement<
@@ -137,6 +138,12 @@ export default class RibbonContainer extends StatefulUIElement<
             this.props.setRibbonShouldAutoHide(true)
         } else if (event.action === 'list') {
             this.processEvent('setShowListsPicker', { value: true })
+        } else if (event.action === 'bookmarksNudge') {
+            this.props.inPageUI.hideRibbon()
+            this.processEvent('setShowBookmarksNudge', {
+                value: true,
+                snooze: null,
+            })
         }
     }
 
@@ -167,7 +174,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             this.state.themeVariant || this.props.theme,
                     })
                 }}
-                ref={this.ribbonRef}
+                ribbonRef={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListDetailsById={(id) => {
                     const listDetails = this.props.annotationsCache.getListByLocalId(
@@ -190,6 +197,13 @@ export default class RibbonContainer extends StatefulUIElement<
                         'toggleRemoveMenu',
                         !this.state.showRemoveMenu,
                     )
+                }}
+                showBookmarksNudge={this.state.showBookmarksNudge}
+                setShowBookmarksNudge={(value, snooze) => {
+                    this.processEvent('setShowBookmarksNudge', {
+                        value,
+                        snooze,
+                    })
                 }}
                 toggleAskAI={(instaExecute: boolean) => {
                     this.processEvent('toggleAskAI', instaExecute)

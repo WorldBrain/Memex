@@ -12,6 +12,7 @@ import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/t
 import { SETTINGS_URL } from 'src/constants'
 
 export interface Props {
+    currentUser: AuthenticatedUser
     theme: MemexThemeVariant
     toggleTheme: () => void
     getRootElement: () => HTMLElement
@@ -91,7 +92,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                     ? 'https://memex.featurebase.app'
                                     : this.state.showChangeLog
                                     ? 'https://memex.featurebase.app/changelog'
-                                    : 'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599'
+                                    : `https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${this.props.currentUser.email}`
                             }
                             height={600}
                             width={500}

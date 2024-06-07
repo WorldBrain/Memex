@@ -31,7 +31,7 @@ export const isUrlSupported = (params: {
     }
 
     // Ignore PDFs that are just urls and not the reader
-    if (params.fullUrl.endsWith('.pdf')) {
+    if (params.fullUrl.includes('.pdf')) {
         if (!params.fullUrl.includes('pdfjs/viewer.html?file')) {
             return false
         }

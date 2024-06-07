@@ -1,7 +1,8 @@
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import VideoRangeSelector from '@worldbrain/memex-common/lib/common-ui/components/video-range-selector'
@@ -11,17 +12,29 @@ import {
     getHTML5VideoTimestamp,
 } from '@worldbrain/memex-common/lib/editor/utils'
 import React, { Component } from 'react'
+import {
+    ONBOARDING_NUDGES_DEFAULT,
+    ONBOARDING_NUDGES_MAX_COUNT,
+    ONBOARDING_NUDGES_STORAGE,
+} from 'src/content-scripts/constants'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import {
+    BaseKeyboardShortcuts,
+    Shortcut,
+} from 'src/in-page-ui/keyboard-shortcuts/types'
+import {
+    ShortcutElData,
+    shortcuts,
+} from 'src/options/settings/keyboard-shortcuts'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
+import { renderNudgeTooltip, updateNudgesCounter } from 'src/util/nudges-utils'
 import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
-import { Range } from 'react-range'
-import { runInTab } from 'src/util/webextensionRPC'
-import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import browser from 'webextension-polyfill'
+import browser, { Browser } from 'webextension-polyfill'
 
 interface Props {
     runtime: any
@@ -29,6 +42,8 @@ interface Props {
     getRootElement: (() => HTMLElement) | null
     syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<'openAI'>
+    browserAPIs: Browser
+    shortcutsData: ShortcutElData[]
 }
 
 interface State {
@@ -43,9 +58,16 @@ interface State {
     toSecondsPosition: number
     videoDuration: number
     adsRunning: boolean
+    showYoutubeSummaryNudge: boolean
 }
 
 export default class YoutubeButtonMenu extends React.Component<Props, State> {
+    static defaultProps: Pick<Props, 'shortcutsData'> = {
+        shortcutsData: shortcuts,
+    }
+
+    private shortcutsData: Map<string, ShortcutElData>
+    private keyboardShortcuts: BaseKeyboardShortcuts
     memexButtonContainerRef = React.createRef<HTMLDivElement>()
     parentContainerRef = React.createRef<HTMLDivElement>() // Assuming you have a ref to the parent container
     summarizeButtonRef = React.createRef<HTMLDivElement>() // Assuming you have a ref to the parent container
@@ -60,6 +82,13 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             syncSettingsBG: this.props.syncSettingsBG,
         })
 
+        this.shortcutsData = new Map(
+            props.shortcutsData.map((s) => [s.name, s]) as [
+                string,
+                ShortcutElData,
+            ][],
+        )
+
         this.state = {
             YTChapterContainerVisible: false,
             existingMemexButtons: false,
@@ -72,12 +101,14 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             toSecondsPosition: 100,
             videoDuration: 0,
             adsRunning: false,
+            showYoutubeSummaryNudge: false,
         }
     }
 
     async componentDidMount() {
         this.getYoutubeVideoDuration()
 
+        this.keyboardShortcuts = await getKeyboardShortcutsState()
         if (this.syncSettings != null) {
             let summarizeVideoPromptSetting
             try {
@@ -122,6 +153,45 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
         await sleepPromise(1000)
         this.adjustScaleToFitParent()
+
+        const shouldShow = await updateNudgesCounter(
+            'youtubeSummaryCount',
+            this.props.browserAPIs,
+        )
+
+        if (shouldShow) {
+            this.setState({
+                showYoutubeSummaryNudge: true,
+            })
+        }
+    }
+
+    private getHotKey(
+        name: string,
+        size: 'small' | 'medium',
+    ): JSX.Element | string {
+        const elData = this.shortcutsData.get(name)
+        const short: Shortcut = this.keyboardShortcuts[name]
+
+        if (!elData) {
+            return null
+        }
+
+        let source = elData.tooltip
+
+        return short.shortcut && short.enabled ? (
+            <TooltipContent>
+                {
+                    <KeyboardShortcuts
+                        size={size ?? 'small'}
+                        keys={short.shortcut.split('+')}
+                        getRootElement={this.props.getRootElement}
+                    />
+                }
+            </TooltipContent>
+        ) : (
+            source
+        )
     }
 
     async getYoutubeVideoDuration() {
@@ -325,6 +395,46 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         this.setState({ noteSeconds: event.target.value })
     }
 
+    hideYTNudge = async () => {
+        this.setState({
+            showYoutubeSummaryNudge: false,
+        })
+
+        const onboardingNudgesStorage = await this.props.browserAPIs.storage.local.get(
+            ONBOARDING_NUDGES_STORAGE,
+        )
+        let onboardingNudgesValues =
+            onboardingNudgesStorage[ONBOARDING_NUDGES_STORAGE] ??
+            ONBOARDING_NUDGES_DEFAULT
+
+        onboardingNudgesValues.youtubeSummaryCount = null
+
+        await this.props.browserAPIs.storage.local.set({
+            [ONBOARDING_NUDGES_STORAGE]: onboardingNudgesValues,
+        })
+    }
+    snoozeNudge = async () => {
+        this.setState({
+            showYoutubeSummaryNudge: false,
+        })
+    }
+
+    renderYouTubeSummaryNudge = () => {
+        if (this.state.showYoutubeSummaryNudge) {
+            return renderNudgeTooltip(
+                "Don't waste time watching this video",
+                'Use Memex to summarize and ask questions instead',
+                this.getHotKey('askAI', 'medium'),
+                '450px',
+                this.hideYTNudge,
+                this.snoozeNudge,
+                this.props.getRootElement,
+                this.summarizeButtonRef.current,
+                'top-start',
+            )
+        }
+    }
+
     renderPromptTooltip = (ref) => {
         let elementRef
         if (ref === 'summarizeVideo') {
@@ -497,6 +607,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     // }
                                     onClick={(event) => {
                                         this.handleSummarizeButtonClick(event)
+                                        this.setState({
+                                            showYoutubeSummaryNudge: false,
+                                        })
                                     }}
                                     ref={this.summarizeButtonRef}
                                 >
@@ -568,6 +681,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                             )}
                     </MemexButtonInnerContainer>
                 </InnerContainer>
+                {this.renderYouTubeSummaryNudge()}
             </ParentContainer>
         )
     }
@@ -737,4 +851,12 @@ const BottomArea = styled.div`
     width: 100%;
     padding: 0 10px;
     box-sizing: border-box;
+`
+
+const TooltipContent = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    flex-direction: row;
+    justify-content: center;
 `

@@ -143,6 +143,7 @@ export default class DirectLinkingBackground {
                 comment: openToComment,
                 bookmark: openToBookmark,
                 list: openToCollections,
+                bookmarksNudge: false,
             }
             const actionPair = Object.entries(actions).findIndex((pair) => {
                 return pair[1]
