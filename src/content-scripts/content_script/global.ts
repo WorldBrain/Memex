@@ -124,6 +124,8 @@ import {
 import type { RemoteSearchInterface } from 'src/search/background/types'
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
 import type { TaskState } from 'ui-logic-core/lib/types'
+import debounce from 'lodash/debounce'
+import { updateNudgesCounter } from 'src/util/nudges-utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -1533,6 +1535,38 @@ export async function main(
         })
     }
 
+    const embedElements = document.getElementsByTagName('embed')
+
+    if (embedElements.length > 0) {
+        inPageUI.loadOnDemandInPageUI({
+            component: 'pdf-open-button',
+            options: {
+                embedElements,
+                contentScriptsBG,
+            },
+        })
+    }
+    const imageElements = document.getElementsByTagName('img')
+
+    const disabledServices = [
+        'https://www.facebook.com/',
+        'https://www.instagram.com/',
+        'https://www.pinterest.com/',
+    ]
+
+    if (
+        imageElements.length > 0 &&
+        !disabledServices.some((url) => fullPageUrl.includes(url))
+    ) {
+        inPageUI.loadOnDemandInPageUI({
+            component: 'img-action-buttons',
+            options: {
+                imageElements,
+                contentScriptsBG,
+            },
+        })
+    }
+
     // Function to track when the subscription has been updated by going to our website (which the user arrives through a redirect)
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
         const h2Element = document.querySelector('h2')
@@ -1600,6 +1634,50 @@ export async function main(
                 }
             }
         }
+    }
+
+    // Function to track when to show the nudges
+    let tabOpenedTime = Date.now()
+
+    async function checkScrollPosition() {
+        const scrollPosition = window.scrollY
+        const pageHeight = document.documentElement.scrollHeight
+        const elapsedTime = Date.now() - tabOpenedTime
+
+        if (scrollPosition > 0.3 * pageHeight && elapsedTime > 10000) {
+            const shouldShow = await updateNudgesCounter(
+                'bookmarksCount',
+                browser,
+            )
+            removeScrollListener()
+            if (shouldShow) {
+                await inPageUI.showRibbon({ action: 'bookmarksNudge' })
+            }
+        }
+    }
+
+    const debouncedCheckScrollPosition = debounce(checkScrollPosition, 2000)
+
+    const excludedPages = [
+        'https://x.com/',
+        'https://twitter.com/',
+        'https://twitter.com/messages',
+        'https://www.facebook.com/',
+        'https://www.instagram.com/',
+        'https://www.pinterest.com/',
+        'https://web.whatsapp.com/',
+        'https://web.telegram.org/',
+    ]
+
+    if (
+        !excludedPages.some((url) => window.location.href.includes(url)) &&
+        !pageHasBookark
+    ) {
+        document.addEventListener('scroll', debouncedCheckScrollPosition)
+    }
+
+    function removeScrollListener() {
+        document.removeEventListener('scroll', debouncedCheckScrollPosition)
     }
 
     if (analyticsBG && hasActivity) {

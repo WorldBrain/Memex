@@ -38,7 +38,12 @@ export type InPageUISidebarAction =
     | 'add_media_range_to_ai_context'
     | 'analyse_image_with_ai'
 
-export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
+export type InPageUIRibbonAction =
+    | 'comment'
+    | 'tag'
+    | 'list'
+    | 'bookmark'
+    | 'bookmarksNudge'
 export type InPageUIComponent = ContentScriptComponent
 
 export type InPageUIComponentShowState = {

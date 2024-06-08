@@ -22,6 +22,8 @@ import { sleepPromise } from 'src/util/promises'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { disableNudgeType } from 'src/util/nudges-utils'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -47,6 +49,7 @@ type SubcomponentHandlers<
 > = HandlersOf<componentTypes.RibbonSubcomponentProps[Subcomponent]>
 
 export interface RibbonContainerState {
+    currentUser: AuthenticatedUser | null
     fullPageUrl: string
     loadState: TaskState
     isRibbonEnabled: boolean | null
@@ -65,6 +68,7 @@ export interface RibbonContainerState {
     annotations: number
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
+    showBookmarksNudge: boolean
     hasFeedActivity: boolean
     isTrial: boolean
     signupDate: number
@@ -86,6 +90,7 @@ export type RibbonContainerEvents = UIEvent<
         setTutorialId: { tutorialIdToOpen: string }
         toggleShowTutorial: null
         toggleFeed: null
+        setShowBookmarksNudge: { value: boolean; disable?: boolean }
         toggleReadingView: null
         toggleAskAI: boolean | null
         deletePage: null
@@ -155,6 +160,7 @@ export class RibbonContainerLogic extends UILogic<
 
     getInitialState(): RibbonContainerState {
         return {
+            currentUser: null,
             fullPageUrl: null,
             loadState: 'pristine',
             areExtraButtonsShown: false,
@@ -195,6 +201,7 @@ export class RibbonContainerLogic extends UILogic<
             themeVariant: null,
             showRabbitHoleButton: false,
             showConfirmDeletion: false,
+            showBookmarksNudge: false,
         }
     }
 
@@ -234,6 +241,7 @@ export class RibbonContainerLogic extends UILogic<
                     this.emitMutation({
                         isTrial: { $set: isTrial },
                         signupDate: { $set: signupDate },
+                        currentUser: { $set: currentUser },
                     })
                 }
             }
@@ -955,6 +963,26 @@ export class RibbonContainerLogic extends UILogic<
         return this.dependencies.customLists.addOpenTabsToList({
             listId: event.value,
         })
+    }
+    setShowBookmarksNudge: EventHandler<'setShowBookmarksNudge'> = async ({
+        event,
+    }) => {
+        if (event.value) {
+            this.dependencies.setRibbonShouldAutoHide(false)
+        } else {
+            this.dependencies.setRibbonShouldAutoHide(true)
+        }
+
+        this.emitMutation({
+            showBookmarksNudge: { $set: event.value },
+        })
+
+        if (event.disable) {
+            await disableNudgeType(
+                'bookmarksCount',
+                this.dependencies.browserAPIs,
+            )
+        }
     }
 
     setShowListsPicker: EventHandler<'setShowListsPicker'> = async ({
