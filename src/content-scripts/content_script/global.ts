@@ -1669,7 +1669,10 @@ export async function main(
         'https://web.telegram.org/',
     ]
 
-    if (!excludedPages.includes(window.location.href) && !pageHasBookark) {
+    if (
+        !excludedPages.some((url) => window.location.href.includes(url)) &&
+        !pageHasBookark
+    ) {
         document.addEventListener('scroll', debouncedCheckScrollPosition)
     }
 

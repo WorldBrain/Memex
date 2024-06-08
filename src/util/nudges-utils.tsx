@@ -26,15 +26,17 @@ export async function updateNudgesCounter(
         return false
     } else {
         nudgeKeyCount = nudgeKeyCount + 1
-        onboardingNudgesValues[nudgeType] = nudgeKeyCount
         if (nudgeKeyCount === ONBOARDING_NUDGES_MAX_COUNT[nudgeType]) {
+            onboardingNudgesValues[nudgeType] = nudgeKeyCount
             await browserAPIs.storage.local.set({
                 [ONBOARDING_NUDGES_STORAGE]: onboardingNudgesValues,
             })
             return true
         } else {
             if (nudgeKeyCount > ONBOARDING_NUDGES_MAX_COUNT[nudgeType]) {
-                nudgeKeyCount = 0
+                onboardingNudgesValues[nudgeType] = 0
+            } else {
+                onboardingNudgesValues[nudgeType] = nudgeKeyCount
             }
             await browserAPIs.storage.local.set({
                 [ONBOARDING_NUDGES_STORAGE]: onboardingNudgesValues,
