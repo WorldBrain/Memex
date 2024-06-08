@@ -25,9 +25,7 @@ function normalizeDexieHistory(dexieHistory: DexieSchema[]) {
 }
 
 describe('Storage initialization', () => {
-    // TODO: Fix this test
-    it.skip('should generate the correct Dexie schema', async () => {
-        return
+    it('should generate the correct Dexie schema', async () => {
         const setup = await setupBackgroundIntegrationTest()
         const dexieHistory = patchDirectLinksSchema(
             getDexieHistory(setup.storageManager.registry),
@@ -851,6 +849,619 @@ describe('Storage initialization', () => {
                     },
                     dexieSchemaVersion: 28,
                     storexSchemaVersion: STORAGE_VERSIONS[27].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, followedList, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 29,
+                    storexSchemaVersion: STORAGE_VERSIONS[28].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, followedList, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 30,
+                    storexSchemaVersion: STORAGE_VERSIONS[29].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 31,
+                    storexSchemaVersion: STORAGE_VERSIONS[30].version,
+                },
+
+                ///
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 32,
+                    storexSchemaVersion: STORAGE_VERSIONS[31].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 33,
+                    storexSchemaVersion: STORAGE_VERSIONS[32].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl, color',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 34,
+                    storexSchemaVersion: STORAGE_VERSIONS[33].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl, color',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 35,
+                    storexSchemaVersion: STORAGE_VERSIONS[34].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl, color',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId, remoteId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 36,
+                    storexSchemaVersion: STORAGE_VERSIONS[35].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl, color',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customListTrees:
+                            '++id, listId, order, parentListId, path',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId, remoteId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 37,
+                    storexSchemaVersion: STORAGE_VERSIONS[36].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl, color',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customListTrees:
+                            '++id, listId, order, parentListId, path',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId, remoteId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 38,
+                    storexSchemaVersion: STORAGE_VERSIONS[37].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl, color',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customListTrees:
+                            '++id, listId, order, parentListId, path',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageEntities: '++id, name, normalizedPageUrl, order',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pageMetadata: '++id, normalizedPageUrl',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId, remoteId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 39,
+                    storexSchemaVersion: STORAGE_VERSIONS[38].version,
+                },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries:
+                            '[listId+url], listId, url, createdAt',
+                        annotationPrivacyLevels: '++id, annotation',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl, color',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customListTrees:
+                            '++id, listId, order, parentListId, path',
+                        customLists:
+                            'id, *nameTerms, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        followedList: 'sharedList',
+                        followedListEntry:
+                            '++id, &sharedListEntry, followedList, normalizedPageUrl',
+                        images: 'id, createdWhen, normalizedPageUrl',
+                        locators: '++id, fingerprint, normalizedUrl',
+                        notifications: 'id',
+                        pageEntities: '++id, name, normalizedPageUrl, order',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries:
+                            '[listId+pageUrl], listId, pageUrl, createdAt',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pageMetadata: '++id, normalizedPageUrl',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        personalCloudAction: '++id, createdWhen',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        settings: 'key',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId, remoteId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 40,
+                    storexSchemaVersion: STORAGE_VERSIONS[39].version,
                 },
             ]),
         )

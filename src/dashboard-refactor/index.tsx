@@ -1653,7 +1653,10 @@ export class DashboardContainer extends StatefulUIElement<
                     <LoginModal
                         authBG={this.props.authBG}
                         contentSharingBG={this.props.contentShareBG}
-                        onSuccess={() =>
+                        onSuccess={() => {
+                            this.processEvent('setShowLoginModal', {
+                                isShown: false,
+                            })
                             setTimeout(
                                 () =>
                                     this.processEvent(
@@ -1662,7 +1665,7 @@ export class DashboardContainer extends StatefulUIElement<
                                     ),
                                 1000,
                             )
-                        }
+                        }}
                         browserAPIs={this.props.browserAPIs}
                     />
                 </OverlayModals>
@@ -2057,6 +2060,7 @@ export class DashboardContainer extends StatefulUIElement<
                     </MainFrame>
                     {this.renderModals()}
                     <HelpBtn
+                        currentUser={this.state.currentUser}
                         theme={this.state.themeVariant}
                         toggleTheme={() =>
                             this.processEvent('toggleTheme', null)
@@ -2386,11 +2390,15 @@ const ListSidebarContent = styled(Rnd)<{
         `}
     ${(props) =>
         props.peeking &&
-        css`
+        css<any>`
             position: absolute
             height: max-content;
-            background-color: ${(props) => props.theme.colors.greyScale1}98;
-            backdrop-filter: blur(30px);
+            background-color: ${(props) =>
+                props.inPageMode
+                    ? props.theme.colors.greyScale1
+                    : props.theme.colors.greyScale1 + '98'};
+            backdrop-filter: ${(props) =>
+                props.inPageMode ? 'unset' : 'blur(30px)'};
             //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
             margin-top: 50px;
             margin-bottom: 9px;

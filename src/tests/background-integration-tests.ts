@@ -226,6 +226,7 @@ export async function setupBackgroundIntegrationTest(
         persistentStorageManager,
         analyticsManager,
         localStorageChangesManager: null,
+        captureException,
         serverStorage,
         browserAPIs,
         services,
@@ -256,7 +257,7 @@ export async function setupBackgroundIntegrationTest(
                 },
                 storageManager: serverStorage.manager,
                 storageModules: serverStorage.modules,
-                clientSchemaVersion: STORAGE_VERSIONS[37].version,
+                clientSchemaVersion: STORAGE_VERSIONS[38].version,
                 view: personalCloudHub.getView(),
                 useDownloadTranslationLayer:
                     options?.useDownloadTranslationLayer ?? true,

@@ -525,7 +525,7 @@ const Powerups = [
         powerUps: {
             basic: {
                 title: 'Basic',
-                subTitle: `${DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} uniquely new pages per month. Every page saved, annotated or added to a Space counts once, forever.`,
+                subTitle: `${DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} uniquely new pages per day. Every page saved, annotated or added to a Space counts once, forever.`,
                 pricing: 'Free',
             },
             pro: {
@@ -549,7 +549,7 @@ const Powerups = [
         powerUps: {
             basic: {
                 title: 'Basic',
-                subTitle: `${DEFAULT_POWERUP_LIMITS.AIpowerup} page sessions per month with Claude-3-Haiku and GPT-3.5-Turbo`,
+                subTitle: `${DEFAULT_POWERUP_LIMITS.AIpowerup} page sessions per day with Claude-3-Haiku and GPT-3.5-Turbo`,
                 pricing: 'Free',
             },
             pro: {

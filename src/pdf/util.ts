@@ -7,7 +7,8 @@ export const constructPDFViewerUrl = (
 ): string =>
     args.runtimeAPI.getURL(PDF_VIEWER_HTML) +
     '?file=' +
-    encodeURIComponent(urlToPdf)
+    encodeURIComponent(urlToPdf) +
+    '#pagemode=none' // this removes the sidebar to open by default
 
 export const isUrlPDFViewerUrl = (
     url: string,

@@ -27,9 +27,8 @@ export interface RibbonSubcomponentProps {
     authBG: AuthRemoteFunctionsInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     contentSharingBG: ContentSharingInterface
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     onListShare?: SpacePickerDependencies['onListShare']
-    selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
     showConfirmDeletion: boolean
 }

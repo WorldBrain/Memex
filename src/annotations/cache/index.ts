@@ -577,7 +577,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         return { unifiedId: nextAnnotation.unifiedId }
     }
 
-    addList: PageAnnotationsCacheInterface['addList'] = (list) => {
+    addList: PageAnnotationsCacheInterface['addList'] = (list, opts) => {
         const nextList = this.prepareListForCaching(list)
         nextList.pathUnifiedIds = nextList.pathLocalIds
             .map((id) => this.getListByLocalId(id)?.unifiedId)
@@ -624,7 +624,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             ])
         }
 
-        this.events.emit('addedList', nextList)
+        if (!opts?.skipEventEmission) {
+            this.events.emit('addedList', nextList)
+        }
         this.events.emit('newListsState', this.lists)
         return { unifiedId: nextList.unifiedId }
     }
@@ -837,9 +839,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         this.events.emit('newAnnotationsState', this.annotations)
     }
 
-    removeList: PageAnnotationsCacheInterface['removeList'] = ({
-        unifiedId,
-    }) => {
+    removeList: PageAnnotationsCacheInterface['removeList'] = (
+        { unifiedId },
+        opts,
+    ) => {
         const targetList = this.lists.byId[unifiedId]
         if (!targetList) {
             throw new Error('No existing cached list found to remove')
@@ -864,7 +867,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 (unifiedListId) => unifiedListId !== listToRemove.unifiedId,
             )
             delete this.lists.byId[listToRemove.unifiedId]
-            this.events.emit('removedList', listToRemove)
+            if (!opts?.skipEventEmission) {
+                this.events.emit('removedList', listToRemove)
+            }
         }
 
         this.events.emit('newListsState', this.lists)

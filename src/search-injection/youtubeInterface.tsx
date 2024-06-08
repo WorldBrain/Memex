@@ -12,7 +12,7 @@ import {
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
-import { runtime } from 'webextension-polyfill'
+import { Browser, runtime } from 'webextension-polyfill'
 import YoutubeButtonMenu from './components/youtubeActionBar'
 import { sleepPromise } from 'src/util/promises'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
@@ -24,6 +24,7 @@ interface RootProps {
     syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<'openAI'>
     annotationsFunctions: any
+    browserAPIs: Browser
 }
 
 interface RootState {
@@ -55,6 +56,7 @@ class Root extends React.Component<RootProps, RootState> {
                         syncSettingsBG={props.syncSettingsBG}
                         syncSettings={props.syncSettings}
                         getRootElement={() => props.rootEl}
+                        browserAPIs={props.browserAPIs}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -66,6 +68,7 @@ export const handleRenderYoutubeInterface = async (
     syncSettings: SyncSettingsStore<'openAI'>,
     syncSettingsBG: RemoteSyncSettingsInterface,
     annotationsFunctions: any,
+    browserAPIs: Browser,
 ) => {
     const existingButton = document.getElementById(
         constants.REACT_ROOTS.youtubeInterface,
@@ -253,6 +256,7 @@ export const handleRenderYoutubeInterface = async (
                 rootEl={target}
                 syncSettings={syncSettings}
                 annotationsFunctions={annotationsFunctions}
+                browserAPIs={browserAPIs}
                 syncSettingsBG={syncSettingsBG}
             />,
             target,

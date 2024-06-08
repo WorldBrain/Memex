@@ -6,6 +6,8 @@ import { renderErrorDisplay } from '../../search-injection/error-display'
 import { renderSearchDisplay } from '../../search-injection/search-display'
 import type { ContentScriptRegistry, InPageUIInjectionsMain } from './types'
 import { renderUpgradeModal } from 'src/search-injection/upgrade-modal-display'
+import { handleRenderPDFOpenButton } from 'src/search-injection/pdf-open-button'
+import { handleRenderImgActionButtons } from 'src/search-injection/img-action-buttons'
 
 export const main: InPageUIInjectionsMain = async ({
     inPageUI,
@@ -36,8 +38,27 @@ export const main: InPageUIInjectionsMain = async ({
                         syncSettings,
                         syncSettingsBG,
                         annotationsFunctions,
+                        upgradeModalProps.browserAPIs,
                     )
                 }
+            } else if (component === 'pdf-open-button') {
+                await handleRenderPDFOpenButton(
+                    syncSettings,
+                    syncSettingsBG,
+                    annotationsFunctions,
+                    upgradeModalProps.browserAPIs,
+                    options.embedElements,
+                    options.contentScriptsBG,
+                )
+            } else if (component === 'img-action-buttons') {
+                await handleRenderImgActionButtons(
+                    syncSettings,
+                    syncSettingsBG,
+                    annotationsFunctions,
+                    upgradeModalProps.browserAPIs,
+                    options.imageElements,
+                    options.contentScriptsBG,
+                )
             } else if (component === 'search-engine-integration') {
                 const url = window.location.href
                 const matched = utils.matchURL(url)
@@ -58,7 +79,9 @@ export const main: InPageUIInjectionsMain = async ({
                                 syncSettings,
                                 () =>
                                     searchDisplayProps.bgScriptBG.openOptionsTab(
-                                        'settings',
+                                        {
+                                            query: 'settings',
+                                        },
                                     ),
                             )
                         } catch (err) {

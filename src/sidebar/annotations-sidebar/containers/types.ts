@@ -50,6 +50,7 @@ import type { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/av
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 
 export type WindowAPISubset = Pick<
     Window,
@@ -74,6 +75,7 @@ export interface SidebarContainerDependencies {
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
     onClickOutside?: React.MouseEventHandler
     showAnnotationShareModal?: () => void
+    highlighter: HighlightRendererInterface
 
     storageAPI: Storage.Static
     runtimeAPI: Runtime.Static
@@ -95,7 +97,7 @@ export interface SidebarContainerDependencies {
     authBG: AuthRemoteFunctionsInterface
     browserAPIs: Browser
     windowAPI: WindowAPISubset
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     pkmSyncBG: PkmSyncInterface
     subscription: SubscriptionsService
     theme: MemexTheme & Partial<SidebarTheme>

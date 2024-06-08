@@ -38,7 +38,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
@@ -48,9 +48,13 @@ import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { renderNudgeTooltip } from 'src/util/nudges-utils'
 
 export interface Props extends RibbonSubcomponentProps {
+    currentUser: AuthenticatedUser
     setRef?: (el: HTMLElement) => void
+    ribbonRef: React.RefObject<Ribbon>
     isExpanded: boolean
     theme: MemexThemeVariant
     isRibbonEnabled: boolean
@@ -70,6 +74,8 @@ export interface Props extends RibbonSubcomponentProps {
     toggleFeed: () => void
     showFeed: boolean
     toggleAskAI: (instaExecute: boolean) => void
+    showBookmarksNudge: boolean
+    setShowBookmarksNudge: (value: boolean, disable?: boolean) => void
     toggleRabbitHole: () => void
     toggleQuickSearch: () => void
     openPDFinViewer: () => void
@@ -80,7 +86,7 @@ export interface Props extends RibbonSubcomponentProps {
     signupDate?: number
     toggleTheme: () => void
     getRootElement: () => HTMLElement
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     setWriteError: (error: string) => void
     showRabbitHoleButton: boolean
     tutorialIdToOpen: string
@@ -114,7 +120,7 @@ export default class Ribbon extends Component<Props, State> {
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
     private spacePickerRef = createRef<HTMLDivElement>()
-    private bookmarkButtonRef = createRef<HTMLDivElement>()
+    private memexLogoRef = createRef<HTMLDivElement>()
 
     private tutorialButtonRef = createRef<HTMLDivElement>()
     private feedButtonRef = createRef<HTMLDivElement>()
@@ -278,6 +284,45 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    private getHotKey(
+        name: string,
+        size: 'small' | 'medium',
+    ): JSX.Element | string {
+        const elData = this.shortcutsData.get(name)
+        const short: Shortcut = this.keyboardShortcuts[name]
+
+        if (!elData) {
+            return null
+        }
+
+        let source = elData.tooltip
+
+        if (['createBookmark'].includes(name)) {
+            source = this.props.bookmark.isBookmarked
+                ? elData.toggleOff
+                : elData.toggleOn
+        }
+        if (['toggleSidebar'].includes(name)) {
+            source = this.props.sidebar.isSidebarOpen
+                ? elData.toggleOff
+                : elData.toggleOn
+        }
+
+        return short.shortcut && short.enabled ? (
+            <TooltipContent>
+                {
+                    <KeyboardShortcuts
+                        size={size ?? 'small'}
+                        keys={short.shortcut.split('+')}
+                        getRootElement={this.props.getRootElement}
+                    />
+                }
+            </TooltipContent>
+        ) : (
+            source
+        )
+    }
+
     private hideListPicker = () => {
         this.props.lists.setShowListsPicker(false)
     }
@@ -430,9 +475,7 @@ export default class Ribbon extends Component<Props, State> {
                         <ChatBox>
                             <LoadingIndicator size={30} />
                             <ChatFrame
-                                src={
-                                    'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599'
-                                }
+                                src={`https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${this.props.currentUser.email}`}
                                 height={600}
                                 width={500}
                             />
@@ -618,7 +661,9 @@ export default class Ribbon extends Component<Props, State> {
                                     <ExtraButtonRow
                                         onClick={() =>
                                             this.props.bgScriptBG.openOptionsTab(
-                                                'settings',
+                                                {
+                                                    query: 'settings',
+                                                },
                                             )
                                         }
                                     >
@@ -637,9 +682,9 @@ export default class Ribbon extends Component<Props, State> {
                                     getKeyboardShortcutsState
                                 }
                                 onSettingsClick={() =>
-                                    this.props.bgScriptBG.openOptionsTab(
-                                        'settings',
-                                    )
+                                    this.props.bgScriptBG.openOptionsTab({
+                                        query: 'settings',
+                                    })
                                 }
                                 hideEditorTutorials
                                 getRootElement={this.props.getRootElement}
@@ -854,9 +899,9 @@ export default class Ribbon extends Component<Props, State> {
                             >
                                 <Icon
                                     onClick={() =>
-                                        this.props.bgScriptBG.openOptionsTab(
-                                            'blocklist',
-                                        )
+                                        this.props.bgScriptBG.openOptionsTab({
+                                            query: 'blocklist',
+                                        })
                                     }
                                     filePath={'settings'}
                                     heightAndWidth={'22px'}
@@ -905,6 +950,22 @@ export default class Ribbon extends Component<Props, State> {
                 </RemoveMenuContainer>
             </PopoutBox>
         )
+    }
+
+    renderBookmarksNudge = () => {
+        if (this.props.showBookmarksNudge) {
+            return renderNudgeTooltip(
+                'Looks like an article worth saving!',
+                'Hover over the brain icon or use hotkeys to save with Memex.',
+                this.getHotKey('createBookmark', 'medium'),
+                '450px',
+                () => this.props.setShowBookmarksNudge(false, true), // hide forever
+                () => this.props.setShowBookmarksNudge(false, false), // snooze
+                this.props.getRootElement,
+                this.memexLogoRef.current,
+                'top-end',
+            )
+        }
     }
 
     renderFeedButton() {
@@ -1495,7 +1556,7 @@ export default class Ribbon extends Component<Props, State> {
                         onClick={(e) => {
                             if (e.shiftKey) {
                                 e.stopPropagation()
-                                this.props.bgScriptBG.openOverviewTab()
+                                this.props.bgScriptBG.openOverviewTab({})
                             } else if (e.altKey) {
                                 e.stopPropagation()
                                 this.props.setTutorialIdToOpen('savePages')
@@ -1511,7 +1572,7 @@ export default class Ribbon extends Component<Props, State> {
                         onClick={(e) => {
                             if (e.shiftKey) {
                                 e.stopPropagation()
-                                this.props.bgScriptBG.openOverviewTab()
+                                this.props.bgScriptBG.openOverviewTab({})
                             } else if (e.altKey) {
                                 e.stopPropagation()
                                 this.props.setTutorialIdToOpen('savePages')
@@ -1985,6 +2046,8 @@ export default class Ribbon extends Component<Props, State> {
                     ribbonPosition={this.props.ribbonPosition}
                     isYoutube={isYoutube}
                 >
+                    {this.renderBookmarksNudge()}
+
                     {this.props.hasFeedActivity && (
                         <FeedActivityDotBox>
                             <FeedActivityDot
@@ -2018,6 +2081,7 @@ export default class Ribbon extends Component<Props, State> {
                                     ? 'greyScale7'
                                     : 'greyScale5'
                             }
+                            containerRef={this.memexLogoRef}
                         />
                     )}
                 </IconContainer>
@@ -2396,7 +2460,7 @@ const IconContainer = styled.div<{ ribbonPosition; isYoutube: boolean }>`
         css`
             backdrop-filter: blur(4px);
         `}
-    
+
 `
 
 const SupportContainer = styled.div`
@@ -2821,7 +2885,7 @@ const InnerRibbon = styled.div<{
         css`
             backdrop-filter: blur(30px);
         `}
-    
+
 
 `
 

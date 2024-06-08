@@ -4,7 +4,6 @@ export const SETTINGS_URL = `${OPTIONS_URL}#/settings`
 export const OVERVIEW_URL = `${OPTIONS_URL}#/overview`
 export const BACKUP_URL = `${OPTIONS_URL}#/backup`
 export const LOGIN_URL = `${OPTIONS_URL}#/account`
-export const LEARN_MORE_URL = 'https://worldbrain.io/pricing'
 export const UPGRADE_URL = 'https://getmemex.com/#pricingSection'
 export const TAG_SUGGESTIONS_KEY = 'tag_suggestions'
 export const SYNC_URL = `${OPTIONS_URL}#/sync`

@@ -22,6 +22,7 @@ async function setupTest() {
         db: setup.storageManager.backend['dexieInstance'],
         localStorage: setup.browserAPIs.storage.local,
         bgModules: setup.backgroundModules,
+        captureException: () => {},
         syncSettingsStore:
             setup.backgroundModules.bgScript.deps.syncSettingsStore,
         localExtSettingStore:

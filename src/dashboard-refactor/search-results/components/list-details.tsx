@@ -75,23 +75,15 @@ export default class ListDetails extends PureComponent<Props, State> {
         }
     }
 
-    // componentDidUpdate(prevProps: Props, prevState: State) {
-    //     if (
-    //         prevState.isEditingDescription !== this.state.isEditingDescription
-    //     ) {
-    //         this.editorRef?.setEditable(this.state?.isEditingDescription)
-
-    //         if (
-    //             !this.editorRef?.checkIfHasContent() &&
-    //             !this.state?.isEditingDescription
-    //         ) {
-    //             this.setState({ shouldShowEditor: false })
-    //         } else if (this.state?.isEditingDescription) {
-    //             this.setState({ shouldShowEditor: true })
-    //             this.editorRef.focus()
-    //         }
-    //     }
-    // }
+    componentDidUpdate(prevProps: Props, prevState: State) {
+        if (prevProps.description !== this.props.description) {
+            if (this.props.description != null) {
+                this.editorRef?.updateContentExternally(this.props.description)
+            } else {
+                this.editorRef?.updateContentExternally('')
+            }
+        }
+    }
 
     async componentWillUpdate(nextProps: Props, prevState: State) {
         if (this.props.listData.unifiedId !== nextProps.listData.unifiedId) {

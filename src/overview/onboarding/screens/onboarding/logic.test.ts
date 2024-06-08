@@ -1,5 +1,6 @@
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import {
+    insertBackgroundFunctionTab,
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
@@ -22,7 +23,9 @@ async function setupTest(
         navToDashboard: args?.onDashboardNav ?? (() => undefined),
         navToGuidedTutorial: () => undefined,
         contentScriptsBG: backgroundModules.contentScripts.remoteFunctions,
-        bgScriptsBG: backgroundModules.bgScript.remoteFunctions,
+        bgScriptsBG: insertBackgroundFunctionTab(
+            backgroundModules.bgScript.remoteFunctions,
+        ) as any,
         browserAPIs: null,
         getRootElement: () => null,
     })

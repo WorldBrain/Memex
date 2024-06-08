@@ -35,10 +35,13 @@ import type { SyncSettingsByFeature } from 'src/sync-settings/background/types'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import type { CustomListTree } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { Template } from 'src/copy-paster/types'
+import { ensureDataLossFlagSet } from '../db-data-loss-check'
+import type { captureException } from 'src/util/raven'
 
 export interface MigrationProps {
     db: Dexie
     storex: Storex
+    captureException: typeof captureException
     normalizeUrl: URLNormalizer
     localStorage: Storage.LocalStorageArea
     bgModules: Pick<
@@ -69,6 +72,17 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This exists as we had a suspicion that sometimes browsers would forcefully evict all extension data.
+     * To in/validate that we put this flag and periodically check it to see if it's still there. In
+     * the case of a full data eviction, it should be gone.
+     */
+    [MIGRATION_PREFIX + 'add-db-data-loss-check-flag-01']: async ({
+        db,
+        captureException,
+    }) => {
+        await ensureDataLossFlagSet({ db, captureException })
+    },
     /*
      * This exists as we released the templates with a new order field, same as cuomstListTrees,
      * though we set the values for the static default templates to be less than the default space between.

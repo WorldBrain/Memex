@@ -27,6 +27,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     analyticsBG: AnalyticsCoreInterface
     theme: MemexThemeVariant
     browserAPIs: Browser
+    // setVisibility: (visibility: boolean) => void
 }
 
 export default class RibbonContainer extends StatefulUIElement<
@@ -36,7 +37,7 @@ export default class RibbonContainer extends StatefulUIElement<
 > {
     private ribbonRef = React.createRef<Ribbon>()
 
-    constructor(props) {
+    constructor(props: RibbonContainerProps) {
         super(
             props,
             new RibbonContainerLogic({
@@ -48,6 +49,15 @@ export default class RibbonContainer extends StatefulUIElement<
                     this.ribbonRef?.current?.focusCreateForm(),
             }),
         )
+
+        props.events.on('bookmarkPage', () =>
+            this.processEvent('toggleBookmark', null),
+        )
+        props.events.on('openSpacePickerInRibbon', () =>
+            this.processEvent('setShowListsPicker', { value: true }),
+        )
+        props.inPageUI.events.on('ribbonAction', this.handleExternalAction)
+        window.addEventListener('beforeunload', this.handleBeforeUnload)
     }
 
     private get normalizedPageUrl(): string | null {
@@ -56,24 +66,13 @@ export default class RibbonContainer extends StatefulUIElement<
             : null
     }
 
-    async componentDidMount() {
-        await super.componentDidMount()
-        this.props.inPageUI.events.on('ribbonAction', this.handleExternalAction)
-
-        this.props.events.on('bookmarkPage', () =>
-            this.processEvent('toggleBookmark', null),
-        )
-        this.props.events.on('openSpacePickerInRibbon', () =>
-            this.processEvent('setShowListsPicker', { value: true }),
-        )
-    }
-
     async componentWillUnmount() {
-        await super.componentWillUnmount()
         this.props.inPageUI.events.removeListener(
             'ribbonAction',
             this.handleExternalAction,
         )
+        window.removeEventListener('beforeunload', this.handleBeforeUnload)
+        await super.componentWillUnmount()
     }
 
     componentDidUpdate(prevProps: RibbonContainerProps) {
@@ -87,6 +86,14 @@ export default class RibbonContainer extends StatefulUIElement<
 
         if (currentTab.url !== prevProps.currentTab.url) {
             this.processEvent('hydrateStateFromDB', { url: currentTab.url })
+        }
+    }
+
+    // Block user nav away when some write RPC op is occurring
+    private handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        let shouldBlockUnload = this.state.bookmark.loadState === 'running'
+        if (shouldBlockUnload) {
+            e.preventDefault()
         }
     }
 
@@ -131,12 +138,18 @@ export default class RibbonContainer extends StatefulUIElement<
             this.props.setRibbonShouldAutoHide(true)
         } else if (event.action === 'list') {
             this.processEvent('setShowListsPicker', { value: true })
+        } else if (event.action === 'bookmarksNudge') {
+            this.props.inPageUI.hideRibbon()
+            this.processEvent('setShowBookmarksNudge', {
+                value: true,
+            })
         }
     }
 
     render() {
         return (
             <Ribbon
+                currentUser={this.state.currentUser}
                 getRootElement={this.props.getRootElement}
                 setWriteError={() =>
                     this.processEvent('setWriteError', {
@@ -160,7 +173,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             this.state.themeVariant || this.props.theme,
                     })
                 }}
-                ref={this.ribbonRef}
+                ribbonRef={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListDetailsById={(id) => {
                     const listDetails = this.props.annotationsCache.getListByLocalId(
@@ -183,6 +196,13 @@ export default class RibbonContainer extends StatefulUIElement<
                         'toggleRemoveMenu',
                         !this.state.showRemoveMenu,
                     )
+                }}
+                showBookmarksNudge={this.state.showBookmarksNudge}
+                setShowBookmarksNudge={(value, disable) => {
+                    this.processEvent('setShowBookmarksNudge', {
+                        value,
+                        disable,
+                    })
                 }}
                 toggleAskAI={(instaExecute: boolean) => {
                     this.processEvent('toggleAskAI', instaExecute)
@@ -298,7 +318,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             null,
                             this.props.customLists,
                             this.state.fullPageUrl,
-                            true,
+                            false,
                         )
 
                         if (!isAllowed) {
@@ -322,13 +342,29 @@ export default class RibbonContainer extends StatefulUIElement<
                             value: { added: null, deleted: id, selected: [] },
                         }),
                     onSpaceCreate: async ({ localListId }) => {
-                        await this.processEvent('updateLists', {
-                            value: {
-                                added: localListId,
-                                deleted: null,
-                                selected: [],
-                            },
-                        })
+                        const isAllowed = await pageActionAllowed(
+                            this.props.browserAPIs,
+                            null,
+                            this.props.customLists,
+                            this.state.fullPageUrl,
+                            false,
+                        )
+
+                        if (!isAllowed) {
+                            this.props.events.emit('showPowerUpModal', {
+                                limitReachedNotif: 'Bookmarks',
+                            })
+                            return false
+                        } else {
+                            this.processEvent('updateLists', {
+                                value: {
+                                    added: localListId,
+                                    deleted: null,
+                                    selected: [],
+                                },
+                            })
+                            return true
+                        }
                     },
                 }}
                 search={{

@@ -1,6 +1,6 @@
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { renderSpacesBar } from './utils'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 
 export async function getActiveTwitterUserName(
     maxRetries,
@@ -17,7 +17,7 @@ export async function getActiveTwitterUserName(
 
 export async function trackTwitterMessageList(
     collectionsBG: RemoteCollectionsInterface,
-    bgScriptBG: RemoteBGScriptInterface,
+    bgScriptBG: RemoteBGScriptInterface<'caller'>,
 ) {
     const maxRetries = 40
     const delayInMilliseconds = 500
@@ -93,8 +93,8 @@ export async function trackTwitterMessageList(
 }
 
 export async function injectTwitterProfileUI(
-    collectionsBG,
-    bgScriptBG: RemoteBGScriptInterface,
+    collectionsBG: RemoteCollectionsInterface,
+    bgScriptBG: RemoteBGScriptInterface<'caller'>,
     url: string,
 ) {
     const maxRetries = 40

@@ -30,6 +30,8 @@ import type {
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { WindowMock } from 'src/util/window-api-mock'
+import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -111,8 +113,11 @@ const setupLogicHelper = async ({
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
         copyPasterBG: backgroundModules.copyPaster.remoteFunctions,
-        bgScriptBG: backgroundModules.bgScript.remoteFunctions,
+        bgScriptBG: insertBackgroundFunctionTab(
+            backgroundModules.bgScript.remoteFunctions,
+        ) as any,
         pkmSyncBG: backgroundModules.pkmSyncBG.remoteFunctions,
+        highlighter: null,
         summarizeBG: insertBackgroundFunctionTab(
             backgroundModules.summarizeBG.remoteFunctions,
         ) as any,

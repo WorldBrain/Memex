@@ -66,6 +66,7 @@ import {
     PromptData,
 } from '@worldbrain/memex-common/lib/summarization/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -82,6 +83,7 @@ export interface Props extends SidebarContainerOptions {
     getRootElement: () => HTMLElement
     inPageMode?: boolean
     isOpenonDashboard?: boolean
+    highlighter: HighlightRendererInterface
 }
 
 export class AnnotationsSidebarContainer<
@@ -120,18 +122,35 @@ export class AnnotationsSidebarContainer<
         )
 
         window['_getState'] = () => ({ ...this.state })
-        this.listenToWindowChanges()
+
+        window.addEventListener('beforeunload', this.handleBeforeUnload)
+        window.addEventListener('resize', this.handleWindowResize)
     }
 
-    listenToWindowChanges() {
-        window.addEventListener('resize', () => {
-            if (this.state.isWidthLocked) {
-                this.processEvent('adjustSidebarWidth', {
-                    newWidth: this.state.sidebarWidth,
-                    isWidthLocked: true,
-                })
-            }
-        })
+    async componentWillUnmount(): Promise<void> {
+        window.removeEventListener('beforeunload', this.handleBeforeUnload)
+        window.removeEventListener('resize', this.handleWindowResize)
+        await super.componentWillUnmount()
+    }
+
+    private handleWindowResize = async () => {
+        if (this.state.isWidthLocked) {
+            await this.processEvent('adjustSidebarWidth', {
+                newWidth: this.state.sidebarWidth,
+                isWidthLocked: true,
+            })
+        }
+    }
+
+    // Block user nav away when some write RPC op is occurring
+    private handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        let shouldBlockUnload =
+            this.state.noteEditState === 'running' ||
+            this.state.noteCreateState === 'running' ||
+            this.state.noteColorUpdateState === 'running'
+        if (shouldBlockUnload) {
+            e.preventDefault()
+        }
     }
 
     private getListDetailsById: ListDetailsGetter = (listId) => {
@@ -247,27 +266,6 @@ export class AnnotationsSidebarContainer<
                     : SIDEBAR_WIDTH_STORAGE_KEY,
                 isWidthLocked: true,
             })
-        }
-    }
-
-    private handleKeyPress = (
-        event: KeyboardEvent,
-        instanceLocation,
-        unifiedAnnotationId,
-    ) => {
-        return () => {
-            // Ensure a function is returned
-
-            event.stopPropagation()
-            if (event.key === 'Enter') {
-                this.processEvent('deleteAnnotation', { unifiedAnnotationId })
-            } else if (event.key === 'Escape') {
-                this.processEvent('setAnnotationCardMode', {
-                    instanceLocation,
-                    unifiedAnnotationId,
-                    mode: 'none',
-                })
-            }
         }
     }
 
@@ -889,7 +887,10 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('checkIfKeyValid', { apiKey: apiKey })
             }
             isKeyValid={this.state.isKeyValid}
-            createCheckOutLink={async (billingPeriod, selectedPremiumPlans) => {
+            createCheckOutLink={async ({
+                billingPeriod,
+                selectedPremiumPlans,
+            }) => {
                 this.processEvent('createCheckOutLink', {
                     billingPeriod,
                     selectedPremiumPlans,

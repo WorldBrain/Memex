@@ -97,7 +97,6 @@ import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui
 import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { injectTelegramCustomUI } from './injectionUtils/telegram'
 import { renderSpacesBar } from './injectionUtils/utils'
-import { getTimestampedNoteWithAIsummaryForYoutubeNotes } from './injectionUtils/youtube'
 import {
     injectTwitterProfileUI,
     trackTwitterMessageList,
@@ -113,7 +112,6 @@ import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
-import type { Storage } from 'webextension-polyfill'
 import type { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import {
     cloneSelectionAsPseudoObject,
@@ -125,6 +123,9 @@ import {
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import debounce from 'lodash/debounce'
+import { updateNudgesCounter } from 'src/util/nudges-utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -217,6 +218,22 @@ export async function main(
         }
     }
 
+    const deleteAnnotation = async (annotationId: string) => {
+        const annotation = annotationsCache.annotations.byId[annotationId]
+        const { localId } = annotation
+
+        highlightRenderer.removeAnnotationHighlight({
+            id: annotationId,
+        })
+
+        annotationsCache.removeAnnotation({
+            unifiedId: annotation.unifiedId,
+        })
+        if (localId != null) {
+            await annotationsBG.deleteAnnotation(localId)
+        }
+    }
+
     const pageInfo = new PageInfo(params)
 
     // 1. Create a local object with promises to track each content script
@@ -227,7 +244,7 @@ export async function main(
     // 2. Initialise dependencies required by content scripts
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
-    const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
+    const bgScriptBG = runInBackground<RemoteBGScriptInterface<'caller'>>()
     const pkmSyncBG = runInBackground<PKMSyncBackgroundModule>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
@@ -277,6 +294,7 @@ export async function main(
         user: currentUser,
         cache: annotationsCache,
         bgModules: {
+            bgScript: bgScriptBG,
             annotations: annotationsBG,
             customLists: collectionsBG,
             syncSettings: syncSettingsBG,
@@ -578,7 +596,17 @@ export async function main(
             quality: 100,
         })
 
+    let highlightCreateState: TaskState = 'pristine'
+    // Block nav away from current page while highlight being created
+    window.addEventListener('beforeunload', (e) => {
+        let shouldBlockUnload = highlightCreateState === 'running'
+        if (shouldBlockUnload) {
+            e.preventDefault()
+        }
+    })
+
     const annotationsFunctions = {
+        // TODO: Simplify and move this logic away from here
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (
@@ -589,6 +617,7 @@ export async function main(
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
+            highlightCreateState = 'running'
             let anchor: Anchor
             let quote: string
 
@@ -603,6 +632,7 @@ export async function main(
                 anchor = { quote, descriptor }
             }
             if (quote?.length === 0 && !drawRectangle) {
+                highlightCreateState = 'success'
                 return
             }
 
@@ -618,7 +648,7 @@ export async function main(
                 sidebarEvents.emit('showPowerUpModal', {
                     limitReachedNotif: 'Bookmarks',
                 })
-
+                highlightCreateState = 'error'
                 return
             }
 
@@ -647,6 +677,7 @@ export async function main(
                     screenshotGrabResult == null ||
                     screenshotGrabResult.anchor == null
                 ) {
+                    highlightCreateState = 'success'
                     return
                 }
 
@@ -722,8 +753,10 @@ export async function main(
                 }
             }
 
+            highlightCreateState = 'success'
             return annotationId
         },
+        // TODO: Simplify and move this logic away from here
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
         ) => async (
@@ -734,8 +767,10 @@ export async function main(
             commentText?: string,
             highlightColorSetting?: HighlightColor,
         ) => {
+            highlightCreateState = 'running'
             const selectionEmpty = !selection?.toString().length
             if (selectionEmpty) {
+                highlightCreateState = 'success'
                 return
             }
 
@@ -761,6 +796,7 @@ export async function main(
                 sidebarEvents.emit('showPowerUpModal', {
                     limitReachedNotif: 'Bookmarks',
                 })
+                highlightCreateState = 'error'
                 return
             }
 
@@ -787,6 +823,7 @@ export async function main(
                     screenshotGrabResult == null ||
                     screenshotGrabResult.anchor == null
                 ) {
+                    highlightCreateState = 'success'
                     return
                 }
 
@@ -868,6 +905,7 @@ export async function main(
                     )
                 }
             }
+            highlightCreateState = 'success'
         },
         askAI: () => (
             highlightedText: string,
@@ -893,6 +931,9 @@ export async function main(
                 prompt,
                 instaExecutePrompt: instaExecutePrompt ?? false,
             })
+        },
+        deleteAnnotation: async (annotationId: string) => {
+            await deleteAnnotation(annotationId)
         },
         createYoutubeTimestamp: async (commentText: string) => {
             await inPageUI.showSidebar({
@@ -1117,6 +1158,9 @@ export async function main(
                         fullPageUrl: originalPageURL,
                     })
                 },
+                deleteAnnotation: async (annotationId) => {
+                    await annotationsFunctions.deleteAnnotation(annotationId)
+                },
                 annotationsBG,
                 annotationsCache,
                 contentSharingBG,
@@ -1300,6 +1344,27 @@ export async function main(
 
             await pageInfo.refreshIfNeeded()
         },
+        addListToCache: async ({ list }) => {
+            annotationsCache.addList(
+                {
+                    ...list,
+                    unifiedAnnotationIds: [],
+                    hasRemoteAnnotationsToLoad: false,
+                },
+                { skipEventEmission: true },
+            )
+        },
+        removeListFromCache: async ({ localListId }) => {
+            let list = annotationsCache.getListByLocalId(localListId)
+            if (list != null) {
+                annotationsCache.removeList(
+                    {
+                        unifiedId: list.unifiedId,
+                    },
+                    { skipEventEmission: true },
+                )
+            }
+        },
     })
 
     // 6. Setup other interactions with this page (things that always run)
@@ -1470,6 +1535,38 @@ export async function main(
         })
     }
 
+    const embedElements = document.getElementsByTagName('embed')
+
+    if (embedElements.length > 0) {
+        inPageUI.loadOnDemandInPageUI({
+            component: 'pdf-open-button',
+            options: {
+                embedElements,
+                contentScriptsBG,
+            },
+        })
+    }
+    const imageElements = document.getElementsByTagName('img')
+
+    const disabledServices = [
+        'https://www.facebook.com/',
+        'https://www.instagram.com/',
+        'https://www.pinterest.com/',
+    ]
+
+    if (
+        imageElements.length > 0 &&
+        !disabledServices.some((url) => fullPageUrl.includes(url))
+    ) {
+        inPageUI.loadOnDemandInPageUI({
+            component: 'img-action-buttons',
+            options: {
+                imageElements,
+                contentScriptsBG,
+            },
+        })
+    }
+
     // Function to track when the subscription has been updated by going to our website (which the user arrives through a redirect)
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
         const h2Element = document.querySelector('h2')
@@ -1537,6 +1634,50 @@ export async function main(
                 }
             }
         }
+    }
+
+    // Function to track when to show the nudges
+    let tabOpenedTime = Date.now()
+
+    async function checkScrollPosition() {
+        const scrollPosition = window.scrollY
+        const pageHeight = document.documentElement.scrollHeight
+        const elapsedTime = Date.now() - tabOpenedTime
+
+        if (scrollPosition > 0.3 * pageHeight && elapsedTime > 10000) {
+            const shouldShow = await updateNudgesCounter(
+                'bookmarksCount',
+                browser,
+            )
+            removeScrollListener()
+            if (shouldShow) {
+                await inPageUI.showRibbon({ action: 'bookmarksNudge' })
+            }
+        }
+    }
+
+    const debouncedCheckScrollPosition = debounce(checkScrollPosition, 2000)
+
+    const excludedPages = [
+        'https://x.com/',
+        'https://twitter.com/',
+        'https://twitter.com/messages',
+        'https://www.facebook.com/',
+        'https://www.instagram.com/',
+        'https://www.pinterest.com/',
+        'https://web.whatsapp.com/',
+        'https://web.telegram.org/',
+    ]
+
+    if (
+        !excludedPages.some((url) => window.location.href.includes(url)) &&
+        !pageHasBookark
+    ) {
+        document.addEventListener('scroll', debouncedCheckScrollPosition)
+    }
+
+    function removeScrollListener() {
+        document.removeEventListener('scroll', debouncedCheckScrollPosition)
     }
 
     if (analyticsBG && hasActivity) {
@@ -1734,7 +1875,7 @@ class PageInfo {
 export function setupWebUIActions(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
 }) {
     const confirmRequest = (requestId: number) => {
         const detail: MemexRequestHandledDetail = { requestId }
@@ -1810,8 +1951,8 @@ export function setupWebUIActions(args: {
 export async function injectCustomUIperPage(
     annotationsFunctions,
     pkmSyncBG,
-    collectionsBG,
-    bgScriptBG,
+    collectionsBG: RemoteCollectionsInterface,
+    bgScriptBG: RemoteBGScriptInterface<'caller'>,
     pageInfo,
     inPageUI,
 ) {
