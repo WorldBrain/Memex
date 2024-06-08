@@ -1644,11 +1644,12 @@ export async function main(
         const pageHeight = document.documentElement.scrollHeight
         const elapsedTime = Date.now() - tabOpenedTime
 
-        if (scrollPosition > 0.3 * pageHeight && elapsedTime > 1) {
+        if (scrollPosition > 0.3 * pageHeight && elapsedTime > 10000) {
             const shouldShow = await updateNudgesCounter(
                 'bookmarksCount',
                 browser,
             )
+            removeScrollListener()
             if (shouldShow) {
                 await inPageUI.showRibbon({ action: 'bookmarksNudge' })
             }
@@ -1657,10 +1658,23 @@ export async function main(
 
     const debouncedCheckScrollPosition = debounce(checkScrollPosition, 2000)
 
-    document.addEventListener('scroll', debouncedCheckScrollPosition)
+    const excludedPages = [
+        'https://x.com/',
+        'https://twitter.com/',
+        'https://twitter.com/messages',
+        'https://www.facebook.com/',
+        'https://www.instagram.com/',
+        'https://www.pinterest.com/',
+        'https://web.whatsapp.com/',
+        'https://web.telegram.org/',
+    ]
+
+    if (!excludedPages.includes(window.location.href) && !pageHasBookark) {
+        document.addEventListener('scroll', debouncedCheckScrollPosition)
+    }
 
     function removeScrollListener() {
-        window.removeEventListener('scroll', checkScrollPosition)
+        document.removeEventListener('scroll', debouncedCheckScrollPosition)
     }
 
     if (analyticsBG && hasActivity) {

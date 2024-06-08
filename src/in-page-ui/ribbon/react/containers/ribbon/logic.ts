@@ -90,7 +90,7 @@ export type RibbonContainerEvents = UIEvent<
         setTutorialId: { tutorialIdToOpen: string }
         toggleShowTutorial: null
         toggleFeed: null
-        setShowBookmarksNudge: { value: boolean; snooze: boolean }
+        setShowBookmarksNudge: { value: boolean; disable?: boolean }
         toggleReadingView: null
         toggleAskAI: boolean | null
         deletePage: null
@@ -977,7 +977,7 @@ export class RibbonContainerLogic extends UILogic<
             showBookmarksNudge: { $set: event.value },
         })
 
-        if (!event.snooze) {
+        if (event.disable) {
             await disableNudgeType(
                 'bookmarksCount',
                 this.dependencies.browserAPIs,

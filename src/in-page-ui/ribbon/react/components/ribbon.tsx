@@ -75,7 +75,7 @@ export interface Props extends RibbonSubcomponentProps {
     showFeed: boolean
     toggleAskAI: (instaExecute: boolean) => void
     showBookmarksNudge: boolean
-    setShowBookmarksNudge: (value: boolean, snooze: boolean) => void
+    setShowBookmarksNudge: (value: boolean, disable?: boolean) => void
     toggleRabbitHole: () => void
     toggleQuickSearch: () => void
     openPDFinViewer: () => void
@@ -959,8 +959,8 @@ export default class Ribbon extends Component<Props, State> {
                 'Hover over the brain icon or use hotkeys to save with Memex.',
                 this.getHotKey('createBookmark', 'medium'),
                 '450px',
-                () => this.props.setShowBookmarksNudge(false, false), // hide forever
-                () => this.props.setShowBookmarksNudge(false, true), // snooze
+                () => this.props.setShowBookmarksNudge(false, true), // hide forever
+                () => this.props.setShowBookmarksNudge(false, false), // snooze
                 this.props.getRootElement,
                 this.memexLogoRef.current,
                 'top-end',

@@ -177,7 +177,8 @@ export const handleRenderImgActionButtons = async (
         const currentUrl = window.location.href
 
         if (arrayOfSpecialCases.some((url) => currentUrl.includes(url))) {
-            element = element.parentNode.parentNode.parentNode
+            element = element.parentNode.parentNode
+                .parentNode as HTMLImageElement
             if (element.getAttribute('jsaction')) {
                 element.setAttribute('jsaction', null)
             }

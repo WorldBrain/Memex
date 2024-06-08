@@ -26,20 +26,22 @@ export async function updateNudgesCounter(
         return false
     } else {
         nudgeKeyCount = nudgeKeyCount + 1
-        if (nudgeKeyCount > ONBOARDING_NUDGES_MAX_COUNT[nudgeType]) {
-            nudgeKeyCount = 0
-        }
-
         onboardingNudgesValues[nudgeType] = nudgeKeyCount
-
-        await browserAPIs.storage.local.set({
-            [ONBOARDING_NUDGES_STORAGE]: onboardingNudgesValues,
-        })
-
         if (nudgeKeyCount === ONBOARDING_NUDGES_MAX_COUNT[nudgeType]) {
+            await browserAPIs.storage.local.set({
+                [ONBOARDING_NUDGES_STORAGE]: onboardingNudgesValues,
+            })
             return true
+        } else {
+            if (nudgeKeyCount > ONBOARDING_NUDGES_MAX_COUNT[nudgeType]) {
+                nudgeKeyCount = 0
+            }
+            await browserAPIs.storage.local.set({
+                [ONBOARDING_NUDGES_STORAGE]: onboardingNudgesValues,
+            })
+
+            return false
         }
-        return false
     }
 }
 export async function disableNudgeType(
@@ -171,7 +173,7 @@ const NudgeBottomNote = styled.div`
     color: ${(props) => props.theme.colors.blac};
     font-size: 12px;
     text-align: center;
-    border-top: 1px solid ${(props) => props.theme.colors.white};
+    /* border-top: 1px solid ${(props) => props.theme.colors.white}; */
     box-sizing: border-box;
     width: 100%;
     margin-top: 15px;

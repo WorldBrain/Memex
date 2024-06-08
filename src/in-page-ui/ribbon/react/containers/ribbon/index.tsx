@@ -142,7 +142,6 @@ export default class RibbonContainer extends StatefulUIElement<
             this.props.inPageUI.hideRibbon()
             this.processEvent('setShowBookmarksNudge', {
                 value: true,
-                snooze: null,
             })
         }
     }
@@ -199,10 +198,10 @@ export default class RibbonContainer extends StatefulUIElement<
                     )
                 }}
                 showBookmarksNudge={this.state.showBookmarksNudge}
-                setShowBookmarksNudge={(value, snooze) => {
+                setShowBookmarksNudge={(value, disable) => {
                     this.processEvent('setShowBookmarksNudge', {
                         value,
-                        snooze,
+                        disable,
                     })
                 }}
                 toggleAskAI={(instaExecute: boolean) => {
