@@ -24,6 +24,7 @@ import * as constants from './constants'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { blobToDataURL } from 'src/util/blob-utils'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 interface RootProps {
     rootEl: HTMLElement
@@ -34,6 +35,7 @@ interface RootProps {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     imageUrl: string
     imageData: string
+    removeElement: () => void
 }
 
 interface RootState {
@@ -62,44 +64,64 @@ class Root extends React.Component<RootProps, RootState> {
             <StyleSheetManager target={props.rootEl}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
                     <ParentContainer ref={this.parentContainerRef}>
-                        <PrimaryAction
-                            icon="removeX"
-                            type="glass"
-                            size={'small'}
-                            onClick={async (event) => {
-                                event.stopPropagation()
-                                event.preventDefault()
-                                ReactDOM.unmountComponentAtNode(
-                                    this.props.rootEl,
-                                )
-                            }}
-                        />
-                        <PrimaryAction
-                            label="Analzye"
-                            icon="stars"
-                            type="glass"
-                            size={'small'}
-                            onClick={async (event) => {
-                                await this.props.annotationsFunctions.analyseImageAsWithAI(
-                                    this.props.imageData,
-                                )
-                                event.stopPropagation()
-                                event.preventDefault()
-                            }}
-                        />
-                        <PrimaryAction
-                            label="Save"
-                            icon="heartFull"
-                            type="glass"
-                            size={'small'}
-                            onClick={async (event) => {
-                                await this.props.annotationsFunctions.saveImageAsNewNote(
-                                    this.props.imageData,
-                                )
-                                event.stopPropagation()
-                                event.preventDefault()
-                            }}
-                        />
+                        <TooltipBox
+                            getPortalRoot={() => this.props.rootEl}
+                            tooltipText="Remove for this page session"
+                            placement="bottom"
+                        >
+                            <PrimaryAction
+                                icon="removeX"
+                                type="glass"
+                                size={'small'}
+                                onClick={async (event) => {
+                                    event.stopPropagation()
+                                    event.preventDefault()
+                                    this.props.removeElement()
+                                }}
+                                padding={'0 5px'}
+                                iconColor={'white'}
+                            />
+                        </TooltipBox>
+                        <TooltipBox
+                            getPortalRoot={() => this.props.rootEl}
+                            tooltipText="Analyze with AI"
+                            placement="bottom"
+                        >
+                            <PrimaryAction
+                                label="Analzye"
+                                icon="stars"
+                                type="glass"
+                                size={'small'}
+                                onClick={async (event) => {
+                                    await this.props.annotationsFunctions.analyseImageAsWithAI(
+                                        this.props.imageData,
+                                    )
+                                    event.stopPropagation()
+                                    event.preventDefault()
+                                }}
+                                iconColor={'white'}
+                            />
+                        </TooltipBox>
+                        <TooltipBox
+                            getPortalRoot={() => this.props.rootEl}
+                            tooltipText="Save to Memex"
+                            placement="bottom"
+                        >
+                            <PrimaryAction
+                                label="Save"
+                                icon="heartFull"
+                                type="glass"
+                                size={'small'}
+                                onClick={async (event) => {
+                                    await this.props.annotationsFunctions.saveImageAsNewNote(
+                                        this.props.imageData,
+                                    )
+                                    event.stopPropagation()
+                                    event.preventDefault()
+                                }}
+                                iconColor={'white'}
+                            />
+                        </TooltipBox>
                     </ParentContainer>
                 </ThemeProvider>
             </StyleSheetManager>
@@ -115,6 +137,7 @@ export const handleRenderImgActionButtons = async (
     imageElements: HTMLCollectionOf<HTMLImageElement>,
     contentScriptsBG: ContentScriptsInterface<'caller'>,
 ) => {
+    let shouldShow = true
     if (imageElements.length === 0) {
         return
     }
@@ -201,23 +224,29 @@ export const handleRenderImgActionButtons = async (
         let renderTimeout
 
         element.onmouseenter = () => {
-            renderTimeout = setTimeout(() => {
-                ReactDOM.render(
-                    <RootPosContainer>
-                        <Root
-                            rootEl={target}
-                            syncSettings={syncSettings}
-                            annotationsFunctions={annotationsFunctions}
-                            browserAPIs={browserAPIs}
-                            syncSettingsBG={syncSettingsBG}
-                            contentScriptsBG={contentScriptsBG}
-                            imageUrl={imageUrl}
-                            imageData={imageData}
-                        />
-                    </RootPosContainer>,
-                    target,
-                )
-            }, 500) // Delay of 500 milliseconds
+            if (shouldShow) {
+                renderTimeout = setTimeout(() => {
+                    ReactDOM.render(
+                        <RootPosContainer>
+                            <Root
+                                rootEl={target}
+                                syncSettings={syncSettings}
+                                annotationsFunctions={annotationsFunctions}
+                                browserAPIs={browserAPIs}
+                                syncSettingsBG={syncSettingsBG}
+                                contentScriptsBG={contentScriptsBG}
+                                imageUrl={imageUrl}
+                                imageData={imageData}
+                                removeElement={() => {
+                                    ReactDOM.unmountComponentAtNode(target)
+                                    shouldShow = false
+                                }}
+                            />
+                        </RootPosContainer>,
+                        target,
+                    )
+                }, 500) // Delay of 500 milliseconds
+            }
         }
 
         element.onmouseleave = (event) => {
