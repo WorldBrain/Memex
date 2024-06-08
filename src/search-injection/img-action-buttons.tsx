@@ -63,6 +63,18 @@ class Root extends React.Component<RootProps, RootState> {
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
                     <ParentContainer ref={this.parentContainerRef}>
                         <PrimaryAction
+                            icon="removeX"
+                            type="glass"
+                            size={'small'}
+                            onClick={async (event) => {
+                                event.stopPropagation()
+                                event.preventDefault()
+                                ReactDOM.unmountComponentAtNode(
+                                    this.props.rootEl,
+                                )
+                            }}
+                        />
+                        <PrimaryAction
                             label="Analzye"
                             icon="stars"
                             type="glass"
