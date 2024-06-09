@@ -7,14 +7,20 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import type {
     RemoteSearchInterface,
     SearchResultPage,
-    UnifiedSearchParams,
     UnifiedBlankSearchParams,
-    UnifiedTermsSearchParams,
-    ResultDataByPage,
-    IntermediarySearchResult,
-    UnifiedSearchPaginationParams,
     UnifiedSearchLookupData,
 } from './types'
+import type {
+    ResultDataByPage,
+    UnifiedSearchParams,
+    IntermediarySearchResult,
+    UnifiedSearchPaginationParams,
+} from '@worldbrain/memex-common/lib/search/types'
+import {
+    needToFilterSearchByUrl,
+    sortSearchResult,
+} from '@worldbrain/memex-common/lib/search/utils'
+import { unifiedTermsSearch } from '@worldbrain/memex-common/lib/search/terms-search'
 import { SearchError, BadTermError } from './errors'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import {
@@ -38,12 +44,9 @@ import type {
     FavIcon,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import {
-    sortSearchResult,
     queryAnnotationsByTerms,
     queryPagesByTerms,
     splitQueryIntoTerms,
-    sliceSearchResult,
-    needToFilterSearchByUrl,
 } from './utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
@@ -678,53 +681,6 @@ export default class SearchBackground {
         }
     }
 
-    private async unifiedTermsSearch(
-        params: UnifiedTermsSearchParams,
-    ): Promise<IntermediarySearchResult> {
-        const resultDataByPage: ResultDataByPage = new Map()
-
-        const [pages, annotations] = await Promise.all([
-            params.queryPages(params.terms, params.phrases),
-            params.queryAnnotations(params.terms, params.phrases),
-        ])
-
-        // Add in all the annotations to the results
-        const annotsByPage = groupBy(annotations, (a) => a.pageUrl)
-        for (const [pageId, annots] of Object.entries(annotsByPage)) {
-            const sortedAnnots = annots.sort(
-                (a, b) => b.lastEdited.valueOf() - a.lastEdited.valueOf(),
-            )
-            resultDataByPage.set(pageId, {
-                annotations: sortedAnnots,
-                // This gets overwritten in the next loop by the latest visit/bookmark time (if exist in this results "page")
-                latestPageTimestamp: sortedAnnots[0].lastEdited.valueOf(),
-                oldestTimestamp: 0,
-            })
-        }
-
-        // Add in all the pages to the results
-        for (const { id, latestTimestamp } of pages) {
-            const annotations = resultDataByPage.get(id)?.annotations ?? []
-            resultDataByPage.set(id, {
-                annotations,
-                latestPageTimestamp: latestTimestamp,
-                oldestTimestamp: 0,
-            })
-        }
-
-        await this.filterUnifiedSearchResultsByFilters(resultDataByPage, params)
-
-        // Paginate!
-        const sortedResultPages = sortSearchResult(resultDataByPage)
-        const paginatedResults = sliceSearchResult(sortedResultPages, params)
-
-        return {
-            oldestResultTimestamp: null,
-            resultDataByPage: paginatedResults,
-            resultsExhausted: paginatedResults.size < params.limit,
-        }
-    }
-
     private async unifiedIntermediarySearch(
         params: UnifiedSearchParams & UnifiedSearchPaginationParams,
     ): Promise<IntermediarySearchResult> {
@@ -781,8 +737,9 @@ export default class SearchBackground {
         params.phrases = phrases
         params.terms = terms
         params.matchTermsFuzzyStartsWith = matchTermsFuzzyStartsWith
-        return this.unifiedTermsSearch({
+        return unifiedTermsSearch({
             ...params,
+            storageManager: this.options.storageManager,
             queryPages: queryPagesByTerms(this.options.storageManager, params),
             queryAnnotations: queryAnnotationsByTerms(
                 this.options.storageManager,

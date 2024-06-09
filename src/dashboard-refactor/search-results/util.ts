@@ -1,9 +1,9 @@
 import type {
     StandardSearchResponse,
     SearchResultPage,
-    UnifiedSearchPaginationParams,
     SearchResultAnnotation,
 } from 'src/search/background/types'
+import type { UnifiedSearchPaginationParams } from '@worldbrain/memex-common/lib/search/types'
 import type {
     PageData,
     PageResult,

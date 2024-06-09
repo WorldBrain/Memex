@@ -3,13 +3,7 @@ import type {
     TermsSearchOpts,
     UnifiedSearchPaginationParams,
     UnifiedSearchParams,
-} from 'src/search/background/types'
-import type { PageResult } from './search-results/types'
-import {
-    initNormalizedState,
-    NormalizedState,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { EVENT_PROVIDER_DOMAINS } from '@worldbrain/memex-common/lib/constants'
+} from '@worldbrain/memex-common/lib/search/types'
 import type {
     PageAnnotationsCacheInterface,
     UnifiedList,
