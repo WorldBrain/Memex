@@ -184,6 +184,10 @@ export const handleRenderImgActionButtons = async (
             imageUrl = element.src
         }
 
+        if (element.naturalWidth < 100 || element.naturalHeight < 100) {
+            continue
+        }
+
         if (imageUrl == null) {
             continue
         }
