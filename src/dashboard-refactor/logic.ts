@@ -1562,7 +1562,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.noteId]: {
                                     comment: { $set: existing.comment },
-                                    color: { $set: event.color as RGBAColor },
+                                    color: { $set: event.color as string },
                                 },
                             },
                         },
@@ -3586,7 +3586,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     lists: { $set: nextLists },
                                     color: {
                                         $set: (event.color ??
-                                            existing.color) as RGBAColor,
+                                            existing.color) as string,
                                     },
                                 },
                             },

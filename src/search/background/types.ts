@@ -1,8 +1,7 @@
 import type { User } from 'src/social-integration/types'
 import type SearchStorage from './storage'
-import type { Annotation } from 'src/annotations/types'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
-import type { Annotation as _Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type { Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export type SearchResultAnnotation = Annotation & {
@@ -141,7 +140,7 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
         queryAnnotations: (
             terms: string[],
             phrases?: string[],
-        ) => Promise<_Annotation[]>
+        ) => Promise<Annotation[]>
     }
 
 /**
