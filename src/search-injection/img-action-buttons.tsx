@@ -150,22 +150,6 @@ export const handleRenderImgActionButtons = async (
     imageElements: HTMLCollectionOf<HTMLImageElement>,
     contentScriptsBG: ContentScriptsInterface<'caller'>,
 ) => {
-    const betaFeatureSetting = await syncSettings.betaFeatures.get(
-        'imageOverlay',
-    )
-    let imageInjectionEnabled = null
-    if (betaFeatureSetting != null) {
-        imageInjectionEnabled = betaFeatureSetting
-    }
-
-    if (imageInjectionEnabled == null) {
-        await syncSettings.betaFeatures.set('imageOverlay', false)
-    }
-
-    if (!imageInjectionEnabled) {
-        return
-    }
-
     let shouldShow = true
     if (imageElements.length === 0) {
         return

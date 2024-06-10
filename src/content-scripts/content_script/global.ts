@@ -1546,25 +1546,41 @@ export async function main(
             },
         })
     }
-    const imageElements = document.getElementsByTagName('img')
 
-    const disabledServices = [
-        'https://www.facebook.com/',
-        'https://www.instagram.com/',
-        'https://www.pinterest.com/',
-    ]
+    const betaFeatureSetting = await syncSettings.betaFeatures.get(
+        'imageOverlay',
+    )
 
-    if (
-        imageElements.length > 0 &&
-        !disabledServices.some((url) => fullPageUrl.includes(url))
-    ) {
-        inPageUI.loadOnDemandInPageUI({
-            component: 'img-action-buttons',
-            options: {
-                imageElements,
-                contentScriptsBG,
-            },
-        })
+    let imageInjectionEnabled = null
+    if (betaFeatureSetting != null) {
+        imageInjectionEnabled = betaFeatureSetting
+    }
+
+    if (imageInjectionEnabled == null) {
+        await syncSettings.betaFeatures.set('imageOverlay', false)
+    }
+
+    if (imageInjectionEnabled) {
+        const imageElements = document.getElementsByTagName('img')
+
+        const disabledServices = [
+            'https://www.facebook.com/',
+            'https://www.instagram.com/',
+            'https://www.pinterest.com/',
+        ]
+
+        if (
+            imageElements.length > 0 &&
+            !disabledServices.some((url) => fullPageUrl.includes(url))
+        ) {
+            inPageUI.loadOnDemandInPageUI({
+                component: 'img-action-buttons',
+                options: {
+                    imageElements,
+                    contentScriptsBG,
+                },
+            })
+        }
     }
 
     // Function to track when the subscription has been updated by going to our website (which the user arrives through a redirect)
