@@ -274,7 +274,7 @@ export const handleRenderImgActionButtons = async (
             windowWidth = 0
         }
 
-        element.onmouseover = () => {
+        element.onmouseenter = () => {
             if (shouldShow) {
                 renderTimeout = setTimeout(() => {
                     ReactDOM.render(
