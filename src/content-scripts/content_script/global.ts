@@ -1654,13 +1654,23 @@ export async function main(
 
     // Function to track when to show the nudges
     let tabOpenedTime = Date.now()
+    let activeTabTime = 0
+    let lastActiveTime = Date.now()
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            tabOpenedTime = Date.now() // Resume timing from last active moment
+        } else {
+            lastActiveTime = Date.now()
+            activeTabTime += lastActiveTime - tabOpenedTime // Update active time
+        }
+    })
 
     async function checkScrollPosition() {
         const scrollPosition = window.scrollY
         const pageHeight = document.documentElement.scrollHeight
-        const elapsedTime = Date.now() - tabOpenedTime
 
-        if (scrollPosition > 0.3 * pageHeight && elapsedTime > 10000) {
+        if (scrollPosition > 0.3 * pageHeight && activeTabTime > 30000) {
             const shouldShow = await updateNudgesCounter(
                 'bookmarksCount',
                 browser,
