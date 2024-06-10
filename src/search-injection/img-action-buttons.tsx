@@ -150,28 +150,12 @@ export const handleRenderImgActionButtons = async (
     imageElements: HTMLCollectionOf<HTMLImageElement>,
     contentScriptsBG: ContentScriptsInterface<'caller'>,
 ) => {
-    const betaFeatureSetting = await syncSettings.betaFeatures.get(
-        'imageOverlay',
-    )
-    let imageInjectionEnabled = null
-    if (betaFeatureSetting != null) {
-        imageInjectionEnabled = betaFeatureSetting
-    }
-
-    if (imageInjectionEnabled == null) {
-        await syncSettings.betaFeatures.set('imageOverlay', false)
-    }
-
-    if (!imageInjectionEnabled) {
-        return
-    }
-
     let shouldShow = true
     if (imageElements.length === 0) {
         return
     }
 
-    const renderComponent = (imageElement, target, index) => {
+    const renderComponent = (imageElement, target, index, isFullScreen) => {
         const existingButton = document.getElementById(
             constants.REACT_ROOTS.imgActionButtons + '-' + index,
         )
@@ -185,8 +169,13 @@ export const handleRenderImgActionButtons = async (
         wrapperSpan.style.display = 'flex' // Use flexbox for alignment
         wrapperSpan.style.justifyContent = 'center' // Center content horizontally
         wrapperSpan.style.alignItems = 'center' // Center content vertically
-        wrapperSpan.style.width = '100%' // Span takes full width
-        wrapperSpan.style.height = '100%' // Span takes full width
+        if (isFullScreen) {
+            wrapperSpan.style.width = '100vw' // Span takes full width
+            wrapperSpan.style.height = '100vh' // Span takes full width
+        } else {
+            wrapperSpan.style.width = '100%' // Span takes full width
+            wrapperSpan.style.height = '100%' // Span takes full width
+        }
         wrapperSpan.style.position = 'relative' // Positioning context for the absolute positioned target
 
         // Insert the wrapper before the imageElement in the DOM
@@ -219,7 +208,7 @@ export const handleRenderImgActionButtons = async (
             imageUrl = element.src
         }
 
-        if (element.naturalWidth < 100 || element.naturalHeight < 100) {
+        if (element.width < 100 || element.height < 100) {
             continue
         }
 
@@ -245,7 +234,25 @@ export const handleRenderImgActionButtons = async (
         if (imageData == null) {
             continue
         }
-        renderComponent(element, target, i)
+
+        let renderTimeout
+        let isFullScreen = false
+
+        let elementRect, elementTopRightX, elementTopRightY, windowWidth
+
+        if (window.location.href.match(/\.(jpeg|jpg|gif|png|svg)$/) !== null) {
+            elementRect = element.getBoundingClientRect()
+            elementTopRightX = elementRect.right
+            elementTopRightY = elementRect.top
+            windowWidth = window.innerWidth
+            isFullScreen = true
+        } else {
+            elementTopRightX = 0
+            elementTopRightY = 0
+            windowWidth = 0
+        }
+
+        renderComponent(element, target, i, isFullScreen)
 
         const arrayOfSpecialCases = ['https://www.google.com/search?']
 
@@ -257,21 +264,6 @@ export const handleRenderImgActionButtons = async (
             if (element.getAttribute('jsaction')) {
                 element.setAttribute('jsaction', null)
             }
-        }
-
-        let renderTimeout
-
-        let elementRect, elementTopRightX, elementTopRightY, windowWidth
-
-        if (window.location.href.match(/\.(jpeg|jpg|gif|png|svg)$/) !== null) {
-            elementRect = element.getBoundingClientRect()
-            elementTopRightX = elementRect.right
-            elementTopRightY = elementRect.top
-            windowWidth = window.innerWidth
-        } else {
-            elementTopRightX = 0
-            elementTopRightY = 0
-            windowWidth = 0
         }
 
         element.onmouseenter = () => {
