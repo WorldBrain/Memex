@@ -75,6 +75,9 @@ export interface SyncSettingsByFeature {
             askAIShortcut: string
             sharePageShortcut: string
         }
+        betaFeatures: {
+            [key: string]: boolean
+        }
         shouldAutoCreateNoteLink: boolean
         shouldAutoAddSpaces: boolean
     }

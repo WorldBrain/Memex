@@ -29,7 +29,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 interface RootProps {
     rootEl: HTMLElement
     syncSettingsBG: RemoteSyncSettingsInterface
-    syncSettings: SyncSettingsStore<'openAI'>
+    syncSettings: SyncSettingsStore<'extension'>
     annotationsFunctions: any
     browserAPIs: Browser
     contentScriptsBG: ContentScriptsInterface<'caller'>
@@ -100,6 +100,7 @@ class Root extends React.Component<RootProps, RootState> {
                                     event.preventDefault()
                                 }}
                                 iconColor={'white'}
+                                fontColor={'white'}
                             />
                         </TooltipBox>
                         <TooltipBox
@@ -109,7 +110,7 @@ class Root extends React.Component<RootProps, RootState> {
                         >
                             <PrimaryAction
                                 label="Save"
-                                icon="heartFull"
+                                icon="heartEmpty"
                                 type="glass"
                                 size={'small'}
                                 onClick={async (event) => {
@@ -120,6 +121,7 @@ class Root extends React.Component<RootProps, RootState> {
                                     event.preventDefault()
                                 }}
                                 iconColor={'white'}
+                                fontColor={'white'}
                             />
                         </TooltipBox>
                     </ParentContainer>
@@ -130,13 +132,29 @@ class Root extends React.Component<RootProps, RootState> {
 }
 
 export const handleRenderImgActionButtons = async (
-    syncSettings: SyncSettingsStore<'openAI'>,
+    syncSettings: SyncSettingsStore<'extension'>,
     syncSettingsBG: RemoteSyncSettingsInterface,
     annotationsFunctions: any,
     browserAPIs: Browser,
     imageElements: HTMLCollectionOf<HTMLImageElement>,
     contentScriptsBG: ContentScriptsInterface<'caller'>,
 ) => {
+    const betaFeatures = await syncSettings.extension.get('betaFeatures')
+    let imageInjectionEnabled = null
+    if (betaFeatures != null) {
+        imageInjectionEnabled = betaFeatures.imageInjection
+    }
+
+    if (imageInjectionEnabled == null) {
+        await syncSettings.extension.set('betaFeatures', {
+            imageInjection: false,
+        })
+    }
+
+    if (!imageInjectionEnabled) {
+        return
+    }
+
     let shouldShow = true
     if (imageElements.length === 0) {
         return
@@ -153,7 +171,11 @@ export const handleRenderImgActionButtons = async (
 
         // Create a span to wrap the imageElement
         const wrapperSpan = document.createElement('span')
-        wrapperSpan.style.display = 'inline-block' // Ensure the span does not break the flow
+        wrapperSpan.style.display = 'flex' // Use flexbox for alignment
+        wrapperSpan.style.justifyContent = 'center' // Center content horizontally
+        wrapperSpan.style.alignItems = 'center' // Center content vertically
+        wrapperSpan.style.width = '100%' // Span takes full width
+        wrapperSpan.style.height = '100%' // Span takes full width
         wrapperSpan.style.position = 'relative' // Positioning context for the absolute positioned target
 
         // Insert the wrapper before the imageElement in the DOM
@@ -172,12 +194,14 @@ export const handleRenderImgActionButtons = async (
 
     for (let i = 0; i < imageElements.length; i++) {
         const target = document.createElement('span')
+
         target.setAttribute(
             'id',
             constants.REACT_ROOTS.imgActionButtons + '-' + i,
         )
 
         let element = imageElements[i]
+
         let imageUrl = null
 
         if (element.src) {
@@ -210,6 +234,7 @@ export const handleRenderImgActionButtons = async (
         if (imageData == null) {
             continue
         }
+        renderComponent(element, target, i)
 
         const arrayOfSpecialCases = ['https://www.google.com/search?']
 
@@ -223,15 +248,29 @@ export const handleRenderImgActionButtons = async (
             }
         }
 
-        renderComponent(element, target, i)
-
         let renderTimeout
 
-        element.onmouseenter = () => {
+        let elementRect, elementTopRightX, elementTopRightY, windowWidth
+
+        if (window.location.href.match(/\.(jpeg|jpg|gif|png|svg)$/) !== null) {
+            elementRect = element.getBoundingClientRect()
+            elementTopRightX = elementRect.right
+            elementTopRightY = elementRect.top
+            windowWidth = window.innerWidth
+        } else {
+            elementTopRightX = 0
+            elementTopRightY = 0
+            windowWidth = 0
+        }
+
+        element.onmouseover = () => {
             if (shouldShow) {
                 renderTimeout = setTimeout(() => {
                     ReactDOM.render(
-                        <RootPosContainer>
+                        <RootPosContainer
+                            top={elementTopRightY}
+                            right={windowWidth - elementTopRightX}
+                        >
                             <Root
                                 rootEl={target}
                                 syncSettings={syncSettings}
@@ -263,11 +302,14 @@ export const handleRenderImgActionButtons = async (
     }
 }
 
-const RootPosContainer = styled.div`
+const RootPosContainer = styled.div<{
+    top: number
+    right: number
+}>`
     position: absolute;
-    top: 5px;
+    top: ${(props) => props.top + 5}px;
+    right: ${(props) => props.right + 5}px;
     padding: 5px;
-    right: 5px;
 `
 
 const ParentContainer = styled.div<{}>`
