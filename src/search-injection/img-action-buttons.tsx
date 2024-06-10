@@ -28,7 +28,6 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 
 interface RootProps {
     rootEl: HTMLElement
-    syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<'betaFeatures'>
     annotationsFunctions: any
     browserAPIs: Browser
@@ -146,7 +145,6 @@ class Root extends React.Component<RootProps, RootState> {
 
 export const handleRenderImgActionButtons = async (
     syncSettings: SyncSettingsStore<'betaFeatures'>,
-    syncSettingsBG: RemoteSyncSettingsInterface,
     annotationsFunctions: any,
     browserAPIs: Browser,
     imageElements: HTMLCollectionOf<HTMLImageElement>,
@@ -289,7 +287,6 @@ export const handleRenderImgActionButtons = async (
                                 syncSettings={syncSettings}
                                 annotationsFunctions={annotationsFunctions}
                                 browserAPIs={browserAPIs}
-                                syncSettingsBG={syncSettingsBG}
                                 contentScriptsBG={contentScriptsBG}
                                 imageUrl={imageUrl}
                                 imageData={imageData}

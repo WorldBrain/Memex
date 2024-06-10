@@ -67,7 +67,6 @@ interface Dependencies {
         | 'customLists'
         | 'personalCloud'
         | 'readwise'
-        | 'betaFeatures'
         | 'syncSettings'
         | 'summarizeBG'
         | 'auth'

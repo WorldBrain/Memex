@@ -53,7 +53,6 @@ export const main: InPageUIInjectionsMain = async ({
             } else if (component === 'img-action-buttons') {
                 await handleRenderImgActionButtons(
                     syncSettings,
-                    syncSettingsBG,
                     annotationsFunctions,
                     upgradeModalProps.browserAPIs,
                     options.imageElements,

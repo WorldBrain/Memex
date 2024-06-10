@@ -113,7 +113,6 @@ import {
     DB_DATA_LOSS_CHECK_ALARM_NAME,
     checkDataLoss,
 } from './db-data-loss-check'
-import { BetaFeaturesBackground } from 'src/beta-features/background'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -148,7 +147,6 @@ export interface BackgroundModules {
     contentConversations: ContentConversationsBackground
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
-    betaFeatures: BetaFeaturesBackground
     activityStreams: ActivityStreamsBackground
     // userMessages: UserMessageService
     personalCloud: PersonalCloudBackground
@@ -461,8 +459,6 @@ export function createBackgroundModules(options: {
             ),
     })
 
-    const betaFeatures = null
-
     const localExtSettingStore = new BrowserSettingsStore<
         LocalExtensionSettings
     >(options.browserAPIs.storage.local, {
@@ -597,7 +593,6 @@ export function createBackgroundModules(options: {
         analyticsBG,
         bgModules: {
             readwise,
-            betaFeatures,
             copyPaster,
             customLists,
             syncSettings,
@@ -633,7 +628,6 @@ export function createBackgroundModules(options: {
         bookmarks,
         tabManagement,
         readwise,
-        betaFeatures,
         syncSettings,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
