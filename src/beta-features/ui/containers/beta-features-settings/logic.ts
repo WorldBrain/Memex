@@ -7,9 +7,13 @@ import {
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { SyncSettingsStoreInterface } from 'src/sync-settings/types'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 export const INITIAL_STATE: BetaFeaturesSettingsState = {
-    betaFeaturesSetting: null,
+    betaFeaturesSetting: {},
 }
 
 type EventHandler<
@@ -24,10 +28,14 @@ export default class BetaFeaturesSettingsLogic extends UILogic<
     BetaFeaturesSettingsState,
     BetaFeaturesSettingsEvent
 > {
-    private syncSettingsBG = runInBackground<SyncSettingsStoreInterface>()
+    syncSettings: SyncSettingsStore<'betaFeatures'>
 
     constructor(protected dependencies: BetaFeaturesSettingsDependencies) {
         super()
+
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: dependencies.syncSettingsBG,
+        })
     }
 
     getInitialState(): BetaFeaturesSettingsState {
@@ -37,7 +45,18 @@ export default class BetaFeaturesSettingsLogic extends UILogic<
     }
 
     init = async () => {
-        // await loadInitial<BetaFeaturesSettingsState>(this, async () => {})
+        // Load feature settings
+        const imageOverlaySetting = await this.syncSettings.betaFeatures.get(
+            'imageOverlay',
+        )
+
+        let betaFeaturesSetting = {
+            imageOverlay: imageOverlaySetting,
+        }
+
+        this.emitMutation({
+            betaFeaturesSetting: { $set: betaFeaturesSetting },
+        })
     }
 
     activateFeature: EventHandler<'activateFeature'> = async ({
@@ -47,12 +66,9 @@ export default class BetaFeaturesSettingsLogic extends UILogic<
         let betaFeaturesSetting = previousState.betaFeaturesSetting
         const feature = event.feature
         const previousValue = betaFeaturesSetting[feature]
+        betaFeaturesSetting[feature] = !previousValue
 
-        await this.dependencies.syncSettingsBG.extension.set('betaFeatures', {
-            [feature]: !previousValue,
-        })
-
-        betaFeaturesSetting[feature] = true
+        await this.syncSettings.betaFeatures.set(feature, !previousValue)
 
         this.emitMutation({
             betaFeaturesSetting: { $set: betaFeaturesSetting },

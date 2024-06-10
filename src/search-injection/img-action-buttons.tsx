@@ -29,13 +29,14 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 interface RootProps {
     rootEl: HTMLElement
     syncSettingsBG: RemoteSyncSettingsInterface
-    syncSettings: SyncSettingsStore<'extension'>
+    syncSettings: SyncSettingsStore<'betaFeatures'>
     annotationsFunctions: any
     browserAPIs: Browser
     contentScriptsBG: ContentScriptsInterface<'caller'>
     imageUrl: string
     imageData: string
     removeElement: () => void
+    disableImageInjection: () => void
 }
 
 interface RootState {
@@ -66,7 +67,14 @@ class Root extends React.Component<RootProps, RootState> {
                     <ParentContainer ref={this.parentContainerRef}>
                         <TooltipBox
                             getPortalRoot={() => this.props.rootEl}
-                            tooltipText="Remove for this page session"
+                            tooltipText={
+                                <span>
+                                    Remove for this page session
+                                    <br /> <strong>Shift</strong>Click to
+                                    disable completely. <br /> Reenable via Beta
+                                    Features Settings
+                                </span>
+                            }
                             placement="bottom"
                         >
                             <PrimaryAction
@@ -76,7 +84,12 @@ class Root extends React.Component<RootProps, RootState> {
                                 onClick={async (event) => {
                                     event.stopPropagation()
                                     event.preventDefault()
-                                    this.props.removeElement()
+
+                                    if (event.shiftKey) {
+                                        this.props.disableImageInjection()
+                                    } else {
+                                        this.props.removeElement()
+                                    }
                                 }}
                                 padding={'0 5px'}
                                 iconColor={'white'}
@@ -132,23 +145,23 @@ class Root extends React.Component<RootProps, RootState> {
 }
 
 export const handleRenderImgActionButtons = async (
-    syncSettings: SyncSettingsStore<'extension'>,
+    syncSettings: SyncSettingsStore<'betaFeatures'>,
     syncSettingsBG: RemoteSyncSettingsInterface,
     annotationsFunctions: any,
     browserAPIs: Browser,
     imageElements: HTMLCollectionOf<HTMLImageElement>,
     contentScriptsBG: ContentScriptsInterface<'caller'>,
 ) => {
-    const betaFeatures = await syncSettings.extension.get('betaFeatures')
+    const betaFeatureSetting = await syncSettings.betaFeatures.get(
+        'imageOverlay',
+    )
     let imageInjectionEnabled = null
-    if (betaFeatures != null) {
-        imageInjectionEnabled = betaFeatures.imageInjection
+    if (betaFeatureSetting != null) {
+        imageInjectionEnabled = betaFeatureSetting
     }
 
     if (imageInjectionEnabled == null) {
-        await syncSettings.extension.set('betaFeatures', {
-            imageInjection: false,
-        })
+        await syncSettings.betaFeatures.set('imageOverlay', false)
     }
 
     if (!imageInjectionEnabled) {
@@ -282,6 +295,14 @@ export const handleRenderImgActionButtons = async (
                                 imageData={imageData}
                                 removeElement={() => {
                                     ReactDOM.unmountComponentAtNode(target)
+                                    shouldShow = false
+                                }}
+                                disableImageInjection={async () => {
+                                    ReactDOM.unmountComponentAtNode(target)
+                                    await syncSettings.betaFeatures.set(
+                                        'imageOverlay',
+                                        false,
+                                    )
                                     shouldShow = false
                                 }}
                             />

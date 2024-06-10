@@ -44,4 +44,7 @@ export const createSyncSettingsStore = <
         highlightColors: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.HIGHLIGHT_COLORS,
         }),
+        betaFeatures: new BrowserSettingsStore(args.syncSettingsBG, {
+            prefix: FEATURE_PREFIX.BETA_FEATURES,
+        }),
     } as SyncSettingsStoreInterface)

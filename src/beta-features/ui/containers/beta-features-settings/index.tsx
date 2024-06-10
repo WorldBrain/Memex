@@ -16,10 +16,11 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import { SyncSettingsStoreInterface } from 'src/sync-settings/types'
+import { SyncSettingsByFeature } from 'src/sync-settings/background/types'
 
 const BetaFeaturesData = [
     {
-        id: 'imageOverlay',
+        id: 'imageOverlay' as keyof SyncSettingsByFeature['betaFeatures'],
         title: 'Image Hover Buttons',
         description:
             'Display an overlay on every image to either save it or analyze it with AI.',
@@ -79,7 +80,11 @@ export default class BetaFeaturesSettings extends StatefulUIElement<
                                         feature: feature.id,
                                     })
                                 }}
-                                type="primary"
+                                type={
+                                    this.state.betaFeaturesSetting[feature.id]
+                                        ? 'primary'
+                                        : 'secondary'
+                                }
                                 size={'medium'}
                             />
                         </RightSide>

@@ -461,9 +461,7 @@ export function createBackgroundModules(options: {
             ),
     })
 
-    const betaFeatures = new BetaFeaturesBackground({
-        settingsStore: syncSettingsStore,
-    })
+    const betaFeatures = null
 
     const localExtSettingStore = new BrowserSettingsStore<
         LocalExtensionSettings

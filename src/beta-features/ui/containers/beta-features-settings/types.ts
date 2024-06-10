@@ -1,5 +1,8 @@
 import { UIEvent } from 'ui-logic-core'
-import { SyncSettingsStoreInterface } from 'src/sync-settings/types'
+import {
+    RemoteSyncSettingsInterface,
+    SyncSettingsByFeature,
+} from 'src/sync-settings/background/types'
 
 export interface BetaFeaturesSettingsState {
     betaFeaturesSetting: {
@@ -8,9 +11,9 @@ export interface BetaFeaturesSettingsState {
 }
 
 export interface BetaFeaturesSettingsDependencies {
-    syncSettingsBG: SyncSettingsStoreInterface
+    syncSettingsBG: RemoteSyncSettingsInterface
 }
 
 export type BetaFeaturesSettingsEvent = UIEvent<{
-    activateFeature: { feature: string }
+    activateFeature: { feature: keyof SyncSettingsByFeature['betaFeatures'] }
 }>
