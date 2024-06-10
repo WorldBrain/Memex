@@ -330,12 +330,15 @@ export class PersonalCloudBackground {
     async sendCountPendingDownloadsDownUpdate() {
         if (this.emitEvents) {
             try {
-                this.options.remoteEventEmitter.emit('cloudStatsUpdated', {
-                    stats: {
-                        pendingDownloads: this.stats.pendingDownloads - 1,
-                        pendingUploads: this.stats.pendingUploads,
+                await this.options.remoteEventEmitter.emit(
+                    'cloudStatsUpdated',
+                    {
+                        stats: {
+                            pendingDownloads: this.stats.pendingDownloads - 1,
+                            pendingUploads: this.stats.pendingUploads,
+                        },
                     },
-                })
+                )
             } catch (err) {
                 console.error('Error while emitting updated stats:', err)
             }

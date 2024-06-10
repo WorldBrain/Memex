@@ -15,6 +15,7 @@ export const FEATURE_PREFIX = {
     READWISE: 'readwise.',
     OPENAI: 'openAI.',
     HIGHLIGHT_COLORS: 'highlightColors.',
+    BETA_FEATURES: '@BetaFeatures-',
 }
 
 export const SETTING_NAMES: SyncSettingNames = {
@@ -41,6 +42,9 @@ export const SETTING_NAMES: SyncSettingNames = {
         shouldAutoCreateNoteLink:
             FEATURE_PREFIX.EXTENSION + 'shouldAutoCreateNoteLink',
         shouldAutoAddSpaces: FEATURE_PREFIX.EXTENSION + 'shouldAutoAddSpaces',
+    },
+    betaFeatures: {
+        imageOverlay: FEATURE_PREFIX.BETA_FEATURES + 'imageOverlay',
     },
     pdfIntegration: {
         shouldAutoOpen: FEATURE_PREFIX.PDF_INTEGRATION + 'should_auto_open',
