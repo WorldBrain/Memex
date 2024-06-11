@@ -196,6 +196,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             localStorageAPI: params.localStorageAPI,
             getRootElement: () => target,
             inPageUI: params.inPageUI,
+            syncSettingsBG: params.syncSettingsBG,
         },
     )
 

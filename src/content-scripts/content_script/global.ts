@@ -1171,6 +1171,7 @@ export async function main(
                 analyticsBG,
                 pageActivityIndicatorBG,
                 localStorageAPI: browser.storage.local,
+                syncSettingsBG: syncSettingsBG,
             })
             components.tooltip?.resolve()
         },
