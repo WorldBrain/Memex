@@ -441,7 +441,7 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 15px 15px 0px 15px;
+    padding: 10px 15px 0px 15px;
     height: 30px;
     align-items: center;
 `
@@ -494,7 +494,7 @@ const Title = styled.div`
 `
 
 const ContentBlock = styled.div`
-    padding: 5px;
+    padding: 0 5px 5px 5px;
     overflow: scroll;
     width: 100%;
     box-sizing: border-box;
