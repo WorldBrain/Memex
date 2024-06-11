@@ -10,6 +10,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { Storage } from 'webextension-polyfill'
 import type { SharedInPageUIState } from '../shared-state/shared-in-page-ui-state'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface TooltipDependencies extends AnnotationFunctions {
     inPageUI: SharedInPageUIState
@@ -23,4 +24,5 @@ export interface TooltipDependencies extends AnnotationFunctions {
     analyticsBG: AnalyticsCoreInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     localStorageAPI: Storage.LocalStorageArea
+    syncSettingsBG: RemoteSyncSettingsInterface
 }

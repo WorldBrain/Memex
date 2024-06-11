@@ -441,7 +441,7 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 15px 15px 0px 24px;
+    padding: 15px 15px 0px 15px;
     height: 30px;
     align-items: center;
 `
@@ -454,9 +454,9 @@ const ButtonBox = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.greyScale4};
-    font-size: 14px;
-    font-weight: 400;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+    font-weight: 600;
     flex: 1;
     white-space: nowrap;
 `
@@ -494,7 +494,7 @@ const Title = styled.div`
 `
 
 const ContentBlock = styled.div`
-    padding: 5px 15px 15px 15px;
+    padding: 5px;
     overflow: scroll;
     width: 100%;
     box-sizing: border-box;
