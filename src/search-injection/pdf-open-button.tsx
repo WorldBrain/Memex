@@ -23,6 +23,7 @@ import {
 import * as constants from './constants'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 interface RootProps {
     rootEl: HTMLElement
@@ -33,6 +34,7 @@ interface RootProps {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pdfOriginalUrl: string
     buttonBarHeight: string
+    disableImageInjection: () => Promise<void>
 }
 
 interface RootState {
@@ -78,6 +80,13 @@ class Root extends React.Component<RootProps, RootState> {
                             size={'large'}
                         />
                         Annotate & Summarize this PDF with Memex
+                        <CloseButtonContainer>
+                            <Icon
+                                onClick={props.disableImageInjection}
+                                heightAndWidth={'22px'}
+                                icon={'removeX'}
+                            />
+                        </CloseButtonContainer>
                     </ParentContainer>
                 </ThemeProvider>
             </StyleSheetManager>
@@ -152,6 +161,9 @@ export const handleRenderPDFOpenButton = async (
                 contentScriptsBG={contentScriptsBG}
                 pdfOriginalUrl={pdfOriginalUrl}
                 buttonBarHeight={buttonBarHeight}
+                disableImageInjection={async () => {
+                    ReactDOM.unmountComponentAtNode(target)
+                }}
             />,
             target,
         )
@@ -167,4 +179,11 @@ const ParentContainer = styled.div<{
     &::-webkit-scrollbar {
         display: none;
     }
+`
+
+const CloseButtonContainer = styled.div`
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    cursor: pointer;
 `
