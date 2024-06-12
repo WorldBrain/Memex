@@ -435,6 +435,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         isAskAIOpen={this.state.askAITabActive}
                         showSpacePicker={this.state.showSpacePicker}
                         aiPrompt={this.state.aiPrompt}
+                        themeVariant={themeVariant}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
