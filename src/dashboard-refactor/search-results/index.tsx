@@ -65,7 +65,7 @@ import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { splitQueryIntoTerms } from 'src/search/background/utils'
+import { splitQueryIntoTerms } from '@worldbrain/memex-common/lib/search/terms-search'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)

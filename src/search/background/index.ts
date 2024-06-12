@@ -20,7 +20,10 @@ import {
     needToFilterSearchByUrl,
     sortSearchResult,
 } from '@worldbrain/memex-common/lib/search/utils'
-import { unifiedTermsSearch } from '@worldbrain/memex-common/lib/search/terms-search'
+import {
+    splitQueryIntoTerms,
+    unifiedTermsSearch,
+} from '@worldbrain/memex-common/lib/search/terms-search'
 import { SearchError, BadTermError } from './errors'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import {
@@ -43,11 +46,7 @@ import type {
     Visit,
     FavIcon,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
-import {
-    queryAnnotationsByTerms,
-    queryPagesByTerms,
-    splitQueryIntoTerms,
-} from './utils'
+import { queryAnnotationsByTerms, queryPagesByTerms } from './utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import {
