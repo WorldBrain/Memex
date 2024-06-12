@@ -53,6 +53,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
                         getPortalRoot={() => rootEl}
                         positioning="centerCenter"
                         blockedBackground
+                        instaClose
                     >
                         <DashboardContainer
                             {...props}
