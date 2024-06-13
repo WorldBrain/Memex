@@ -1149,6 +1149,7 @@ const FooterBar = styled.div<{
     shouldShow: boolean
     inFocus: boolean
     inPageMode?: boolean
+    inTitleEditMode?: boolean
 }>`
     bottom: 0;
     width: 100%;
@@ -1158,7 +1159,7 @@ const FooterBar = styled.div<{
     background: unset;
     backdrop-filter: unset;
     margin-top: -5px;
-    position: absolute;
+    position: relative;
     animation: ${slideInFromBottom} 0.1s cubic-bezier(0.22, 0.61, 0.36, 1)
         forwards;
     display: none;
@@ -1171,6 +1172,12 @@ const FooterBar = styled.div<{
             animation: none;
             position: relative;
             display: flex;
+        `};
+    ${(props) =>
+        props.inTitleEditMode &&
+        css`
+            display: flex;
+            position: relative;
         `};
     ${(props) =>
         props.shouldShow &&

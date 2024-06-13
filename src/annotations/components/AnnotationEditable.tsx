@@ -1016,6 +1016,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     compactVersion={this.props.compactVersion}
                     inFocus={this.props.isInFocus}
                     inPageMode={this.props.contextLocation === 'in-page'}
+                    inEditMode={isEditing || isEditingHighlight}
                 >
                     <ItemBoxBottom
                         borderTop={false}
@@ -1066,6 +1067,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 compactVersion={this.props.compactVersion}
                 inFocus={this.props.isInFocus}
                 inPageMode={this.props.contextLocation === 'in-page'}
+                inEditMode={isEditing || isEditingHighlight}
             >
                 <ShareMenuContainer>
                     <PrimaryAction
@@ -1649,6 +1651,7 @@ const DefaultFooterStyled = styled.div<{
     hoverCard: boolean
     inFocus: boolean
     inPageMode?: boolean
+    inEditMode?: boolean
 }>`
     display: none;
     bottom: 0px;
@@ -1658,7 +1661,7 @@ const DefaultFooterStyled = styled.div<{
     padding: 0 10px 0px 10px;
     box-sizing: border-box;
     border-radius: 0 0 12px 12px;
-    position: absolute;
+    position: relative;
     animation: ${slideInFromBottom} 0.1s ease-out;
     background: ${(props) => props.theme.colors.black}98;
     backdrop-filter: blur(5px);
@@ -1676,6 +1679,12 @@ const DefaultFooterStyled = styled.div<{
         props.hoverCard &&
         css`
             display: flex;
+        `}
+    ${(props) =>
+        props.inEditMode &&
+        css`
+            display: flex;
+            position: relative;
         `}
     ${(props) =>
         props.inPageMode &&
@@ -1832,7 +1841,8 @@ const ContentContainer = styled.div<{ isEditMode: boolean }>`
     ${(props) =>
         props.isEditMode &&
         css`
-            /* margin-bottom: 10px; */
+            grid-gap: 10px;
+            padding-top: 5px;
         `}
 `
 const BtnContainerStyled = styled.div`
