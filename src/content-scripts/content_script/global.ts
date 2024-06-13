@@ -1079,8 +1079,17 @@ export async function main(
                 },
                 getFullPageUrl: pageInfo.getFullPageUrl,
                 openPDFinViewer: async (originalPageURL) => {
+                    let urlToOpen = originalPageURL
+
+                    if (
+                        urlToOpen.includes('https://arxiv.org/pdf/') &&
+                        !urlToOpen.includes('.pdf')
+                    ) {
+                        urlToOpen = urlToOpen.concat('.pdf')
+                    }
+
                     await contentScriptsBG.openPdfInViewer({
-                        fullPageUrl: originalPageURL,
+                        fullPageUrl: urlToOpen,
                     })
                 },
                 events: sidebarEvents,

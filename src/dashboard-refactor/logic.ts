@@ -2391,7 +2391,33 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        if (event.activePageID == null || event.activeDay == null) {
+        const previousPageId = previousState.activePageID
+            ? previousState.searchResults?.pageIdToResultIds[
+                  previousState.activePageID
+              ][0]
+            : null
+
+        if (previousPageId) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [previousState.activeDay]: {
+                            pages: {
+                                byId: {
+                                    [previousPageId]: {
+                                        activePage: {
+                                            $set: false,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
+
+        if (event.activePageID == null && event.activeDay == null) {
             this.emitMutation({
                 activeDay: { $set: undefined },
                 activePageID: { $set: undefined },
@@ -2421,31 +2447,36 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
         })
+    }
 
-        const previousPageId =
-            previousState.searchResults.pageIdToResultIds[
-                previousState.activePageID
-            ][0]
-
-        if (previousPageId) {
-            this.emitMutation({
-                searchResults: {
-                    results: {
-                        [previousState.activeDay]: {
-                            pages: {
-                                byId: {
-                                    [previousPageId]: {
-                                        activePage: {
-                                            $set: false,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            })
-        }
+    shiftSelectItems: EventHandler<'shiftSelectItems'> = ({
+        event,
+        previousState,
+    }) => {
+        // let currentIndex = event.selectedIndex
+        // let results = previousState.searchResults.results
+        // let docs = Object.values(results)
+        // let docId = null
+        // if (event.type ==='pages') {
+        //     docId = docs[0].pages.allIds[currentIndex]
+        // } else if (event.type === 'notes') {
+        //     docId = docs[0].pages.byId[docs[0].pages.allIds[0]].noteIds.user[currentIndex]
+        // }
+        // while (!previousState.bulkSelectedUrls.includes(pageData.normalizedUrl)) {
+        //     if (pageData == null) {
+        //         return
+        //     }
+        //     const data = {
+        //         title: pageData.fullTitle,
+        //         url: pageData.normalizedUrl,
+        //         type: 'pages',
+        //     }
+        //     await this.props.onBulkSelect(data, false)
+        //     currentIndex = currentIndex - 1
+        //     pageId = this.props.pageData.allIds[currentIndex]
+        //     pageData = this.props.pageData.byId[pageId]
+        // }
+        // }
     }
 
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {
@@ -2521,7 +2552,36 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    hoverTimeout = null
+
     setPageHover: EventHandler<'setPageHover'> = ({ event, previousState }) => {
+        const emitMutation = () =>
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [event.day]: {
+                            pages: {
+                                byId: {
+                                    [event.pageResultId]: {
+                                        hoverState: { $set: event.hover },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    // pageData: {
+                    //     byId: {
+                    //         [event.pageResultId]: {
+                    //             isInFocus: {
+                    //                 $set:
+                    //                     event.hover == null
+                    //             },
+                    //         },
+                    //     },
+                    // },
+                },
+            })
+
         if (
             previousState.searchResults.results[event.day]?.pages.byId[
                 event.pageResultId
@@ -2533,21 +2593,22 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        this.emitMutation({
-            searchResults: {
-                results: {
-                    [event.day]: {
-                        pages: {
-                            byId: {
-                                [event.pageResultId]: {
-                                    hoverState: { $set: event.hover },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        })
+        if (event.hover === null) {
+            console.log('clearing timeout')
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+                this.hoverTimeout = null
+                emitMutation()
+                return
+            }
+        }
+
+        if (this.hoverTimeout) {
+            clearTimeout(this.hoverTimeout)
+        }
+        this.hoverTimeout = setTimeout(() => {
+            emitMutation()
+        }, 300)
     }
 
     setPageNewNoteTagPickerShown: EventHandler<

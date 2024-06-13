@@ -369,6 +369,7 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <AnnotationEditable
+                compactVersion={true}
                 imageSupport={this.props.imageSupport}
                 zIndex={zIndex}
                 key={noteId}
@@ -596,7 +597,7 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <PageNotesBox bottom="10px" left="10px">
-                <PageNotesContainer>
+                {/* <PageNotesContainer>
                     <AnnotationCreate
                         autoFocus={false}
                         comment={newNoteForm.inputValue}
@@ -640,7 +641,7 @@ export default class SearchResultsContainer extends React.Component<
                             boundAnnotCreateProps.addNewSpaceViaWikiLinksNewNote
                         }
                     />
-                </PageNotesContainer>
+                </PageNotesContainer> */}
                 {noteIds[notesType] && noteIds[notesType]?.length > 0 && (
                     <NoteResultContainer>
                         {/* {noteIds[notesType].length > 0 && (
@@ -1075,6 +1076,7 @@ export default class SearchResultsContainer extends React.Component<
 
     shiftSelectItems = async (selectedIndex) => {
         let currentIndex = selectedIndex
+        console.log('arrives here')
 
         const pages = Object.values(this.props.results)
         let pageId = pages[0].pages.allIds[currentIndex]
@@ -1654,6 +1656,7 @@ const PageNotesBox = styled(Margin)`
     z-index: 4;
     position: relative;
     align-items: flex-start;
+    padding-top: 15px;
 `
 
 const PageNotesContainer = styled.div`

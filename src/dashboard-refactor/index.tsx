@@ -588,9 +588,14 @@ export class DashboardContainer extends StatefulUIElement<
                                 <PrimaryAction
                                     icon="arrowRight"
                                     padding="6px"
-                                    onClick={() =>
+                                    onClick={() => {
                                         this.notesSidebarRef.current.hideSidebar()
-                                    }
+                                        this.processEvent('setActivePage', {
+                                            activeDay: undefined,
+                                            activePageID: undefined,
+                                            activePage: false,
+                                        })
+                                    }}
                                     type="glass"
                                     size="medium"
                                 />
@@ -1061,6 +1066,11 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }}
                 spaceSearchSuggestions={this.state.spaceSearchSuggestions}
+                shiftSelectItems={(itemData) =>
+                    this.processEvent('shiftSelectItems', {
+                        item: itemData,
+                    })
+                }
                 pageInteractionProps={{
                     onClick: (day, pageResultId) => async (event) => {
                         this.processEvent('clickPageResult', {

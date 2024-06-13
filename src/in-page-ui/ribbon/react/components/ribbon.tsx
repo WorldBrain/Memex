@@ -1703,10 +1703,13 @@ export default class Ribbon extends Component<Props, State> {
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         const isNotReader =
-            window.location.href.includes('.pdf') &&
+            (window.location.href.includes('.pdf') ||
+                window.location.href.includes('https://arxiv.org/pdf/')) &&
             !window.location.href.includes('pdfjs/viewer.html?')
 
-        const isPDF = window.location.href.includes('.pdf')
+        const isPDF =
+            window.location.href.includes('.pdf') ||
+            window.location.href.includes('https://arxiv.org/pdf/')
 
         if (isPDF) {
             if (
@@ -2139,7 +2142,10 @@ export default class Ribbon extends Component<Props, State> {
                                             this.props.sidebar.isSidebarOpen
                                         }
                                     />
-                                    {window.location.href.includes('.pdf') &&
+                                    {(window.location.href.includes('.pdf') ||
+                                        window.location.href.includes(
+                                            'https://arxiv.org/pdf/',
+                                        )) &&
                                     !window.location.href.includes(
                                         'pdfjs/viewer.html?',
                                     ) ? (
