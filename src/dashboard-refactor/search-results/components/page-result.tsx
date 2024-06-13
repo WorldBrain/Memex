@@ -929,13 +929,13 @@ export default class PageResultView extends PureComponent<Props> {
                 hoverState={this.props.isInFocus}
                 onRef={this.itemBoxRef} // Passing the ref as a prop
             >
-                {this.props.uploadedPdfLinkLoadState === 'running' && (
-                    <LoadingBox>
-                        <LoadingIndicator size={30} />
-                        Loading PDF
-                    </LoadingBox>
-                )}
                 <StyledPageResult>
+                    {this.props.uploadedPdfLinkLoadState === 'running' && (
+                        <LoadingBox>
+                            <LoadingIndicator size={30} />
+                            Loading PDF
+                        </LoadingBox>
+                    )}
                     <PageContentBox
                         // onMouseOver={this.props.onMainContentHover}
                         // onMouseLeave={
@@ -1227,6 +1227,11 @@ const StyledPageResult = styled.div`
     flex-direction: column;
     position: relative;
     border-radius: 12px;
+
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale1
+            : props.theme.colors.greyScale3};
 
     ${(props) =>
         props.theme.variant === 'light' &&

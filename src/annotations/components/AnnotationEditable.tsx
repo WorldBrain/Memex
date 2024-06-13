@@ -1801,7 +1801,7 @@ const CommentBox = styled.div`
     `}
 `
 
-const AnnotationStyled = styled.div`
+const AnnotationStyled = styled.div<{}>`
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -1809,14 +1809,10 @@ const AnnotationStyled = styled.div`
     cursor: pointer;
     border-radius: inherit;
 
-    cursor: ${({ theme }) => theme.cursor}
-        ${({ theme }) =>
-            theme.isEditing &&
-            css`
-                background-color: ${(props) => props.theme.colors.greyScale1};
-                cursor: default;
-            `};
-
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale1
+            : props.theme.colors.greyScale3}96;
     ${({ theme }) =>
         theme.isActive &&
         `
