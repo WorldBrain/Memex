@@ -1746,7 +1746,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     font-size: 14px;
     letter-spacing: 0.5px;
     margin: 0;
-    padding: 0px 10px 7px 15px;
+    padding: 0px 10px 0px 15px;
     line-height: 20px;
     text-align: left;
     grid-gap: 2px;

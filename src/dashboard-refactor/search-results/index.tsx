@@ -163,6 +163,7 @@ export type Props = RootState &
         >
         updateSpacesSearchSuggestions?: (query: string) => void
         spaceSearchSuggestions?: SpaceSearchSuggestion[]
+        shiftSelectItems: (itemId: string, type: 'notes' | 'pages') => void
     }
 
 export interface State {
@@ -408,7 +409,9 @@ export default class SearchResultsContainer extends React.Component<
                     )
                 }}
                 isBulkSelected={this.props.selectedItems?.includes(noteId)}
-                shiftSelectItem={() => this.shiftSelectItems(noteId)}
+                shiftSelectItem={() =>
+                    this.props.shiftSelectItems(noteId, 'notes')
+                }
                 isInFocus={noteData.isInFocus}
                 getHighlightColorSettings={this.props.getHighlightColorSettings}
                 highlightColorSettings={this.props.highlightColorSettings}
@@ -1071,32 +1074,6 @@ export default class SearchResultsContainer extends React.Component<
                     </NoResultsMessage>
                 </>
             )
-        }
-    }
-
-    shiftSelectItems = async (selectedIndex) => {
-        let currentIndex = selectedIndex
-        console.log('arrives here')
-
-        const pages = Object.values(this.props.results)
-        let pageId = pages[0].pages.allIds[currentIndex]
-        let pageData = this.props.pageData.byId[pageId]
-
-        while (!this.props.selectedItems.includes(pageData.normalizedUrl)) {
-            if (pageData == null) {
-                return
-            }
-
-            const data = {
-                title: pageData.fullTitle,
-                url: pageData.normalizedUrl,
-                type: 'pages',
-            }
-
-            await this.props.onBulkSelect(data, false)
-            currentIndex = currentIndex - 1
-            pageId = this.props.pageData.allIds[currentIndex]
-            pageData = this.props.pageData.byId[pageId]
         }
     }
 
