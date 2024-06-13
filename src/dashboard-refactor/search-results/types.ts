@@ -323,6 +323,10 @@ export type Events = UIEvent<{
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
+    shiftSelectItems: {
+        itemId: string
+        type: 'notes' | 'pages'
+    }
     onMatchingTextToggleClick: PageEventArgs
     setActivePage: {
         activePage: boolean
