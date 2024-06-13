@@ -769,7 +769,9 @@ export default class SearchResultsContainer extends React.Component<
                         interactionProps.onMatchingTextToggleClick
                     }
                     selectItem={this.props.onBulkSelect}
-                    shiftSelectItem={() => this.shiftSelectItems(page.pageId)}
+                    shiftSelectItem={() =>
+                        this.props.shiftSelectItems(page.pageId, 'pages')
+                    }
                     isBulkSelected={this.props.selectedItems?.includes(
                         page.normalizedUrl,
                     )}

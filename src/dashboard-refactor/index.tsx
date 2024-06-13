@@ -1066,9 +1066,10 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }}
                 spaceSearchSuggestions={this.state.spaceSearchSuggestions}
-                shiftSelectItems={(itemData) =>
+                shiftSelectItems={(itemId: string, type: 'notes' | 'pages') =>
                     this.processEvent('shiftSelectItems', {
-                        item: itemData,
+                        itemId: itemId,
+                        type: type,
                     })
                 }
                 pageInteractionProps={{

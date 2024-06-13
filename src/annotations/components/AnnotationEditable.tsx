@@ -1697,9 +1697,7 @@ const ActionFooterStyled = styled(DefaultFooterStyled)`
     padding: 0 0px 0px 0px;
 `
 
-const HighlightActionsBox = styled.div<{
-    compactVersion: boolean
-}>`
+const HighlightActionsBox = styled.div<{}>`
     position: absolute;
     right: 0px;
     display: flex;
