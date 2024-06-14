@@ -182,8 +182,8 @@ export default class SearchResultsContainer extends React.Component<
     State
 > {
     private ResultsScrollContainerRef = React.createRef<HTMLDivElement>()
-    private renderLoader = (props: { key?: string } = {}) => (
-        <Loader {...props}>
+    private renderLoader = () => (
+        <Loader>
             <LoadingIndicator />
         </Loader>
     )
@@ -1127,8 +1127,8 @@ export default class SearchResultsContainer extends React.Component<
 
         if (this.props.searchPaginationState === 'running') {
             days.push(
-                <PaginationLoaderBox>
-                    {this.renderLoader({ key: 'pagination-loader' })}
+                <PaginationLoaderBox key="pagination-loader">
+                    {this.renderLoader()}
                 </PaginationLoaderBox>,
             )
         } else if (
@@ -1136,11 +1136,8 @@ export default class SearchResultsContainer extends React.Component<
             this.props.searchState !== 'pristine'
         ) {
             days.push(
-                <WayPointContainer>
-                    <Waypoint
-                        key="pagination-waypoint"
-                        onEnter={() => this.props.paginateSearch()}
-                    />
+                <WayPointContainer key="pagination-waypoint">
+                    <Waypoint onEnter={() => this.props.paginateSearch()} />
                 </WayPointContainer>,
             )
         }

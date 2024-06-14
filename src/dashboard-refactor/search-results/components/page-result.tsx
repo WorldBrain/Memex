@@ -937,7 +937,6 @@ export default class PageResultView extends PureComponent<Props> {
     hoverTimeout = null
 
     onMainContentHover = (event) => {
-        console.log('focuslock', this.props.focusLockUntilMouseStart)
         if (!this.props.focusLockUntilMouseStart) {
             this.setState({ hoveredMouse: true })
             if (this.hoverTimeout) {
