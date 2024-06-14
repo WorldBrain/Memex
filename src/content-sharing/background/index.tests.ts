@@ -307,6 +307,7 @@ export class SharingTestHelper {
             {
                 annotationUrl: localId,
                 shareToParentPageLists: options.shareToParentPageLists,
+                excludeFromLists: !options.shareToParentPageLists,
             },
         )
         const remoteIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
