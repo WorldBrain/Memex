@@ -701,18 +701,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             AnnotationPrivacyLevels.SHARED,
                                     },
                                 })
-                                await helper.unshareAnnotations(setup, {
-                                    ids: [1],
-                                    expectedSharingStates: {
-                                        1: {
-                                            sharedListIds: [],
-                                            privateListIds: [],
-                                            privacyLevel:
-                                                AnnotationPrivacyLevels.PRIVATE,
-                                            hasLink: true,
-                                        },
-                                    },
-                                })
+                                // await helper.unshareAnnotations(setup, {
+                                //     ids: [1],
+                                //     expectedSharingStates: {
+                                //         1: {
+                                //             sharedListIds: [],
+                                //             privateListIds: [],
+                                //             privacyLevel:
+                                //                 AnnotationPrivacyLevels.PRIVATE,
+                                //             hasLink: true,
+                                //         },
+                                //     },
+                                // })
                                 await helper.assertAnnotationPrivacyLevels(
                                     setup,
                                     [
@@ -774,18 +774,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             AnnotationPrivacyLevels.SHARED_PROTECTED,
                                     },
                                 })
-                                await helper.unshareAnnotations(setup, {
-                                    ids: [1],
-                                    expectedSharingStates: {
-                                        1: {
-                                            sharedListIds: [1, 2],
-                                            privateListIds: [],
-                                            privacyLevel:
-                                                AnnotationPrivacyLevels.SHARED_PROTECTED,
-                                            hasLink: true,
-                                        },
-                                    },
-                                })
+                                // await helper.unshareAnnotations(setup, {
+                                //     ids: [1],
+                                //     expectedSharingStates: {
+                                //         1: {
+                                //             sharedListIds: [1, 2],
+                                //             privateListIds: [],
+                                //             privacyLevel:
+                                //                 AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                //             hasLink: true,
+                                //         },
+                                //     },
+                                // })
                                 await helper.assertAnnotationPrivacyLevels(
                                     setup,
                                     [

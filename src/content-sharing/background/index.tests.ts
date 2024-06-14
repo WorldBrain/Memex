@@ -474,26 +474,6 @@ export class SharingTestHelper {
         )
     }
 
-    async unshareAnnotations(
-        setup: BackgroundIntegrationTestSetup,
-        options: {
-            ids: number[]
-            expectedSharingStates: AnnotationSharingStates
-        },
-    ) {
-        const {
-            sharingStates,
-        } = await setup.backgroundModules.contentSharing.unshareAnnotations({
-            annotationUrls: options.ids.map(
-                (id) => this.annotations[id].localId,
-            ),
-        })
-        this._expectAnnotationSharingStates(
-            sharingStates,
-            options.expectedSharingStates,
-        )
-    }
-
     async unshareAnnotation(
         setup: BackgroundIntegrationTestSetup,
         options: { id: number; expectedSharingState: AnnotationSharingState },

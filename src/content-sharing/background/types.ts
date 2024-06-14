@@ -41,16 +41,6 @@ export interface ContentSharingInterface
     deleteListAndAllAssociatedData(params: {
         localListId: number
     }): Promise<void>
-    shareAnnotations(options: {
-        annotationUrls: string[]
-        shareToParentPageLists?: boolean
-        setBulkShareProtected?: boolean
-        skipAnalytics?: boolean
-    }): Promise<{ sharingStates: AnnotationSharingStates }>
-    unshareAnnotations(options: {
-        annotationUrls: string[]
-        setBulkShareProtected?: boolean
-    }): Promise<{ sharingStates: AnnotationSharingStates }>
     ensureRemotePageId(normalizedPageUrl: string): Promise<string>
     getRemoteAnnotationLink(params: {
         annotationUrl: string
