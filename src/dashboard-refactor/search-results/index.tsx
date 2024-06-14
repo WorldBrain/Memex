@@ -144,6 +144,7 @@ export type Props = RootState &
         saveHighlightColorSettings: (newState: HighlightColor[]) => void
         getHighlightColorSettings: () => void
         highlightColorSettings: HighlightColor[]
+        setAnnotationInFocus: (unifiedId: string) => void
         getRootElement: () => HTMLElement
         showSpacesTab: (pageUrl) => void
         // onEditPageBtnClick: (
@@ -164,6 +165,7 @@ export type Props = RootState &
         updateSpacesSearchSuggestions?: (query: string) => void
         spaceSearchSuggestions?: SpaceSearchSuggestion[]
         shiftSelectItems: (itemId: string, type: 'notes' | 'pages') => void
+        focusLockUntilMouseStart: boolean
     }
 
 export interface State {
@@ -380,6 +382,7 @@ export default class SearchResultsContainer extends React.Component<
                 color={noteColor ?? null}
                 body={noteData.highlight}
                 comment={noteData.comment}
+                focusLockUntilMouseStart={this.props.focusLockUntilMouseStart}
                 isShared={noteData.isShared}
                 getListDetailsById={this.props.getListDetailsById}
                 isBulkShareProtected={noteData.isBulkShareProtected}
@@ -412,6 +415,7 @@ export default class SearchResultsContainer extends React.Component<
                 shiftSelectItem={() =>
                     this.props.shiftSelectItems(noteId, 'notes')
                 }
+                setAnnotationInFocus={this.props.setAnnotationInFocus}
                 isInFocus={noteData.isInFocus}
                 getHighlightColorSettings={this.props.getHighlightColorSettings}
                 highlightColorSettings={this.props.highlightColorSettings}
@@ -757,6 +761,9 @@ export default class SearchResultsContainer extends React.Component<
                     filteredbyListID={
                         this.props.listData.byId[this.props.selectedListId]
                             ?.localId
+                    }
+                    focusLockUntilMouseStart={
+                        this.props.focusLockUntilMouseStart
                     }
                     isNotesSidebarShown={this.props.isNotesSidebarShown}
                     isListsSidebarShown={this.props.isSpacesSidebarLocked}
@@ -1587,6 +1594,7 @@ const PageTopBarBox = styled.div<{
         props.inPageMode &&
         css`
             position: relative;
+            background: ${(props) => props.theme.colors.black};
         `}
 `
 

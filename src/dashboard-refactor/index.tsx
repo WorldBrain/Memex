@@ -2,7 +2,6 @@ import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import browser from 'webextension-polyfill'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
-import { createGlobalStyle } from 'styled-components'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -65,12 +64,8 @@ import {
     ColorThemeKeys,
     IconKeys,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import PageCitations from 'src/citations/PageCitations'
-import CopyPaster from 'src/copy-paster/components/CopyPaster'
-import { PageSearchCopyPaster } from 'src/copy-paster'
 import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
-import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
@@ -957,6 +952,20 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('getHighlightColorSettings', null)
                 }
                 highlightColorSettings={this.state.highlightColors}
+                setAnnotationInFocus={(unifiedId: string) => {
+                    if (unifiedId == null) {
+                        this.processEvent('changeFocusItem', {
+                            item: {
+                                id: null,
+                                type: null,
+                            },
+                        })
+                    } else {
+                        this.processEvent('changeFocusItem', {
+                            item: { id: unifiedId, type: 'note' },
+                        })
+                    }
+                }}
                 getListDetailsById={this.getListDetailsById}
                 youtubeService={this.youtubeService}
                 toggleSortMenuShown={() =>
@@ -1072,6 +1081,7 @@ export class DashboardContainer extends StatefulUIElement<
                         type: type,
                     })
                 }
+                focusLockUntilMouseStart={this.state.focusLockUntilMouseStart}
                 pageInteractionProps={{
                     onClick: (day, pageResultId) => async (event) => {
                         this.processEvent('clickPageResult', {
@@ -1179,20 +1189,10 @@ export class DashboardContainer extends StatefulUIElement<
                             ].isShareMenuShown,
                         }),
                     onMainContentHover: (day, pageId) => () => {
-                        if (this.state.focusLockUntilMouseStart) {
-                            return
-                        }
-                        this.processEvent('setPageHover', {
-                            day,
+                        this.processEvent('onMainContentHover', {
                             pageResultId: pageId,
+                            day,
                             hover: 'main-content',
-                        })
-
-                        this.processEvent('changeFocusItem', {
-                            item: {
-                                id: pageId,
-                                type: 'page',
-                            },
                         })
                     },
                     onFooterHover: (day, pageId) => () =>
@@ -1214,14 +1214,14 @@ export class DashboardContainer extends StatefulUIElement<
                             hover: 'lists',
                         }),
                     onUnhover: (day, pageId) => () => {
+                        // if (this.state.focusLockUntilMouseStart) {
+                        //     return
+                        // }
                         this.processEvent('setPageHover', {
                             day,
                             pageResultId: pageId,
                             hover: null,
                         })
-                        if (this.state.focusLockUntilMouseStart) {
-                            return
-                        }
                         this.processEvent('changeFocusItem', {
                             item: {
                                 id: null,

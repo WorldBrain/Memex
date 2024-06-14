@@ -62,6 +62,7 @@ export interface Props
     searchType: SearchType
     hasNotes: boolean
     isInFocus?: boolean
+    focusLockUntilMouseStart?: boolean
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -102,12 +103,15 @@ export default class PageResultView extends PureComponent<Props> {
     componentDidUpdate(prevProps: Props) {
         if (this.props.isInFocus && !prevProps.isInFocus) {
             this.setupKeyListener()
-            const itemBox = this.itemBoxRef.current
-            if (itemBox && !this.props.hoverState) {
-                itemBox.scrollIntoView({ block: 'center' })
+            if (this.props.hoverState !== 'main-content') {
+                const itemBox = this.itemBoxRef.current
+                if (itemBox && !this.props.hoverState) {
+                    itemBox.scrollIntoView({ block: 'center' })
+                }
             }
         } else if (!this.props.isInFocus && prevProps.isInFocus) {
             this.removeKeyListener()
+            // this.props.onUnhover(null)
         }
     }
 
@@ -118,6 +122,7 @@ export default class PageResultView extends PureComponent<Props> {
         tutorialId: null,
         showFooterBar: false,
         searchTermMatches: null,
+        hoveredMouse: false,
     }
 
     componentDidMount() {
@@ -136,6 +141,13 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         this.getMatches(this.props.text)
+    }
+
+    private isAnyModalOpen() {
+        const isOpen =
+            this.props.listPickerShowStatus != 'hide' ||
+            this.props.isCopyPasterShown
+        return isOpen
     }
 
     updateMatchingTextContainerHeight = async () => {
@@ -301,7 +313,11 @@ export default class PageResultView extends PureComponent<Props> {
                     placement={'bottom-end'}
                     offsetX={10}
                     strategy={'fixed'}
-                    closeComponent={this.props.onCopyPasterBtnClick}
+                    closeComponent={(event) => {
+                        this.props.onCopyPasterBtnClick(event)
+                        this.props.onUnhover(event)
+                        this.setState({ hoveredMouse: false })
+                    }}
                     getPortalRoot={this.props.getRootElement}
                 >
                     {this.props.renderPageCitations()}
@@ -317,11 +333,14 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerBarRef.current}
                     placement={'bottom-end'}
                     offsetX={10}
-                    closeComponent={(event) =>
+                    closeComponent={(event) => {
                         this.listPickerBtnClickHandler(event)
-                    }
+                        this.props.onUnhover(event)
+                        this.setState({ hoveredMouse: false })
+                    }}
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
+                    instaClose
                 >
                     {this.props.renderSpacePicker()}
                 </PopoutBox>
@@ -334,11 +353,14 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerButtonRef.current}
                     placement={'bottom-start'}
                     offsetX={10}
-                    closeComponent={(event) =>
+                    closeComponent={(event) => {
                         this.listPickerBtnClickHandler(event)
-                    }
+                        this.props.onUnhover(event)
+                        this.setState({ hoveredMouse: false })
+                    }}
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
+                    instaClose
                 >
                     {this.props.renderSpacePicker()}
                 </PopoutBox>
@@ -912,12 +934,45 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 
+    hoverTimeout = null
+
+    onMainContentHover = (event) => {
+        console.log('focuslock', this.props.focusLockUntilMouseStart)
+        if (!this.props.focusLockUntilMouseStart) {
+            this.setState({ hoveredMouse: true })
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+                this.hoverTimeout = null
+                this.props.onMainContentHover(event)
+                return
+            }
+
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+            }
+            this.hoverTimeout = setTimeout(() => {
+                this.props.onMainContentHover(event)
+            }, 300)
+        }
+    }
+
+    onUnhover = (event) => {
+        if (!this.props.focusLockUntilMouseStart && !this.isAnyModalOpen()) {
+            this.setState({ hoveredMouse: false })
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+                this.hoverTimeout = null
+            }
+            this.props.onUnhover(event)
+        }
+    }
+
     render() {
         return (
             <ItemBox
-                onMouseEnter={this.props.onMainContentHover}
+                onMouseEnter={this.onMainContentHover}
                 // onMouseOver={this.props.onMainContentHover}
-                onMouseLeave={this.props.onUnhover}
+                onMouseLeave={this.onUnhover}
                 active={this.props.activePage}
                 firstDivProps={{
                     // onMouseLeave: this.props.onUnhover,
@@ -926,7 +981,7 @@ export default class PageResultView extends PureComponent<Props> {
                     onDragEnd:
                         !this.props.isCopyPasterShown && this.props.onPageDrop,
                 }}
-                hoverState={this.props.isInFocus}
+                hoverState={this.props.isInFocus || this.state.hoveredMouse}
                 onRef={this.itemBoxRef} // Passing the ref as a prop
             >
                 <StyledPageResult>
@@ -948,7 +1003,7 @@ export default class PageResultView extends PureComponent<Props> {
                     >
                         {this.props.hoverState != null ||
                         this.props.isBulkSelected ? (
-                            <PageActionBox>
+                            <PageActionBox inPageMode={this.props.inPageMode}>
                                 {this.props.hoverState != null && (
                                     <ExtraButtonsActionBar>
                                         {this.renderEditButton()}
@@ -1151,6 +1206,7 @@ const FooterBar = styled.div<{
     inPageMode?: boolean
     inTitleEditMode?: boolean
 }>`
+    display: none;
     bottom: 0;
     width: 100%;
     z-index: 999999;
@@ -1160,16 +1216,15 @@ const FooterBar = styled.div<{
     backdrop-filter: unset;
     margin-top: -5px;
     position: relative;
-    animation: ${slideInFromBottom} 0.1s cubic-bezier(0.22, 0.61, 0.36, 1)
-        forwards;
-    display: none;
+    opacity: 0;
     background: ${(props) => props.theme.colors.black}98;
     backdrop-filter: blur(5px);
 
     ${(props) =>
         props.inFocus &&
         css`
-            animation: none;
+            animation: ${slideInFromBottom} 1s cubic-bezier(0.22, 0.61, 0.36, 1)
+                forwards;
             position: relative;
             display: flex;
         `};
@@ -1182,6 +1237,8 @@ const FooterBar = styled.div<{
     ${(props) =>
         props.shouldShow &&
         css`
+            animation: ${slideInFromBottom} 0.1s
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
             display: flex;
         `};
     ${(props) =>
@@ -1220,6 +1277,7 @@ const BulkSelectButtonBox = styled.div`
     justify-content: center;
     width: 28px;
     height: 28px;
+    user-select: none; // Prevent text selection
 `
 
 const StyledPageResult = styled.div`
@@ -1271,7 +1329,9 @@ const LoadingBox = styled.div`
     z-index: 10000000;
 `
 
-const PageActionBox = styled.div`
+const PageActionBox = styled.div<{
+    inPageMode: boolean
+}>`
     display: flex;
     justify-content: space-between;
     grid-gap: 5px;
@@ -1284,6 +1344,13 @@ const PageActionBox = styled.div`
     backdrop-filter: blur(5px);
     border-radius: 8px;
     align-items: center;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            background: ${(props) => props.theme.colors.black};
+            backdrop-filter: none;
+        `}
 `
 
 const NotesCounterContainer = styled.div`
@@ -1303,12 +1370,13 @@ const NotesCounterTitle = styled.span`
 
 const NoteCounter = styled.span`
     color: ${(props) => props.theme.colors.black};
+    background: ${(props) => props.theme.colors.headerGradient};
+
     font-weight: 400;
     font-size: 12px;
     margin-left: 5px;
     border-radius: 30px;
     padding: 2px 10px;
-    background: ${(props) => props.theme.colors.headerGradient};
     text-align: center;
     position: absolute;
     right: 10px;

@@ -684,7 +684,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         ) {
             if (this.increment > 1) {
                 const blurContainer = document.getElementById('BlurContainer')
-                blurContainer.style.background = '#313239'
+                blurContainer.style.background = this.options.theme.colors.black
             } else {
                 this.emitMutation({
                     blurEffectReset: { $set: true },
@@ -698,7 +698,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         const blurContainer = document.getElementById(
                             'BlurContainer',
                         )
-                        blurContainer.style.background = '#313239'
+                        blurContainer.style.background = this.options.theme.colors.black
                         if (
                             // @ts-ignore
                             !blurContainer.style.backdropFilter ||
@@ -1043,13 +1043,32 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
         if (event.item?.id != null) {
+            const searchBarElement = document.getElementById('search-bar')
+            if (searchBarElement) {
+                searchBarElement.blur()
+            }
+            const itemPos = event.item?.id?.split('-')[0]
+            if (parseFloat(itemPos) === currentFocusElementIndex) {
+                return
+            }
+            const itemId = event.item.id?.replace(/^[^-]*-/, '')
             const nextFocusItemIndex = selectedBlocksArray.findIndex(
-                (item) => item?.id === event.item.id,
+                (item) => item?.id === itemId,
             )
 
             nextItem = selectedBlocksArray[nextFocusItemIndex]
             this.emitMutation({
                 focusedBlockId: { $set: nextFocusItemIndex },
+            })
+        }
+
+        if (
+            event.item?.id == null &&
+            event.direction == undefined &&
+            event.item?.type == null
+        ) {
+            this.emitMutation({
+                focusedBlockId: { $set: null },
             })
         }
 
@@ -2552,7 +2571,30 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    hoverTimeout = null
+    onMainContentHover: EventHandler<'setPageHover'> = ({
+        event,
+        previousState,
+    }) => {
+        this.setHoverState(
+            event.day,
+            event.pageResultId,
+            event.hover,
+            previousState,
+        )
+    }
+
+    setHoverState(day, pageResultId, hover, previousState) {
+        this.processUIEvent('setPageHover', {
+            event: { pageResultId, day, hover },
+            previousState,
+        })
+        this.processUIEvent('changeFocusItem', {
+            event: {
+                item: { id: pageResultId, type: 'page' },
+            },
+            previousState,
+        })
+    }
 
     setPageHover: EventHandler<'setPageHover'> = ({ event, previousState }) => {
         const emitMutation = () =>
@@ -2593,22 +2635,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        if (event.hover === null) {
-            console.log('clearing timeout')
-            if (this.hoverTimeout) {
-                clearTimeout(this.hoverTimeout)
-                this.hoverTimeout = null
-                emitMutation()
-                return
-            }
-        }
-
-        if (this.hoverTimeout) {
-            clearTimeout(this.hoverTimeout)
-        }
-        this.hoverTimeout = setTimeout(() => {
-            emitMutation()
-        }, 300)
+        emitMutation()
     }
 
     setPageNewNoteTagPickerShown: EventHandler<
