@@ -19,7 +19,6 @@ import type { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
-    createRabbitHoleEntry,
     isPkmSyncEnabled,
     shareAnnotationWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
@@ -572,16 +571,6 @@ export default class AnnotationStorage extends StorageModule {
 
                 shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
             }
-
-            const annotationData = {
-                pageTitle: pageTitle,
-                fullUrl: 'https://' + url,
-                createdWhen: Math.floor(createdWhen.getTime() / 1000),
-                creatorId: userId,
-                contentType: 'annotation',
-                fullHTML: (body ?? '') + (comment ? ' ' + comment : ''),
-            }
-            await createRabbitHoleEntry(annotationData, this.options.pkmSyncBG)
         } catch (e) {}
         return this.operation('createAnnotation', {
             pageTitle,
@@ -677,21 +666,6 @@ export default class AnnotationStorage extends StorageModule {
                             url: url,
                             listNames: listNames,
                         }),
-                )
-                const annotationDataForRabbitHole = {
-                    pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
-                    fullUrl: 'https://' + annotationDataForPKMSyncUpdate.url,
-                    createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
-                    creatorId: userId,
-                    contentType: 'annotation',
-                    fullHTML:
-                        (annotationData.body ?? '') +
-                        (comment ? ' ' + comment : ''),
-                }
-
-                await createRabbitHoleEntry(
-                    annotationDataForRabbitHole,
-                    this.options.pkmSyncBG,
                 )
             }
         } catch (e) {}
