@@ -1043,6 +1043,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
         if (event.item?.id != null) {
+            const searchBarElement = document.getElementById('search-bar')
+            if (searchBarElement) {
+                searchBarElement.blur()
+            }
             const itemPos = event.item?.id?.split('-')[0]
             if (parseFloat(itemPos) === currentFocusElementIndex) {
                 return

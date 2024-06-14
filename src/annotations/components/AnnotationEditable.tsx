@@ -352,10 +352,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 case 'Enter':
                     if (!this.props.isEditing) {
                         if (event.shiftKey && this.props.shiftSelectItem) {
-                            this.props.shiftSelectItem()
-                            event.preventDefault()
-                            event.stopPropagation()
-                        } else {
+                            // this.props.shiftSelectItem()
                             this.props.bulkSelectAnnotation()
                             event.preventDefault()
                             event.stopPropagation()
@@ -1370,7 +1367,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     </>
                 )}
                 {bulkSelectAnnotation &&
-                    (this.props.isBulkSelected || this.state.hoverCard) &&
+                    (this.props.isBulkSelected ||
+                        this.state.hoverCard ||
+                        this.props.isInFocus) &&
                     this.props.currentUserId === this.props.creatorId &&
                     bulkSelectAnnotation &&
                     this.renderBulkSelectBtn()}
