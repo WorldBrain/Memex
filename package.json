@@ -80,7 +80,7 @@
         "classnames": "^2.2.5",
         "dataurl-to-blob": "^0.0.1",
         "deserialize-error": "^0.0.3",
-        "dexie": "3.2.2",
+        "dexie": "4.0.7",
         "dexie-export-import": "^1.0.3",
         "dexie-mongoify": "^1.3.0",
         "diff-match-patch": "^1.0.0",
