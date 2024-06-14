@@ -1261,7 +1261,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 event.nativeEvent.shiftKey &&
                                 this.props.shiftSelectItem
                             ) {
-                                console.log('shift select item')
                                 this.props.shiftSelectItem()
                             } else {
                                 this.props.bulkSelectAnnotation()

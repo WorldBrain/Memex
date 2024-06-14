@@ -1277,6 +1277,7 @@ const BulkSelectButtonBox = styled.div`
     justify-content: center;
     width: 28px;
     height: 28px;
+    user-select: none; // Prevent text selection
 `
 
 const StyledPageResult = styled.div`
@@ -1368,6 +1369,9 @@ const NotesCounterTitle = styled.span`
 `
 
 const NoteCounter = styled.span`
+    color: ${(props) => props.theme.colors.black};
+    background: ${(props) => props.theme.colors.headerGradient};
+
     font-weight: 400;
     font-size: 12px;
     margin-left: 5px;
