@@ -1255,17 +1255,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         onClick={(
                             event: React.MouseEvent<HTMLInputElement>,
                         ) => {
+                            event.preventDefault()
+                            event.stopPropagation()
                             if (
                                 event.nativeEvent.shiftKey &&
                                 this.props.shiftSelectItem
                             ) {
+                                console.log('shift select item')
                                 this.props.shiftSelectItem()
-                                event.preventDefault()
-                                event.stopPropagation()
                             } else {
                                 this.props.bulkSelectAnnotation()
-                                event.preventDefault()
-                                event.stopPropagation()
                             }
                         }}
                         size={16}
@@ -1287,7 +1286,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     handleMouseLeave = () => {
-        if (!this.props.focusLockUntilMouseStart) {
+        if (!this.props.focusLockUntilMouseStart && !this.isAnyModalOpen()) {
             this.setState({ hoverCard: false })
             if (this.hoverTimeout) {
                 clearTimeout(this.hoverTimeout)

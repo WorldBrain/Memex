@@ -143,6 +143,13 @@ export default class PageResultView extends PureComponent<Props> {
         this.getMatches(this.props.text)
     }
 
+    private isAnyModalOpen() {
+        const isOpen =
+            this.props.listPickerShowStatus != 'hide' ||
+            this.props.isCopyPasterShown
+        return isOpen
+    }
+
     updateMatchingTextContainerHeight = async () => {
         await sleepPromise(50)
 
@@ -333,6 +340,7 @@ export default class PageResultView extends PureComponent<Props> {
                     }}
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
+                    instaClose
                 >
                     {this.props.renderSpacePicker()}
                 </PopoutBox>
@@ -352,6 +360,7 @@ export default class PageResultView extends PureComponent<Props> {
                     }}
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
+                    instaClose
                 >
                     {this.props.renderSpacePicker()}
                 </PopoutBox>
@@ -948,7 +957,7 @@ export default class PageResultView extends PureComponent<Props> {
     }
 
     onUnhover = (event) => {
-        if (!this.props.focusLockUntilMouseStart) {
+        if (!this.props.focusLockUntilMouseStart && !this.isAnyModalOpen()) {
             this.setState({ hoveredMouse: false })
             if (this.hoverTimeout) {
                 clearTimeout(this.hoverTimeout)
