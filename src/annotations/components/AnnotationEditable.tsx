@@ -85,6 +85,7 @@ export interface AnnotationProps {
     hasReplies?: boolean
     appendRepliesToggle?: boolean
     isBulkShareProtected: boolean
+    focusLockUntilMouseStart?: boolean
     repliesLoadingState?: UITaskState
     onReplyBtnClick?: React.MouseEventHandler
     isClickable?: boolean
@@ -143,6 +144,7 @@ export interface AnnotationProps {
         spaceName: string,
         unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
     ) => void
+    setAnnotationInFocus?: (unifiedId: string) => void
     isInFocus?: boolean
     shiftSelectItem?: () => void
     searchTerms?: string[]
@@ -295,11 +297,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
         if (this.props.isInFocus && !prevProps.isInFocus) {
             this.setupKeyListener()
-            const itemBox = this.itemBoxRef.current
-            if (itemBox && !this.props.hoverState) {
-                itemBox.scrollIntoView({ block: 'center' })
+            if (!this.state.hoverCard) {
+                const itemBox = this.itemBoxRef.current
+                if (itemBox && !this.props.hoverState) {
+                    itemBox.scrollIntoView({ block: 'center' })
+                }
             }
         } else if (!this.props.isInFocus && prevProps.isInFocus) {
+            // if (!this.state.hoverCard) {
+            //     this.props.setAnnotationInFocus(null)
+            // }
             this.removeKeyListener()
         }
     }
@@ -949,6 +956,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.unifiedId,
                 buttonRef: this.shareMenuButtonRef,
                 leftSideItem: this.renderAutoAddedIndicator(),
+                showKeyShortcut: this.props.isInFocus && 'S',
             },
             {
                 key: 'copy-paste-note-btn',
@@ -981,6 +989,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.copyPasterAnnotationInstanceId ===
                     this.props.unifiedId,
                 buttonRef: this.copyPasterButtonRef,
+                showKeyShortcut: this.props.isInFocus && 'C',
             },
             appendRepliesToggle && {
                 key: 'show-replies-notes-btn',
@@ -1012,7 +1021,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         ) {
             return (
                 <ActionFooterStyled
-                    hoverCard={this.state.hoverCard || this.props.isInFocus}
                     compactVersion={this.props.compactVersion}
                     inFocus={this.props.isInFocus}
                     inPageMode={this.props.contextLocation === 'in-page'}
@@ -1063,7 +1071,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         return (
             <DefaultFooterStyled
-                hoverCard={true}
                 compactVersion={this.props.compactVersion}
                 inFocus={this.props.isInFocus}
                 inPageMode={this.props.contextLocation === 'in-page'}
@@ -1274,19 +1281,24 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     hoverTimeout = null
 
     handleMouseEnter = () => {
-        this.hoverTimeout = setTimeout(() => {
+        if (!this.props.focusLockUntilMouseStart) {
             this.setState({ hoverCard: true })
-        }, 300)
+            this.hoverTimeout = setTimeout(() => {
+                this.props.setAnnotationInFocus(this.props.unifiedId)
+            }, 300)
+        }
     }
 
     handleMouseLeave = () => {
-        if (this.hoverTimeout) {
-            console.log('clearing timeout')
-            clearTimeout(this.hoverTimeout)
-            this.hoverTimeout = null
-        }
-        if (!this.isAnyModalOpen()) {
+        if (!this.props.focusLockUntilMouseStart) {
             this.setState({ hoverCard: false })
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+                this.hoverTimeout = null
+            }
+            if (!this.isAnyModalOpen()) {
+                this.props.setAnnotationInFocus(null)
+            }
         }
     }
 
@@ -1301,7 +1313,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         const actionsBox = !this.props.isEditingHighlight ? (
             <HighlightActionsBox>
-                {this.state.hoverCard && (
+                {this.props.isInFocus && (
                     <>
                         {footerDeps.onDeleteIconClick && (
                             <TooltipBox
@@ -1376,7 +1388,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         firstDivProps={{
                             id: ANNOT_BOX_ID_PREFIX + this.props.unifiedId,
                         }}
-                        hoverState={this.props.isInFocus}
+                        hoverState={
+                            this.props.isInFocus || this.state.hoverCard
+                        }
                         onRef={this.itemBoxRef}
                     >
                         {this.renderDeleteScreen(footerDeps)}
@@ -1637,18 +1651,15 @@ const SaveActionBar = styled.div`
 
 const slideInFromBottom = keyframes`
   from {
-    opacity: 0;
     margin-top: -10px;
   }
   to {
-    opacity: 1;
     margin-top: 0px;
   }
 `
 
 const DefaultFooterStyled = styled.div<{
     compactVersion: boolean
-    hoverCard: boolean
     inFocus: boolean
     inPageMode?: boolean
     inEditMode?: boolean
@@ -1662,27 +1673,26 @@ const DefaultFooterStyled = styled.div<{
     box-sizing: border-box;
     border-radius: 0 0 12px 12px;
     position: relative;
-    animation: ${slideInFromBottom} 0.1s ease-out;
-    background: ${(props) => props.theme.colors.black}98;
+    background: ${(props) => props.theme.colors.black0}98;
     backdrop-filter: blur(5px);
     width: 100%;
+    opacity: 0;
 
     ${(props) =>
         props.inFocus &&
         css`
-            animation: none;
+            animation: ${slideInFromBottom} 0.1
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
             position: relative;
             display: flex;
+            opacity: 1;
         `};
 
     ${(props) =>
-        props.hoverCard &&
-        css`
-            display: flex;
-        `}
-    ${(props) =>
         props.inEditMode &&
         css`
+            animation: ${slideInFromBottom} 0.1
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
             display: flex;
             position: relative;
         `}
