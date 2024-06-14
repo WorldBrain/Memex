@@ -24,6 +24,7 @@ import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/typ
 import type { SharedListMetadata } from 'src/content-sharing/background/types'
 import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -259,9 +260,9 @@ export async function hydrateCacheForPageAnnotations(
     const syncSettingsStore = createSyncSettingsStore({
         syncSettingsBG: args.bgModules.syncSettings,
     })
-    const highlightColors = await syncSettingsStore.highlightColors.get(
-        'highlightColors',
-    )
+    const highlightColors =
+        (await syncSettingsStore.highlightColors.get('highlightColors')) ??
+        HIGHLIGHT_COLORS_DEFAULT
     args.cache.setHighlightColorDictionary(highlightColors)
 
     args.cache.setAnnotations(
