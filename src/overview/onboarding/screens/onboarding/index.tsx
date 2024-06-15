@@ -270,31 +270,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                 <OptionsContainer
                     onClick={async () => {
                         this.processEvent('setOnboardingTutorial', {
-                            tutorialId: 'savePages',
-                        })
-                        await trackOnboardingPath(this.props.analyticsBG, {
-                            type: 'Bookmarking',
-                        })
-                    }}
-                >
-                    <OptionTitle>
-                        <Icon
-                            icon={'cursor'}
-                            heightAndWidth="30px"
-                            color="prime1"
-                            hoverOff
-                        />
-                        <OptionTitleText>
-                            Organising & Annotating websites, PDFs and Videos
-                        </OptionTitleText>
-                    </OptionTitle>
-                    {/* <OptionDescription>
-                        Highlight text on a page and add tags
-                    </OptionDescription> */}
-                </OptionsContainer>
-                <OptionsContainer
-                    onClick={async () => {
-                        this.processEvent('setOnboardingTutorial', {
                             tutorialId: 'askAI',
                         })
                         await trackOnboardingPath(this.props.analyticsBG, {
@@ -320,6 +295,31 @@ export default class OnboardingScreen extends StatefulUIElement<
                 <OptionsContainer
                     onClick={async () => {
                         this.processEvent('setOnboardingTutorial', {
+                            tutorialId: 'savePages',
+                        })
+                        await trackOnboardingPath(this.props.analyticsBG, {
+                            type: 'Bookmarking',
+                        })
+                    }}
+                >
+                    <OptionTitle>
+                        <Icon
+                            icon={'cursor'}
+                            heightAndWidth="30px"
+                            color="prime1"
+                            hoverOff
+                        />
+                        <OptionTitleText>
+                            Organising & Annotating websites, PDFs and Videos
+                        </OptionTitleText>
+                    </OptionTitle>
+                    {/* <OptionDescription>
+                        Highlight text on a page and add tags
+                    </OptionDescription> */}
+                </OptionsContainer>
+                <OptionsContainer
+                    onClick={async () => {
+                        this.processEvent('setOnboardingTutorial', {
                             tutorialId: 'sharePages',
                         })
                         await trackOnboardingPath(this.props.analyticsBG, {
@@ -336,6 +336,28 @@ export default class OnboardingScreen extends StatefulUIElement<
                         />
                         <OptionTitleText>
                             Sharing & collaborating with peers
+                        </OptionTitleText>
+                    </OptionTitle>
+                </OptionsContainer>
+                <OptionsContainer
+                    onClick={async () => {
+                        this.processEvent('setOnboardingTutorial', {
+                            tutorialId: 'syncWithObsidianLogseq',
+                        })
+                        await trackOnboardingPath(this.props.analyticsBG, {
+                            type: 'PKMsync',
+                        })
+                    }}
+                >
+                    <OptionTitle>
+                        <Icon
+                            icon={'reload'}
+                            heightAndWidth="30px"
+                            color="prime1"
+                            hoverOff
+                        />
+                        <OptionTitleText>
+                            Sync & web-clipper for Obsidian & Logseq
                         </OptionTitleText>
                     </OptionTitle>
                 </OptionsContainer>
