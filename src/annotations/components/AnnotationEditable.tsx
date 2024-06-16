@@ -1072,6 +1072,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 inFocus={this.props.isInFocus}
                 inPageMode={this.props.contextLocation === 'in-page'}
                 inEditMode={isEditing || isEditingHighlight}
+                isShown={true}
             >
                 <ShareMenuContainer>
                     <PrimaryAction
@@ -1652,6 +1653,7 @@ const slideInFromBottom = keyframes`
   }
   to {
     margin-top: 0px;
+    opacity: 1;
   }
 `
 
@@ -1660,6 +1662,7 @@ const DefaultFooterStyled = styled.div<{
     inFocus: boolean
     inPageMode?: boolean
     inEditMode?: boolean
+    isShown?: boolean
 }>`
     display: none;
     bottom: 0px;
@@ -1692,6 +1695,15 @@ const DefaultFooterStyled = styled.div<{
                 cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
             display: flex;
             position: relative;
+            opacity: 1;
+        `}
+    ${(props) =>
+        props.isShown &&
+        css`
+            animation: ${slideInFromBottom} 0.1
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            display: flex;
+            opacity: 1;
         `}
     ${(props) =>
         props.inPageMode &&

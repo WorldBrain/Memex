@@ -66,7 +66,8 @@ export default class UpgradeModal extends UIElement<
                             Upgrade to use GPT-4 and your own key
                         </UpgradeOverlayText>
                         <UpgradeOverlaySubText>
-                            Add "Bring your own key" powerup to continue
+                            Add "Bring your own key"- or the "Pro"-powerup to
+                            continue
                         </UpgradeOverlaySubText>
                     </UpgradeOverlayTextContainer>
                 )}
