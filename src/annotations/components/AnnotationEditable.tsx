@@ -740,12 +740,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.props.isShared ? (
                             <span>
                                 Disable Auto-Add
-                                <br /> Only added to Spaces you select
+                                <br /> Only added to Spaces you manually select
                             </span>
                         ) : (
                             <span>
                                 Enable Auto-Add
-                                <br /> Added to all Spaces the page is
+                                <br /> Added to all Spaces the page is in
                             </span>
                         )
                     }
@@ -952,7 +952,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.shareMenuAnnotationInstanceId ===
                     this.props.unifiedId,
                 buttonRef: this.shareMenuButtonRef,
-                leftSideItem: this.renderAutoAddedIndicator(),
+                leftSideItem:
+                    this.displayLists.length === 0
+                        ? this.renderAutoAddedIndicator()
+                        : null,
                 showKeyShortcut: this.props.isInFocus && 'S',
             },
             {
@@ -1022,6 +1025,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     inFocus={this.props.isInFocus}
                     inPageMode={this.props.contextLocation === 'in-page'}
                     inEditMode={isEditing || isEditingHighlight}
+                    isShown={
+                        this.state.hoverCard ||
+                        this.props.isInFocus ||
+                        isEditing ||
+                        isEditingHighlight
+                    }
                 >
                     <ItemBoxBottom
                         borderTop={false}
@@ -1072,7 +1081,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 inFocus={this.props.isInFocus}
                 inPageMode={this.props.contextLocation === 'in-page'}
                 inEditMode={isEditing || isEditingHighlight}
-                isShown={true}
+                // isShown={
+                //     isEditing ||
+                //     isEditingHighlight ||
+                //     isDeleting ||
+                //     this.props.isInFocus
+                // }
             >
                 <ShareMenuContainer>
                     <PrimaryAction
@@ -1418,7 +1432,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             {(this.creationInfo?.createdWhen &&
                                 !this.props.isEditing) ||
                             this.displayLists.length >= 1 ? (
-                                <DateAndSpaces>
+                                <DateAndSpaces
+                                    inSidebar={
+                                        this.props.contextLocation === 'in-page'
+                                    }
+                                >
                                     {this.creationInfo?.createdWhen &&
                                         !this.props.isEditing && (
                                             <CreationInfoBox>
@@ -1428,27 +1446,33 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                             </CreationInfoBox>
                                         )}
                                     {this.displayLists.length >= 1 && (
-                                        <ListsSegment
-                                            tabIndex={0}
-                                            lists={this.displayLists}
-                                            onMouseEnter={
-                                                this.props.onListsHover
-                                            }
-                                            onListClick={this.props.onListClick}
-                                            onEditBtnClick={() => null}
-                                            spacePickerButtonRef={
-                                                this.spacePickerBodyButtonRef
-                                            }
-                                            padding={
-                                                this.props.isEditing
-                                                    ? '0px'
-                                                    : '0px'
-                                            }
-                                            removeSpaceForAnnotation={
-                                                this.props
-                                                    .removeSpaceFromEditorPicker
-                                            }
-                                        />
+                                        <ListSegmentBox>
+                                            {this.renderAutoAddedIndicator()}
+                                            <ListsSegment
+                                                tabIndex={0}
+                                                lists={this.displayLists}
+                                                onMouseEnter={
+                                                    this.props.onListsHover
+                                                }
+                                                onListClick={
+                                                    this.props.onListClick
+                                                }
+                                                onEditBtnClick={() => null}
+                                                spacePickerButtonRef={
+                                                    this
+                                                        .spacePickerBodyButtonRef
+                                                }
+                                                padding={
+                                                    this.props.isEditing
+                                                        ? '0px'
+                                                        : '0px'
+                                                }
+                                                removeSpaceForAnnotation={
+                                                    this.props
+                                                        .removeSpaceFromEditorPicker
+                                                }
+                                            />
+                                        </ListSegmentBox>
                                     )}
                                 </DateAndSpaces>
                             ) : null}
@@ -1482,14 +1506,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 }
 
-const DateAndSpaces = styled.div`
+const ListSegmentBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    grid-gap: 10px;
+    /* padding: 0px 15px; */
+`
+
+const DateAndSpaces = styled.div<{
+    inSidebar: boolean
+}>`
     display: flex;
     justify-content: space-between;
-    align-items: center;
     width: 100%;
-    grid-gap: 20px;
-    padding: 5px 15px 10px 15px;
     box-sizing: border-box;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding: 10px 15px 10px 15px;
+    grid-gap: 10px;
 `
 
 const DeleteScreenContainer = styled.div`
@@ -1709,11 +1745,14 @@ const DefaultFooterStyled = styled.div<{
         props.inPageMode &&
         css`
             backdrop-filter: unset;
-            background: ${(props) => props.theme.colors.black};
+            background: transparent;
         `};
 `
 const ActionFooterStyled = styled(DefaultFooterStyled)`
     padding: 0 0px 0px 0px;
+    position: absolute;
+    bottom: 0;
+    background: ${(props) => props.theme.colors.black0};
 `
 
 const HighlightActionsBox = styled.div<{}>`
