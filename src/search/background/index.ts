@@ -507,11 +507,13 @@ export default class SearchBackground {
             .toArray()
         let autoSharedAnnotIds = new Set(
             annotPrivacyLevels
-                .filter((l) =>
-                    [
-                        AnnotationPrivacyLevels.SHARED,
-                        AnnotationPrivacyLevels.SHARED_PROTECTED,
-                    ].includes(l.privacyLevel),
+                .filter(
+                    (l) =>
+                        [
+                            AnnotationPrivacyLevels.SHARED,
+                            AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        ].includes(l.privacyLevel) &&
+                        !validAnnotIds.has(l.annotation),
                 )
                 .map((l) => l.annotation),
         )

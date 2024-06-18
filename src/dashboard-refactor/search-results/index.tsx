@@ -677,7 +677,7 @@ export default class SearchResultsContainer extends React.Component<
                                 const noteB = this.props.noteData.byId[b]
                                 return noteB.displayTime - noteA.displayTime
                             })
-                            ?.map((noteId, index) => {
+                            .map((noteId, index) => {
                                 const zIndex =
                                     noteIds[notesType]?.length - index
 
