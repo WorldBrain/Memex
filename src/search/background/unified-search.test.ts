@@ -2,14 +2,15 @@ import omit from 'lodash/omit'
 import type Storex from '@worldbrain/storex'
 import * as DATA from './unified-search.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { sortSearchResult, splitQueryIntoTerms } from './utils'
 import type {
     UnifiedSearchPaginationParams,
     IntermediarySearchResult,
     UnifiedSearchParams,
-} from './types'
+} from '@worldbrain/memex-common/lib/search/types'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { sortSearchResult } from '@worldbrain/memex-common/lib/search/utils'
+import { splitQueryIntoTerms } from '@worldbrain/memex-common/lib/search/terms-search'
 
 async function insertTestData(storageManager: Storex) {
     for (const doc of Object.values(DATA.LISTS)) {

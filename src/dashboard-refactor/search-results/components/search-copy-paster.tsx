@@ -6,7 +6,7 @@ import {
     PageSearchCopyPaster,
 } from 'src/copy-paster'
 import { SearchType } from '../types'
-import { UnifiedSearchParams } from 'src/search/background/types'
+import type { UnifiedSearchParams } from '@worldbrain/memex-common/lib/search/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'

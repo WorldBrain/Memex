@@ -1,12 +1,8 @@
 import type Storex from '@worldbrain/storex'
 import type {
-    ResultDataByPage,
-    TermsSearchOpts,
-    UnifiedSearchPageResultData,
-    UnifiedSearchPaginationParams,
-    UnifiedSearchParams,
     UnifiedTermsSearchParams,
-} from './types'
+    TermsSearchOpts,
+} from '@worldbrain/memex-common/lib/search/types'
 import type { SearchParams as OldSearchParams } from '../types'
 import type {
     Page,
@@ -65,27 +61,6 @@ export const reshapePageForDisplay = (page) => ({
     displayTime: page.displayTime,
     annotsCount: page.annotsCount,
 })
-
-export const sortSearchResult = (resultDataByPage: ResultDataByPage) =>
-    [...resultDataByPage].sort(
-        ([, a], [, b]) =>
-            Math.max(
-                b.latestPageTimestamp,
-                b.annotations[0]?.lastEdited.valueOf() ?? 0,
-            ) -
-            Math.max(
-                a.latestPageTimestamp,
-                a.annotations[0]?.lastEdited.valueOf() ?? 0,
-            ),
-    )
-
-export const sliceSearchResult = (
-    resultDataByPage: Array<[string, UnifiedSearchPageResultData]>,
-    { limit, skip }: UnifiedSearchPaginationParams,
-): ResultDataByPage => {
-    // NOTE: Current implementation ignores annotation count, and simply paginates by the number of pages in the results
-    return new Map(resultDataByPage.slice(skip, skip + limit))
-}
 
 /** Given separate result sets of the same type, gets the intersection of them / ANDs them together by ID */
 const intersectResults = (results: string[][]): string[] =>
@@ -223,92 +198,3 @@ export const queryPagesByTerms = (
         latestTimestamp: latestTimestampByPageUrl.get(id) ?? 0,
     }))
 }
-
-export const splitQueryIntoTerms = (
-    query: string,
-): {
-    terms: string[]
-    phrases: string[]
-    inTitle: boolean
-    inContent: boolean
-    inHighlight: boolean
-    inComment: boolean
-    matchTermsFuzzyStartsWith: boolean
-} => {
-    const discreteTerms = new Set<string>()
-    const phrases = new Set<string>()
-    let queryString = query.trim().toLocaleLowerCase()
-    let inTitle = true
-    let inContent = true
-    let inHighlight = true
-    let inComment = true
-    let matchTermsFuzzyStartsWith = false
-
-    if (queryString.includes('*')) {
-        matchTermsFuzzyStartsWith = true
-        queryString = queryString.replace(/\*/g, '')
-    }
-    const matches = query.match(/"[^"]+"/g)
-    matches?.forEach((match) => {
-        phrases.add(match.slice(1, -1))
-        queryString = queryString.replace(match, ' ') // Remove the matched phrase from queryString
-    })
-    queryString = queryString.replace(/\s+/g, ' ').trim()
-
-    // Also process out chinese characters
-
-    queryString = processCJKCharacters(queryString)
-
-    // First split by double quotes, then by spaces on non-double quoted phrases
-    const terms = queryString.split(' ').filter(Boolean)
-    for (const term of terms) {
-        const subTerms = term.split(/\s+/).filter(Boolean)
-        subTerms.forEach((subTerm) => {
-            switch (subTerm) {
-                case 'intitle':
-                    inTitle = true
-                    inContent = false
-                    inHighlight = false
-                    inComment = false
-                    break
-                case 'incontent':
-                    inTitle = false
-                    inContent = true
-                    inHighlight = false
-                    inComment = false
-                    break
-                case 'inhighlight':
-                    inTitle = false
-                    inContent = false
-                    inHighlight = true
-                    inComment = false
-                    break
-                case 'incomment':
-                    inTitle = false
-                    inContent = false
-                    inHighlight = false
-                    inComment = true
-                    break
-                default:
-                    discreteTerms.add(subTerm)
-            }
-        })
-    }
-    return {
-        terms: [...discreteTerms],
-        phrases: [...phrases],
-        inTitle,
-        inContent,
-        inHighlight,
-        inComment,
-        matchTermsFuzzyStartsWith,
-    }
-}
-
-export const needToFilterSearchByUrl = (params: UnifiedSearchParams): boolean =>
-    params.filterByDomains.length > 0 ||
-    params.filterByPDFs ||
-    params.filterByVideos ||
-    params.filterByTweets ||
-    params.filterByEvents ||
-    params.omitPagesWithoutAnnotations

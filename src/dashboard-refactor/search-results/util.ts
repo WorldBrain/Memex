@@ -1,9 +1,9 @@
 import type {
     StandardSearchResponse,
     SearchResultPage,
-    UnifiedSearchPaginationParams,
     SearchResultAnnotation,
 } from 'src/search/background/types'
+import type { UnifiedSearchPaginationParams } from '@worldbrain/memex-common/lib/search/types'
 import type {
     PageData,
     PageResult,
@@ -177,12 +177,12 @@ const annotationToNoteData = (
     return {
         url: annotation.url,
         pageUrl: annotation.pageUrl,
-        highlight: annotation.body,
+        highlight: annotation['body'],
         comment: annotation.comment,
-        tags: annotation.tags ?? [],
+        tags: [],
         lists,
-        selector: annotation.selector,
-        color: annotation.color as RGBAColor,
+        selector: annotation['selector'],
+        color: annotation['color'],
         createdWhen: annotation.createdWhen,
         displayTime: new Date(
             annotation.lastEdited ?? annotation.createdWhen,
@@ -193,8 +193,8 @@ const annotationToNoteData = (
         ...getInitialNoteResultState(),
         editNoteForm: {
             inputValue: annotation.comment ?? '',
-            bodyInputValue: annotation.body ?? '',
-            tags: annotation.tags ?? [],
+            bodyInputValue: annotation['body'] ?? '',
+            tags: [],
             lists,
             isTagPickerShown: false,
             isListPickerShown: false,
