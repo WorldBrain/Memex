@@ -625,7 +625,10 @@ export class PersonalCloudBackground {
         // For automated tests
         this.reportExecutingAction?.(action)
 
-        if (action.type === PersonalCloudActionType.PushObject) {
+        if (
+            action.type === PersonalCloudActionType.PushObject &&
+            action.updates.length > 0
+        ) {
             const {
                 clientInstructions,
             } = await this.options.backend.pushUpdates(

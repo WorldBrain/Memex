@@ -1581,7 +1581,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.noteId]: {
                                     comment: { $set: existing.comment },
-                                    color: { $set: event.color as RGBAColor },
+                                    color: { $set: event.color as string },
                                 },
                             },
                         },
@@ -1864,24 +1864,22 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        const listData = getListData(
+        let listData = getListData(
             previousState.listsSidebar.selectedListId,
             previousState,
             { mustBeLocal: true, source: 'removePageFromList' },
         )
-        const filterOutPage = (ids: string[]) =>
-            ids.filter((id) => id !== event.pageResultId)
-
-        const mutation: UIMutation<State['searchResults']> = {
-            pageData: {
-                byId: { $unset: [event.pageResultId] },
-                allIds: {
-                    $set: filterOutPage(
-                        previousState.searchResults.pageData.allIds,
-                    ),
-                },
-            },
+        let resultItem =
+            previousState.searchResults.results[event.day]?.pages.byId[
+                event.pageResultId
+            ]
+        if (!resultItem) {
+            throw new Error(
+                `Page to remove from list not found in UI results state: ${event.pageResultId}`,
+            )
         }
+
+        let mutation: UIMutation<State['searchResults']> = {}
 
         if (event.day === PAGE_SEARCH_DUMMY_DAY) {
             mutation.results = {
@@ -1889,11 +1887,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     pages: {
                         byId: { $unset: [event.pageResultId] },
                         allIds: {
-                            $set: filterOutPage(
-                                previousState.searchResults.results[
-                                    PAGE_SEARCH_DUMMY_DAY
-                                ]?.pages.allIds,
-                            ),
+                            $apply: (ids: string[]) =>
+                                ids.filter((id) => id !== event.pageResultId),
                         },
                     },
                 },
@@ -1916,7 +1911,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         await this.options.listsBG.removePageFromList({
             id: listData.localId,
-            url: event.pageResultId,
+            url: resultItem.pageId,
         })
     }
 
@@ -3674,7 +3669,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     lists: { $set: nextLists },
                                     color: {
                                         $set: (event.color ??
-                                            existing.color) as RGBAColor,
+                                            existing.color) as string,
                                     },
                                 },
                             },

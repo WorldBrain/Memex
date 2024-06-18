@@ -1,9 +1,11 @@
-import type { User } from 'src/social-integration/types'
 import type SearchStorage from './storage'
-import type { Annotation } from 'src/annotations/types'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
-import type { Annotation as _Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type { Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type {
+    UnifiedSearchParams,
+    UnifiedSearchPaginationParams,
+} from '@worldbrain/memex-common/lib/search/types'
 
 export type SearchResultAnnotation = Annotation & {
     lists: number[]
@@ -25,6 +27,9 @@ export interface SearchResultPage {
     text: string
 }
 
+/**
+ * @deprecated
+ */
 export interface AnnotSearchParams {
     /** Main text to search against annot (pre-processed). */
     query?: string
@@ -73,13 +78,6 @@ export interface AnnotsByPageUrl {
     [pageUrl: string]: Annotation[]
 }
 
-export interface SocialSearchParams extends AnnotSearchParams {
-    usersInc?: User[]
-    usersExc?: User[]
-    hashtagsInc?: string[]
-    hashtagsExc?: string[]
-}
-
 export interface StandardSearchResponse {
     resultsExhausted: boolean
     totalCount?: number
@@ -103,47 +101,6 @@ export interface RemoteSearchInterface {
     }>
 }
 
-export type UnifiedSearchParams = TermsSearchOpts & {
-    query: string
-    terms?: string[]
-    phrases?: string[]
-    fromWhen?: number
-    untilWhen?: number
-    filterByDomains: string[]
-    filterByListIds: number[]
-    filterByPDFs?: boolean
-    filterByVideos?: boolean
-    filterByTweets?: boolean
-    filterByEvents?: boolean
-    omitPagesWithoutAnnotations?: boolean
-}
-
-export interface TermsSearchOpts {
-    /** Set to enable fuzzy startsWith terms matching, instead of exact match. */
-    matchTermsFuzzyStartsWith?: boolean
-    matchPageText?: boolean
-    matchPageTitleUrl?: boolean
-    matchHighlights?: boolean
-    matchNotes?: boolean
-}
-
-export interface UnifiedSearchPaginationParams {
-    skip: number
-    limit: number
-}
-
-export type UnifiedTermsSearchParams = UnifiedSearchParams &
-    UnifiedSearchPaginationParams & {
-        queryPages: (
-            terms: string[],
-            phrases?: string[],
-        ) => Promise<Array<{ id: string; latestTimestamp: number }>>
-        queryAnnotations: (
-            terms: string[],
-            phrases?: string[],
-        ) => Promise<_Annotation[]>
-    }
-
 /**
  * Note that, unlike terms search, blank search does not use the traditional pagination params.
  * Instead it expects the caller to keep a state of the oldest search result so far
@@ -162,29 +119,6 @@ export type UnifiedSearchResult = {
     docs: SearchResultPage[]
     resultsExhausted: boolean
     oldestResultTimestamp: number
-}
-
-export type IntermediarySearchResult = {
-    resultsExhausted: boolean
-    resultDataByPage: ResultDataByPage
-    /** Always null for terms search. */
-    oldestResultTimestamp: number | null
-}
-
-export type ResultDataByPage = Map<string, UnifiedSearchPageResultData>
-
-export type UnifiedSearchPageResultData = {
-    annotations: Annotation[]
-    /**
-     * Contains the latest timestamp associated with the page bookmark or visits. Not annotation.
-     * Used primarily for sorting and display in UI.
-     */
-    latestPageTimestamp: number
-    /**
-     * Contains the oldest timestamp associated with the page, including bookmarks, visits, or annotations.
-     * Used for paging back through blank search results (oldest timestamp of batch N is the upper bound for batch N+1)
-     */
-    oldestTimestamp: number
 }
 
 export type UnifiedSearchLookupData = {

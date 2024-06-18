@@ -1,7 +1,7 @@
 import React from 'react'
 import CopyPaster, { Props as CopyPasterProps } from './CopyPaster'
-import type { UnifiedSearchParams } from 'src/search/background/types'
 import type { Template } from './types'
+import type { UnifiedSearchParams } from '@worldbrain/memex-common/lib/search/types'
 
 export interface Props
     extends Omit<CopyPasterProps, 'renderTemplate' | 'renderPreview'> {

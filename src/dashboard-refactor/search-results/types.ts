@@ -142,7 +142,7 @@ export interface NoteData {
     selector?: Anchor
     isShared?: boolean
     isBulkShareProtected?: boolean
-    color?: RGBAColor
+    color?: string
     isInFocus?: boolean
 }
 

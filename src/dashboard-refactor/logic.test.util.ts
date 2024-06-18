@@ -54,7 +54,7 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
             await storageManager.collection('annotations').createObject({
                 ...annot,
             })
-            if (annot.isShared) {
+            if (annot['isShared']) {
                 await storageManager
                     .collection('sharedAnnotationMetadata')
                     .createObject({
@@ -68,7 +68,7 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
                         id: idCounter++,
                         annotation: annot.url,
                         createdWhen: new Date(),
-                        privacyLevel: annot.isBulkShareProtected
+                        privacyLevel: annot['isBulkShareProtected']
                             ? AnnotationPrivacyLevels.SHARED_PROTECTED
                             : AnnotationPrivacyLevels.SHARED,
                     })
