@@ -437,23 +437,16 @@ export default class PageResultView extends PureComponent<Props> {
         return (
             <TooltipBox
                 tooltipText={
-                    this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX ? (
-                        <span>
-                            Remove from Inbox
-                            <br />
-                            <strong>+ shift + Click</strong> or{' '}
-                            <strong>+ shift + Backspace</strong> to remove
-                            without confirmation
-                        </span>
-                    ) : (
-                        <span>
-                            Remove from Space
-                            <br />
-                            <strong>+ shift + Click</strong> or{' '}
-                            <strong>+ shift + Backspace</strong> to remove
-                            without confirmation
-                        </span>
-                    )
+                    <span>
+                        Remove from{' '}
+                        {this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX
+                            ? 'Inbox'
+                            : 'Space'}
+                        <br />
+                        <strong>+ shift + Click</strong> or{' '}
+                        <strong>+ shift + Backspace</strong> to remove without
+                        confirmation
+                    </span>
                 }
                 placement="bottom"
                 getPortalRoot={this.props.getRootElement}
@@ -1000,8 +993,8 @@ export default class PageResultView extends PureComponent<Props> {
                         tabIndex={-1}
                         hasSpaces={this.displayLists.length > 0}
                     >
-                        {this.props.hoverState != null ||
-                        this.props.isBulkSelected ? (
+                        {(this.props.hoverState != null ||
+                            this.props.isBulkSelected) && (
                             <PageActionBox inPageMode={this.props.inPageMode}>
                                 {this.props.hoverState != null && (
                                     <ExtraButtonsActionBar>
@@ -1014,8 +1007,7 @@ export default class PageResultView extends PureComponent<Props> {
 
                                 {this.renderBulkSelectBtn()}
                             </PageActionBox>
-                        ) : undefined}
-
+                        )}
                         <BlockContent
                             type={this.props.type}
                             normalizedUrl={this.props.normalizedUrl}
