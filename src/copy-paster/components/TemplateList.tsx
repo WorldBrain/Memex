@@ -12,7 +12,7 @@ import {
     Droppable,
     Draggable,
     OnDragEndResponder,
-} from 'react-beautiful-dnd'
+} from '@hello-pangea/dnd'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
