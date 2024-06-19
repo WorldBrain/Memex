@@ -4382,9 +4382,13 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setDragOverListId: EventHandler<'setDragOverListId'> = async ({
+    setDragOverListId: EventHandler<'setDragOverListId'> = ({
         event,
+        previousState,
     }) => {
+        if (event.listId === previousState.listsSidebar.dragOverListId) {
+            return
+        }
         this.emitMutation({
             listsSidebar: { dragOverListId: { $set: event.listId } },
         })

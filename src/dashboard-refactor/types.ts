@@ -52,6 +52,7 @@ import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import type { BulkEditCollection } from 'src/bulk-edit/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
+import type { DragEventHandler } from 'react'
 
 export interface RootState {
     loadState: TaskState
@@ -152,8 +153,8 @@ export interface DropReceivingState {
     wasPageDropped?: boolean
     canReceiveDroppedItems?: boolean
     onDrop(dataTransfer: DataTransfer): void
-    onDragEnter(): void
-    onDragLeave(): void
+    onDragEnter: DragEventHandler
+    onDragLeave: DragEventHandler
 }
 
 export interface SearchResultTextPart {
