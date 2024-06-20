@@ -115,14 +115,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                 isVisible={reorderLineDropReceivingState.isDraggedOver}
                 onDragEnter={reorderLineDropReceivingState.onDragEnter}
                 onDragLeave={reorderLineDropReceivingState.onDragLeave}
-                onDragOver={(e: React.DragEvent) => {
+                onDragOver={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
                 }} // Needed to allow the `onDrop` event to fire
-                onDrop={(e: React.DragEvent) => {
+                onDrop={(e) => {
                     e.preventDefault()
                     reorderLineDropReceivingState.onDrop(e.dataTransfer)
-                    this.props.onListDragEnd(null)
                 }}
                 topItem={topItem}
             />
