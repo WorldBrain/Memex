@@ -5,6 +5,13 @@ import type { UnifiedList } from 'src/annotations/cache/types'
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
+export interface ListTreeInteractions {
+    hasChildren: boolean
+    isTreeToggled: boolean
+    isNestedListInputShown: boolean
+    newNestedListCreateState: TaskState
+}
+
 export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<
         UnifiedList & {
@@ -12,12 +19,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
             wasListDropped?: boolean
         }
     >
-    listTrees: NormalizedState<{
-        isTreeToggled: boolean
-        isNestedListInputShown: boolean
-        newNestedListCreateState: TaskState
-        hasChildren: boolean
-    }>
+    listTrees: NormalizedState<ListTreeInteractions>
     filteredListIds: UnifiedList['unifiedId'][]
     areLocalListsExpanded: boolean
     areFollowedListsExpanded: boolean

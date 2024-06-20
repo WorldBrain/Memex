@@ -24,13 +24,9 @@ import type { DropReceivingState } from '../types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './constants'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { mapTreeTraverse } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import {
-    LIST_REORDER_POST_EL_POSTFIX,
-    LIST_REORDER_PRE_EL_POSTFIX,
-} from '../constants'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { ListTrees } from './list-trees'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -153,94 +149,114 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         }
     }, 100)
 
-    private renderListTrees() {
-        let rootLists = this.props.ownListsGroup.listData.filter(
-            (list) => list.parentUnifiedId == null,
-        )
-
-        // Derived state used to hide nested lists if any of their ancestors are collapsed
-        let listShowFlag = new Map<string, boolean>()
-
-        return rootLists
-            .map((root, index) =>
-                mapTreeTraverse({
-                    root,
-                    strategy: 'dfs',
-                    getChildren: (list) =>
-                        this.props.ownListsGroup.listData
-                            .filter(
-                                (_list) =>
-                                    _list.parentUnifiedId === list.unifiedId,
-                            )
-                            .reverse(),
-                    cb: (list, index2) => {
-                        const parentListTreeState = this.props.listTrees.byId[
-                            list.parentUnifiedId
-                        ]
-                        const currentListTreeState = this.props.listTrees.byId[
-                            list.unifiedId
-                        ]
-
-                        if (list.parentUnifiedId != null) {
-                            const parentShowFlag = listShowFlag.get(
-                                list.parentUnifiedId,
-                            )
-                            if (
-                                this.props.filteredListIds.length === 0 && // Always toggle children shown when filtering lists by query
-                                (!parentShowFlag ||
-                                    !parentListTreeState?.isTreeToggled)
-                            ) {
-                                return null
+    render() {
+        return (
+            <Container
+                onMouseOver={this.props.setSidebarPeekState(true)}
+                spaceSidebarWidth={this.props.spaceSidebarWidth}
+                inPageMode={this.props.isInPageMode}
+            >
+                <GlobalStyle />
+                <SidebarInnerContent>
+                    <TopGroup>
+                        <StaticSidebarItem
+                            icon="feed"
+                            name="Notifications"
+                            isSelected={
+                                this.props.selectedListId ===
+                                SPECIAL_LIST_STRING_IDS.FEED
                             }
-                        }
-                        listShowFlag.set(list.unifiedId, true)
-
-                        // TODO: This renders the new list input directly under the list. It's meant to be rendered after all the list's children.
-                        //  With the current state shape that's quite difficult to do. Maybe need to change to recursive rendering of a node's children type thing
-                        let nestedListInput: JSX.Element = null
-                        if (
-                            currentListTreeState.isTreeToggled &&
-                            currentListTreeState.isNestedListInputShown
-                        ) {
-                            nestedListInput = (
-                                <NestedListInput
-                                    indentSteps={list.pathUnifiedIds.length}
-                                    ref={this.nestedInputBoxRef}
-                                >
-                                    <SidebarItemInput
-                                        onCancelClick={() =>
-                                            this.props.onNestedListInputToggle(
-                                                list.unifiedId,
-                                            )
-                                        }
-                                        onConfirmClick={(name) =>
-                                            this.props.onConfirmNestedListCreate(
-                                                list.unifiedId,
-                                                name,
-                                            )
-                                        }
-                                        onChange={() =>
-                                            this.moveItemIntoHorizontalView(
-                                                this.nestedInputBoxRef.current,
-                                            )
-                                        }
-                                        scrollIntoView={() =>
-                                            this.moveItemIntoHorizontalView(
-                                                this.nestedInputBoxRef.current,
-                                            )
-                                        }
-                                    />
-                                </NestedListInput>
-                            )
-                        }
-                        return (
-                            <React.Fragment key={list.unifiedId}>
-                                {index === 0 &&
-                                    this.renderReorderLine(
-                                        list.unifiedId +
-                                            LIST_REORDER_PRE_EL_POSTFIX,
-                                        true,
-                                    )}
+                            onClick={this.props.switchToFeed}
+                            renderRightSideIcon={
+                                this.props.hasFeedActivity
+                                    ? () => <ActivityBeacon />
+                                    : null
+                            }
+                            forceRightSidePermanentDisplay
+                            spaceSidebarWidth={this.props.spaceSidebarWidth}
+                        />
+                        <StaticSidebarItem
+                            icon="heartEmpty"
+                            name="All Saved"
+                            isSelected={this.props.selectedListId == null}
+                            onClick={() => this.props.onListSelection(null)}
+                            spaceSidebarWidth={this.props.spaceSidebarWidth}
+                        />
+                        <StaticSidebarItem
+                            icon="inbox"
+                            name="Inbox"
+                            isSelected={
+                                this.props.selectedListId ===
+                                SPECIAL_LIST_STRING_IDS.INBOX
+                            }
+                            onClick={() =>
+                                this.props.onListSelection(
+                                    SPECIAL_LIST_STRING_IDS.INBOX,
+                                )
+                            }
+                            renderRightSideIcon={
+                                this.props.inboxUnreadCount > 0
+                                    ? () => (
+                                          <NewItemsCount>
+                                              <NewItemsCountInnerDiv>
+                                                  {this.props.inboxUnreadCount}
+                                              </NewItemsCountInnerDiv>
+                                          </NewItemsCount>
+                                      )
+                                    : null
+                            }
+                            forceRightSidePermanentDisplay
+                            spaceSidebarWidth={this.props.spaceSidebarWidth}
+                        />
+                        <StaticSidebarItem
+                            icon="phone"
+                            name="From Mobile"
+                            isSelected={
+                                this.props.selectedListId ==
+                                SPECIAL_LIST_STRING_IDS.MOBILE
+                            }
+                            onClick={() =>
+                                this.props.onListSelection(
+                                    SPECIAL_LIST_STRING_IDS.MOBILE,
+                                )
+                            }
+                            spaceSidebarWidth={this.props.spaceSidebarWidth}
+                        />
+                    </TopGroup>
+                    <Separator />
+                    <Margin top="10px">
+                        <ListsSidebarSearchBar {...this.props.searchBarProps} />
+                    </Margin>
+                    <ListsSidebarGroup
+                        {...this.props.ownListsGroup}
+                        listsCount={this.props.ownListsGroup.listData.length}
+                        spaceSidebarWidth={this.props.spaceSidebarWidth}
+                        getRootElement={this.props.getRootElement}
+                    >
+                        {this.props.isAddListInputShown && (
+                            <SidebarItemInput
+                                onCancelClick={this.props.onCancelAddList}
+                                onConfirmClick={this.props.onConfirmAddList}
+                                errorMessage={this.props.addListErrorMessage}
+                            />
+                        )}
+                        <ListTrees
+                            lists={this.props.ownListsGroup.listData}
+                            draggedListId={this.props.draggedListId}
+                            areListsBeingFiltered={
+                                this.props.filteredListIds.length > 0
+                            }
+                            listTreeInteractionStates={this.props.listTrees}
+                            initDropReceivingState={
+                                this.props.initDropReceivingState
+                            }
+                            onNestedListInputToggle={
+                                this.props.onNestedListInputToggle
+                            }
+                            onConfirmNestedListCreate={
+                                this.props.onConfirmNestedListCreate
+                            }
+                            renderListItem={(list) => (
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
                                         this.setSidebarItemRefs(
@@ -445,111 +461,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         )
                                     }}
                                 />
-                                {this.renderReorderLine(
-                                    list.unifiedId +
-                                        LIST_REORDER_POST_EL_POSTFIX,
-                                )}
-                                {nestedListInput}
-                            </React.Fragment>
-                        )
-                    },
-                }),
-            )
-            .flat()
-    }
-
-    render() {
-        return (
-            <Container
-                onMouseOver={this.props.setSidebarPeekState(true)}
-                spaceSidebarWidth={this.props.spaceSidebarWidth}
-                inPageMode={this.props.isInPageMode}
-            >
-                <GlobalStyle />
-                <SidebarInnerContent>
-                    <TopGroup>
-                        <StaticSidebarItem
-                            icon="feed"
-                            name="Notifications"
-                            isSelected={
-                                this.props.selectedListId ===
-                                SPECIAL_LIST_STRING_IDS.FEED
-                            }
-                            onClick={this.props.switchToFeed}
-                            renderRightSideIcon={
-                                this.props.hasFeedActivity
-                                    ? () => <ActivityBeacon />
-                                    : null
-                            }
-                            forceRightSidePermanentDisplay
-                            spaceSidebarWidth={this.props.spaceSidebarWidth}
+                            )}
                         />
-                        <StaticSidebarItem
-                            icon="heartEmpty"
-                            name="All Saved"
-                            isSelected={this.props.selectedListId == null}
-                            onClick={() => this.props.onListSelection(null)}
-                            spaceSidebarWidth={this.props.spaceSidebarWidth}
-                        />
-                        <StaticSidebarItem
-                            icon="inbox"
-                            name="Inbox"
-                            isSelected={
-                                this.props.selectedListId ===
-                                SPECIAL_LIST_STRING_IDS.INBOX
-                            }
-                            onClick={() =>
-                                this.props.onListSelection(
-                                    SPECIAL_LIST_STRING_IDS.INBOX,
-                                )
-                            }
-                            renderRightSideIcon={
-                                this.props.inboxUnreadCount > 0
-                                    ? () => (
-                                          <NewItemsCount>
-                                              <NewItemsCountInnerDiv>
-                                                  {this.props.inboxUnreadCount}
-                                              </NewItemsCountInnerDiv>
-                                          </NewItemsCount>
-                                      )
-                                    : null
-                            }
-                            forceRightSidePermanentDisplay
-                            spaceSidebarWidth={this.props.spaceSidebarWidth}
-                        />
-                        <StaticSidebarItem
-                            icon="phone"
-                            name="From Mobile"
-                            isSelected={
-                                this.props.selectedListId ==
-                                SPECIAL_LIST_STRING_IDS.MOBILE
-                            }
-                            onClick={() =>
-                                this.props.onListSelection(
-                                    SPECIAL_LIST_STRING_IDS.MOBILE,
-                                )
-                            }
-                            spaceSidebarWidth={this.props.spaceSidebarWidth}
-                        />
-                    </TopGroup>
-                    <Separator />
-                    <Margin top="10px">
-                        <ListsSidebarSearchBar {...this.props.searchBarProps} />
-                    </Margin>
-                    <ListsSidebarGroup
-                        {...this.props.ownListsGroup}
-                        listsCount={this.props.ownListsGroup.listData.length}
-                        spaceSidebarWidth={this.props.spaceSidebarWidth}
-                        getRootElement={this.props.getRootElement}
-                    >
-                        {this.props.isAddListInputShown && (
-                            <SidebarItemInput
-                                onCancelClick={this.props.onCancelAddList}
-                                onConfirmClick={this.props.onConfirmAddList}
-                                errorMessage={this.props.addListErrorMessage}
-                            />
-                        )}
-                        {this.renderListTrees()}
                     </ListsSidebarGroup>
                     <ListsSidebarGroup
                         {...this.props.followedListsGroup}
