@@ -475,7 +475,11 @@ export default class Ribbon extends Component<Props, State> {
                         <ChatBox>
                             <LoadingIndicator size={30} />
                             <ChatFrame
-                                src={`https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${this.props.currentUser.email}`}
+                                src={`https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${
+                                    this.props.currentUser
+                                        ? this.props.currentUser?.email
+                                        : null
+                                }`}
                                 height={600}
                                 width={500}
                             />
