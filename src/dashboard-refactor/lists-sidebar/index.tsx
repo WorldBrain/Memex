@@ -74,7 +74,6 @@ export interface ListsSidebarProps extends ListsSidebarState {
     currentUser: any
     onConfirmListDelete: (listId: string) => void
     spaceSidebarWidth: string
-    someListIsDragging: boolean
     getRootElement: () => HTMLElement
     isInPageMode: boolean
 }
@@ -113,7 +112,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         )
         return (
             <ReorderLine
-                isActive={this.props.someListIsDragging}
+                isActive={this.props.draggedListId != null}
                 isVisible={reorderLineDropReceivingState.isDraggedOver}
                 onDragEnter={reorderLineDropReceivingState.onDragEnter}
                 onDragLeave={reorderLineDropReceivingState.onDragLeave}

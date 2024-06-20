@@ -319,7 +319,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 selectedListId: null,
                 themeVariant: null,
                 draggedListId: null,
-                someListIsDragging: false,
                 disableMouseLeave: false,
             },
             syncMenu: {
@@ -4398,7 +4397,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 draggedListId: { $set: event.listId },
-                someListIsDragging: { $set: true },
             },
         })
         const crt = this.options.document?.getElementById(DRAG_EL_ID)
@@ -4418,16 +4416,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 draggedListId: { $set: null },
-                someListIsDragging: { $set: false },
             },
         })
     }
 
     dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
         this.emitMutation({
-            listsSidebar: {
-                someListIsDragging: { $set: true },
-            },
             searchResults: { draggedPageId: { $set: event.pageResultId } },
         })
         const crt = this.options.document.getElementById(DRAG_EL_ID)
@@ -4442,12 +4436,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             normalizedPageUrl: page.normalizedUrl,
         }
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
-
-        this.emitMutation({
-            listsSidebar: {
-                someListIsDragging: { $set: false },
-            },
-        })
     }
 
     dropPage: EventHandler<'dropPage'> = async () => {
