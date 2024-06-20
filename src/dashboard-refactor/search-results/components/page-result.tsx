@@ -62,6 +62,7 @@ export interface Props
     searchType: SearchType
     hasNotes: boolean
     isInFocus?: boolean
+    focusLockUntilMouseStart?: boolean
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -102,12 +103,15 @@ export default class PageResultView extends PureComponent<Props> {
     componentDidUpdate(prevProps: Props) {
         if (this.props.isInFocus && !prevProps.isInFocus) {
             this.setupKeyListener()
-            const itemBox = this.itemBoxRef.current
-            if (itemBox && !this.props.hoverState) {
-                itemBox.scrollIntoView({ block: 'center' })
+            if (this.props.hoverState !== 'main-content') {
+                const itemBox = this.itemBoxRef.current
+                if (itemBox && !this.props.hoverState) {
+                    itemBox.scrollIntoView({ block: 'center' })
+                }
             }
         } else if (!this.props.isInFocus && prevProps.isInFocus) {
             this.removeKeyListener()
+            // this.props.onUnhover(null)
         }
     }
 
@@ -118,6 +122,7 @@ export default class PageResultView extends PureComponent<Props> {
         tutorialId: null,
         showFooterBar: false,
         searchTermMatches: null,
+        hoveredMouse: false,
     }
 
     componentDidMount() {
@@ -136,6 +141,13 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         this.getMatches(this.props.text)
+    }
+
+    private isAnyModalOpen() {
+        const isOpen =
+            this.props.listPickerShowStatus != 'hide' ||
+            this.props.isCopyPasterShown
+        return isOpen
     }
 
     updateMatchingTextContainerHeight = async () => {
@@ -301,7 +313,11 @@ export default class PageResultView extends PureComponent<Props> {
                     placement={'bottom-end'}
                     offsetX={10}
                     strategy={'fixed'}
-                    closeComponent={this.props.onCopyPasterBtnClick}
+                    closeComponent={(event) => {
+                        this.props.onCopyPasterBtnClick(event)
+                        this.props.onUnhover(event)
+                        this.setState({ hoveredMouse: false })
+                    }}
                     getPortalRoot={this.props.getRootElement}
                 >
                     {this.props.renderPageCitations()}
@@ -317,11 +333,14 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerBarRef.current}
                     placement={'bottom-end'}
                     offsetX={10}
-                    closeComponent={(event) =>
+                    closeComponent={(event) => {
                         this.listPickerBtnClickHandler(event)
-                    }
+                        this.props.onUnhover(event)
+                        this.setState({ hoveredMouse: false })
+                    }}
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
+                    instaClose
                 >
                     {this.props.renderSpacePicker()}
                 </PopoutBox>
@@ -334,11 +353,14 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerButtonRef.current}
                     placement={'bottom-start'}
                     offsetX={10}
-                    closeComponent={(event) =>
+                    closeComponent={(event) => {
                         this.listPickerBtnClickHandler(event)
-                    }
+                        this.props.onUnhover(event)
+                        this.setState({ hoveredMouse: false })
+                    }}
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
+                    instaClose
                 >
                     {this.props.renderSpacePicker()}
                 </PopoutBox>
@@ -415,23 +437,16 @@ export default class PageResultView extends PureComponent<Props> {
         return (
             <TooltipBox
                 tooltipText={
-                    this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX ? (
-                        <span>
-                            Remove from Inbox
-                            <br />
-                            <strong>+ shift + Click</strong> or{' '}
-                            <strong>+ shift + Backspace</strong> to remove
-                            without confirmation
-                        </span>
-                    ) : (
-                        <span>
-                            Remove from Space
-                            <br />
-                            <strong>+ shift + Click</strong> or{' '}
-                            <strong>+ shift + Backspace</strong> to remove
-                            without confirmation
-                        </span>
-                    )
+                    <span>
+                        Remove from{' '}
+                        {this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX
+                            ? 'Inbox'
+                            : 'Space'}
+                        <br />
+                        <strong>+ shift + Click</strong> or{' '}
+                        <strong>+ shift + Backspace</strong> to remove without
+                        confirmation
+                    </span>
                 }
                 placement="bottom"
                 getPortalRoot={this.props.getRootElement}
@@ -462,8 +477,9 @@ export default class PageResultView extends PureComponent<Props> {
                 tooltipText={
                     <span>
                         Multi Select Items
+                        {/* }
                         <br />
-                        <strong>Shift+Enter</strong>when item in focus
+                        <strong>Shift+Enter</strong>when item in focus */}
                     </span>
                 }
                 placement="bottom"
@@ -911,12 +927,44 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 
+    hoverTimeout = null
+
+    onMainContentHover = (event) => {
+        if (!this.props.focusLockUntilMouseStart) {
+            this.setState({ hoveredMouse: true })
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+                this.hoverTimeout = null
+                this.props.onMainContentHover(event)
+                return
+            }
+
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+            }
+            this.hoverTimeout = setTimeout(() => {
+                this.props.onMainContentHover(event)
+            }, 300)
+        }
+    }
+
+    onUnhover = (event) => {
+        if (!this.props.focusLockUntilMouseStart && !this.isAnyModalOpen()) {
+            this.setState({ hoveredMouse: false })
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+                this.hoverTimeout = null
+            }
+            this.props.onUnhover(event)
+        }
+    }
+
     render() {
         return (
             <ItemBox
-                onMouseEnter={this.props.onMainContentHover}
-                onMouseOver={this.props.onMainContentHover}
-                onMouseLeave={this.props.onUnhover}
+                onMouseEnter={this.onMainContentHover}
+                // onMouseOver={this.props.onMainContentHover}
+                onMouseLeave={this.onUnhover}
                 active={this.props.activePage}
                 firstDivProps={{
                     // onMouseLeave: this.props.onUnhover,
@@ -925,16 +973,16 @@ export default class PageResultView extends PureComponent<Props> {
                     onDragEnd:
                         !this.props.isCopyPasterShown && this.props.onPageDrop,
                 }}
-                hoverState={this.props.isInFocus}
+                hoverState={this.props.isInFocus || this.state.hoveredMouse}
                 onRef={this.itemBoxRef} // Passing the ref as a prop
             >
-                {this.props.uploadedPdfLinkLoadState === 'running' && (
-                    <LoadingBox>
-                        <LoadingIndicator size={30} />
-                        Loading PDF
-                    </LoadingBox>
-                )}
                 <StyledPageResult>
+                    {this.props.uploadedPdfLinkLoadState === 'running' && (
+                        <LoadingBox>
+                            <LoadingIndicator size={30} />
+                            Loading PDF
+                        </LoadingBox>
+                    )}
                     <PageContentBox
                         // onMouseOver={this.props.onMainContentHover}
                         // onMouseLeave={
@@ -945,9 +993,9 @@ export default class PageResultView extends PureComponent<Props> {
                         tabIndex={-1}
                         hasSpaces={this.displayLists.length > 0}
                     >
-                        {this.props.hoverState != null ||
-                        this.props.isBulkSelected ? (
-                            <PageActionBox>
+                        {(this.props.hoverState != null ||
+                            this.props.isBulkSelected) && (
+                            <PageActionBox inPageMode={this.props.inPageMode}>
                                 {this.props.hoverState != null && (
                                     <ExtraButtonsActionBar>
                                         {this.renderEditButton()}
@@ -959,8 +1007,7 @@ export default class PageResultView extends PureComponent<Props> {
 
                                 {this.renderBulkSelectBtn()}
                             </PageActionBox>
-                        ) : undefined}
-
+                        )}
                         <BlockContent
                             type={this.props.type}
                             normalizedUrl={this.props.normalizedUrl}
@@ -986,6 +1033,40 @@ export default class PageResultView extends PureComponent<Props> {
                                     />
                                 ) : null
                             }}
+                            renderSpacePicker={() => {
+                                if (this.displayLists.length > 0) {
+                                    return (
+                                        <ListSegmentContainer>
+                                            <ListsSegment
+                                                lists={this.displayLists}
+                                                onListClick={(listId) => {
+                                                    this.props.filterbyList(
+                                                        listId,
+                                                    )
+                                                }}
+                                                onEditBtnClick={
+                                                    this.props
+                                                        .onListPickerBarBtnClick
+                                                }
+                                                renderSpacePicker={
+                                                    this.props
+                                                        .listPickerShowStatus ===
+                                                    'lists-bar'
+                                                        ? this.renderSpacePicker
+                                                        : null
+                                                }
+                                                filteredbyListID={
+                                                    this.props.filteredbyListID
+                                                }
+                                                padding={'0px 20px 0px 20px'}
+                                                spacePickerButtonRef={
+                                                    this.spacePickerBarRef
+                                                }
+                                            />
+                                        </ListSegmentContainer>
+                                    )
+                                }
+                            }}
                             memexIcon={MemexIcon}
                             getRootElement={this.props.getRootElement}
                             onEditTitleChange={(changedTitle) => {
@@ -1003,28 +1084,7 @@ export default class PageResultView extends PureComponent<Props> {
                             editTitleState={this.props.editTitleState}
                         />
                     </PageContentBox>
-                    {this.displayLists.length > 0 && (
-                        <ListSegmentContainer>
-                            <ListsSegment
-                                lists={this.displayLists}
-                                onListClick={(listId) => {
-                                    this.props.filterbyList(listId)
-                                }}
-                                onEditBtnClick={
-                                    this.props.onListPickerBarBtnClick
-                                }
-                                renderSpacePicker={
-                                    this.props.listPickerShowStatus ===
-                                    'lists-bar'
-                                        ? this.renderSpacePicker
-                                        : null
-                                }
-                                filteredbyListID={this.props.filteredbyListID}
-                                padding={'0px 20px 0px 20px'}
-                                spacePickerButtonRef={this.spacePickerBarRef}
-                            />
-                        </ListSegmentContainer>
-                    )}
+
                     {this.props.searchType !== 'notes' &&
                         this.props.searchTerms?.length > 0 &&
                         this.props.text?.length > 0 &&
@@ -1048,9 +1108,9 @@ export default class PageResultView extends PureComponent<Props> {
                         shouldShow={
                             (this.props.hoverState === 'main-content' ||
                                 this.props.isInFocus) &&
-                            this.props.editTitleState == null
+                            !this.props.editTitleState
                         }
-                        slimVersion={this.props.hasNotes}
+                        inFocus={this.props.isInFocus}
                     >
                         <ItemBoxBottom
                             // firstDivProps={{
@@ -1090,41 +1150,54 @@ export default class PageResultView extends PureComponent<Props> {
     }
 }
 
-const slideInFromBottom = keyframes`
-  0% {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  60% {
-    transform: translateY(0%);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-`
+// const slideInFromBottom = keyframes`
+//   0% {
+//     transform: translateY(100%);
+//     opacity: 0;
+//   }
+//   60% {
+//     transform: translateY(0%);
+//     opacity: 0.9;
+//   }
+//   100% {
+//     transform: translateY(0);
+//     opacity: 1;
+//   }
+// `
 
-const slideOutToBottom = keyframes`
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  40% {
-    transform: translateY(0%);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translateY(100%);
+// const slideOutToBottom = keyframes`
+//   0% {
+//     transform: translateY(0);
+//     opacity: 1;
+//   }
+//   40% {
+//     transform: translateY(0%);
+//     opacity: 0.9;
+//   }
+//   100% {
+//     transform: translateY(100%);
+//     opacity: 0;
+//   }
+// `
+
+const slideInFromBottom = keyframes`
+  from {
     opacity: 0;
+    margin-top: -10px;
+  }
+  to {
+    opacity: 1;
+    margin-top: 0px;
   }
 `
 
 const FooterBar = styled.div<{
     shouldShow: boolean
-    slimVersion: boolean
+    inFocus: boolean
     inPageMode?: boolean
+    inTitleEditMode?: boolean
 }>`
+    display: none;
     bottom: 0;
     width: 100%;
     z-index: 999999;
@@ -1133,30 +1206,37 @@ const FooterBar = styled.div<{
     background: unset;
     backdrop-filter: unset;
     margin-top: -5px;
+    position: relative;
+    opacity: 0;
+    background: ${(props) => props.theme.colors.black}98;
+    backdrop-filter: blur(5px);
 
     ${(props) =>
-        props.inPageMode &&
+        props.inFocus &&
         css`
-            backdrop-filter: unset;
-            background: unset;
+            animation: ${slideInFromBottom} 1s cubic-bezier(0.22, 0.61, 0.36, 1)
+                forwards;
+            position: relative;
+            display: flex;
         `};
     ${(props) =>
-        (props.slimVersion || true) &&
+        props.inTitleEditMode &&
         css`
             display: flex;
             position: relative;
-
-            backdrop-filter: blur(5px);
-            background: ${(props) => props.theme.colors.black0}95;
-            /* animation: ${slideOutToBottom} 0.2s
-                cubic-bezier(0.22, 0.61, 0.36, 1) forwards; */
         `};
     ${(props) =>
         props.shouldShow &&
         css`
+            animation: ${slideInFromBottom} 0.1s
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
             display: flex;
-            /* animation: ${slideInFromBottom} 0.2s
-                cubic-bezier(0.22, 0.61, 0.36, 1) forwards; */
+        `};
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            backdrop-filter: unset;
+            background: ${(props) => props.theme.colors.black};
         `};
 `
 
@@ -1188,6 +1268,7 @@ const BulkSelectButtonBox = styled.div`
     justify-content: center;
     width: 28px;
     height: 28px;
+    user-select: none; // Prevent text selection
 `
 
 const StyledPageResult = styled.div`
@@ -1195,6 +1276,11 @@ const StyledPageResult = styled.div`
     flex-direction: column;
     position: relative;
     border-radius: 12px;
+
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale1
+            : props.theme.colors.greyScale3};
 
     ${(props) =>
         props.theme.variant === 'light' &&
@@ -1234,7 +1320,9 @@ const LoadingBox = styled.div`
     z-index: 10000000;
 `
 
-const PageActionBox = styled.div`
+const PageActionBox = styled.div<{
+    inPageMode: boolean
+}>`
     display: flex;
     justify-content: space-between;
     grid-gap: 5px;
@@ -1247,6 +1335,13 @@ const PageActionBox = styled.div`
     backdrop-filter: blur(5px);
     border-radius: 8px;
     align-items: center;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            background: ${(props) => props.theme.colors.black};
+            backdrop-filter: none;
+        `}
 `
 
 const NotesCounterContainer = styled.div`
@@ -1266,16 +1361,17 @@ const NotesCounterTitle = styled.span`
 
 const NoteCounter = styled.span`
     color: ${(props) => props.theme.colors.black};
+    background: ${(props) => props.theme.colors.headerGradient};
+
     font-weight: 400;
     font-size: 12px;
     margin-left: 5px;
     border-radius: 30px;
     padding: 2px 10px;
-    background: ${(props) => props.theme.colors.headerGradient};
     text-align: center;
     position: absolute;
     right: 10px;
-    bottom: 8px;
+    bottom: 10px;
     cursor: pointer;
     z-index: 9999991; // to be above the footerbar
 `
@@ -1398,7 +1494,4 @@ const TooltipContent = styled.div`
     justify-content: center;
 `
 
-const ListSegmentContainer = styled.div`
-    margin-bottom: 10px;
-    margin-top: -10px;
-`
+const ListSegmentContainer = styled.div``

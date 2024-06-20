@@ -2,7 +2,6 @@ import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import browser from 'webextension-polyfill'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
-import { createGlobalStyle } from 'styled-components'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -65,12 +64,8 @@ import {
     ColorThemeKeys,
     IconKeys,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import PageCitations from 'src/citations/PageCitations'
-import CopyPaster from 'src/copy-paster/components/CopyPaster'
-import { PageSearchCopyPaster } from 'src/copy-paster'
 import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
-import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
@@ -588,9 +583,14 @@ export class DashboardContainer extends StatefulUIElement<
                                 <PrimaryAction
                                     icon="arrowRight"
                                     padding="6px"
-                                    onClick={() =>
+                                    onClick={() => {
                                         this.notesSidebarRef.current.hideSidebar()
-                                    }
+                                        this.processEvent('setActivePage', {
+                                            activeDay: undefined,
+                                            activePageID: undefined,
+                                            activePage: false,
+                                        })
+                                    }}
                                     type="glass"
                                     size="medium"
                                 />
@@ -812,12 +812,26 @@ export class DashboardContainer extends StatefulUIElement<
                 onListDragEnd={(listId) => (e) =>
                     this.processEvent('dropList', { listId })}
                 initDropReceivingState={(listId) => ({
-                    onDragEnter: () =>
-                        this.processEvent('setDragOverListId', { listId }),
-                    onDragLeave: () =>
+                    onDragEnter: (e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        // Needed to push this op back on the event queue, so it fires after the previous
+                        //  list item's `onDropLeave` event
+                        setTimeout(
+                            () =>
+                                this.processEvent('setDragOverListId', {
+                                    listId,
+                                }),
+                            0,
+                        )
+                    },
+                    onDragLeave: (e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
                         this.processEvent('setDragOverListId', {
                             listId: undefined,
-                        }),
+                        })
+                    },
                     onDrop: (dataTransfer) =>
                         this.processEvent('dropOnListItem', {
                             listId,
@@ -952,6 +966,20 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('getHighlightColorSettings', null)
                 }
                 highlightColorSettings={this.state.highlightColors}
+                setAnnotationInFocus={(unifiedId: string) => {
+                    if (unifiedId == null) {
+                        this.processEvent('changeFocusItem', {
+                            item: {
+                                id: null,
+                                type: null,
+                            },
+                        })
+                    } else {
+                        this.processEvent('changeFocusItem', {
+                            item: { id: unifiedId, type: 'note' },
+                        })
+                    }
+                }}
                 getListDetailsById={this.getListDetailsById}
                 youtubeService={this.youtubeService}
                 toggleSortMenuShown={() =>
@@ -1061,6 +1089,13 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }}
                 spaceSearchSuggestions={this.state.spaceSearchSuggestions}
+                shiftSelectItems={(itemId: string, type: 'notes' | 'pages') =>
+                    this.processEvent('shiftSelectItems', {
+                        itemId: itemId,
+                        type: type,
+                    })
+                }
+                focusLockUntilMouseStart={this.state.focusLockUntilMouseStart}
                 pageInteractionProps={{
                     onClick: (day, pageResultId) => async (event) => {
                         this.processEvent('clickPageResult', {
@@ -1168,20 +1203,10 @@ export class DashboardContainer extends StatefulUIElement<
                             ].isShareMenuShown,
                         }),
                     onMainContentHover: (day, pageId) => () => {
-                        if (this.state.focusLockUntilMouseStart) {
-                            return
-                        }
-                        this.processEvent('setPageHover', {
-                            day,
+                        this.processEvent('onMainContentHover', {
                             pageResultId: pageId,
+                            day,
                             hover: 'main-content',
-                        })
-
-                        this.processEvent('changeFocusItem', {
-                            item: {
-                                id: pageId,
-                                type: 'page',
-                            },
                         })
                     },
                     onFooterHover: (day, pageId) => () =>
@@ -1203,14 +1228,14 @@ export class DashboardContainer extends StatefulUIElement<
                             hover: 'lists',
                         }),
                     onUnhover: (day, pageId) => () => {
+                        // if (this.state.focusLockUntilMouseStart) {
+                        //     return
+                        // }
                         this.processEvent('setPageHover', {
                             day,
                             pageResultId: pageId,
                             hover: null,
                         })
-                        if (this.state.focusLockUntilMouseStart) {
-                            return
-                        }
                         this.processEvent('changeFocusItem', {
                             item: {
                                 id: null,

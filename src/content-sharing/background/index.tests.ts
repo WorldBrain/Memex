@@ -307,6 +307,7 @@ export class SharingTestHelper {
             {
                 annotationUrl: localId,
                 shareToParentPageLists: options.shareToParentPageLists,
+                excludeFromLists: !options.shareToParentPageLists,
             },
         )
         const remoteIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
@@ -468,26 +469,6 @@ export class SharingTestHelper {
             )
             sharingStates[this.annotations[annotationId].localId] = sharingState
         }
-        this._expectAnnotationSharingStates(
-            sharingStates,
-            options.expectedSharingStates,
-        )
-    }
-
-    async unshareAnnotations(
-        setup: BackgroundIntegrationTestSetup,
-        options: {
-            ids: number[]
-            expectedSharingStates: AnnotationSharingStates
-        },
-    ) {
-        const {
-            sharingStates,
-        } = await setup.backgroundModules.contentSharing.unshareAnnotations({
-            annotationUrls: options.ids.map(
-                (id) => this.annotations[id].localId,
-            ),
-        })
         this._expectAnnotationSharingStates(
             sharingStates,
             options.expectedSharingStates,

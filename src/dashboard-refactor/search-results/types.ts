@@ -142,7 +142,7 @@ export interface NoteData {
     selector?: Anchor
     isShared?: boolean
     isBulkShareProtected?: boolean
-    color?: RGBAColor
+    color?: string
     isInFocus?: boolean
 }
 
@@ -323,6 +323,10 @@ export type Events = UIEvent<{
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
+    shiftSelectItems: {
+        itemId: string
+        type: 'notes' | 'pages'
+    }
     onMatchingTextToggleClick: PageEventArgs
     setActivePage: {
         activePage: boolean
@@ -332,6 +336,7 @@ export type Events = UIEvent<{
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
     setPageHover: PageEventArgs & { hover: ResultHoverState }
+    onMainContentHover: PageEventArgs & { hover: ResultHoverState }
     removePageFromList: PageEventArgs
     clearInbox: null
     bulkSelectItems: {

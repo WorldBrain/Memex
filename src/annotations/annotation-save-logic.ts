@@ -129,6 +129,7 @@ export async function createAnnotation({
                 shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
+                    excludeFromLists: !shareOpts?.shouldShare ?? true,
                     shareToParentPageLists: shareOpts?.shouldShare ?? false,
                     skipPrivacyLevelUpdate: !!shareOpts?.shouldShare ?? true,
                 })
@@ -144,6 +145,7 @@ export async function createAnnotation({
                 shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
+                    excludeFromLists: false,
                     shareToParentPageLists: false,
                     skipPrivacyLevelUpdate: true,
                 })
@@ -234,6 +236,7 @@ export async function updateAnnotation({
                         remoteAnnotationId,
                         annotationUrl: annotationData.localId,
                         shareToParentPageLists: true,
+                        excludeFromLists: false,
                     }),
                 !shareOpts?.skipPrivacyLevelUpdate &&
                     contentSharingBG.setAnnotationPrivacyLevel({

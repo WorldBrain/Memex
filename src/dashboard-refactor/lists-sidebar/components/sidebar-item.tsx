@@ -1,8 +1,6 @@
 import React from 'react'
 import { fonts } from 'src/dashboard-refactor/styles'
 import styled, { css } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import type { DropReceivingState } from 'src/dashboard-refactor/types'
 
 export interface Props {
@@ -38,14 +36,6 @@ export default class ListsSidebarItem extends React.PureComponent<
 > {
     state: State = { isHovering: false, canDisableHover: false }
 
-    private handleDragEnter: React.DragEventHandler = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        // Needed to push this op back on the event queue, so it fires after the previous
-        //  list item's `onDropLeave` event
-        setTimeout(() => this.props.dropReceivingState?.onDragEnter(), 0)
-    }
-
     private handleDrop: React.DragEventHandler = (e) => {
         e.preventDefault()
         if (!this.props.dropReceivingState?.canReceiveDroppedItems) {
@@ -75,7 +65,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                     })
                 }}
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
-                onDragEnter={this.handleDragEnter}
+                onDragEnter={this.props.dropReceivingState?.onDragEnter}
                 onDragLeave={this.props.dropReceivingState?.onDragLeave}
                 onDragOver={(e) => {
                     e.preventDefault()

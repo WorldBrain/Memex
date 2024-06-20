@@ -55,49 +55,6 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         this.setState({ link: getPageShareUrl({ remotePageInfoId }) })
     }
 
-    private shareAllAnnotations = async () => {
-        try {
-            const {
-                sharingStates,
-            } = await this.props.contentSharingBG.shareAnnotations({
-                annotationUrls: this.annotationUrls,
-                shareToParentPageLists: true,
-            })
-            this.props.postBulkShareHook?.(sharingStates)
-        } catch (err) {}
-    }
-
-    private unshareAllAnnotations = async () => {
-        try {
-            const {
-                sharingStates,
-            } = await this.props.contentSharingBG.unshareAnnotations({
-                annotationUrls: this.annotationUrls,
-            })
-            this.props.postBulkShareHook?.(sharingStates)
-        } catch (err) {}
-    }
-
-    private handleSetShared = async () => {
-        await executeReactStateUITask<State, 'shareState'>(
-            this,
-            'shareState',
-            async () => {
-                await this.shareAllAnnotations()
-            },
-        )
-    }
-
-    private handleSetPrivate = async () => {
-        await executeReactStateUITask<State, 'shareState'>(
-            this,
-            'shareState',
-            async () => {
-                await this.unshareAllAnnotations()
-            },
-        )
-    }
-
     render() {
         return null
         // <ShareAnnotationMenu

@@ -1390,28 +1390,27 @@ export class SidebarContainerLogic extends UILogic<
 
         const user = await authBG.getCurrentUser()
         if (user != null) {
-            if (!user.displayName?.length) {
-                const userProfile = await authBG.getUserProfile()
-                if (!userProfile?.displayName?.length) {
-                    setDisplayNameModalShown?.(true)
-                    this.emitMutation({
-                        showDisplayNameSetupModal: { $set: true },
-                    })
-                    return false
-                }
-            }
+            // if (!user.displayName?.length) {
+            //     const userProfile = await authBG.getUserProfile()
+            //     if (!userProfile?.displayName?.length) {
+            //         setDisplayNameModalShown?.(true)
+            //         this.emitMutation({
+            //             showDisplayNameSetupModal: { $set: true },
+            //         })
+            //         return false
+            //     }
+            // }
 
-            setLoginModalShown?.(false)
-            setDisplayNameModalShown?.(false)
+            // setDisplayNameModalShown?.(false)
             this.emitMutation({
                 annotationSharingAccess: { $set: 'sharing-allowed' },
             })
             return true
+        } else {
+            setLoginModalShown(true)
+            this.emitMutation({ showLoginModal: { $set: true } })
+            return false
         }
-
-        setLoginModalShown?.(true)
-        this.emitMutation({ showLoginModal: { $set: true } })
-        return false
     }
 
     adjustSidebarWidth: EventHandler<'adjustSidebarWidth'> = ({ event }) => {

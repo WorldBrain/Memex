@@ -131,6 +131,7 @@ const LabelContainer = styled.label<{ zIndex?: number; width: string }>`
     width: ${(props) => (props.width ? props.width : '100%')};
     cursor: pointer;
     z-index: ${(props) => props.zIndex};
+    user-select: none; // Prevent text selection
 `
 
 const InputContainer = styled.input`

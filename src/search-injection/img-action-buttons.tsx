@@ -24,16 +24,18 @@ import * as constants from './constants'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { blobToDataURL } from 'src/util/blob-utils'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 interface RootProps {
     rootEl: HTMLElement
-    syncSettingsBG: RemoteSyncSettingsInterface
-    syncSettings: SyncSettingsStore<'openAI'>
+    syncSettings: SyncSettingsStore<'betaFeatures'>
     annotationsFunctions: any
     browserAPIs: Browser
     contentScriptsBG: ContentScriptsInterface<'caller'>
     imageUrl: string
     imageData: string
+    removeElement: () => void
+    disableImageInjection: () => void
 }
 
 interface RootState {
@@ -62,32 +64,78 @@ class Root extends React.Component<RootProps, RootState> {
             <StyleSheetManager target={props.rootEl}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
                     <ParentContainer ref={this.parentContainerRef}>
-                        <PrimaryAction
-                            label="Analzye"
-                            icon="stars"
-                            type="glass"
-                            size={'small'}
-                            onClick={async (event) => {
-                                await this.props.annotationsFunctions.analyseImageAsWithAI(
-                                    this.props.imageData,
-                                )
-                                event.stopPropagation()
-                                event.preventDefault()
-                            }}
-                        />
-                        <PrimaryAction
-                            label="Save"
-                            icon="heartFull"
-                            type="glass"
-                            size={'small'}
-                            onClick={async (event) => {
-                                await this.props.annotationsFunctions.saveImageAsNewNote(
-                                    this.props.imageData,
-                                )
-                                event.stopPropagation()
-                                event.preventDefault()
-                            }}
-                        />
+                        <TooltipBox
+                            getPortalRoot={() => this.props.rootEl}
+                            tooltipText={
+                                <span>
+                                    Remove for this page session
+                                    <br /> <strong>Shift</strong>Click to
+                                    disable completely. <br /> Reenable via Beta
+                                    Features Settings
+                                </span>
+                            }
+                            placement="bottom"
+                        >
+                            <PrimaryAction
+                                icon="removeX"
+                                type="glass"
+                                size={'small'}
+                                onClick={async (event) => {
+                                    event.stopPropagation()
+                                    event.preventDefault()
+
+                                    if (event.shiftKey) {
+                                        this.props.disableImageInjection()
+                                    } else {
+                                        this.props.removeElement()
+                                    }
+                                }}
+                                padding={'0 5px'}
+                                iconColor={'white'}
+                            />
+                        </TooltipBox>
+                        <TooltipBox
+                            getPortalRoot={() => this.props.rootEl}
+                            tooltipText="Analyze with AI"
+                            placement="bottom"
+                        >
+                            <PrimaryAction
+                                label="Analzye"
+                                icon="stars"
+                                type="glass"
+                                size={'small'}
+                                onClick={async (event) => {
+                                    await this.props.annotationsFunctions.analyseImageAsWithAI(
+                                        this.props.imageData,
+                                    )
+                                    event.stopPropagation()
+                                    event.preventDefault()
+                                }}
+                                iconColor={'white'}
+                                fontColor={'white'}
+                            />
+                        </TooltipBox>
+                        <TooltipBox
+                            getPortalRoot={() => this.props.rootEl}
+                            tooltipText="Save to Memex"
+                            placement="bottom"
+                        >
+                            <PrimaryAction
+                                label="Save"
+                                icon="heartEmpty"
+                                type="glass"
+                                size={'small'}
+                                onClick={async (event) => {
+                                    await this.props.annotationsFunctions.saveImageAsNewNote(
+                                        this.props.imageData,
+                                    )
+                                    event.stopPropagation()
+                                    event.preventDefault()
+                                }}
+                                iconColor={'white'}
+                                fontColor={'white'}
+                            />
+                        </TooltipBox>
                     </ParentContainer>
                 </ThemeProvider>
             </StyleSheetManager>
@@ -96,18 +144,18 @@ class Root extends React.Component<RootProps, RootState> {
 }
 
 export const handleRenderImgActionButtons = async (
-    syncSettings: SyncSettingsStore<'openAI'>,
-    syncSettingsBG: RemoteSyncSettingsInterface,
+    syncSettings: SyncSettingsStore<'betaFeatures'>,
     annotationsFunctions: any,
     browserAPIs: Browser,
     imageElements: HTMLCollectionOf<HTMLImageElement>,
     contentScriptsBG: ContentScriptsInterface<'caller'>,
 ) => {
+    let shouldShow = true
     if (imageElements.length === 0) {
         return
     }
 
-    const renderComponent = (imageElement, target, index) => {
+    const renderComponent = (imageElement, target, index, isFullScreen) => {
         const existingButton = document.getElementById(
             constants.REACT_ROOTS.imgActionButtons + '-' + index,
         )
@@ -118,7 +166,16 @@ export const handleRenderImgActionButtons = async (
 
         // Create a span to wrap the imageElement
         const wrapperSpan = document.createElement('span')
-        wrapperSpan.style.display = 'inline-block' // Ensure the span does not break the flow
+        wrapperSpan.style.display = 'flex' // Use flexbox for alignment
+        wrapperSpan.style.justifyContent = 'center' // Center content horizontally
+        wrapperSpan.style.alignItems = 'center' // Center content vertically
+        if (isFullScreen) {
+            wrapperSpan.style.width = '100vw' // Span takes full width
+            wrapperSpan.style.height = '100vh' // Span takes full width
+        } else {
+            wrapperSpan.style.width = '100%' // Span takes full width
+            wrapperSpan.style.height = '100%' // Span takes full width
+        }
         wrapperSpan.style.position = 'relative' // Positioning context for the absolute positioned target
 
         // Insert the wrapper before the imageElement in the DOM
@@ -137,16 +194,22 @@ export const handleRenderImgActionButtons = async (
 
     for (let i = 0; i < imageElements.length; i++) {
         const target = document.createElement('span')
+
         target.setAttribute(
             'id',
             constants.REACT_ROOTS.imgActionButtons + '-' + i,
         )
 
         let element = imageElements[i]
+
         let imageUrl = null
 
         if (element.src) {
             imageUrl = element.src
+        }
+
+        if (element.width < 100 || element.height < 100) {
+            continue
         }
 
         if (imageUrl == null) {
@@ -172,6 +235,25 @@ export const handleRenderImgActionButtons = async (
             continue
         }
 
+        let renderTimeout
+        let isFullScreen = false
+
+        let elementRect, elementTopRightX, elementTopRightY, windowWidth
+
+        if (window.location.href.match(/\.(jpeg|jpg|gif|png|svg)$/) !== null) {
+            elementRect = element.getBoundingClientRect()
+            elementTopRightX = elementRect.right
+            elementTopRightY = elementRect.top
+            windowWidth = window.innerWidth
+            isFullScreen = true
+        } else {
+            elementTopRightX = 0
+            elementTopRightY = 0
+            windowWidth = 0
+        }
+
+        renderComponent(element, target, i, isFullScreen)
+
         const arrayOfSpecialCases = ['https://www.google.com/search?']
 
         const currentUrl = window.location.href
@@ -184,28 +266,40 @@ export const handleRenderImgActionButtons = async (
             }
         }
 
-        renderComponent(element, target, i)
-
-        let renderTimeout
-
         element.onmouseenter = () => {
-            renderTimeout = setTimeout(() => {
-                ReactDOM.render(
-                    <RootPosContainer>
-                        <Root
-                            rootEl={target}
-                            syncSettings={syncSettings}
-                            annotationsFunctions={annotationsFunctions}
-                            browserAPIs={browserAPIs}
-                            syncSettingsBG={syncSettingsBG}
-                            contentScriptsBG={contentScriptsBG}
-                            imageUrl={imageUrl}
-                            imageData={imageData}
-                        />
-                    </RootPosContainer>,
-                    target,
-                )
-            }, 500) // Delay of 500 milliseconds
+            if (shouldShow) {
+                renderTimeout = setTimeout(() => {
+                    ReactDOM.render(
+                        <RootPosContainer
+                            top={elementTopRightY}
+                            right={windowWidth - elementTopRightX}
+                        >
+                            <Root
+                                rootEl={target}
+                                syncSettings={syncSettings}
+                                annotationsFunctions={annotationsFunctions}
+                                browserAPIs={browserAPIs}
+                                contentScriptsBG={contentScriptsBG}
+                                imageUrl={imageUrl}
+                                imageData={imageData}
+                                removeElement={() => {
+                                    ReactDOM.unmountComponentAtNode(target)
+                                    shouldShow = false
+                                }}
+                                disableImageInjection={async () => {
+                                    ReactDOM.unmountComponentAtNode(target)
+                                    await syncSettings.betaFeatures.set(
+                                        'imageOverlay',
+                                        false,
+                                    )
+                                    shouldShow = false
+                                }}
+                            />
+                        </RootPosContainer>,
+                        target,
+                    )
+                }, 500) // Delay of 500 milliseconds
+            }
         }
 
         element.onmouseleave = (event) => {
@@ -218,11 +312,14 @@ export const handleRenderImgActionButtons = async (
     }
 }
 
-const RootPosContainer = styled.div`
+const RootPosContainer = styled.div<{
+    top: number
+    right: number
+}>`
     position: absolute;
-    top: 5px;
+    top: ${(props) => props.top + 5}px;
+    right: ${(props) => props.right + 5}px;
     padding: 5px;
-    right: 5px;
 `
 
 const ParentContainer = styled.div<{}>`

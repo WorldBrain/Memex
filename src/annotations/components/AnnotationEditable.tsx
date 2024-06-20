@@ -60,6 +60,7 @@ export interface NoteProps extends AnnotationProps {
 }
 
 export interface AnnotationProps {
+    compactVersion?: boolean
     zIndex?: number
     tags: string[]
     lists: number[]
@@ -84,6 +85,7 @@ export interface AnnotationProps {
     hasReplies?: boolean
     appendRepliesToggle?: boolean
     isBulkShareProtected: boolean
+    focusLockUntilMouseStart?: boolean
     repliesLoadingState?: UITaskState
     onReplyBtnClick?: React.MouseEventHandler
     isClickable?: boolean
@@ -142,6 +144,7 @@ export interface AnnotationProps {
         spaceName: string,
         unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
     ) => void
+    setAnnotationInFocus?: (unifiedId: string) => void
     isInFocus?: boolean
     shiftSelectItem?: () => void
     searchTerms?: string[]
@@ -294,11 +297,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
         if (this.props.isInFocus && !prevProps.isInFocus) {
             this.setupKeyListener()
-            const itemBox = this.itemBoxRef.current
-            if (itemBox && !this.props.hoverState) {
-                itemBox.scrollIntoView({ block: 'center' })
+            if (!this.state.hoverCard) {
+                const itemBox = this.itemBoxRef.current
+                if (itemBox && !this.props.hoverState) {
+                    itemBox.scrollIntoView({ block: 'center' })
+                }
             }
         } else if (!this.props.isInFocus && prevProps.isInFocus) {
+            // if (!this.state.hoverCard) {
+            //     this.props.setAnnotationInFocus(null)
+            // }
             this.removeKeyListener()
         }
     }
@@ -344,10 +352,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 case 'Enter':
                     if (!this.props.isEditing) {
                         if (event.shiftKey && this.props.shiftSelectItem) {
-                            this.props.shiftSelectItem()
-                            event.preventDefault()
-                            event.stopPropagation()
-                        } else {
+                            // this.props.shiftSelectItem()
                             this.props.bulkSelectAnnotation()
                             event.preventDefault()
                             event.stopPropagation()
@@ -735,12 +740,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.props.isShared ? (
                             <span>
                                 Disable Auto-Add
-                                <br /> Only added to Spaces you select
+                                <br /> Only added to Spaces you manually select
                             </span>
                         ) : (
                             <span>
                                 Enable Auto-Add
-                                <br /> Added to all Spaces the page is
+                                <br /> Added to all Spaces the page is in
                             </span>
                         )
                     }
@@ -827,7 +832,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
 
         return (
-            <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
+            <AnnotationEditContainer
+                isEditing={this.props.isEditing}
+                hasHighlight={this.theme.hasHighlight}
+            >
                 <AnnotationEdit
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
@@ -944,7 +952,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.shareMenuAnnotationInstanceId ===
                     this.props.unifiedId,
                 buttonRef: this.shareMenuButtonRef,
-                leftSideItem: this.renderAutoAddedIndicator(),
+                leftSideItem:
+                    this.displayLists.length === 0
+                        ? this.renderAutoAddedIndicator()
+                        : null,
+                showKeyShortcut: this.props.isInFocus && 'S',
             },
             {
                 key: 'copy-paste-note-btn',
@@ -977,6 +989,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.copyPasterAnnotationInstanceId ===
                     this.props.unifiedId,
                 buttonRef: this.copyPasterButtonRef,
+                showKeyShortcut: this.props.isInFocus && 'C',
             },
             appendRepliesToggle && {
                 key: 'show-replies-notes-btn',
@@ -1007,7 +1020,18 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             footerDeps == null
         ) {
             return (
-                <ActionFooterStyled>
+                <ActionFooterStyled
+                    compactVersion={this.props.compactVersion}
+                    inFocus={this.props.isInFocus}
+                    inPageMode={this.props.contextLocation === 'in-page'}
+                    inEditMode={isEditing || isEditingHighlight}
+                    isShown={
+                        this.state.hoverCard ||
+                        this.props.isInFocus ||
+                        isEditing ||
+                        isEditingHighlight
+                    }
+                >
                     <ItemBoxBottom
                         borderTop={false}
                         creationInfo={this.creationInfo}
@@ -1052,7 +1076,18 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
 
         return (
-            <DefaultFooterStyled>
+            <DefaultFooterStyled
+                compactVersion={this.props.compactVersion}
+                inFocus={this.props.isInFocus}
+                inPageMode={this.props.contextLocation === 'in-page'}
+                inEditMode={isEditing || isEditingHighlight}
+                // isShown={
+                //     isEditing ||
+                //     isEditingHighlight ||
+                //     isDeleting ||
+                //     this.props.isInFocus
+                // }
+            >
                 <ShareMenuContainer>
                     <PrimaryAction
                         onClick={() => {
@@ -1217,9 +1252,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 tooltipText={
                     <span>
                         Multi Select Items
-                        <br />
-                        <strong>{AnnotationEditable.MOD_KEY}+A</strong>to select
-                        all
+                        {this.props.contextLocation === 'in-page' ? (
+                            <>
+                                <br />
+                                <strong>{AnnotationEditable.MOD_KEY}+A</strong>
+                                to select all
+                            </>
+                        ) : null}
                     </span>
                 }
                 placement="bottom"
@@ -1231,17 +1270,15 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         onClick={(
                             event: React.MouseEvent<HTMLInputElement>,
                         ) => {
+                            event.preventDefault()
+                            event.stopPropagation()
                             if (
                                 event.nativeEvent.shiftKey &&
                                 this.props.shiftSelectItem
                             ) {
                                 this.props.shiftSelectItem()
-                                event.preventDefault()
-                                event.stopPropagation()
                             } else {
                                 this.props.bulkSelectAnnotation()
-                                event.preventDefault()
-                                event.stopPropagation()
                             }
                         }}
                         size={16}
@@ -1249,6 +1286,30 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 </BulkSelectButtonBox>
             </TooltipBox>
         )
+    }
+
+    hoverTimeout = null
+
+    handleMouseEnter = () => {
+        if (!this.props.focusLockUntilMouseStart) {
+            this.setState({ hoverCard: true })
+            this.hoverTimeout = setTimeout(() => {
+                this.props.setAnnotationInFocus(this.props.unifiedId)
+            }, 300)
+        }
+    }
+
+    handleMouseLeave = () => {
+        if (!this.props.focusLockUntilMouseStart && !this.isAnyModalOpen()) {
+            this.setState({ hoverCard: false })
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout)
+                this.hoverTimeout = null
+            }
+            if (!this.isAnyModalOpen()) {
+                this.props.setAnnotationInFocus(null)
+            }
+        }
     }
 
     render() {
@@ -1262,7 +1323,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         const actionsBox = !this.props.isEditingHighlight ? (
             <HighlightActionsBox>
-                {this.state.hoverCard && (
+                {this.props.isInFocus && (
                     <>
                         {footerDeps.onDeleteIconClick && (
                             <TooltipBox
@@ -1319,7 +1380,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     </>
                 )}
                 {bulkSelectAnnotation &&
-                    (this.props.isBulkSelected || this.state.hoverCard) &&
+                    (this.props.isBulkSelected ||
+                        this.state.hoverCard ||
+                        this.props.isInFocus) &&
                     this.props.currentUserId === this.props.creatorId &&
                     bulkSelectAnnotation &&
                     this.renderBulkSelectBtn()}
@@ -1330,18 +1393,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             <ThemeProvider theme={this.theme}>
                 <AnnotationBox
                     zIndex={this.props.zIndex}
-                    onMouseEnter={() => this.setState({ hoverCard: true })}
-                    onMouseOver={() => this.setState({ hoverCard: true })}
-                    onMouseLeave={() =>
-                        !this.isAnyModalOpen() &&
-                        this.setState({ hoverCard: false })
-                    }
+                    onMouseEnter={this.handleMouseEnter}
+                    onMouseLeave={this.handleMouseLeave}
                 >
                     <ItemBox
                         firstDivProps={{
                             id: ANNOT_BOX_ID_PREFIX + this.props.unifiedId,
                         }}
-                        hoverState={this.props.isInFocus}
+                        hoverState={
+                            this.props.isInFocus || this.state.hoverCard
+                        }
                         onRef={this.itemBoxRef}
                     >
                         {this.renderDeleteScreen(footerDeps)}
@@ -1365,34 +1426,56 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     })
                                 }
                             >
-                                {this.creationInfo?.createdWhen && (
-                                    <CreationInfoBox>
-                                        <CreationInfo {...this.creationInfo} />
-                                    </CreationInfoBox>
-                                )}
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            {this.displayLists.length >= 1 && (
-                                <ListsSegment
-                                    tabIndex={0}
-                                    lists={this.displayLists}
-                                    onMouseEnter={this.props.onListsHover}
-                                    onListClick={this.props.onListClick}
-                                    onEditBtnClick={() => null}
-                                    spacePickerButtonRef={
-                                        this.spacePickerBodyButtonRef
+                            {(this.creationInfo?.createdWhen &&
+                                !this.props.isEditing) ||
+                            this.displayLists.length >= 1 ? (
+                                <DateAndSpaces
+                                    inSidebar={
+                                        this.props.contextLocation === 'in-page'
                                     }
-                                    padding={
-                                        this.props.isEditing
-                                            ? '10px 15px 10px 10px'
-                                            : '0px 15px 10px 15px'
-                                    }
-                                    removeSpaceForAnnotation={
-                                        this.props.removeSpaceFromEditorPicker
-                                    }
-                                />
-                            )}
+                                >
+                                    {this.creationInfo?.createdWhen &&
+                                        !this.props.isEditing && (
+                                            <CreationInfoBox>
+                                                <CreationInfo
+                                                    {...this.creationInfo}
+                                                />
+                                            </CreationInfoBox>
+                                        )}
+                                    {this.displayLists.length >= 1 && (
+                                        <ListSegmentBox>
+                                            {this.renderAutoAddedIndicator()}
+                                            <ListsSegment
+                                                tabIndex={0}
+                                                lists={this.displayLists}
+                                                onMouseEnter={
+                                                    this.props.onListsHover
+                                                }
+                                                onListClick={
+                                                    this.props.onListClick
+                                                }
+                                                onEditBtnClick={() => null}
+                                                spacePickerButtonRef={
+                                                    this
+                                                        .spacePickerBodyButtonRef
+                                                }
+                                                padding={
+                                                    this.props.isEditing
+                                                        ? '0px'
+                                                        : '0px'
+                                                }
+                                                removeSpaceForAnnotation={
+                                                    this.props
+                                                        .removeSpaceFromEditorPicker
+                                                }
+                                            />
+                                        </ListSegmentBox>
+                                    )}
+                                </DateAndSpaces>
+                            ) : null}
                             {this.renderFooter()}
                         </AnnotationStyled>
                         {this.renderCopyPaster(this.copyPasterButtonRef)}
@@ -1422,6 +1505,28 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 }
+
+const ListSegmentBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    grid-gap: 10px;
+    /* padding: 0px 15px; */
+`
+
+const DateAndSpaces = styled.div<{
+    inSidebar: boolean
+}>`
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding: 10px 15px 10px 15px;
+    grid-gap: 10px;
+`
 
 const DeleteScreenContainer = styled.div`
     display: flex;
@@ -1530,11 +1635,19 @@ const ListCounter = styled.div<{ isShared: boolean }>`
     flex-direction: row;
     justify-content: center;
     padding: ${(props) => (props.isShared ? '5px 0 5px 0' : '5px 0 5px 8px')};
-    margin-right: 4px;
+    margin-right: 6px;
+    color: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.white
+            : props.theme.colors.black};
 `
 
-const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
+const AnnotationEditContainer = styled.div<{
+    hasHighlight: boolean
+    isEditing: boolean
+}>`
     margin-top: ${(props) => !props.hasHighlight && '5px'};
+    margin-bottom: ${(props) => props.isEditing && '5px'};
     width: 100%;
     position: relative;
 `
@@ -1570,7 +1683,79 @@ const SaveActionBar = styled.div`
     width: 100%;
 `
 
-const HighlightActionsBox = styled.div`
+const slideInFromBottom = keyframes`
+  from {
+    margin-top: -10px;
+  }
+  to {
+    margin-top: 0px;
+    opacity: 1;
+  }
+`
+
+const DefaultFooterStyled = styled.div<{
+    compactVersion: boolean
+    inFocus: boolean
+    inPageMode?: boolean
+    inEditMode?: boolean
+    isShown?: boolean
+}>`
+    display: none;
+    bottom: 0px;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000000;
+    padding: 0 10px 0px 10px;
+    box-sizing: border-box;
+    border-radius: 0 0 12px 12px;
+    position: relative;
+    background: ${(props) => props.theme.colors.black0}98;
+    backdrop-filter: blur(5px);
+    width: 100%;
+    opacity: 0;
+
+    ${(props) =>
+        props.inFocus &&
+        css`
+            animation: ${slideInFromBottom} 0.1
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            position: relative;
+            display: flex;
+            opacity: 1;
+        `};
+
+    ${(props) =>
+        props.inEditMode &&
+        css`
+            animation: ${slideInFromBottom} 0.1
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            display: flex;
+            position: relative;
+            opacity: 1;
+        `}
+    ${(props) =>
+        props.isShown &&
+        css`
+            animation: ${slideInFromBottom} 0.1
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            display: flex;
+            opacity: 1;
+        `}
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            backdrop-filter: unset;
+            background: transparent;
+        `};
+`
+const ActionFooterStyled = styled(DefaultFooterStyled)`
+    padding: 0 0px 0px 0px;
+    position: absolute;
+    bottom: 0;
+    background: ${(props) => props.theme.colors.black0};
+`
+
+const HighlightActionsBox = styled.div<{}>`
     position: absolute;
     right: 0px;
     display: flex;
@@ -1626,7 +1811,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     font-size: 14px;
     letter-spacing: 0.5px;
     margin: 0;
-    padding: 0px 10px 7px 15px;
+    padding: 0px 10px 0px 15px;
     line-height: 20px;
     text-align: left;
     grid-gap: 2px;
@@ -1635,9 +1820,9 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     position: relative;
     flex-direction: column;
     ${(props) =>
-        !props.hasComment &&
+        props.hasComment &&
         css`
-            padding: 0px 10px 10px 15px;
+            padding: 0px 10px 0px 15px;
         `};
 `
 
@@ -1672,19 +1857,7 @@ const CommentBox = styled.div`
     `}
 `
 
-const DefaultFooterStyled = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 5px;
-    padding: 0 10px 5px 10px;
-    box-sizing: border-box;
-`
-const ActionFooterStyled = styled(DefaultFooterStyled)`
-    padding: 0 0px 5px 0px;
-`
-
-const AnnotationStyled = styled.div`
+const AnnotationStyled = styled.div<{}>`
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -1692,14 +1865,10 @@ const AnnotationStyled = styled.div`
     cursor: pointer;
     border-radius: inherit;
 
-    cursor: ${({ theme }) => theme.cursor}
-        ${({ theme }) =>
-            theme.isEditing &&
-            css`
-                background-color: ${(props) => props.theme.colors.greyScale1};
-                cursor: default;
-            `};
-
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale1
+            : props.theme.colors.greyScale3}96;
     ${({ theme }) =>
         theme.isActive &&
         `
@@ -1724,7 +1893,8 @@ const ContentContainer = styled.div<{ isEditMode: boolean }>`
     ${(props) =>
         props.isEditMode &&
         css`
-            /* margin-bottom: 10px; */
+            grid-gap: 10px;
+            padding-top: 5px;
         `}
 `
 const BtnContainerStyled = styled.div`
@@ -1830,7 +2000,7 @@ const TooltipTextBox = styled.div`
 `
 
 const CreationInfoBox = styled.div`
-    padding: 15px 15px 0px 15px;
+    display: flex;
 `
 
 const BulkSelectButtonBox = styled.div`

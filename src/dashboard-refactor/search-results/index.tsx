@@ -65,7 +65,7 @@ import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { splitQueryIntoTerms } from 'src/search/background/utils'
+import { splitQueryIntoTerms } from '@worldbrain/memex-common/lib/search/terms-search'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -144,6 +144,7 @@ export type Props = RootState &
         saveHighlightColorSettings: (newState: HighlightColor[]) => void
         getHighlightColorSettings: () => void
         highlightColorSettings: HighlightColor[]
+        setAnnotationInFocus: (unifiedId: string) => void
         getRootElement: () => HTMLElement
         showSpacesTab: (pageUrl) => void
         // onEditPageBtnClick: (
@@ -163,6 +164,8 @@ export type Props = RootState &
         >
         updateSpacesSearchSuggestions?: (query: string) => void
         spaceSearchSuggestions?: SpaceSearchSuggestion[]
+        shiftSelectItems: (itemId: string, type: 'notes' | 'pages') => void
+        focusLockUntilMouseStart: boolean
     }
 
 export interface State {
@@ -179,8 +182,8 @@ export default class SearchResultsContainer extends React.Component<
     State
 > {
     private ResultsScrollContainerRef = React.createRef<HTMLDivElement>()
-    private renderLoader = (props: { key?: string } = {}) => (
-        <Loader {...props}>
+    private renderLoader = () => (
+        <Loader>
             <LoadingIndicator />
         </Loader>
     )
@@ -369,6 +372,7 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <AnnotationEditable
+                compactVersion={true}
                 imageSupport={this.props.imageSupport}
                 zIndex={zIndex}
                 key={noteId}
@@ -378,6 +382,7 @@ export default class SearchResultsContainer extends React.Component<
                 color={noteColor ?? null}
                 body={noteData.highlight}
                 comment={noteData.comment}
+                focusLockUntilMouseStart={this.props.focusLockUntilMouseStart}
                 isShared={noteData.isShared}
                 getListDetailsById={this.props.getListDetailsById}
                 isBulkShareProtected={noteData.isBulkShareProtected}
@@ -407,7 +412,10 @@ export default class SearchResultsContainer extends React.Component<
                     )
                 }}
                 isBulkSelected={this.props.selectedItems?.includes(noteId)}
-                shiftSelectItem={() => this.shiftSelectItems(noteId)}
+                shiftSelectItem={() =>
+                    this.props.shiftSelectItems(noteId, 'notes')
+                }
+                setAnnotationInFocus={this.props.setAnnotationInFocus}
                 isInFocus={noteData.isInFocus}
                 getHighlightColorSettings={this.props.getHighlightColorSettings}
                 highlightColorSettings={this.props.highlightColorSettings}
@@ -596,7 +604,7 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <PageNotesBox bottom="10px" left="10px">
-                <PageNotesContainer>
+                {/* <PageNotesContainer>
                     <AnnotationCreate
                         autoFocus={false}
                         comment={newNoteForm.inputValue}
@@ -640,7 +648,7 @@ export default class SearchResultsContainer extends React.Component<
                             boundAnnotCreateProps.addNewSpaceViaWikiLinksNewNote
                         }
                     />
-                </PageNotesContainer>
+                </PageNotesContainer> */}
                 {noteIds[notesType] && noteIds[notesType]?.length > 0 && (
                     <NoteResultContainer>
                         {/* {noteIds[notesType].length > 0 && (
@@ -669,7 +677,7 @@ export default class SearchResultsContainer extends React.Component<
                                 const noteB = this.props.noteData.byId[b]
                                 return noteB.displayTime - noteA.displayTime
                             })
-                            ?.map((noteId, index) => {
+                            .map((noteId, index) => {
                                 const zIndex =
                                     noteIds[notesType]?.length - index
 
@@ -754,6 +762,9 @@ export default class SearchResultsContainer extends React.Component<
                         this.props.listData.byId[this.props.selectedListId]
                             ?.localId
                     }
+                    focusLockUntilMouseStart={
+                        this.props.focusLockUntilMouseStart
+                    }
                     isNotesSidebarShown={this.props.isNotesSidebarShown}
                     isListsSidebarShown={this.props.isSpacesSidebarLocked}
                     showPopoutsForResultBox={(show) =>
@@ -765,7 +776,9 @@ export default class SearchResultsContainer extends React.Component<
                         interactionProps.onMatchingTextToggleClick
                     }
                     selectItem={this.props.onBulkSelect}
-                    shiftSelectItem={() => this.shiftSelectItems(page.pageId)}
+                    shiftSelectItem={() =>
+                        this.props.shiftSelectItems(page.pageId, 'pages')
+                    }
                     isBulkSelected={this.props.selectedItems?.includes(
                         page.normalizedUrl,
                     )}
@@ -1073,31 +1086,6 @@ export default class SearchResultsContainer extends React.Component<
         }
     }
 
-    shiftSelectItems = async (selectedIndex) => {
-        let currentIndex = selectedIndex
-
-        const pages = Object.values(this.props.results)
-        let pageId = pages[0].pages.allIds[currentIndex]
-        let pageData = this.props.pageData.byId[pageId]
-
-        while (!this.props.selectedItems.includes(pageData.normalizedUrl)) {
-            if (pageData == null) {
-                return
-            }
-
-            const data = {
-                title: pageData.fullTitle,
-                url: pageData.normalizedUrl,
-                type: 'pages',
-            }
-
-            await this.props.onBulkSelect(data, false)
-            currentIndex = currentIndex - 1
-            pageId = this.props.pageData.allIds[currentIndex]
-            pageData = this.props.pageData.byId[pageId]
-        }
-    }
-
     private renderResultsByDay() {
         if (this.props.noResultsType != null) {
             return this.renderNoResults()
@@ -1139,8 +1127,8 @@ export default class SearchResultsContainer extends React.Component<
 
         if (this.props.searchPaginationState === 'running') {
             days.push(
-                <PaginationLoaderBox>
-                    {this.renderLoader({ key: 'pagination-loader' })}
+                <PaginationLoaderBox key="pagination-loader">
+                    {this.renderLoader()}
                 </PaginationLoaderBox>,
             )
         } else if (
@@ -1148,11 +1136,8 @@ export default class SearchResultsContainer extends React.Component<
             this.props.searchState !== 'pristine'
         ) {
             days.push(
-                <WayPointContainer>
-                    <Waypoint
-                        key="pagination-waypoint"
-                        onEnter={() => this.props.paginateSearch()}
-                    />
+                <WayPointContainer key="pagination-waypoint">
+                    <Waypoint onEnter={() => this.props.paginateSearch()} />
                 </WayPointContainer>,
             )
         }
@@ -1606,6 +1591,7 @@ const PageTopBarBox = styled.div<{
         props.inPageMode &&
         css`
             position: relative;
+            background: ${(props) => props.theme.colors.black};
         `}
 `
 
@@ -1654,6 +1640,7 @@ const PageNotesBox = styled(Margin)`
     z-index: 4;
     position: relative;
     align-items: flex-start;
+    padding-top: 15px;
 `
 
 const PageNotesContainer = styled.div`

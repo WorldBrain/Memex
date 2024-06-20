@@ -99,7 +99,7 @@ export function renderNudgeTooltip(
                 <NudgeBottomNote>
                     <PrimaryAction
                         onClick={snoozeNudge}
-                        label={'Remind me again'}
+                        label={'Remind me later'}
                         type={'secondary'}
                         size={'small'}
                         padding={'2px 6px'}

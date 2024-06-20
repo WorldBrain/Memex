@@ -24,7 +24,6 @@ import {
     LocationSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
-    createRabbitHoleEntry,
     isPkmSyncEnabled,
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
@@ -306,17 +305,6 @@ export default class PageStorage extends StorageModule {
                 console.error(e)
             }
         }
-        try {
-            const dataToSave = {
-                fullUrl: pageData.fullUrl,
-                pageTitle: pageData.fullTitle,
-                createdWhen: Math.floor(Date.now() / 1000),
-                creatorId: userId.toString(),
-                contentType: 'page',
-                fullHTML: pageData?.htmlBody,
-            }
-            createRabbitHoleEntry(dataToSave, this.options.pkmSyncBG)
-        } catch (e) {}
     }
 
     async updatePage(newPageData: PipelineRes, existingPage: PipelineRes) {

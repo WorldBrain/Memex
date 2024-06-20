@@ -2,6 +2,7 @@ import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 import type { Storage } from 'webextension-polyfill'
+import type { PKMSyncBackgroundModule } from '..'
 
 export async function shareAnnotationWithPKM(
     annotationData,
@@ -195,10 +196,9 @@ export type rabbitHoleDocument = {
 
 export async function createRabbitHoleEntry(
     entryData: rabbitHoleDocument,
-    pkmSyncBG,
-    checkForFilteredSpaces?,
+    pkmSyncBG: PKMSyncBackgroundModule,
 ) {
-    await pkmSyncBG.pushRabbitHoleUpdate(entryData, checkForFilteredSpaces)
+    await pkmSyncBG.pushRabbitHoleUpdate(entryData)
 }
 
 export async function addFeedSources(feedSources, pkmSyncBG) {

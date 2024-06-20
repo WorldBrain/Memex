@@ -78,6 +78,9 @@ export interface SyncSettingsByFeature {
         shouldAutoCreateNoteLink: boolean
         shouldAutoAddSpaces: boolean
     }
+    betaFeatures: {
+        imageOverlay: boolean
+    }
     readwise: {
         apiKey: string
     }

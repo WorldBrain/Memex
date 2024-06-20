@@ -12,4 +12,5 @@ export interface SyncSettingsStoreInterface {
     activityIndicator: SettingStore<SyncSettingsByFeature['activityIndicator']>
     openAI: SettingStore<SyncSettingsByFeature['openAI']>
     highlightColors: SettingStore<SyncSettingsByFeature['highlightColors']>
+    betaFeatures: SettingStore<SyncSettingsByFeature['betaFeatures']>
 }

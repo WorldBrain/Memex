@@ -6,6 +6,7 @@ import UserScreen from 'src/authentication/components/UserScreen'
 import Blocklist from './blacklist'
 import React from 'react'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
+import BetaFeaturesSettings from 'src/beta-features/ui/containers/beta-features-settings'
 
 export default [
     {
@@ -44,6 +45,12 @@ export default [
         pathname: '/blocklist',
         component: Blocklist,
         icon: 'block',
+    },
+    {
+        name: 'Beta Features',
+        pathname: '/betaFeatures',
+        component: BetaFeaturesSettings,
+        icon: 'stars',
     },
     {
         name: 'Feedback',

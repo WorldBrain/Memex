@@ -19,6 +19,7 @@ import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const COPY_TIMEOUT = 2000
 
@@ -110,7 +111,12 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
         let sharingState = await contentSharingBG.shareAnnotation({
             annotationUrl,
-            shareToParentPageLists: currentSharingLevel?.privacyLevel === 200,
+            shareToParentPageLists:
+                currentSharingLevel?.privacyLevel ===
+                AnnotationPrivacyLevels.SHARED,
+            excludeFromLists:
+                currentSharingLevel?.privacyLevel !==
+                AnnotationPrivacyLevels.SHARED,
             skipPrivacyLevelUpdate: true,
         })
 
@@ -163,6 +169,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         await contentSharingBG.shareAnnotation({
             annotationUrl,
             shareToParentPageLists: false,
+            excludeFromLists: true,
             skipPrivacyLevelUpdate: true,
         })
 

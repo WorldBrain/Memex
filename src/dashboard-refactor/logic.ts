@@ -684,7 +684,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         ) {
             if (this.increment > 1) {
                 const blurContainer = document.getElementById('BlurContainer')
-                blurContainer.style.background = '#313239'
+                blurContainer.style.background = this.options.theme.colors.black
             } else {
                 this.emitMutation({
                     blurEffectReset: { $set: true },
@@ -698,7 +698,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         const blurContainer = document.getElementById(
                             'BlurContainer',
                         )
-                        blurContainer.style.background = '#313239'
+                        blurContainer.style.background = this.options.theme.colors.black
                         if (
                             // @ts-ignore
                             !blurContainer.style.backdropFilter ||
@@ -1043,13 +1043,32 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
         if (event.item?.id != null) {
+            const searchBarElement = document.getElementById('search-bar')
+            if (searchBarElement) {
+                searchBarElement.blur()
+            }
+            const itemPos = event.item?.id?.split('-')[0]
+            if (parseFloat(itemPos) === currentFocusElementIndex) {
+                return
+            }
+            const itemId = event.item.id?.replace(/^[^-]*-/, '')
             const nextFocusItemIndex = selectedBlocksArray.findIndex(
-                (item) => item?.id === event.item.id,
+                (item) => item?.id === itemId,
             )
 
             nextItem = selectedBlocksArray[nextFocusItemIndex]
             this.emitMutation({
                 focusedBlockId: { $set: nextFocusItemIndex },
+            })
+        }
+
+        if (
+            event.item?.id == null &&
+            event.direction == undefined &&
+            event.item?.type == null
+        ) {
+            this.emitMutation({
+                focusedBlockId: { $set: null },
             })
         }
 
@@ -1562,7 +1581,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.noteId]: {
                                     comment: { $set: existing.comment },
-                                    color: { $set: event.color as RGBAColor },
+                                    color: { $set: event.color as string },
                                 },
                             },
                         },
@@ -1845,24 +1864,22 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        const listData = getListData(
+        let listData = getListData(
             previousState.listsSidebar.selectedListId,
             previousState,
             { mustBeLocal: true, source: 'removePageFromList' },
         )
-        const filterOutPage = (ids: string[]) =>
-            ids.filter((id) => id !== event.pageResultId)
-
-        const mutation: UIMutation<State['searchResults']> = {
-            pageData: {
-                byId: { $unset: [event.pageResultId] },
-                allIds: {
-                    $set: filterOutPage(
-                        previousState.searchResults.pageData.allIds,
-                    ),
-                },
-            },
+        let resultItem =
+            previousState.searchResults.results[event.day]?.pages.byId[
+                event.pageResultId
+            ]
+        if (!resultItem) {
+            throw new Error(
+                `Page to remove from list not found in UI results state: ${event.pageResultId}`,
+            )
         }
+
+        let mutation: UIMutation<State['searchResults']> = {}
 
         if (event.day === PAGE_SEARCH_DUMMY_DAY) {
             mutation.results = {
@@ -1870,11 +1887,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     pages: {
                         byId: { $unset: [event.pageResultId] },
                         allIds: {
-                            $set: filterOutPage(
-                                previousState.searchResults.results[
-                                    PAGE_SEARCH_DUMMY_DAY
-                                ]?.pages.allIds,
-                            ),
+                            $apply: (ids: string[]) =>
+                                ids.filter((id) => id !== event.pageResultId),
                         },
                     },
                 },
@@ -1897,7 +1911,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         await this.options.listsBG.removePageFromList({
             id: listData.localId,
-            url: event.pageResultId,
+            url: resultItem.pageId,
         })
     }
 
@@ -2391,7 +2405,33 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        if (event.activePageID == null || event.activeDay == null) {
+        const previousPageId = previousState.activePageID
+            ? previousState.searchResults?.pageIdToResultIds[
+                  previousState.activePageID
+              ][0]
+            : null
+
+        if (previousPageId) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [previousState.activeDay]: {
+                            pages: {
+                                byId: {
+                                    [previousPageId]: {
+                                        activePage: {
+                                            $set: false,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
+
+        if (event.activePageID == null && event.activeDay == null) {
             this.emitMutation({
                 activeDay: { $set: undefined },
                 activePageID: { $set: undefined },
@@ -2421,31 +2461,36 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
         })
+    }
 
-        const previousPageId =
-            previousState.searchResults.pageIdToResultIds[
-                previousState.activePageID
-            ][0]
-
-        if (previousPageId) {
-            this.emitMutation({
-                searchResults: {
-                    results: {
-                        [previousState.activeDay]: {
-                            pages: {
-                                byId: {
-                                    [previousPageId]: {
-                                        activePage: {
-                                            $set: false,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            })
-        }
+    shiftSelectItems: EventHandler<'shiftSelectItems'> = ({
+        event,
+        previousState,
+    }) => {
+        // let currentIndex = event.selectedIndex
+        // let results = previousState.searchResults.results
+        // let docs = Object.values(results)
+        // let docId = null
+        // if (event.type ==='pages') {
+        //     docId = docs[0].pages.allIds[currentIndex]
+        // } else if (event.type === 'notes') {
+        //     docId = docs[0].pages.byId[docs[0].pages.allIds[0]].noteIds.user[currentIndex]
+        // }
+        // while (!previousState.bulkSelectedUrls.includes(pageData.normalizedUrl)) {
+        //     if (pageData == null) {
+        //         return
+        //     }
+        //     const data = {
+        //         title: pageData.fullTitle,
+        //         url: pageData.normalizedUrl,
+        //         type: 'pages',
+        //     }
+        //     await this.props.onBulkSelect(data, false)
+        //     currentIndex = currentIndex - 1
+        //     pageId = this.props.pageData.allIds[currentIndex]
+        //     pageData = this.props.pageData.byId[pageId]
+        // }
+        // }
     }
 
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {
@@ -2521,7 +2566,59 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    onMainContentHover: EventHandler<'setPageHover'> = ({
+        event,
+        previousState,
+    }) => {
+        this.setHoverState(
+            event.day,
+            event.pageResultId,
+            event.hover,
+            previousState,
+        )
+    }
+
+    setHoverState(day, pageResultId, hover, previousState) {
+        this.processUIEvent('setPageHover', {
+            event: { pageResultId, day, hover },
+            previousState,
+        })
+        this.processUIEvent('changeFocusItem', {
+            event: {
+                item: { id: pageResultId, type: 'page' },
+            },
+            previousState,
+        })
+    }
+
     setPageHover: EventHandler<'setPageHover'> = ({ event, previousState }) => {
+        const emitMutation = () =>
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [event.day]: {
+                            pages: {
+                                byId: {
+                                    [event.pageResultId]: {
+                                        hoverState: { $set: event.hover },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    // pageData: {
+                    //     byId: {
+                    //         [event.pageResultId]: {
+                    //             isInFocus: {
+                    //                 $set:
+                    //                     event.hover == null
+                    //             },
+                    //         },
+                    //     },
+                    // },
+                },
+            })
+
         if (
             previousState.searchResults.results[event.day]?.pages.byId[
                 event.pageResultId
@@ -2533,21 +2630,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        this.emitMutation({
-            searchResults: {
-                results: {
-                    [event.day]: {
-                        pages: {
-                            byId: {
-                                [event.pageResultId]: {
-                                    hoverState: { $set: event.hover },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        })
+        emitMutation()
     }
 
     setPageNewNoteTagPickerShown: EventHandler<
@@ -3586,7 +3669,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     lists: { $set: nextLists },
                                     color: {
                                         $set: (event.color ??
-                                            existing.color) as RGBAColor,
+                                            existing.color) as string,
                                     },
                                 },
                             },
@@ -4299,9 +4382,13 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setDragOverListId: EventHandler<'setDragOverListId'> = async ({
+    setDragOverListId: EventHandler<'setDragOverListId'> = ({
         event,
+        previousState,
     }) => {
+        if (event.listId === previousState.listsSidebar.dragOverListId) {
+            return
+        }
         this.emitMutation({
             listsSidebar: { dragOverListId: { $set: event.listId } },
         })

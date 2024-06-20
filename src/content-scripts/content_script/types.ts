@@ -63,6 +63,7 @@ export interface InPageUIInjectionsDependencies {
         | 'openAI'
         | 'searchInjection'
         | 'dashboard'
+        | 'betaFeatures'
     >
     annotationsFunctions: any
 }

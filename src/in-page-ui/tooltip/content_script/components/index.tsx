@@ -31,6 +31,12 @@ import {
     getRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 interface TooltipRootProps {
     mount: InPageUIRootMount
@@ -42,6 +48,7 @@ interface TooltipRootProps {
     contentSharingBG: ContentSharingInterface
     authBG: AuthRemoteFunctionsInterface
     spacesBG: RemoteCollectionsInterface
+    syncSettingsBG: RemoteSyncSettingsInterface
     bgScriptsBG: RemoteBGScriptInterface<'caller'>
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     localStorageAPI: Storage.LocalStorageArea
@@ -56,6 +63,7 @@ interface TooltipRootState {
     showSpacePicker: boolean
     spaceSearchResults: any[]
     askAITabActive?: boolean
+    aiPrompt?: string
 }
 
 class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
@@ -65,6 +73,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         showSpacePicker: false,
         spaceSearchResults: [],
         askAITabActive: false,
+        aiPrompt: null,
     }
     private summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
 
@@ -138,14 +147,25 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
     }
 
     setCurrentAnnotation = (annotationId: string) => {
+        if (!annotationId) {
+            this.setState({
+                currentAnnotation: null,
+                currentAnnotationLists: [],
+            })
+            return
+        }
         const annotation = this.props.annotationsCache.annotations.byId[
             annotationId
         ]
-        this.setState({ currentAnnotation: annotation })
+        this.setState({
+            currentAnnotation: annotation,
+            currentAnnotationLists: [],
+        })
     }
 
     selectSpaceForAnnotation = async (listId: number) => {
         const { currentAnnotation } = this.state
+
         if (!currentAnnotation) {
             return
         }
@@ -153,6 +173,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         const isListAlreadySelected = this.state.currentAnnotationLists.some(
             (currentList) => currentList.localId === listId,
         )
+
         if (isListAlreadySelected) {
             return
         }
@@ -167,7 +188,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
 
         const existing = this.props.annotationsCache.annotations.byId[
             currentAnnotation.unifiedId
-        ].unifiedListIds
+        ]?.unifiedListIds
 
         const unifiedListId = newList.unifiedId
         const updatedUnifiedListIdLists: UnifiedList['unifiedId'][] = [
@@ -306,6 +327,20 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         }
     }
 
+    renderPromptTemplates = () => {
+        return (
+            <PromptTemplatesComponent
+                syncSettingsBG={this.props.syncSettingsBG}
+                getRootElement={this.props.getRootElement}
+                onTemplateSelect={(text: string) =>
+                    this.setState({
+                        aiPrompt: text,
+                    })
+                }
+            />
+        )
+    }
+
     renderSpacePicker = (buttonRef?) => {
         if (this.state.showSpacePicker) {
             const CollectionsPickerElement = (
@@ -351,6 +386,9 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         offsetX={12}
                         offsetY={-10}
                         closeComponent={() => this.toggleSpacePicker(false)}
+                        blockedBackground
+                        blockedBackgroundTransparent
+                        instaClose
                     >
                         {CollectionsPickerElement}
                     </PopoutBox>
@@ -378,6 +416,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         renderSpacePicker={(buttonRef) =>
                             this.renderSpacePicker(buttonRef)
                         }
+                        promptTemplates={this.renderPromptTemplates}
                         saveAnnotation={this.saveAnnotation}
                         getAnnotationData={this.getAnnotationData}
                         currentAnnotationLists={
@@ -394,6 +433,9 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         spaceSearchResults={this.state.spaceSearchResults}
                         addNewSpaceViaWikiLinks={this.addNewSpaceViaWikiLinks}
                         isAskAIOpen={this.state.askAITabActive}
+                        showSpacePicker={this.state.showSpacePicker}
+                        aiPrompt={this.state.aiPrompt}
+                        themeVariant={themeVariant}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -423,6 +465,7 @@ export function setupUIContainer(
                 localStorageAPI={props.localStorageAPI}
                 getRootElement={props.getRootElement}
                 inPageUI={props.inPageUI}
+                syncSettingsBG={props.syncSettingsBG}
             />,
             mount.rootElement,
         )

@@ -475,7 +475,11 @@ export default class Ribbon extends Component<Props, State> {
                         <ChatBox>
                             <LoadingIndicator size={30} />
                             <ChatFrame
-                                src={`https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${this.props.currentUser.email}`}
+                                src={`https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${
+                                    this.props.currentUser
+                                        ? this.props.currentUser?.email
+                                        : null
+                                }`}
                                 height={600}
                                 width={500}
                             />
@@ -1703,10 +1707,13 @@ export default class Ribbon extends Component<Props, State> {
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         const isNotReader =
-            window.location.href.includes('.pdf') &&
+            (window.location.href.includes('.pdf') ||
+                window.location.href.includes('https://arxiv.org/pdf/')) &&
             !window.location.href.includes('pdfjs/viewer.html?')
 
-        const isPDF = window.location.href.includes('.pdf')
+        const isPDF =
+            window.location.href.includes('.pdf') ||
+            window.location.href.includes('https://arxiv.org/pdf/')
 
         if (isPDF) {
             if (
@@ -2139,7 +2146,10 @@ export default class Ribbon extends Component<Props, State> {
                                             this.props.sidebar.isSidebarOpen
                                         }
                                     />
-                                    {window.location.href.includes('.pdf') &&
+                                    {(window.location.href.includes('.pdf') ||
+                                        window.location.href.includes(
+                                            'https://arxiv.org/pdf/',
+                                        )) &&
                                     !window.location.href.includes(
                                         'pdfjs/viewer.html?',
                                     ) ? (
