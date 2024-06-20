@@ -31,7 +31,6 @@ import {
     LIST_REORDER_PRE_EL_POSTFIX,
 } from '../constants'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -158,15 +157,12 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     }, 100)
 
     private renderListTrees() {
-        const rootLists = this.props.ownListsGroup.listData
-            .filter(
-                (list) =>
-                    list.parentUnifiedId == null && list.type === 'user-list',
-            )
-            .sort(defaultOrderableSorter)
+        let rootLists = this.props.ownListsGroup.listData.filter(
+            (list) => list.parentUnifiedId == null,
+        )
 
         // Derived state used to hide nested lists if any of their ancestors are collapsed
-        const listShowFlag = new Map<string, boolean>()
+        let listShowFlag = new Map<string, boolean>()
 
         return rootLists
             .map((root, index) =>
@@ -179,7 +175,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 (_list) =>
                                     _list.parentUnifiedId === list.unifiedId,
                             )
-                            .sort(defaultOrderableSorter)
                             .reverse(),
                     cb: (list, index2) => {
                         const parentListTreeState = this.props.listTrees.byId[

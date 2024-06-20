@@ -68,6 +68,7 @@ import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -661,23 +662,26 @@ export class DashboardContainer extends StatefulUIElement<
             ? { type: 'user-reference', id: currentUser.id }
             : undefined
 
-        const ownListsData = allLists.filter(
-            (list) =>
-                list.type !== 'page-link' &&
-                cacheUtils.deriveListOwnershipStatus(list, userReference) ===
-                    'Creator' &&
-                list.localId !== parseFloat(SPECIAL_LIST_STRING_IDS.INBOX),
-        )
+        const ownListsData = allLists
+            .filter(
+                (list) =>
+                    list.type === 'user-list' &&
+                    cacheUtils.deriveListOwnershipStatus(
+                        list,
+                        userReference,
+                    ) === 'Creator',
+            )
+            .sort(defaultOrderableSorter)
         const followedListsData = allLists.filter(
             (list) =>
-                list.type !== 'page-link' &&
+                list.type === 'user-list' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
                     'Follower' &&
                 !list.isForeignList,
         )
         const joinedListsData = allLists.filter(
             (list) =>
-                list.type !== 'page-link' &&
+                list.type === 'user-list' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
                     'Contributor',
         )
