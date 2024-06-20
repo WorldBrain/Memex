@@ -621,8 +621,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         isNestedListInputShown:
                                             prevState?.isNestedListInputShown ??
                                             false,
-                                        newNestedListValue:
-                                            prevState?.newNestedListValue ?? '',
                                         newNestedListCreateState:
                                             prevState?.newNestedListCreateState ??
                                             'pristine',
@@ -5158,22 +5156,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setNewNestedListValue: EventHandler<'setNewNestedListValue'> = async ({
-        event,
-    }) => {
-        this.emitMutation({
-            listsSidebar: {
-                listTrees: {
-                    byId: {
-                        [event.listId]: {
-                            newNestedListValue: { $set: event.value },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
     toggleNestedListInputShow: EventHandler<
         'toggleNestedListInputShow'
     > = async ({ event, previousState }) => {
@@ -5206,9 +5188,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const { annotationsCache, listsBG, authBG } = this.options
         const parentList = annotationsCache.lists.byId[event.parentListId]
-        const newListName = previousState.listsSidebar.listTrees.byId[
-            event.parentListId
-        ].newNestedListValue.trim()
+        const newListName = event.name.trim()
         if (!newListName.length || !parentList?.localId) {
             return
         }
@@ -5258,7 +5238,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         listTrees: {
                             byId: {
                                 [event.parentListId]: {
-                                    newNestedListValue: { $set: '' },
                                     isNestedListInputShown: { $set: false },
                                 },
                             },

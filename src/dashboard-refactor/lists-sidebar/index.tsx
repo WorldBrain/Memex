@@ -43,8 +43,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onCancelAddList: () => void
     onTreeToggle: (listId: string) => void
     onNestedListInputToggle: (listId: string) => void
-    setNestedListInputValue: (listId: string, value: string) => void
-    onConfirmNestedListCreate: (parentListId: string) => Promise<void>
+    onConfirmNestedListCreate: (parentListId: string, name: string) => void
     onConfirmAddList: (value: string) => void
     onListDragStart: (listId: string) => React.DragEventHandler
     onListDragEnd: (listId: string) => React.DragEventHandler
@@ -210,36 +209,27 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     ref={this.nestedInputBoxRef}
                                 >
                                     <SidebarItemInput
-                                        initValue={
-                                            currentListTreeState.newNestedListValue
-                                        }
                                         onCancelClick={() =>
                                             this.props.onNestedListInputToggle(
                                                 list.unifiedId,
                                             )
                                         }
-                                        onConfirmClick={async () =>
-                                            await this.props.onConfirmNestedListCreate(
+                                        onConfirmClick={(name) =>
+                                            this.props.onConfirmNestedListCreate(
                                                 list.unifiedId,
+                                                name,
                                             )
                                         }
-                                        // onErro={
-                                        //     currentListTreeState.newNestedListErrorMessage
-                                        // }
-                                        onChange={(value) => {
-                                            this.props.setNestedListInputValue(
-                                                list.unifiedId,
-                                                value,
-                                            )
+                                        onChange={() =>
                                             this.moveItemIntoHorizontalView(
                                                 this.nestedInputBoxRef.current,
                                             )
-                                        }}
-                                        scrollIntoView={() => {
+                                        }
+                                        scrollIntoView={() =>
                                             this.moveItemIntoHorizontalView(
                                                 this.nestedInputBoxRef.current,
                                             )
-                                        }}
+                                        }
                                     />
                                 </NestedListInput>
                             )

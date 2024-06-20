@@ -15,7 +15,6 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     listTrees: NormalizedState<{
         isTreeToggled: boolean
         isNestedListInputShown: boolean
-        newNestedListValue: string
         newNestedListCreateState: TaskState
         hasChildren: boolean
     }>
@@ -91,8 +90,7 @@ export type Events = UIEvent<{
     // Tree-related events
     toggleListTreeShow: { listId: string }
     toggleNestedListInputShow: { listId: string }
-    setNewNestedListValue: { listId: string; value: string }
-    createdNestedList: { parentListId: string }
+    createdNestedList: { parentListId: string; name: string }
 
     confirmListDelete: null
     cancelListDelete: null

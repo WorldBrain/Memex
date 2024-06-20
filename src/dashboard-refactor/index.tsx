@@ -696,14 +696,11 @@ export class DashboardContainer extends StatefulUIElement<
                 onNestedListInputToggle={(listId) =>
                     this.processEvent('toggleNestedListInputShow', { listId })
                 }
-                setNestedListInputValue={(listId, value) =>
-                    this.processEvent('setNewNestedListValue', {
-                        listId,
-                        value,
+                onConfirmNestedListCreate={(parentListId, name) =>
+                    this.processEvent('createdNestedList', {
+                        parentListId,
+                        name,
                     })
-                }
-                onConfirmNestedListCreate={(parentListId) =>
-                    this.processEvent('createdNestedList', { parentListId })
                 }
                 openRemoteListPage={(remoteListId) =>
                     this.props.openSpaceInWebUI(remoteListId)
