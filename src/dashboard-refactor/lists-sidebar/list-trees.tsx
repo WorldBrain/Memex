@@ -1,34 +1,89 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled, { css } from 'styled-components'
 import { mapTreeTraverse } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
-import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import {
+    initNormalizedState,
+    NormalizedState,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { DropReceivingState } from '../types'
 import SidebarItemInput from './components/sidebar-editable-item'
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
 } from '../constants'
-import type { ListTreeInteractions } from './types'
+import type { TaskState } from 'ui-logic-core/lib/types'
+
+interface ListTreeState {
+    unifiedId: UnifiedList['unifiedId']
+    hasChildren: boolean
+    areChildrenShown: boolean
+    isNewChildInputShown: boolean
+    newChildListCreateState: TaskState
+}
+
+interface ListTreeActions {
+    toggleShowChildren: () => void
+    toggleShowNewChildInput: () => void
+    createChildList: (name: string) => void
+}
 
 export interface Props {
     /** Order is delegated to called - pass down already sorted. */
     lists: UnifiedList[]
     draggedListId: string | null
     areListsBeingFiltered: boolean
-    listTreeInteractionStates: NormalizedState<ListTreeInteractions>
-    onNestedListInputToggle: (listId: string) => void
-    onConfirmNestedListCreate: (parentListId: string, name: string) => void
+    onConfirmChildListCreate: (parentListId: string, name: string) => void
     initDropReceivingState: (listId: string) => DropReceivingState
 
     // New stuff
-    renderListItem: (list: UnifiedList) => JSX.Element
+    renderListItem: (
+        list: UnifiedList,
+        treeState: ListTreeState,
+        actions: ListTreeActions,
+    ) => JSX.Element
 }
 
-export let ListTrees = (props: Props) => {
+export let ListTrees = (props: Props): JSX.Element => {
+    let initListTreeState = (
+        { unifiedId }: UnifiedList,
+        prevState?: ListTreeState,
+    ): ListTreeState => ({
+        unifiedId,
+        areChildrenShown: prevState?.areChildrenShown ?? false,
+        isNewChildInputShown: prevState?.isNewChildInputShown ?? false,
+        newChildListCreateState:
+            prevState?.newChildListCreateState ?? 'pristine',
+        hasChildren:
+            props.lists.filter(
+                (l) =>
+                    l.parentUnifiedId === unifiedId && l.type === 'user-list',
+            ).length > 0,
+    })
+
+    let [listTreeStates, setListTreeStates] = useState<
+        NormalizedState<ListTreeState>
+    >(() =>
+        initNormalizedState({
+            getId: (list) => list.unifiedId,
+            seedData: props.lists.map((list) => initListTreeState(list)),
+        }),
+    )
+
+    // Keep list trees state in sync with passed down lists data
+    useEffect(() => {
+        let nextState = initNormalizedState({
+            getId: (list) => list.unifiedId,
+            seedData: props.lists.map((list) =>
+                initListTreeState(list, listTreeStates.byId[list.unifiedId]),
+            ),
+        })
+        setListTreeStates(nextState)
+    }, [props.lists])
+
     // Derived state used to hide nested lists if any of their ancestors are collapsed
+    // TODO: Make an actual state
     let listShowFlag = new Map<string, boolean>()
-    let rootLists = props.lists.filter((l) => l.parentUnifiedId == null)
 
     let renderReorderLine = (listId: string, topItem?: boolean) => {
         // Disable reordering when filtering lists by query
@@ -45,6 +100,7 @@ export let ListTrees = (props: Props) => {
         )
         return (
             <ReorderLine
+                topItem={topItem}
                 isActive={props.draggedListId != null}
                 isVisible={reorderLineDropReceivingState.isDraggedOver}
                 onDragEnter={reorderLineDropReceivingState.onDragEnter}
@@ -55,17 +111,21 @@ export let ListTrees = (props: Props) => {
                 }} // Needed to allow the `onDrop` event to fire
                 onDrop={(e: React.DragEvent) => {
                     e.preventDefault()
-                    reorderLineDropReceivingState.onDrop(e.dataTransfer)
+                    reorderLineDropReceivingState.onDrop(
+                        e.dataTransfer,
+                        listTreeStates.byId[listId]?.areChildrenShown,
+                    )
                 }}
-                topItem={topItem}
             />
         )
     }
 
-    let listElements = rootLists
-        .map((currList, index) =>
+    let listElements = props.lists
+        .filter((l) => l.parentUnifiedId == null) // Top-level iteration only goes over roots
+        .map((root, index) =>
+            // Then, for each root, we iterate over their descendents
             mapTreeTraverse({
-                root: currList,
+                root,
                 strategy: 'dfs',
                 getChildren: (list) =>
                     props.lists
@@ -73,11 +133,60 @@ export let ListTrees = (props: Props) => {
                         .reverse(),
                 cb: (list) => {
                     let parentListTreeState =
-                        props.listTreeInteractionStates.byId[
-                            list.parentUnifiedId
-                        ]
+                        listTreeStates.byId[list.parentUnifiedId]
                     let currentListTreeState =
-                        props.listTreeInteractionStates.byId[list.unifiedId]
+                        listTreeStates.byId[list.unifiedId]
+                    // This case only happens on a newly created list, as props.lists will update before the tree state has a chance to reactively update based on that
+                    if (currentListTreeState == null) {
+                        return null
+                    }
+
+                    let actions: ListTreeActions = {
+                        createChildList: (name) => {
+                            props.onConfirmChildListCreate(list.unifiedId, name)
+                            setListTreeStates({
+                                ...listTreeStates,
+                                byId: {
+                                    ...listTreeStates.byId,
+                                    [list.unifiedId]: {
+                                        ...listTreeStates.byId[list.unifiedId],
+                                        isNewChildInputShown: false,
+                                        newChildListCreateState: 'success',
+                                    },
+                                },
+                            })
+                        },
+                        toggleShowChildren: () =>
+                            setListTreeStates({
+                                ...listTreeStates,
+                                byId: {
+                                    ...listTreeStates.byId,
+                                    [list.unifiedId]: {
+                                        ...listTreeStates.byId[list.unifiedId],
+                                        areChildrenShown: !listTreeStates.byId[
+                                            list.unifiedId
+                                        ].areChildrenShown,
+                                    },
+                                },
+                            }),
+                        toggleShowNewChildInput: () => {
+                            let prevState = listTreeStates.byId[list.unifiedId]
+                            return setListTreeStates({
+                                ...listTreeStates,
+                                byId: {
+                                    ...listTreeStates.byId,
+                                    [list.unifiedId]: {
+                                        ...prevState,
+                                        isNewChildInputShown: !prevState.isNewChildInputShown,
+                                        // Couple tree toggle state to this. If not open, open it. Else leave it
+                                        areChildrenShown: !prevState.isNewChildInputShown
+                                            ? true
+                                            : prevState.areChildrenShown,
+                                    },
+                                },
+                            })
+                        },
+                    }
 
                     if (list.parentUnifiedId != null) {
                         let parentShowFlag = listShowFlag.get(
@@ -86,7 +195,7 @@ export let ListTrees = (props: Props) => {
                         if (
                             !props.areListsBeingFiltered && // Always toggle children shown when filtering lists by query
                             (!parentShowFlag ||
-                                !parentListTreeState?.isTreeToggled)
+                                !parentListTreeState?.areChildrenShown)
                         ) {
                             return null
                         }
@@ -95,8 +204,8 @@ export let ListTrees = (props: Props) => {
 
                     let nestedListInput: JSX.Element = null
                     if (
-                        currentListTreeState.isTreeToggled &&
-                        currentListTreeState.isNestedListInputShown
+                        currentListTreeState.areChildrenShown &&
+                        currentListTreeState.isNewChildInputShown
                     ) {
                         nestedListInput = (
                             <ChildListInputContainer
@@ -104,17 +213,10 @@ export let ListTrees = (props: Props) => {
                                 // ref={inputContainerRef}
                             >
                                 <SidebarItemInput
-                                    onCancelClick={() =>
-                                        props.onNestedListInputToggle(
-                                            list.unifiedId,
-                                        )
+                                    onCancelClick={
+                                        actions.toggleShowNewChildInput
                                     }
-                                    onConfirmClick={(name) =>
-                                        props.onConfirmNestedListCreate(
-                                            list.unifiedId,
-                                            name,
-                                        )
-                                    }
+                                    onConfirmClick={actions.createChildList}
                                     // onChange={() =>
                                     //     this.moveItemIntoHorizontalView(
                                     //         this.nestedInputBoxRef.current,
@@ -133,7 +235,11 @@ export let ListTrees = (props: Props) => {
                         <React.Fragment key={list.unifiedId}>
                             {index === 0 &&
                                 renderReorderLine(list.unifiedId, true)}
-                            {props.renderListItem(list)}
+                            {props.renderListItem(
+                                list,
+                                listTreeStates.byId[list.unifiedId],
+                                actions,
+                            )}
                             {renderReorderLine(list.unifiedId)}
                             {nestedListInput}
                         </React.Fragment>

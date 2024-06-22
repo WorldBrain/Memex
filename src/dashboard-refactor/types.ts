@@ -152,7 +152,10 @@ export interface DropReceivingState {
     isDraggedOver?: boolean
     wasPageDropped?: boolean
     canReceiveDroppedItems?: boolean
-    onDrop(dataTransfer: DataTransfer): void
+    onDrop(
+        dataTransfer: DataTransfer,
+        areTargetListChildrenShown?: boolean,
+    ): void
     onDragEnter: DragEventHandler
     onDragLeave: DragEventHandler
 }

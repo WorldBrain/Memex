@@ -310,7 +310,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 inboxUnreadCount: 0,
                 searchQuery: '',
                 lists: initNormalizedState(),
-                listTrees: initNormalizedState(),
                 filteredListIds: [],
                 isAddListInputShown: false,
                 areLocalListsExpanded: true,
@@ -604,37 +603,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
         nextLists,
     ) => {
-        this.emitMutation({
-            listsSidebar: {
-                lists: { $set: nextLists },
-                listTrees: {
-                    $apply: (prev) =>
-                        initNormalizedState({
-                            getId: (state) => state.unifiedId,
-                            seedData: normalizedStateToArray(nextLists).map(
-                                (list) => {
-                                    const prevState = prev.byId[list.unifiedId]
-                                    return {
-                                        unifiedId: list.unifiedId,
-                                        isTreeToggled:
-                                            prevState?.isTreeToggled ?? false,
-                                        isNestedListInputShown:
-                                            prevState?.isNestedListInputShown ??
-                                            false,
-                                        newNestedListCreateState:
-                                            prevState?.newNestedListCreateState ??
-                                            'pristine',
-                                        hasChildren:
-                                            this.options.annotationsCache.getListsByParentId(
-                                                list.unifiedId,
-                                            ).length > 0,
-                                    }
-                                },
-                            ),
-                        }),
-                },
-            },
-        })
+        this.emitMutation({ listsSidebar: { lists: { $set: nextLists } } })
     }
 
     private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
@@ -4494,6 +4463,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                         action,
                         cleanedListId,
                         previousState,
+                        {
+                            areTargetListChildrenShown:
+                                event.areTargetListChildrenShown,
+                        },
                     )
                     return
                 }
@@ -4507,7 +4480,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                         action,
                         cleanedListId,
                         previousState,
-                        { isBeforeFirstRoot: true },
+                        {
+                            isBeforeFirstRoot: true,
+                            areTargetListChildrenShown:
+                                event.areTargetListChildrenShown,
+                        },
                     )
                     return
                 }
@@ -4685,7 +4662,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         { listId }: DragToListAction<'list'>,
         dropTargetListId: string,
         previousState: State,
-        params?: { isBeforeFirstRoot?: boolean },
+        params?: {
+            isBeforeFirstRoot?: boolean
+            areTargetListChildrenShown?: boolean
+        },
     ): Promise<void> {
         if (listId == null || dropTargetListId === listId) {
             this.emitMutation({
@@ -4717,10 +4697,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 )
             }
         } // If the target list tree is toggled open, the behavior is that the dragged list becomes a child of it (if not already)
-        else if (
-            previousState.listsSidebar.listTrees.byId[dropTargetListId]
-                ?.isTreeToggled
-        ) {
+        else if (params?.areTargetListChildrenShown) {
             const targetSiblings = cache.getListsByParentId(
                 targetList.unifiedId,
             )
@@ -5140,51 +5117,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    toggleListTreeShow: EventHandler<'toggleListTreeShow'> = async ({
-        event,
-    }) => {
-        this.emitMutation({
-            listsSidebar: {
-                listTrees: {
-                    byId: {
-                        [event.listId]: {
-                            isTreeToggled: { $apply: (prev) => !prev },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
-    toggleNestedListInputShow: EventHandler<
-        'toggleNestedListInputShow'
-    > = async ({ event, previousState }) => {
-        const prevTreeState =
-            previousState.listsSidebar.listTrees.byId[event.listId]
-        this.emitMutation({
-            listsSidebar: {
-                listTrees: {
-                    byId: {
-                        [event.listId]: {
-                            isNestedListInputShown: {
-                                $set: !prevTreeState.isNestedListInputShown,
-                            },
-                            // Couple tree toggle state to this. If not open, open it. Else leave it
-                            isTreeToggled: {
-                                $set: !prevTreeState.isNestedListInputShown
-                                    ? true
-                                    : prevTreeState.isTreeToggled,
-                            },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
     createdNestedList: EventHandler<'createdNestedList'> = async ({
         event,
-        previousState,
     }) => {
         const { annotationsCache, listsBG, authBG } = this.options
         const parentList = annotationsCache.lists.byId[event.parentListId]
@@ -5193,59 +5127,28 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        await executeUITask(
-            this,
-            (taskState) => ({
-                listsSidebar: {
-                    listTrees: {
-                        byId: {
-                            [event.parentListId]: {
-                                newNestedListCreateState: { $set: taskState },
-                            },
-                        },
-                    },
-                },
-            }),
-            async () => {
-                const {
-                    localListId,
-                    remoteListId,
-                    collabKey,
-                } = await listsBG.createCustomList({
-                    name: newListName,
-                    parentListId: parentList.localId!,
-                })
-                const user = await authBG.getCurrentUser()
-                annotationsCache.addList({
-                    type: 'user-list',
-                    name: newListName,
-                    localId: localListId,
-                    collabKey: collabKey,
-                    remoteId: remoteListId,
-                    creator: { type: 'user-reference', id: user.id },
-                    unifiedAnnotationIds: [],
-                    hasRemoteAnnotationsToLoad: false,
-                    parentLocalId: parentList.localId!,
-                    pathLocalIds: [
-                        ...parentList.pathLocalIds,
-                        parentList.localId!,
-                    ],
-                    isPrivate: true,
-                })
-
-                this.emitMutation({
-                    listsSidebar: {
-                        listTrees: {
-                            byId: {
-                                [event.parentListId]: {
-                                    isNestedListInputShown: { $set: false },
-                                },
-                            },
-                        },
-                    },
-                })
-            },
-        )
+        const {
+            localListId,
+            remoteListId,
+            collabKey,
+        } = await listsBG.createCustomList({
+            name: newListName,
+            parentListId: parentList.localId!,
+        })
+        const user = await authBG.getCurrentUser()
+        annotationsCache.addList({
+            type: 'user-list',
+            name: newListName,
+            localId: localListId,
+            collabKey: collabKey,
+            remoteId: remoteListId,
+            creator: { type: 'user-reference', id: user.id },
+            unifiedAnnotationIds: [],
+            hasRemoteAnnotationsToLoad: false,
+            parentLocalId: parentList.localId!,
+            pathLocalIds: [...parentList.pathLocalIds, parentList.localId!],
+            isPrivate: true,
+        })
     }
 
     setDeletingListId: EventHandler<'setDeletingListId'> = async ({

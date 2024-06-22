@@ -5,13 +5,6 @@ import type { UnifiedList } from 'src/annotations/cache/types'
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-export interface ListTreeInteractions {
-    hasChildren: boolean
-    isTreeToggled: boolean
-    isNestedListInputShown: boolean
-    newNestedListCreateState: TaskState
-}
-
 export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<
         UnifiedList & {
@@ -19,7 +12,6 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
             wasListDropped?: boolean
         }
     >
-    listTrees: NormalizedState<ListTreeInteractions>
     filteredListIds: UnifiedList['unifiedId'][]
     areLocalListsExpanded: boolean
     areFollowedListsExpanded: boolean
@@ -85,13 +77,15 @@ export type Events = UIEvent<{
     setSelectedListId: { listId: string }
     setShowMoreMenuListId: { listId: string }
     setEditMenuListId: { listId: string }
-    dropOnListItem: { listId: string; dataTransfer: DataTransfer }
+    dropOnListItem: {
+        listId: string
+        dataTransfer: DataTransfer
+        areTargetListChildrenShown?: boolean
+    }
     dragList: { listId: string; dataTransfer: DataTransfer }
     dropList: { listId: string }
 
     // Tree-related events
-    toggleListTreeShow: { listId: string }
-    toggleNestedListInputShow: { listId: string }
     createdNestedList: { parentListId: string; name: string }
 
     confirmListDelete: null

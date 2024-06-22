@@ -37,8 +37,6 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onListSelection: (id: string | null) => void
     openRemoteListPage: (remoteListId: string) => void
     onCancelAddList: () => void
-    onTreeToggle: (listId: string) => void
-    onNestedListInputToggle: (listId: string) => void
     onConfirmNestedListCreate: (parentListId: string, name: string) => void
     onConfirmAddList: (value: string) => void
     onListDragStart: (listId: string) => React.DragEventHandler
@@ -246,17 +244,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             areListsBeingFiltered={
                                 this.props.filteredListIds.length > 0
                             }
-                            listTreeInteractionStates={this.props.listTrees}
                             initDropReceivingState={
                                 this.props.initDropReceivingState
                             }
-                            onNestedListInputToggle={
-                                this.props.onNestedListInputToggle
-                            }
-                            onConfirmNestedListCreate={
+                            onConfirmChildListCreate={
                                 this.props.onConfirmNestedListCreate
                             }
-                            renderListItem={(list) => (
+                            renderListItem={(list, treeState, actions) => (
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
                                         this.setSidebarItemRefs(
@@ -290,11 +284,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 .current,
                                         )
                                     }}
-                                    hasChildren={
-                                        this.props.listTrees.byId[
-                                            list.unifiedId
-                                        ]?.hasChildren
-                                    }
+                                    hasChildren={treeState.hasChildren}
                                     dropReceivingState={this.props.initDropReceivingState(
                                         list.unifiedId,
                                     )}
@@ -309,13 +299,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     renderLeftSideIcon={() => (
                                         <TooltipBox
                                             tooltipText={
-                                                !this.props.listTrees.byId[
-                                                    list.unifiedId
-                                                ]?.hasChildren
+                                                !treeState.hasChildren
                                                     ? 'Add Sub-Space'
-                                                    : this.props.listTrees.byId[
-                                                          list.unifiedId
-                                                      ].isTreeToggled
+                                                    : treeState.areChildrenShown
                                                     ? 'Hide Sub Spaces'
                                                     : 'Show Sub Spaces'
                                             }
@@ -333,39 +319,23 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     this.spaceToggleButtonRef
                                                 }
                                                 icon={
-                                                    !this.props.listTrees.byId[
-                                                        list.unifiedId
-                                                    ]?.hasChildren
+                                                    !treeState.hasChildren
                                                         ? 'plus'
-                                                        : this.props.listTrees
-                                                              .byId[
-                                                              list.unifiedId
-                                                          ].isTreeToggled
+                                                        : treeState.areChildrenShown
                                                         ? 'arrowDown'
                                                         : 'arrowRight'
                                                 }
                                                 heightAndWidth="16px"
                                                 color={
-                                                    this.props.listTrees.byId[
-                                                        list.unifiedId
-                                                    ].hasChildren
+                                                    treeState.hasChildren
                                                         ? 'greyScale5'
                                                         : 'greyScale3'
                                                 }
                                                 onClick={(event) => {
-                                                    if (
-                                                        this.props.listTrees
-                                                            .byId[
-                                                            list.unifiedId
-                                                        ].hasChildren
-                                                    ) {
-                                                        this.props.onTreeToggle(
-                                                            list.unifiedId,
-                                                        )
+                                                    if (treeState.hasChildren) {
+                                                        actions.toggleShowChildren()
                                                     } else {
-                                                        this.props.onNestedListInputToggle(
-                                                            list.unifiedId,
-                                                        )
+                                                        actions.toggleShowNewChildInput()
                                                     }
                                                     this.moveItemIntoHorizontalView(
                                                         this.sidebarItemRefs[
@@ -423,9 +393,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                         heightAndWidth="18px"
                                                         onClick={(event) => {
                                                             event.stopPropagation()
-                                                            this.props.onNestedListInputToggle(
-                                                                list.unifiedId,
-                                                            )
+                                                            actions.toggleShowNewChildInput()
                                                         }}
                                                     />
                                                 </TooltipBox>

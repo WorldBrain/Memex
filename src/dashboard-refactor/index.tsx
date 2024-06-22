@@ -690,12 +690,6 @@ export class DashboardContainer extends StatefulUIElement<
             <ListsSidebarContainer
                 {...listsSidebar}
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
-                onTreeToggle={(listId) =>
-                    this.processEvent('toggleListTreeShow', { listId })
-                }
-                onNestedListInputToggle={(listId) =>
-                    this.processEvent('toggleNestedListInputShow', { listId })
-                }
                 onConfirmNestedListCreate={(parentListId, name) =>
                     this.processEvent('createdNestedList', {
                         parentListId,
@@ -833,10 +827,11 @@ export class DashboardContainer extends StatefulUIElement<
                             listId: undefined,
                         })
                     },
-                    onDrop: (dataTransfer) =>
+                    onDrop: (dataTransfer, areTargetListChildrenShown) =>
                         this.processEvent('dropOnListItem', {
                             listId,
                             dataTransfer,
+                            areTargetListChildrenShown,
                         }),
                     canReceiveDroppedItems: true,
                     isDraggedOver: listId === listsSidebar.dragOverListId,
