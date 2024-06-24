@@ -897,12 +897,7 @@ export class SidebarContainerLogic extends UILogic<
                 loadState: { $set: 'running' },
             })
 
-            if (fullPageUrl == null) {
-                return
-            }
-            this.fullPageUrl = fullPageUrl
-
-            const currentUser = await this.options.authBG.getCurrentUser()
+            const currentUser = await this.options.authBG?.getCurrentUser()
             if (currentUser) {
                 this.emitMutation({
                     currentUserId: { $set: currentUser.id ?? null },
@@ -949,8 +944,13 @@ export class SidebarContainerLogic extends UILogic<
                     renderHighlights: true,
                 })
             }
-            this.syncCachePageListsState(this.fullPageUrl)
-            await this.setPageActivityState(this.fullPageUrl)
+            if (fullPageUrl == null) {
+                return
+            }
+            this.fullPageUrl = fullPageUrl
+
+            this.syncCachePageListsState(fullPageUrl)
+            await this.setPageActivityState(fullPageUrl)
 
             if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
                 const width = SIDEBAR_WIDTH_STORAGE_KEY
