@@ -2,6 +2,8 @@ import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 import type { ErrorDisplayProps } from './error-display'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
+import { ContentIdentifier } from 'src/search/types'
+import SearchBackground from 'src/search/background'
 
 export type SearchEngineName = 'google' | 'duckduckgo' | 'brave' | 'bing'
 export interface SearchEngineInfo {
@@ -23,7 +25,6 @@ export interface ResultItemProps {
     title: string
     displayTime: number
     searchEngine: SearchEngineName
-    tags: []
     onLinkClick: React.MouseEventHandler
 }
 

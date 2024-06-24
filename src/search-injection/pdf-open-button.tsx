@@ -112,16 +112,6 @@ export const handleRenderPDFOpenButton = async (
     let pdfOriginalUrl = null
     let buttonBarHeight = '24px'
 
-    if (
-        window.location.href.includes('https://arxiv.org/pdf/') &&
-        !window.location.href.includes('.pdf')
-    ) {
-        pdfOriginalUrl = window.location.href + '.pdf'
-    }
-    if (window.location.href.includes('.pdf')) {
-        pdfOriginalUrl = window.location.href
-    }
-
     const target = document.createElement('div')
 
     target.setAttribute('id', constants.REACT_ROOTS.pdfOpenButtons)
@@ -152,12 +142,18 @@ export const handleRenderPDFOpenButton = async (
         }
         if (element.src && element.src.includes('.pdf')) {
             pdfOriginalUrl = element.src
+        } else if (
+            window.location.href.includes('https://arxiv.org/pdf/') &&
+            !window.location.href.includes('.pdf')
+        ) {
+            pdfOriginalUrl = window.location.href + '.pdf'
+        } else if (window.location.href.includes('.pdf')) {
+            pdfOriginalUrl = window.location.href
+        } else {
+            pdfOriginalUrl = null
         }
 
-        if (pdfOriginalUrl == null) {
-            return
-        }
-
+        console.log('pdfOriginalUrl', pdfOriginalUrl)
         ReactDOM.render(
             <Root
                 rootEl={target}

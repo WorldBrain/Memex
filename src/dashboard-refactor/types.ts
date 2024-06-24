@@ -133,6 +133,7 @@ export type DashboardDependencies = {
     openSettings?: () => void
     bgScriptBG?: RemoteBGScriptInterface<'caller'>
     getPortalElement?: () => HTMLElement
+    openPDFinViewer?: (url: string) => Promise<void>
 } & (
     | {
           inPageMode: true
