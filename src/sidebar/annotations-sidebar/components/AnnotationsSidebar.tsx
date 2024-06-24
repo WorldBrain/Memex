@@ -2047,6 +2047,9 @@ export class AnnotationsSidebar extends React.Component<
                             />
                         )
                     }}
+                    omitLocalContentFeature={
+                        this.props.sidebarContext === 'dashboard'
+                    }
                 />
             </AISidebarContainer>
         )
