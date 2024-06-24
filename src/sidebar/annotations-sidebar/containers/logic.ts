@@ -968,8 +968,8 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const pageAlreadySaved =
-                (await this.options.pageIndexingBG.getPageMetadata({
-                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+                (await this.options.pageIndexingBG.getTitleForPage({
+                    fullPageUrl: this.fullPageUrl,
                 })) != null
 
             this.emitMutation({
@@ -1525,13 +1525,14 @@ export class SidebarContainerLogic extends UILogic<
         this.options.events.emit('bookmarkPage')
         let pageAlreadySaved = false
         let retries = 0
-        const maxRetries = 30
+        const maxRetries = 100
         while (!pageAlreadySaved && retries < maxRetries) {
             pageAlreadySaved =
-                (await this.options.pageIndexingBG.getPageMetadata({
-                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+                (await this.options.pageIndexingBG.getTitleForPage({
+                    fullPageUrl: this.fullPageUrl,
                 })) != null
             await sleepPromise(100)
+            retries++
         }
 
         this.emitMutation({

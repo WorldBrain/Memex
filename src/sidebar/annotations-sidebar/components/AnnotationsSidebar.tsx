@@ -5263,6 +5263,7 @@ const PageMetaDataContainer = styled.div`
     padding: 5px;
     width: fill-available;
     width: -moz-available;
+    height: 100%;
 `
 const PageMetadataFormTitle = styled.div`
     background: ${(props) => props.theme.colors.headerGradient};
