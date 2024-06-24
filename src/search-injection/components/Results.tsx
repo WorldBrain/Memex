@@ -29,6 +29,7 @@ interface ResultsProps {
     updateQuery: (query: string) => Promise<void>
     query: string
     openSettings: () => void
+    openPDFinViewer: (url: string) => Promise<void>
 }
 
 interface ResultsState {

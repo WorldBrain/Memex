@@ -82,6 +82,8 @@ export const main: InPageUIInjectionsMain = async ({
                                             query: 'settings',
                                         },
                                     ),
+                                searchDisplayProps.searchBG,
+                                searchDisplayProps.openPDFinViewer,
                             )
                         } catch (err) {
                             console.error(err)

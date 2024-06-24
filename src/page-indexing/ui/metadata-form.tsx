@@ -656,13 +656,15 @@ const FormContainer = styled.form`
     width: 100%;
     box-sizing: border-box;
     position: relative;
+    padding-bottom: 150px;
 
     &::-webkit-scrollbar {
         display: none;
     }
 
+    height: 100%;
+
     scrollbar-width: none;
-    padding-bottom: 50px;
 `
 
 const FormSection = styled.div`

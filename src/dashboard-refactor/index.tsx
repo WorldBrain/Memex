@@ -867,7 +867,14 @@ export class DashboardContainer extends StatefulUIElement<
                             heightAndWidth={'40px'}
                             hoverOff
                         />
-                        <DropZoneTitle>Drop PDF here to open it</DropZoneTitle>
+                        <DropZoneTitle>
+                            Download, then drop the PDF here
+                        </DropZoneTitle>
+                        <DropZoneSubTitle>
+                            In rare cases the PDF file is not reachable
+                            directly. In this case, you can drag and drop the
+                            PDF file here.
+                        </DropZoneSubTitle>
                     </DropZoneContent>
                 </DropZoneFrame>
             </DropZoneBackground>
@@ -2372,6 +2379,12 @@ const DropZoneContent = styled.div`
 const DropZoneTitle = styled.div`
     color: ${(props) => props.theme.colors.white};
     font-size: 20px;
+    text-align: center;
+`
+
+const DropZoneSubTitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 18px;
     text-align: center;
 `
 

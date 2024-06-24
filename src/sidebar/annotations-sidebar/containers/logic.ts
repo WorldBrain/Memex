@@ -538,6 +538,7 @@ export class SidebarContainerLogic extends UILogic<
     isPageSummaryEmpty = true
     tokenBuffer: string
     tokenBufferEditor: string
+
     private setupRemoteEventListeners() {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
@@ -886,6 +887,8 @@ export class SidebarContainerLogic extends UILogic<
             runtimeAPI,
         } = this.options
 
+        this.setupRemoteEventListeners()
+
         // All the things necessary for the sidebar to function
         await loadInitial<SidebarContainerState>(this, async () => {
             this.showState = initialState ?? 'hidden'
@@ -894,12 +897,7 @@ export class SidebarContainerLogic extends UILogic<
                 loadState: { $set: 'running' },
             })
 
-            if (fullPageUrl == null) {
-                return
-            }
-            this.fullPageUrl = fullPageUrl
-
-            const currentUser = await this.options.authBG.getCurrentUser()
+            const currentUser = await this.options.authBG?.getCurrentUser()
             if (currentUser) {
                 this.emitMutation({
                     currentUserId: { $set: currentUser.id ?? null },
@@ -946,9 +944,13 @@ export class SidebarContainerLogic extends UILogic<
                     renderHighlights: true,
                 })
             }
-            this.syncCachePageListsState(this.fullPageUrl)
-            await this.setPageActivityState(this.fullPageUrl)
-            this.setupRemoteEventListeners()
+            if (fullPageUrl == null) {
+                return
+            }
+            this.fullPageUrl = fullPageUrl
+
+            this.syncCachePageListsState(fullPageUrl)
+            await this.setPageActivityState(fullPageUrl)
 
             if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
                 const width = SIDEBAR_WIDTH_STORAGE_KEY
@@ -966,8 +968,8 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const pageAlreadySaved =
-                (await this.options.pageIndexingBG.getPageMetadata({
-                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+                (await this.options.pageIndexingBG.getTitleForPage({
+                    fullPageUrl: this.fullPageUrl,
                 })) != null
 
             this.emitMutation({
@@ -1523,13 +1525,14 @@ export class SidebarContainerLogic extends UILogic<
         this.options.events.emit('bookmarkPage')
         let pageAlreadySaved = false
         let retries = 0
-        const maxRetries = 30
+        const maxRetries = 100
         while (!pageAlreadySaved && retries < maxRetries) {
             pageAlreadySaved =
-                (await this.options.pageIndexingBG.getPageMetadata({
-                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+                (await this.options.pageIndexingBG.getTitleForPage({
+                    fullPageUrl: this.fullPageUrl,
                 })) != null
             await sleepPromise(100)
+            retries++
         }
 
         this.emitMutation({
