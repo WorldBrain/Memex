@@ -538,6 +538,7 @@ export class SidebarContainerLogic extends UILogic<
     isPageSummaryEmpty = true
     tokenBuffer: string
     tokenBufferEditor: string
+
     private setupRemoteEventListeners() {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
@@ -886,6 +887,8 @@ export class SidebarContainerLogic extends UILogic<
             runtimeAPI,
         } = this.options
 
+        this.setupRemoteEventListeners()
+
         // All the things necessary for the sidebar to function
         await loadInitial<SidebarContainerState>(this, async () => {
             this.showState = initialState ?? 'hidden'
@@ -948,7 +951,6 @@ export class SidebarContainerLogic extends UILogic<
             }
             this.syncCachePageListsState(this.fullPageUrl)
             await this.setPageActivityState(this.fullPageUrl)
-            this.setupRemoteEventListeners()
 
             if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
                 const width = SIDEBAR_WIDTH_STORAGE_KEY
