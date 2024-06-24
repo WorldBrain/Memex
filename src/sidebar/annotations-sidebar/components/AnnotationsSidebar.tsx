@@ -582,8 +582,8 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     async getLocalContent() {
-        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
-        let fullTextToProcess
+        let isPagePDF = this.props.fullPageUrl?.includes('/pdfjs/viewer.html?')
+        let fullTextToProcess: string
         if (isPagePDF) {
             const searchParams = new URLSearchParams(window.location.search)
             const filePath = searchParams.get('file')
@@ -2729,7 +2729,7 @@ export class AnnotationsSidebar extends React.Component<
                                 while (!executed) {
                                     try {
                                         if (
-                                            isUrlYTVideo(window.location.href)
+                                            isUrlYTVideo(this.props.fullPageUrl)
                                         ) {
                                             let video = document.getElementsByTagName(
                                                 'video',
@@ -2754,7 +2754,7 @@ export class AnnotationsSidebar extends React.Component<
                                         } else {
                                             executed = this.props.events.emit(
                                                 'addPageUrlToEditor',
-                                                window.location.href,
+                                                this.props.fullPageUrl,
                                                 null,
                                                 false,
                                                 (success) => {
