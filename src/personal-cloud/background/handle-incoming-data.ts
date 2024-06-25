@@ -36,8 +36,9 @@ export const handleIncomingData = (deps: {
     storageType,
     collection,
     updates,
-    where,
+    where: _where,
 }: IncomingDataInfo): Promise<void> => {
+    let where = _where
     const incomingStorageManager =
         storageType === PersonalCloudClientStorageType.Persistent
             ? deps.persistentStorageManager
@@ -63,6 +64,24 @@ export const handleIncomingData = (deps: {
             await deps.customListsBG.updateListSuggestionsCache({
                 added: updates.id,
             })
+        }
+    }
+
+    if (collection === 'pages') {
+        let existingPage = await deps.storageManager.backend.operation(
+            'findObject',
+            collection,
+            { url: updates.url },
+        )
+        // This covers a bug we had for a long time where any page updates would result in text being deleted
+        //  as pages coming from the translation layer never contain text. Text is fetched from a separate data source.
+        //  Thus we remove it here so it's not included in the fields that will get overwritten in the update op, and also
+        //  set the `where` clause so an update op happens instead of a create op (which overwrites everything).
+        //
+        //  See the `docContent` collection clause in this function below for how text is fetched.
+        if (existingPage) {
+            delete updates['text']
+            where = { url: updates['url'] }
         }
     }
 
