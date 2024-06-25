@@ -24,6 +24,10 @@ body {
     width: 400vw;
     max-width: 800px;
 }
+.fullScreen {
+    width: 100%;
+    height: 100vh;
+}
 
 .routeTitle {
     font-size: 20px;
