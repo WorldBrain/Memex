@@ -1232,7 +1232,6 @@ export async function main(
                     browserAPIs: browser,
                     localStorage: browser.storage.local,
                     services: createUIServices(),
-                    renderUpdateNotifBanner: () => null,
                     bgScriptBG,
                     openPDFinViewer: async (originalPageURL) => {
                         let urlToOpen = originalPageURL
@@ -1243,11 +1242,9 @@ export async function main(
                         ) {
                             const url = new URL(urlToOpen)
                             const uploadId = url.searchParams.get('upload_id')
-                            console.log('uploadId', uploadId)
                             urlToOpen = await pdfViewerBG.getTempPdfAccessUrl(
                                 uploadId,
                             )
-                            console.log('urlToOpen', urlToOpen)
                         }
                         if (
                             urlToOpen.includes('https://arxiv.org/pdf/') &&
@@ -1360,7 +1357,6 @@ export async function main(
             if (isPdfViewerRunning) {
                 return
             }
-            await inPageUI.hideRibbon()
             await maybeLoadOnDemandInPageUI()
             await injectCustomUIperPage(
                 annotationsFunctions,

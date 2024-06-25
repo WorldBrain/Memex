@@ -279,7 +279,8 @@ const MenuList = styled.div`
     width: 300px;
     padding: 10px;
     position: relative;
-    height: 360px;
+    max-height: 360px;
+    height: fit-content;
     grid-gap: 2px;
 `
 

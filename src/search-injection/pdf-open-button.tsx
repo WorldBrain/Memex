@@ -153,7 +153,6 @@ export const handleRenderPDFOpenButton = async (
             pdfOriginalUrl = null
         }
 
-        console.log('pdfOriginalUrl', pdfOriginalUrl)
         ReactDOM.render(
             <Root
                 rootEl={target}

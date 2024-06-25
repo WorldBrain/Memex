@@ -212,7 +212,6 @@ export class AuthBackground {
         if (!validGeneratedLoginToken(loginToken)) {
             return
         }
-        console.log('loginToken', loginToken)
         return loginToken
     }
 

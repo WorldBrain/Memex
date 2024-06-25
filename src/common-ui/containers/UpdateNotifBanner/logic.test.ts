@@ -21,6 +21,7 @@ describe('Update notification banner logic tests', () => {
         const { logic: logic1 } = setupTest(context, {
             getStorage: async () => false,
             setStorage: () => undefined,
+            getFeatureBaseToken: async () => 'test',
         })
 
         expect(logic1.state.isVisible).toBe(false)
@@ -30,6 +31,7 @@ describe('Update notification banner logic tests', () => {
         const { logic: logic2 } = setupTest(context, {
             getStorage: async () => true,
             setStorage: () => undefined,
+            getFeatureBaseToken: async () => 'test',
         })
 
         expect(logic2.state.isVisible).toBe(false)
@@ -44,6 +46,7 @@ describe('Update notification banner logic tests', () => {
             setStorage: async (key, value) => {
                 readFlag = value
             },
+            getFeatureBaseToken: async () => 'test',
         })
 
         expect(logic.state.isVisible).toBe(false)
