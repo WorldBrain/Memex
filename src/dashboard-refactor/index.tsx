@@ -68,6 +68,7 @@ import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
 import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -2100,6 +2101,9 @@ export class DashboardContainer extends StatefulUIElement<
                         getRootElement={this.props.getRootElement}
                         padding={'4px'}
                         iconSize="22px"
+                        getFeatureBaseToken={async () =>
+                            await this.props.authBG.getJWTTokenForFeatureBase()
+                        }
                     />
                     {/* {this.state.listsSidebar.draggedListId != null ||
                         (this.state.searchResults.draggedPageId != null && ( */}
@@ -2108,8 +2112,15 @@ export class DashboardContainer extends StatefulUIElement<
                             listsSidebar.dragOverListId != null
                         }
                     />
-                    {/* ))} */}
-                    {this.props.renderUpdateNotifBanner()}
+                    <UpdateNotifBanner
+                        theme={{
+                            variant: this.state.themeVariant,
+                            position: 'fixed',
+                        }}
+                        getFeatureBaseToken={
+                            this.props.authBG.getJWTTokenForFeatureBase
+                        }
+                    />
                     <BulkEditWidget
                         deleteBulkSelection={() =>
                             this.processEvent('bulkDeleteItem', null)

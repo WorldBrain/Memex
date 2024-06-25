@@ -11,6 +11,9 @@ class Layout extends Component {
     isActive = (route) => this.props.location.pathname === route.pathname
 
     render() {
+        const shouldFullScreen =
+            this.props.location.pathname === '/changelog' ||
+            this.props.location.pathname === '/feedback'
         return (
             <RootContainer>
                 <Navigation
@@ -19,7 +22,13 @@ class Layout extends Component {
                 >
                     <AccountMenu />
                 </Navigation>
-                <div className={styles.route}>{this.props.children}</div>
+                <div
+                    className={
+                        shouldFullScreen ? styles.fullScreen : styles.route
+                    }
+                >
+                    {this.props.children}
+                </div>
                 <HelpBtn />
             </RootContainer>
         )

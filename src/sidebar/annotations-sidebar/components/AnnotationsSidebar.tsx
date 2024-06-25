@@ -2335,6 +2335,9 @@ export class AnnotationsSidebar extends React.Component<
                     location={'sidebar'}
                     theme={{ variant: themeVariant, position: 'fixed' }}
                     sidebarContext={this.props.sidebarContext}
+                    getFeatureBaseToken={
+                        this.props.authBG.getJWTTokenForFeatureBase
+                    }
                 />
             </>
         )

@@ -10,6 +10,7 @@ import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { SETTINGS_URL } from 'src/constants'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface Props {
     currentUser: AuthenticatedUser
@@ -18,6 +19,7 @@ export interface Props {
     getRootElement: () => HTMLElement
     padding?: string
     iconSize?: string
+    getFeatureBaseToken: () => Promise<string>
 }
 export interface State {
     isOpen: boolean
@@ -26,6 +28,8 @@ export interface State {
     showChangeLog: boolean
     showTutorialBox: boolean
     currentUser: AuthenticatedUser | null
+    loading: TaskState
+    token?: string
 }
 
 export class HelpBtn extends React.PureComponent<Props, State> {
@@ -38,6 +42,8 @@ export class HelpBtn extends React.PureComponent<Props, State> {
         showChangeLog: false,
         showTutorialBox: false,
         currentUser: null,
+        loading: 'pristine' as TaskState,
+        token: null,
     }
 
     private handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -89,9 +95,9 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         <ChatFrame
                             src={
                                 this.state.showFeedbackForm
-                                    ? 'https://memex.featurebase.app'
+                                    ? `https://memex.featurebase.app?jwt=${this.state.token}`
                                     : this.state.showChangeLog
-                                    ? 'https://memex.featurebase.app/changelog'
+                                    ? `https://memex.featurebase.app/changelog?jwt=${this.state.token}`
                                     : `https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${this.props.currentUser.email}`
                             }
                             height={600}
@@ -133,9 +139,19 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                             {this.renderTutorialBox()}
                         </MenuItem>
                         <MenuItem
-                            onClick={() =>
-                                this.setState({ showFeedbackForm: true })
-                            }
+                            onClick={async () => {
+                                this.setState({
+                                    loading: 'running',
+                                })
+                                const token = await this.props.getFeatureBaseToken()
+
+                                if (token) {
+                                    this.setState({
+                                        token: token,
+                                        showFeedbackForm: true,
+                                    })
+                                }
+                            }}
                         >
                             <Icon
                                 filePath={icons.sadFace}
@@ -143,18 +159,6 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                 hoverOff
                             />
                             Feature Requests & Bugs
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() =>
-                                window.open('https://feedback.memex.garden')
-                            }
-                        >
-                            <Icon
-                                filePath={icons.peopleFine}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            Community Forum
                         </MenuItem>
                         <MenuItem
                             onClick={() => window.open(SETTINGS_URL, '_blank')}
@@ -167,9 +171,19 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                             Keyboard Shortcuts
                         </MenuItem>
                         <MenuItem
-                            onClick={() =>
-                                this.setState({ showChangeLog: true })
-                            }
+                            onClick={async () => {
+                                this.setState({
+                                    loading: 'running',
+                                })
+                                const token = await this.props.getFeatureBaseToken()
+
+                                if (token) {
+                                    this.setState({
+                                        token: token,
+                                        showChangeLog: true,
+                                    })
+                                }
+                            }}
                         >
                             <Icon
                                 filePath={icons.clock}
@@ -265,7 +279,8 @@ const MenuList = styled.div`
     width: 300px;
     padding: 10px;
     position: relative;
-    height: 360px;
+    max-height: 360px;
+    height: fit-content;
     grid-gap: 2px;
 `
 

@@ -73,6 +73,7 @@ export class AuthBackground {
             refreshUserInfo: this.refreshUserInfo,
             registerWithEmailPassword: this.registerWithEmailPassword,
             generateLoginToken: this.generateLoginToken,
+            getJWTTokenForFeatureBase: this.getJWTTokenForFeatureBase,
             loginWithEmailPassword: this.loginWithEmailPassword,
             loginWithProvider: this.loginWithProvider,
             getCurrentUser: () => this.authService.getCurrentUser(),
@@ -199,6 +200,15 @@ export class AuthBackground {
     generateLoginToken = async () => {
         const tokenObj = await this.authService.generateLoginToken()
         const loginToken = tokenObj.token
+        if (!validGeneratedLoginToken(loginToken)) {
+            return
+        }
+        return loginToken
+    }
+
+    getJWTTokenForFeatureBase = async () => {
+        const tokenObj = await this.authService.getJWTTokenForFeatureBase()
+        const loginToken = tokenObj?.token ?? null
         if (!validGeneratedLoginToken(loginToken)) {
             return
         }

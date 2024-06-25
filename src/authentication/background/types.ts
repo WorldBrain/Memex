@@ -41,6 +41,7 @@ export interface AuthRemoteFunctionsInterface {
         options?: { request?: AuthRequest },
     ): Promise<{ result: LoginResult }>
     generateLoginToken(): Promise<any>
+    getJWTTokenForFeatureBase(): Promise<string>
 }
 
 export interface AuthRemoteEvents {

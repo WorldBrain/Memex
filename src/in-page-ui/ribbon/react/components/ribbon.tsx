@@ -95,6 +95,7 @@ export interface Props extends RibbonSubcomponentProps {
     confirmDeletion: (promptConfirmation: boolean) => void
     events: AnnotationsSidebarInPageEventEmitter
     forceRibbonShow: (force: boolean) => void
+    getFeatureBaseToken: () => Promise<string>
 }
 
 interface State {
@@ -107,6 +108,7 @@ interface State {
     updatesAvailable: boolean
     initialHighlightColor: RGBAColor
     hoverSavedButton: boolean
+    featureBaseToken?: string
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -141,6 +143,7 @@ export default class Ribbon extends Component<Props, State> {
         updatesAvailable: false,
         initialHighlightColor: null,
         hoverSavedButton: false,
+        featureBaseToken: null,
     }
 
     constructor(props: Props) {
@@ -465,7 +468,7 @@ export default class Ribbon extends Component<Props, State> {
                         <FeedbackContainer>
                             <LoadingIndicator size={30} />
                             <FeedFrame
-                                src="https://memex.featurebase.app"
+                                src={`https://feedback.memex.garden/?jwt=${this.state.featureBaseToken}`}
                                 frameBorder="0"
                                 width="100%"
                                 height="533"
@@ -488,7 +491,7 @@ export default class Ribbon extends Component<Props, State> {
                         <ChatBox>
                             <LoadingIndicator size={30} />
                             <ChatFrame
-                                src={'https://memex.featurebase.app/changelog'}
+                                src={`https://feedback.memex.garden/changelog?jwt=${this.state.featureBaseToken}`}
                                 height={600}
                                 width={500}
                             />
@@ -511,12 +514,15 @@ export default class Ribbon extends Component<Props, State> {
                                     iconPosition="left"
                                 />
                                 <SupportBox>
-                                    {/* <ExtraButtonRow
-                                        onClick={() =>
+                                    <ExtraButtonRow
+                                        onClick={async () => {
+                                            const token = await this.props.getFeatureBaseToken()
                                             this.setState({
+                                                featureBaseToken: token ?? null,
                                                 renderFeedback: true,
                                             })
-                                        }
+                                            await this.setUpdateFlagToRead()
+                                        }}
                                     >
                                         <Icon
                                             filePath={icons.sadFace}
@@ -526,10 +532,12 @@ export default class Ribbon extends Component<Props, State> {
                                         <InfoText>
                                             Feature Requests & Bugs
                                         </InfoText>
-                                    </ExtraButtonRow> */}
+                                    </ExtraButtonRow>
                                     <ExtraButtonRow
                                         onClick={async () => {
+                                            const token = await this.props.getFeatureBaseToken()
                                             this.setState({
+                                                featureBaseToken: token ?? null,
                                                 renderChangeLog: true,
                                                 updatesAvailable: false,
                                             })

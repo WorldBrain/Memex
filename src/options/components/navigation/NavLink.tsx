@@ -28,6 +28,7 @@ class NavLink extends PureComponent<Props> {
                     <RouteItem
                         name={this.props.name}
                         isActive={this.props.isActive}
+                        hidden={this.props.name == null}
                     >
                         <RouteItemContent>
                             <Icon
@@ -57,10 +58,6 @@ const Container = styled.div`
         display: flex;
         text-decoration: none;
     }
-
-    & * {
-        cursor: pointer !important;
-    }
 `
 
 const RouteTitle = styled.div<{ name: string; isActive: boolean }>`
@@ -82,7 +79,11 @@ const RouteItemContent = styled.div`
     width: 100%;
 `
 
-const RouteItem = styled.li<{ name: string; isActive: boolean }>`
+const RouteItem = styled.li<{
+    name: string
+    isActive: boolean
+    hidden: boolean
+}>`
     display: grid;
     grid-auto-flow: column;
     grid-gap: 10px;
@@ -93,6 +94,10 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     justify-content: flex-start;
     margin: 0 10px;
     border-radius: 5px;
+
+    & * {
+        cursor: pointer !important;
+    }
 
     &::-webkit-scrollbar {
         display: none;
@@ -134,6 +139,23 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
         css`
             margin-bottom: 100px;
             margin-top: 20px;
+        `};
+    ${(props) =>
+        props.hidden &&
+        css`
+            outline: none;
+            background: transparent;
+            cursor: default;
+
+            &:hover {
+                outline: none;
+                cursor: default;
+                background: transparent;
+
+                & * {
+                    cursor: default !important;
+                }
+            }
         `};
 `
 

@@ -200,7 +200,6 @@ export async function setupTest(
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
         openSpaceInWebUI: () => {},
-        renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
         services: createUIServices(),
         analyticsBG: device.backgroundModules.analyticsBG,
         imageSupportBG: insertBackgroundFunctionTab(

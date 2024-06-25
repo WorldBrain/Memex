@@ -113,6 +113,10 @@ import {
     DB_DATA_LOSS_CHECK_ALARM_NAME,
     checkDataLoss,
 } from './db-data-loss-check'
+import {
+    CHECK_MEMEX_UPDATE_ALARM_NAME,
+    checkForUpdates,
+} from './memex-update-check'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -805,6 +809,10 @@ export async function setupBackgroundModules(
                     captureException,
                     db: storageManager.backend['dexie'],
                 }),
+        },
+        [CHECK_MEMEX_UPDATE_ALARM_NAME]: {
+            alarmDefinition: { periodInMinutes: 360 },
+            job: () => checkForUpdates(),
         },
     }
 

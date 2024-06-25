@@ -188,6 +188,9 @@ export default class RibbonContainer extends StatefulUIElement<
                 forceRibbonShow={(force: boolean) =>
                     this.props.setRibbonShouldAutoHide(!force)
                 }
+                getFeatureBaseToken={
+                    this.props.authBG.getJWTTokenForFeatureBase
+                }
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}

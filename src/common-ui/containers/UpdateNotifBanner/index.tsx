@@ -24,6 +24,7 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
             new Logic({
                 getStorage: getLocalStorage,
                 setStorage: setLocalStorage,
+                getFeatureBaseToken: async () => null,
                 ...props,
             }),
         )
@@ -44,7 +45,11 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
                 onCloseBtnClick={() => this.processEvent('hide', null)}
                 onMainBtnClick={() => {
                     this.processEvent('hide', null)
-                    this.props.openLink(CHANGE_LOG_LINK)
+                    this.props.openLink(
+                        CHANGE_LOG_LINK +
+                            '/?jwt=' +
+                            this.state.featureBaseToken,
+                    )
                 }}
                 location={this.props.location}
                 {...this.props}
