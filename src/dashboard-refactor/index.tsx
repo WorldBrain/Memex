@@ -2100,6 +2100,9 @@ export class DashboardContainer extends StatefulUIElement<
                         getRootElement={this.props.getRootElement}
                         padding={'4px'}
                         iconSize="22px"
+                        getFeatureBaseToken={async () =>
+                            await this.props.authBG.getJWTTokenForFeatureBase()
+                        }
                     />
                     {/* {this.state.listsSidebar.draggedListId != null ||
                         (this.state.searchResults.draggedPageId != null && ( */}
