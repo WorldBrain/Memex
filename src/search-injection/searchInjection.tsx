@@ -14,16 +14,13 @@ import {
 } from 'src/common-ui/components/design-library/theme'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type { ResultItemProps, SearchEngineName } from './types'
-import { SyncSettingsStore } from 'src/sync-settings/util'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { RemoteSearchInterface } from 'src/search/background/types'
-import { ContentIdentifier } from 'src/search/types'
 import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
-import SearchBackground from 'src/search/background'
 
 interface RootProps {
     rootEl: HTMLElement
     query: string
-    requestSearcher: RemoteSearchInterface['unifiedSearch']
     renderComponent: () => Promise<void>
     searchEngine: SearchEngineName
     syncSettings: SyncSettingsStore<
@@ -36,7 +33,7 @@ interface RootProps {
     >
     position: 'side' | 'above'
     openSettings: () => void
-    searchBG: SearchBackground
+    searchBG: RemoteSearchInterface
     openPDFinViewer: (url: string) => Promise<void>
 }
 
@@ -62,9 +59,8 @@ class Root extends React.Component<RootProps, RootState> {
     }
 
     private executeSearch = async (query: string) => {
-        const { requestSearcher } = this.props
         const limit = 100
-        const searchRes = await requestSearcher({
+        const searchRes = await this.props.searchBG.unifiedSearch({
             query,
             limit,
             skip: 0,
@@ -102,8 +98,6 @@ class Root extends React.Component<RootProps, RootState> {
         const searchResDocsProcessed = await Promise.all(
             searchResDocsProcessedPromises,
         )
-
-        console.log('searchResDocsProcessed', searchResDocsProcessed)
 
         this.setState({
             searchResDocsProcessed: searchResDocsProcessed,
@@ -148,9 +142,8 @@ class Root extends React.Component<RootProps, RootState> {
 
 // TODO: Type this
 export const handleRenderSearchInjection = async (
-    query,
-    requestSearcher,
-    searchEngine,
+    query: string,
+    searchEngine: SearchEngineName,
     syncSettings: SyncSettingsStore<
         | 'extension'
         | 'inPageUI'
@@ -159,9 +152,9 @@ export const handleRenderSearchInjection = async (
         | 'searchInjection'
         | 'dashboard'
     >,
-    openSettings,
-    searchBG,
-    openPDFinViewer,
+    openSettings: () => void,
+    searchBG: RemoteSearchInterface,
+    openPDFinViewer: (url: string) => Promise<void>,
 ) => {
     // docs: (array of objects) returned by the search.
     // totalCount: (int) number of results found
@@ -376,7 +369,6 @@ export const handleRenderSearchInjection = async (
                 syncSettings={syncSettings}
                 searchEngine={searchEngine}
                 renderComponent={renderComponent}
-                requestSearcher={requestSearcher}
                 openSettings={openSettings}
                 searchBG={searchBG}
                 openPDFinViewer={openPDFinViewer}

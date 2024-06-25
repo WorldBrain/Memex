@@ -6,7 +6,6 @@ import strictUriEncode from 'strict-uri-encode'
 import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'
 import * as constants from '../constants'
-import { getLocalStorage } from '../utils'
 import Notification from './Notification'
 import { UPDATE_NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
@@ -14,17 +13,13 @@ import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
 import ToggleSwitch from '../../common-ui/components/ToggleSwitch'
 import type { SearchEngineName, ResultItemProps } from '../types'
-import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
-import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { OVERVIEW_URL } from 'src/constants'
-import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
-import SearchBackground from 'src/search/background'
+import type { RemoteSearchInterface } from 'src/search/background/types'
 
 const search = browser.runtime.getURL('/img/search.svg')
 
@@ -39,7 +34,7 @@ export interface Props {
     updateQuery: (query: string) => Promise<void>
     query: string
     openSettings: () => void
-    searchBG: SearchBackground
+    searchBG: RemoteSearchInterface
     openPDFinViewer: (url: string) => Promise<void>
 }
 
