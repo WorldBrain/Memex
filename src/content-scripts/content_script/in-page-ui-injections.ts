@@ -8,6 +8,7 @@ import type { ContentScriptRegistry, InPageUIInjectionsMain } from './types'
 import { renderUpgradeModal } from 'src/search-injection/upgrade-modal-display'
 import { handleRenderPDFOpenButton } from 'src/search-injection/pdf-open-button'
 import { handleRenderImgActionButtons } from 'src/search-injection/img-action-buttons'
+import type { SearchEngineName } from 'src/search-injection/types'
 
 export const main: InPageUIInjectionsMain = async ({
     inPageUI,
@@ -60,7 +61,7 @@ export const main: InPageUIInjectionsMain = async ({
                 )
             } else if (component === 'search-engine-integration') {
                 const url = window.location.href
-                const matched = utils.matchURL(url)
+                const matched = utils.matchURL(url) as SearchEngineName | false
 
                 if (matched) {
                     const searchInjection =
@@ -73,7 +74,6 @@ export const main: InPageUIInjectionsMain = async ({
 
                             await handleRenderSearchInjection(
                                 query,
-                                searchDisplayProps.searchBG.unifiedSearch,
                                 matched,
                                 syncSettings,
                                 () =>
