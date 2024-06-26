@@ -1309,6 +1309,8 @@ export async function main(
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
         goToHighlight: async (annotationCacheId) => {
+            // i suspect that there is a race condition with the cache sometimes that does not create the jumping to the annotation
+            await sleepPromise(100)
             let unifiedAnnotation
             for (const id in annotationsCache.annotations.byId) {
                 if (
