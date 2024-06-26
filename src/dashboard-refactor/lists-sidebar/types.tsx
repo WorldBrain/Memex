@@ -12,13 +12,6 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
             wasListDropped?: boolean
         }
     >
-    listTrees: NormalizedState<{
-        isTreeToggled: boolean
-        isNestedListInputShown: boolean
-        newNestedListValue: string
-        newNestedListCreateState: TaskState
-        hasChildren: boolean
-    }>
     filteredListIds: UnifiedList['unifiedId'][]
     areLocalListsExpanded: boolean
     areFollowedListsExpanded: boolean
@@ -28,7 +21,6 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     disableMouseLeave: boolean
 
     draggedListId: string | null
-    someListIsDragging: boolean
     inboxUnreadCount: number
     dragOverListId?: string
     editingListId?: string
@@ -85,15 +77,16 @@ export type Events = UIEvent<{
     setSelectedListId: { listId: string }
     setShowMoreMenuListId: { listId: string }
     setEditMenuListId: { listId: string }
-    dropOnListItem: { listId: string; dataTransfer: DataTransfer }
+    dropOnListItem: {
+        listId: string
+        dataTransfer: DataTransfer
+        areTargetListChildrenShown?: boolean
+    }
     dragList: { listId: string; dataTransfer: DataTransfer }
     dropList: { listId: string }
 
     // Tree-related events
-    toggleListTreeShow: { listId: string }
-    toggleNestedListInputShow: { listId: string }
-    setNewNestedListValue: { listId: string; value: string }
-    createdNestedList: { parentListId: string }
+    createdNestedList: { parentListId: string; name: string }
 
     confirmListDelete: null
     cancelListDelete: null

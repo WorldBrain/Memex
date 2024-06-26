@@ -69,6 +69,7 @@ import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -662,23 +663,26 @@ export class DashboardContainer extends StatefulUIElement<
             ? { type: 'user-reference', id: currentUser.id }
             : undefined
 
-        const ownListsData = allLists.filter(
-            (list) =>
-                list.type !== 'page-link' &&
-                cacheUtils.deriveListOwnershipStatus(list, userReference) ===
-                    'Creator' &&
-                list.localId !== parseFloat(SPECIAL_LIST_STRING_IDS.INBOX),
-        )
+        const ownListsData = allLists
+            .filter(
+                (list) =>
+                    list.type === 'user-list' &&
+                    cacheUtils.deriveListOwnershipStatus(
+                        list,
+                        userReference,
+                    ) === 'Creator',
+            )
+            .sort(defaultOrderableSorter)
         const followedListsData = allLists.filter(
             (list) =>
-                list.type !== 'page-link' &&
+                list.type === 'user-list' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
                     'Follower' &&
                 !list.isForeignList,
         )
         const joinedListsData = allLists.filter(
             (list) =>
-                list.type !== 'page-link' &&
+                list.type === 'user-list' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
                     'Contributor',
         )
@@ -687,20 +691,11 @@ export class DashboardContainer extends StatefulUIElement<
             <ListsSidebarContainer
                 {...listsSidebar}
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
-                onTreeToggle={(listId) =>
-                    this.processEvent('toggleListTreeShow', { listId })
-                }
-                onNestedListInputToggle={(listId) =>
-                    this.processEvent('toggleNestedListInputShow', { listId })
-                }
-                setNestedListInputValue={(listId, value) =>
-                    this.processEvent('setNewNestedListValue', {
-                        listId,
-                        value,
+                onConfirmNestedListCreate={(parentListId, name) =>
+                    this.processEvent('createdNestedList', {
+                        parentListId,
+                        name,
                     })
-                }
-                onConfirmNestedListCreate={(parentListId) =>
-                    this.processEvent('createdNestedList', { parentListId })
                 }
                 openRemoteListPage={(remoteListId) =>
                     this.props.openSpaceInWebUI(remoteListId)
@@ -833,10 +828,11 @@ export class DashboardContainer extends StatefulUIElement<
                             listId: undefined,
                         })
                     },
-                    onDrop: (dataTransfer) =>
+                    onDrop: (dataTransfer, areTargetListChildrenShown) =>
                         this.processEvent('dropOnListItem', {
                             listId,
                             dataTransfer,
+                            areTargetListChildrenShown,
                         }),
                     canReceiveDroppedItems: true,
                     isDraggedOver: listId === listsSidebar.dragOverListId,
