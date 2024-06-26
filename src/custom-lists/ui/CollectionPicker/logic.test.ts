@@ -705,7 +705,6 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('resultEntryAllPress', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
-            analyticsBG: device.backgroundModules.analyticsBG,
         })
         await entryPickerLogic['processingUpstreamOperation']
 
@@ -914,7 +913,6 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('newEntryPress', {
             entry: newEntryText,
-            analyticsBG: device.backgroundModules.analyticsBG,
         })
 
         expect(selectedEntry).toBe(newEntryId)
@@ -981,7 +979,6 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('newEntryAllPress', {
             entry: newEntryText,
-            analyticsBG: device.backgroundModules.analyticsBG,
         })
         expect(newEntryName).toBe(newEntryText)
 
