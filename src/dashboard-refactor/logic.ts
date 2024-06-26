@@ -3421,31 +3421,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const cachedAnnotation = this.options.annotationsCache.getAnnotationByLocalId(
-            event.noteId,
-        )
-        const pageData =
-            previousState.searchResults.pageData.byId[
-                cachedAnnotation.normalizedPageUrl
-            ]
-        if (!cachedAnnotation) {
-            console.warn(
-                'Tried to go to highlight from dashboard but could not find associated annotation in cache:',
-                event,
-            )
-            return
-        }
-        if (!pageData?.fullUrl) {
-            console.warn(
-                'Tried to go to highlight from dashboard but could not find associated page data:',
-                event,
-                previousState.searchResults.pageData,
-            )
-        }
+        const pageURL = 'https://' + normalizeUrl(event.noteId)
 
         await this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar({
-            fullPageUrl: pageData.fullUrl,
-            annotationCacheId: cachedAnnotation.unifiedId,
+            fullPageUrl: pageURL,
+            annotationCacheId: event.noteId,
         })
     }
 

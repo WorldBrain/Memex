@@ -7,6 +7,7 @@ import Blocklist from './blacklist'
 import React from 'react'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
 import BetaFeaturesSettings from 'src/beta-features/ui/containers/beta-features-settings'
+import Changelog from 'src/changelog/ui/containers/changelog'
 
 export default [
     {
@@ -35,17 +36,22 @@ export default [
         icon: 'folder',
     },
     {
-        name: 'My Account',
-        pathname: '/account',
-        component: UserScreen,
-        icon: 'personFine',
-    },
-    {
         name: 'Blocklist',
         pathname: '/blocklist',
         component: Blocklist,
         icon: 'block',
     },
+    {
+        name: null,
+        icon: null,
+    },
+    {
+        name: 'My Account',
+        pathname: '/account',
+        component: UserScreen,
+        icon: 'personFine',
+    },
+
     {
         name: 'Beta Features',
         pathname: '/betaFeatures',
@@ -54,16 +60,17 @@ export default [
     },
     {
         name: 'Feedback',
-        pathname: 'https://feedback.memex.garden',
-        icon: 'helpIcon',
-        isExternal: true,
+        pathname: '/feedback',
+        component: (props) => <Changelog mode="feedback" {...props} />,
+        icon: 'sadFace',
     },
     {
-        name: 'Tutorial',
-        pathname: 'https://tutorials.memex.garden/tutorials',
-        isExternal: true,
-        icon: 'info',
+        name: 'Changelog/Roadmap',
+        pathname: '/changelog',
+        component: (props) => <Changelog mode="changelog" {...props} />,
+        icon: 'clock',
     },
+
     {
         name: 'User Account',
         pathname: '/account',

@@ -259,6 +259,7 @@ export async function main(
         RemoteContentSharingByTabsInterface<'caller'>
     >()
     const searchBG = runInBackground<RemoteSearchInterface>()
+    const pdfViewerBG = runInBackground<PDFRemoteInterface>()
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
     >()
@@ -1082,6 +1083,16 @@ export async function main(
                     let urlToOpen = originalPageURL
 
                     if (
+                        urlToOpen.includes('memex.cloud') &&
+                        urlToOpen.includes('upload_id')
+                    ) {
+                        const url = new URL(urlToOpen)
+                        const uploadId = url.searchParams.get('upload_id')
+                        urlToOpen = await pdfViewerBG.getTempPdfAccessUrl(
+                            uploadId,
+                        )
+                    }
+                    if (
                         urlToOpen.includes('https://arxiv.org/pdf/') &&
                         !urlToOpen.includes('.pdf')
                     ) {
@@ -1091,7 +1102,9 @@ export async function main(
                     await contentScriptsBG.openPdfInViewer({
                         fullPageUrl: urlToOpen,
                     })
+                    return true
                 },
+
                 events: sidebarEvents,
                 browserAPIs: browser,
             })
@@ -1219,8 +1232,31 @@ export async function main(
                     browserAPIs: browser,
                     localStorage: browser.storage.local,
                     services: createUIServices(),
-                    renderUpdateNotifBanner: () => null,
                     bgScriptBG,
+                    openPDFinViewer: async (originalPageURL) => {
+                        let urlToOpen = originalPageURL
+
+                        if (
+                            urlToOpen.includes('memex.cloud') &&
+                            urlToOpen.includes('upload_id')
+                        ) {
+                            const url = new URL(urlToOpen)
+                            const uploadId = url.searchParams.get('upload_id')
+                            urlToOpen = await pdfViewerBG.getTempPdfAccessUrl(
+                                uploadId,
+                            )
+                        }
+                        if (
+                            urlToOpen.includes('https://arxiv.org/pdf/') &&
+                            !urlToOpen.includes('.pdf')
+                        ) {
+                            urlToOpen = urlToOpen.concat('.pdf')
+                        }
+
+                        await contentScriptsBG.openPdfInViewer({
+                            fullPageUrl: urlToOpen,
+                        })
+                    },
                 },
                 upgradeModalProps: {
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
@@ -1273,6 +1309,8 @@ export async function main(
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
         goToHighlight: async (annotationCacheId) => {
+            // i suspect that there is a race condition with the cache sometimes that does not create the jumping to the annotation
+            await sleepPromise(100)
             let unifiedAnnotation
             for (const id in annotationsCache.annotations.byId) {
                 if (
@@ -1321,7 +1359,6 @@ export async function main(
             if (isPdfViewerRunning) {
                 return
             }
-            await inPageUI.hideRibbon()
             await maybeLoadOnDemandInPageUI()
             await injectCustomUIperPage(
                 annotationsFunctions,

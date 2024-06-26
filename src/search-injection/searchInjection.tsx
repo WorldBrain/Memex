@@ -14,13 +14,13 @@ import {
 } from 'src/common-ui/components/design-library/theme'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type { ResultItemProps, SearchEngineName } from './types'
-import { SyncSettingsStore } from 'src/sync-settings/util'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { RemoteSearchInterface } from 'src/search/background/types'
+import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 interface RootProps {
     rootEl: HTMLElement
     query: string
-    requestSearcher: RemoteSearchInterface['unifiedSearch']
     renderComponent: () => Promise<void>
     searchEngine: SearchEngineName
     syncSettings: SyncSettingsStore<
@@ -33,6 +33,8 @@ interface RootProps {
     >
     position: 'side' | 'above'
     openSettings: () => void
+    searchBG: RemoteSearchInterface
+    openPDFinViewer: (url: string) => Promise<void>
 }
 
 interface RootState {
@@ -43,7 +45,7 @@ interface RootState {
 
 class Root extends React.Component<RootProps, RootState> {
     state: RootState = {
-        searchResDocsProcessed: [],
+        searchResDocsProcessed: null,
     }
 
     async componentDidMount() {
@@ -57,9 +59,8 @@ class Root extends React.Component<RootProps, RootState> {
     }
 
     private executeSearch = async (query: string) => {
-        const { requestSearcher } = this.props
         const limit = 100
-        const searchRes = await requestSearcher({
+        const searchRes = await this.props.searchBG.unifiedSearch({
             query,
             limit,
             skip: 0,
@@ -70,15 +71,36 @@ class Root extends React.Component<RootProps, RootState> {
             matchHighlights: true,
             matchPageTitleUrl: true,
         })
-        this.setState({
-            searchResDocsProcessed: searchRes.docs.map((d) => ({
+
+        const contentIdentifier = async (url) => {
+            if (url.includes('memex.cloud/')) {
+                const urlData = await this.props.searchBG.resolvePdfPageFullUrls(
+                    url,
+                )
+                const originalURL = urlData?.originalLocation ?? url
+                return originalURL
+            } else {
+                return url
+            }
+        }
+
+        const searchResDocsProcessedPromises = searchRes.docs.map(
+            async (d) => ({
                 searchEngine: this.props.searchEngine,
                 displayTime: d.displayTime,
                 title: d.fullTitle ?? d.fullUrl,
-                url: d.fullUrl,
+                url: (await contentIdentifier(d.fullUrl)).toString(),
                 onLinkClick: () => null, // Gets filled in later
-                tags: [],
-            })),
+                isPDF: isMemexPageAPdf({ url: d.fullUrl }),
+            }),
+        )
+
+        const searchResDocsProcessed = await Promise.all(
+            searchResDocsProcessedPromises,
+        )
+
+        this.setState({
+            searchResDocsProcessed: searchResDocsProcessed,
         })
     }
 
@@ -109,6 +131,8 @@ class Root extends React.Component<RootProps, RootState> {
                         updateQuery={this.updateQuery}
                         query={props.query}
                         openSettings={props.openSettings}
+                        searchBG={this.props.searchBG}
+                        openPDFinViewer={props.openPDFinViewer}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -118,10 +142,8 @@ class Root extends React.Component<RootProps, RootState> {
 
 // TODO: Type this
 export const handleRenderSearchInjection = async (
-    query,
-    requestSearcher,
-    //{ docs, totalCount },
-    searchEngine,
+    query: string,
+    searchEngine: SearchEngineName,
     syncSettings: SyncSettingsStore<
         | 'extension'
         | 'inPageUI'
@@ -130,9 +152,11 @@ export const handleRenderSearchInjection = async (
         | 'searchInjection'
         | 'dashboard'
     >,
-    openSettings,
+    openSettings: () => void,
+    searchBG: RemoteSearchInterface,
+    openPDFinViewer: (url: string) => Promise<void>,
 ) => {
-    // docs: (array of objects) returned by the search
+    // docs: (array of objects) returned by the search.
     // totalCount: (int) number of results found
     // Injects CSS into the search page.
     // Calls renderComponent to render the react component
@@ -345,8 +369,9 @@ export const handleRenderSearchInjection = async (
                 syncSettings={syncSettings}
                 searchEngine={searchEngine}
                 renderComponent={renderComponent}
-                requestSearcher={requestSearcher}
                 openSettings={openSettings}
+                searchBG={searchBG}
+                openPDFinViewer={openPDFinViewer}
             />,
             root,
         )

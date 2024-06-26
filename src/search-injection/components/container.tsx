@@ -6,7 +6,6 @@ import strictUriEncode from 'strict-uri-encode'
 import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'
 import * as constants from '../constants'
-import { getLocalStorage } from '../utils'
 import Notification from './Notification'
 import { UPDATE_NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
@@ -14,16 +13,13 @@ import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
 import ToggleSwitch from '../../common-ui/components/ToggleSwitch'
 import type { SearchEngineName, ResultItemProps } from '../types'
-import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
-import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { OVERVIEW_URL } from 'src/constants'
-import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { RemoteSearchInterface } from 'src/search/background/types'
 
 const search = browser.runtime.getURL('/img/search.svg')
 
@@ -38,6 +34,8 @@ export interface Props {
     updateQuery: (query: string) => Promise<void>
     query: string
     openSettings: () => void
+    searchBG: RemoteSearchInterface
+    openPDFinViewer: (url: string) => Promise<void>
 }
 
 interface State {
@@ -49,6 +47,7 @@ interface State {
     isNotif: boolean
     position: null | 'side' | 'above'
     notification: any
+    isLoadingPDFReader?: string
     isStickyContainer: boolean
 }
 
@@ -85,6 +84,7 @@ class Container extends React.Component<Props, State> {
         isNotif: true,
         notification: {},
         isStickyContainer: true,
+        isLoadingPDFReader: null,
     }
 
     async componentDidMount() {
@@ -171,7 +171,16 @@ class Container extends React.Component<Props, State> {
         }
     }
 
-    handleResultLinkClick = () => {}
+    handleResultLinkClick = async (url: string) => {
+        if (url.includes('memex.cloud') || url.includes('pdf')) {
+            this.setState({ isLoadingPDFReader: url })
+
+            await this.props.openPDFinViewer(url)
+            this.setState({ isLoadingPDFReader: null })
+        } else {
+            this.handleClickOpenNewTabButton(url)
+        }
+    }
 
     renderResultItems() {
         if (this.props.searchResDocs == null) {
@@ -182,18 +191,21 @@ class Container extends React.Component<Props, State> {
             )
         } else if (this.props.searchResDocs.length > 0) {
             const resultItems = this.props.searchResDocs.map((result, i) => (
-                <>
+                <ClickItem
+                    onClick={() => this.handleResultLinkClick(result.url)}
+                >
                     <ResultItem
                         key={i}
-                        onLinkClick={this.handleResultLinkClick}
                         searchEngine={this.props.searchEngine}
                         {...result}
                         displayTime={result.displayTime}
                         url={result.url}
                         title={result.title}
-                        tags={result.tags}
+                        isLoadingPDFReader={
+                            this.state.isLoadingPDFReader === result.url
+                        }
                     />
-                </>
+                </ClickItem>
             ))
 
             return resultItems
@@ -400,7 +412,7 @@ class Container extends React.Component<Props, State> {
                 <Results
                     position={this.state.position}
                     searchEngine={this.props.searchEngine}
-                    totalCount={this.props.searchResDocs.length}
+                    totalCount={this.props.searchResDocs?.length}
                     seeMoreResults={this.seeMoreResults}
                     toggleHideResults={this.toggleHideResults}
                     hideResults={this.state.hideResults}
@@ -417,11 +429,14 @@ class Container extends React.Component<Props, State> {
                     updateQuery={this.props.updateQuery}
                     query={this.props.query}
                     openSettings={this.props.openSettings}
+                    openPDFinViewer={this.props.openPDFinViewer}
                 />
             </>
         )
     }
 }
+
+const ClickItem = styled.div``
 
 const SearchLink = styled.span`
     padding-left: 2px;

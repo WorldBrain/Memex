@@ -43,6 +43,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import checkBrowser from 'src/util/check-browser'
 import { ensureDataLossFlagSet } from './db-data-loss-check'
+import { checkForUpdates } from './memex-update-check'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -216,7 +217,7 @@ class BackgroundScript {
                     break
                 case 'update':
                     this.runQuickAndDirtyMigrations()
-                    await this.checkForUpdates()
+                    await checkForUpdates()
                     await this.handleUnifiedLogic()
                     await this.checkForSubscriptionStatus()
                     break
@@ -227,34 +228,6 @@ class BackgroundScript {
 
     private async trackInstallTime() {
         return null
-    }
-
-    private async checkForUpdates() {
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
-        const baseUrl = isStaging
-            ? CLOUDFLARE_WORKER_URLS.staging
-            : CLOUDFLARE_WORKER_URLS.production
-        const url = `${baseUrl}/checkForUpdates`
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        })
-
-        const responseJSON = await response.json()
-        const hasUpdate = parseFloat(responseJSON.hasUpdate)
-        const lastUpdateTimeStamp = await getLocalStorage(
-            LAST_UPDATE_TIME_STAMP,
-        )
-        if (
-            hasUpdate > lastUpdateTimeStamp ||
-            (hasUpdate && !lastUpdateTimeStamp)
-        ) {
-            await setLocalStorage(READ_STORAGE_FLAG, false)
-            await setLocalStorage(LAST_UPDATE_TIME_STAMP, hasUpdate)
-        }
     }
 
     private async checkForSubscriptionStatus() {

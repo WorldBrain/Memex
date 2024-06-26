@@ -123,7 +123,6 @@ export type DashboardDependencies = {
     browserAPIs: Browser
     tabsAPI: Browser['tabs']
     openSpaceInWebUI: (remoteCollectionId: string) => void
-    renderUpdateNotifBanner: () => JSX.Element
     services: Pick<
         UIServices,
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
@@ -133,6 +132,7 @@ export type DashboardDependencies = {
     openSettings?: () => void
     bgScriptBG?: RemoteBGScriptInterface<'caller'>
     getPortalElement?: () => HTMLElement
+    openPDFinViewer?: (url: string) => Promise<void>
 } & (
     | {
           inPageMode: true

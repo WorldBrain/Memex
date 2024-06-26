@@ -45,7 +45,7 @@ export interface RibbonContainerDependencies {
     >
     currentUser?: UserReference
     getRootElement: () => HTMLElement
-    openPDFinViewer: (url: string) => Promise<void>
+    openPDFinViewer: (url: string) => Promise<boolean>
     events: AnnotationsSidebarInPageEventEmitter
     browserAPIs: Browser
 }
