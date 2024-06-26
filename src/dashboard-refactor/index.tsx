@@ -692,7 +692,7 @@ export class DashboardContainer extends StatefulUIElement<
                 {...listsSidebar}
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 onConfirmNestedListCreate={(parentListId, name) =>
-                    this.processEvent('createdNestedList', {
+                    this.processEvent('createNestedList', {
                         parentListId,
                         name,
                     })
@@ -834,7 +834,6 @@ export class DashboardContainer extends StatefulUIElement<
                             dataTransfer,
                             areTargetListChildrenShown,
                         }),
-                    canReceiveDroppedItems: true,
                     isDraggedOver: listId === listsSidebar.dragOverListId,
                     wasPageDropped:
                         listsSidebar.lists.byId[listId]?.wasPageDropped,

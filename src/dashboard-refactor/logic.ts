@@ -5097,9 +5097,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    createdNestedList: EventHandler<'createdNestedList'> = async ({
-        event,
-    }) => {
+    createNestedList: EventHandler<'createNestedList'> = async ({ event }) => {
         const { annotationsCache, listsBG, authBG } = this.options
         const parentList = annotationsCache.lists.byId[event.parentListId]
         const newListName = event.name.trim()

@@ -94,34 +94,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         this.sidebarItemRefs[unifiedId] = { current: element }
     }
 
-    private renderReorderLine = (listId: string, topItem?: boolean) => {
-        // Disable reordering when filtering lists by query
-        if (this.props.filteredListIds.length > 0) {
-            return null
-        }
-
-        const reorderLineDropReceivingState = this.props.initDropReceivingState(
-            listId,
-        )
-        return (
-            <ReorderLine
-                isActive={this.props.draggedListId != null}
-                isVisible={reorderLineDropReceivingState.isDraggedOver}
-                onDragEnter={reorderLineDropReceivingState.onDragEnter}
-                onDragLeave={reorderLineDropReceivingState.onDragLeave}
-                onDragOver={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                }} // Needed to allow the `onDrop` event to fire
-                onDrop={(e) => {
-                    e.preventDefault()
-                    reorderLineDropReceivingState.onDrop(e.dataTransfer)
-                }}
-                topItem={topItem}
-            />
-        )
-    }
-
     private moveItemIntoHorizontalView = throttle((itemRef: HTMLElement) => {
         if (itemRef && itemRef.parentElement) {
             // container dimensions and scroll position
@@ -573,32 +545,6 @@ const SidebarInnerContent = styled.div`
     }
 `
 
-const NoCollectionsMessage = styled.div`
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
-    cursor: pointer;
-    padding: 0px 15px;
-    margin: 5px 10px;
-    width: fill-available;
-    margin-top: 5px;
-    height: 40px;
-    justify-content: flex-start;
-    border-radius: 5px;
-
-    & * {
-        cursor: pointer;
-    }
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale1};
-    }
-`
-
 const GlobalStyle = createGlobalStyle`
 
     .sidebarResizeHandleSidebar {
@@ -614,32 +560,6 @@ const GlobalStyle = createGlobalStyle`
             background: #5671cf30 !important;
         }
     }
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.greyScale2};
-    border: 1px solid ${(props) => props.theme.colors.greyScale6};
-    border-radius: 8px;
-    height: 24px;
-    width: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 14px;
-    font-weight: 400;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    white-space: nowrap;
-`
-
-const Link = styled.span`
-    color: ${(props) => props.theme.colors.prime1};
-    padding-left: 3px;
 `
 
 const TopGroup = styled.div`
@@ -677,58 +597,4 @@ const NewItemsCountInnerDiv = styled.div`
     font-size: 12px;
     line-height: 14px;
     padding: 2px 0px;
-`
-
-const NestedListInput = styled.div<{ indentSteps: number }>`
-    margin-left: ${(props) =>
-        props.indentSteps > 0
-            ? (props.indentSteps - 1) * 20
-            : props.indentSteps * 20}px;
-`
-
-const ReorderLine = styled.div<{
-    isVisible: boolean
-    isActive: boolean
-    topItem: boolean
-}>`
-    position: relative;
-    z-index: -1;
-    border-bottom: 3px solid
-        ${(props) =>
-            props.isVisible && props.isActive
-                ? props.theme.colors.prime3
-                : 'transparent'};
-    &::before {
-        content: '';
-        width: 100%;
-        top: -10px;
-        position: absolute;
-        height: 10px;
-        z-index: 2;
-        background: transparent;
-    }
-    &::after {
-        content: '';
-        width: 100%;
-        bottom: -13px;
-        position: absolute;
-        height: 10px;
-        z-index: 2;
-        background: transparent;
-    }
-
-    ${(props) =>
-        props.isActive &&
-        css`
-            z-index: 2147483647;
-        `}
-    ${(props) =>
-        props.topItem &&
-        css`
-            display: none;
-
-            &:first-child {
-                display: flex;
-            }
-        `}
 `

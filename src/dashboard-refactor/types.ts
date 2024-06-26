@@ -151,7 +151,6 @@ export type DashboardDependencies = {
 export interface DropReceivingState {
     isDraggedOver?: boolean
     wasPageDropped?: boolean
-    canReceiveDroppedItems?: boolean
     onDrop(
         dataTransfer: DataTransfer,
         areTargetListChildrenShown?: boolean,

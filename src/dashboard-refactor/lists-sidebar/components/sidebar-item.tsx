@@ -38,9 +38,6 @@ export default class ListsSidebarItem extends React.PureComponent<
 
     private handleDrop: React.DragEventHandler = (e) => {
         e.preventDefault()
-        if (!this.props.dropReceivingState?.canReceiveDroppedItems) {
-            return
-        }
         this.props.dropReceivingState?.onDrop(e.dataTransfer)
     }
 
@@ -239,12 +236,7 @@ const SidebarItem = styled.div<Props>`
         `}
 
 
-    cursor: ${({ dropReceivingState }: Props) =>
-        !dropReceivingState?.isDraggedOver
-            ? `pointer`
-            : dropReceivingState?.canReceiveDroppedItems
-            ? `pointer`
-            : `not-allowed`};
+    cursor: 'pointer';
 
     &:hover {
         background: ${(props) => props.theme.colors.greyScale1_5};

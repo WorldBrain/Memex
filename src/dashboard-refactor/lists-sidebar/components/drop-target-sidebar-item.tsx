@@ -20,10 +20,7 @@ const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
                     />
                 )
             }
-            if (
-                props.dropReceivingState.canReceiveDroppedItems &&
-                props.dropReceivingState.isDraggedOver
-            ) {
+            if (props.dropReceivingState.isDraggedOver) {
                 return (
                     <Icon
                         icon="plus"
