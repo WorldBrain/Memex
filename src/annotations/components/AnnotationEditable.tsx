@@ -1323,7 +1323,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         const actionsBox = !this.props.isEditingHighlight ? (
             <HighlightActionsBox>
-                {this.props.isInFocus && (
+                {(this.props.isInFocus || this.state.hoverCard) && (
                     <>
                         {footerDeps.onDeleteIconClick && (
                             <TooltipBox
