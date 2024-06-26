@@ -26,7 +26,7 @@ import { SPECIAL_LIST_STRING_IDS } from './constants'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { ListTrees } from './list-trees'
+import { ListTrees } from 'src/custom-lists/ui/list-trees'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
