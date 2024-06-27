@@ -41,22 +41,19 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
         onDragLeave: (e) => {
             e.preventDefault()
             e.stopPropagation()
-            this.processEvent('setDragOverListId', {
+            return this.processEvent('setDragOverListId', {
                 listId: null,
             })
         },
-        onDrop: (dataTransfer, areTargetListChildrenShown) =>
-            this.processEvent('dropOnList', {
-                dropTargetListId: listId,
-                dataTransfer,
-                areTargetListChildrenShown,
-            }),
+        onDrop: (e) => {
+            e.preventDefault()
+            return this.processEvent('dropOnList', { dropTargetListId: listId })
+        },
         onDragStart: (e) =>
             this.processEvent('startListDrag', {
-                dataTransfer: e.dataTransfer,
                 listId,
             }),
-        onDragEnd: (e) => this.processEvent('endListDrag', { listId }),
+        onDragEnd: (e) => this.processEvent('endListDrag', null),
     })
 
     private renderReorderLine = (listId: string, topItem?: boolean) => {
@@ -76,6 +73,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
             <ReorderLine
                 topItem={topItem}
                 isActive={this.state.draggedListId != null}
+                onDrop={reorderLineDropReceivingState.onDrop}
                 isVisible={reorderLineDropReceivingState.isDraggedOver}
                 onDragEnter={reorderLineDropReceivingState.onDragEnter}
                 onDragLeave={reorderLineDropReceivingState.onDragLeave}
@@ -83,13 +81,6 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
                     // Needed to allow the `onDrop` event to fire
                     e.preventDefault()
                     e.stopPropagation()
-                }}
-                onDrop={(e: React.DragEvent) => {
-                    e.preventDefault()
-                    reorderLineDropReceivingState.onDrop(
-                        e.dataTransfer,
-                        this.state.listTrees.byId[listId]?.areChildrenShown,
-                    )
                 }}
             />
         )

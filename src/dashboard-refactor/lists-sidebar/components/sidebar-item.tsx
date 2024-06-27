@@ -36,11 +36,6 @@ export default class ListsSidebarItem extends React.PureComponent<
 > {
     state: State = { isHovering: false, canDisableHover: false }
 
-    private handleDrop: React.DragEventHandler = (e) => {
-        e.preventDefault()
-        this.props.dragNDropActions?.onDrop(e.dataTransfer)
-    }
-
     render() {
         if (!this.props.areAnyMenusDisplayed && this.state.canDisableHover) {
             this.setState({ isHovering: false, canDisableHover: false })
@@ -68,7 +63,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                     e.preventDefault()
                     e.stopPropagation()
                 }}
-                onDrop={this.handleDrop}
+                onDrop={this.props.dragNDropActions?.onDrop}
                 onClick={this.props.onClick}
             >
                 <SidebarItem

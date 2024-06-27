@@ -172,10 +172,9 @@ export class ListTreesLogic extends UILogic<State, Events> {
 
     startListDrag: EventHandler<'startListDrag'> = ({ event }) => {
         this.emitMutation({ draggedListId: { $set: event.listId } })
-        event.dataTransfer.setData('text/plain', event.listId)
     }
 
-    endListDrag: EventHandler<'endListDrag'> = ({ event }) => {
+    endListDrag: EventHandler<'endListDrag'> = ({}) => {
         this.emitMutation({ draggedListId: { $set: null } })
     }
 
@@ -183,7 +182,7 @@ export class ListTreesLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        let draggedListId = event.dataTransfer.getData('text/plain')
+        let draggedListId = previousState.draggedListId
         if (!draggedListId) {
             return
         }
@@ -194,15 +193,11 @@ export class ListTreesLogic extends UILogic<State, Events> {
                 event.dropTargetListId.length -
                     LIST_REORDER_POST_EL_POSTFIX.length,
             )
-            await this.handleDropOnReorderLine(
-                draggedListId,
-                cleanedListId,
-                previousState,
-                {
-                    areTargetListChildrenShown:
-                        event.areTargetListChildrenShown,
-                },
-            )
+            await this.handleDropOnReorderLine(draggedListId, cleanedListId, {
+                areTargetListChildrenShown:
+                    previousState.listTrees.byId[cleanedListId]
+                        ?.areChildrenShown,
+            })
             return
         }
         if (event.dropTargetListId.endsWith(LIST_REORDER_PRE_EL_POSTFIX)) {
@@ -211,16 +206,12 @@ export class ListTreesLogic extends UILogic<State, Events> {
                 event.dropTargetListId.length -
                     LIST_REORDER_PRE_EL_POSTFIX.length,
             )
-            await this.handleDropOnReorderLine(
-                draggedListId,
-                cleanedListId,
-                previousState,
-                {
-                    isBeforeFirstRoot: true,
-                    areTargetListChildrenShown:
-                        event.areTargetListChildrenShown,
-                },
-            )
+            await this.handleDropOnReorderLine(draggedListId, cleanedListId, {
+                isBeforeFirstRoot: true,
+                areTargetListChildrenShown:
+                    previousState.listTrees.byId[cleanedListId]
+                        ?.areChildrenShown,
+            })
             return
         }
 
@@ -251,7 +242,6 @@ export class ListTreesLogic extends UILogic<State, Events> {
     private async handleDropOnReorderLine(
         listId: string,
         dropTargetListId: string,
-        previousState: State,
         params?: {
             isBeforeFirstRoot?: boolean
             areTargetListChildrenShown?: boolean

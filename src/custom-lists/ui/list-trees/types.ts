@@ -25,14 +25,11 @@ export interface ListTreeActions {
 }
 
 export interface DragNDropActions {
-    onDrop(
-        dataTransfer: DataTransfer,
-        areTargetListChildrenShown?: boolean,
-    ): void
     onDragEnter: DragEventHandler
     onDragLeave: DragEventHandler
     onDragStart: DragEventHandler
     onDragEnd: DragEventHandler
+    onDrop: DragEventHandler
     isDraggedOver: boolean
 }
 
@@ -64,11 +61,7 @@ export type Events = UIEvent<{
     toggleShowNewChildInput: { listId: string }
     toggleShowChildren: { listId: string }
     setDragOverListId: { listId: string | null }
-    startListDrag: { listId: string; dataTransfer: DataTransfer }
-    endListDrag: { listId: string }
-    dropOnList: {
-        dropTargetListId: UnifiedList['unifiedId']
-        dataTransfer: DataTransfer
-        areTargetListChildrenShown?: boolean
-    }
+    startListDrag: { listId: string }
+    endListDrag: null
+    dropOnList: { dropTargetListId: string }
 }>
