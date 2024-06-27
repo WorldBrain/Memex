@@ -85,8 +85,6 @@ export type Events = UIEvent<{
     dragList: { listId: string; dataTransfer: DataTransfer }
     dropList: { listId: string }
 
-    createNestedList: { parentListId: string; name: string }
-
     confirmListDelete: null
     cancelListDelete: null
 

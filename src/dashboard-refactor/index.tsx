@@ -690,13 +690,15 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                listTreesDeps={{
+                    lists: ownListsData,
+                    authBG: this.props.authBG,
+                    listsBG: this.props.listsBG,
+                    cache: this.props.annotationsCache,
+                    areListsBeingFiltered:
+                        this.state.listsSidebar.filteredListIds.length > 0,
+                }}
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
-                onConfirmNestedListCreate={(parentListId, name) =>
-                    this.processEvent('createNestedList', {
-                        parentListId,
-                        name,
-                    })
-                }
                 openRemoteListPage={(remoteListId) =>
                     this.props.openSpaceInWebUI(remoteListId)
                 }
@@ -807,6 +809,7 @@ export class DashboardContainer extends StatefulUIElement<
                     })}
                 onListDragEnd={(listId) => (e) =>
                     this.processEvent('dropList', { listId })}
+                // TODO: Simplify this to only handle page drops (list drops handled in <ListTrees>)
                 initDropReceivingState={(listId) => ({
                     onDragEnter: (e) => {
                         e.preventDefault()

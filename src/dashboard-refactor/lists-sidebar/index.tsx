@@ -27,6 +27,7 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { ListTrees } from 'src/custom-lists/ui/list-trees'
+import type { Dependencies as ListTreesDeps } from 'src/custom-lists/ui/list-trees/types'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -37,7 +38,6 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onListSelection: (id: string | null) => void
     openRemoteListPage: (remoteListId: string) => void
     onCancelAddList: () => void
-    onConfirmNestedListCreate: (parentListId: string, name: string) => void
     onConfirmAddList: (value: string) => void
     onListDragStart: (listId: string) => React.DragEventHandler
     onListDragEnd: (listId: string) => React.DragEventHandler
@@ -69,6 +69,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     spaceSidebarWidth: string
     getRootElement: () => HTMLElement
     isInPageMode: boolean
+    listTreesDeps: Omit<ListTreesDeps, 'renderListItem'>
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -211,18 +212,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             />
                         )}
                         <ListTrees
-                            lists={this.props.ownListsGroup.listData}
-                            draggedListId={this.props.draggedListId}
-                            areListsBeingFiltered={
-                                this.props.filteredListIds.length > 0
-                            }
-                            initDropReceivingState={
-                                this.props.initDropReceivingState
-                            }
-                            onConfirmChildListCreate={
-                                this.props.onConfirmNestedListCreate
-                            }
-                            renderListItem={(list, treeState, actions) => (
+                            {...this.props.listTreesDeps}
+                            renderListItem={(
+                                list,
+                                treeState,
+                                actions,
+                                dndActions,
+                            ) => (
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
                                         this.setSidebarItemRefs(
@@ -235,12 +231,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     }
                                     key={list.unifiedId}
                                     indentSteps={list.pathUnifiedIds.length}
-                                    onDragStart={this.props.onListDragStart(
-                                        list.unifiedId,
-                                    )}
-                                    onDragEnd={this.props.onListDragEnd(
-                                        list.unifiedId,
-                                    )}
                                     name={`${list.name}`}
                                     isSelected={
                                         this.props.selectedListId ===
@@ -257,9 +247,12 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         )
                                     }}
                                     hasChildren={treeState.hasChildren}
-                                    dropReceivingState={this.props.initDropReceivingState(
-                                        list.unifiedId,
-                                    )}
+                                    dragNDropActions={{
+                                        ...dndActions,
+                                        wasPageDropped: this.props.lists.byId[
+                                            list.unifiedId
+                                        ]?.wasPageDropped,
+                                    }}
                                     isPrivate={list.isPrivate}
                                     isShared={!list.isPrivate}
                                     areAnyMenusDisplayed={
@@ -437,7 +430,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 onClick={() =>
                                     this.props.onListSelection(list.unifiedId)
                                 }
-                                dropReceivingState={this.props.initDropReceivingState(
+                                dragNDropActions={this.props.initDropReceivingState(
                                     list.unifiedId,
                                 )}
                                 isPrivate={list.isPrivate}

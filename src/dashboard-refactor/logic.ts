@@ -5097,38 +5097,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    createNestedList: EventHandler<'createNestedList'> = async ({ event }) => {
-        const { annotationsCache, listsBG, authBG } = this.options
-        const parentList = annotationsCache.lists.byId[event.parentListId]
-        const newListName = event.name.trim()
-        if (!newListName.length || !parentList?.localId) {
-            return
-        }
-
-        const {
-            localListId,
-            remoteListId,
-            collabKey,
-        } = await listsBG.createCustomList({
-            name: newListName,
-            parentListId: parentList.localId!,
-        })
-        const user = await authBG.getCurrentUser()
-        annotationsCache.addList({
-            type: 'user-list',
-            name: newListName,
-            localId: localListId,
-            collabKey: collabKey,
-            remoteId: remoteListId,
-            creator: { type: 'user-reference', id: user.id },
-            unifiedAnnotationIds: [],
-            hasRemoteAnnotationsToLoad: false,
-            parentLocalId: parentList.localId!,
-            pathLocalIds: [...parentList.pathLocalIds, parentList.localId!],
-            isPrivate: true,
-        })
-    }
-
     setDeletingListId: EventHandler<'setDeletingListId'> = async ({
         event,
     }) => {

@@ -3,7 +3,13 @@ import styled, { css } from 'styled-components'
 import { mapTreeTraverse } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { ListTreesLogic } from './logic'
-import type { Dependencies, State, Events, ListTreeActions } from './types'
+import type {
+    Dependencies,
+    State,
+    Events,
+    ListTreeActions,
+    DragNDropActions,
+} from './types'
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
@@ -27,13 +33,49 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
         }
     }
 
+    private initDropReceivingState = (listId: string): DragNDropActions => ({
+        isDraggedOver: this.state.dragOverListId === listId,
+        onDragEnter: (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            // Needed to push this op back on the event queue, so it fires after the previous
+            //  list item's `onDropLeave` event
+            setTimeout(
+                () =>
+                    this.processEvent('setDragOverListId', {
+                        listId,
+                    }),
+                0,
+            )
+        },
+        onDragLeave: (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            this.processEvent('setDragOverListId', {
+                listId: null,
+            })
+        },
+        onDrop: (dataTransfer, areTargetListChildrenShown) =>
+            this.processEvent('dropOnList', {
+                dropTargetListId: listId,
+                dataTransfer,
+                areTargetListChildrenShown,
+            }),
+        onDragStart: (e) =>
+            this.processEvent('startListDrag', {
+                dataTransfer: e.dataTransfer,
+                listId,
+            }),
+        onDragEnd: (e) => this.processEvent('endListDrag', { listId }),
+    })
+
     private renderReorderLine = (listId: string, topItem?: boolean) => {
         // Disable reordering when filtering lists by query
         if (this.props.areListsBeingFiltered) {
             return null
         }
 
-        let reorderLineDropReceivingState = this.props.initDropReceivingState(
+        let reorderLineDropReceivingState = this.initDropReceivingState(
             `${listId}${
                 topItem
                     ? LIST_REORDER_PRE_EL_POSTFIX
@@ -43,14 +85,15 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
         return (
             <ReorderLine
                 topItem={topItem}
-                isActive={this.props.draggedListId != null}
+                isActive={this.state.draggedListId != null}
                 isVisible={reorderLineDropReceivingState.isDraggedOver}
                 onDragEnter={reorderLineDropReceivingState.onDragEnter}
                 onDragLeave={reorderLineDropReceivingState.onDragLeave}
                 onDragOver={(e: React.DragEvent) => {
+                    // Needed to allow the `onDrop` event to fire
                     e.preventDefault()
                     e.stopPropagation()
-                }} // Needed to allow the `onDrop` event to fire
+                }}
                 onDrop={(e: React.DragEvent) => {
                     e.preventDefault()
                     reorderLineDropReceivingState.onDrop(
@@ -94,7 +137,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
                             createChildList: (name) =>
                                 this.processEvent('createNewChildList', {
                                     name,
-                                    listId: list.unifiedId,
+                                    parentListId: list.unifiedId,
                                 }),
                             toggleShowChildren: () =>
                                 this.processEvent('toggleShowChildren', {
@@ -160,6 +203,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
                                     list,
                                     this.state.listTrees.byId[list.unifiedId],
                                     actions,
+                                    this.initDropReceivingState(list.unifiedId),
                                 )}
                                 {this.renderReorderLine(list.unifiedId)}
                                 {nestedListInput}

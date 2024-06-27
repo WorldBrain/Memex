@@ -3,14 +3,14 @@ import SidebarItem, { Props as SidebarItemProps } from './sidebar-item'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface Props
-    extends Omit<SidebarItemProps, 'dropReceivingState'>,
-        Required<Pick<SidebarItemProps, 'dropReceivingState'>> {}
+    extends Omit<SidebarItemProps, 'dragNDropActions'>,
+        Required<Pick<SidebarItemProps, 'dragNDropActions'>> {}
 
 const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
     <SidebarItem
         {...props}
         renderRightSideIcon={() => {
-            if (props.dropReceivingState.wasPageDropped) {
+            if (props.dragNDropActions.wasPageDropped) {
                 return (
                     <Icon
                         icon="check"
@@ -20,7 +20,7 @@ const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
                     />
                 )
             }
-            if (props.dropReceivingState.isDraggedOver) {
+            if (props.dragNDropActions.isDraggedOver) {
                 return (
                     <Icon
                         icon="plus"
