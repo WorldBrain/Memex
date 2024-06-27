@@ -375,6 +375,7 @@ export class SidebarContainerLogic extends UILogic<
             existingSourcesOption: 'pristine',
             localFoldersList: [],
             bulkSelectionState: [],
+            imageSourceForPreview: null,
         }
     }
 
@@ -1332,6 +1333,14 @@ export class SidebarContainerLogic extends UILogic<
         //     width = width + 'px'
         //     document.body.style.width = width
         // }
+    }
+
+    openImageInPreview: EventHandler<'openImageInPreview'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            imageSourceForPreview: { $set: event },
+        })
     }
 
     setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {

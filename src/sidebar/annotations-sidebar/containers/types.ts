@@ -152,6 +152,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
     selectedTextAIPreview: string
+    imageSourceForPreview: string
     queryMode: string
     isTrial: boolean
     signupDate: number
@@ -354,6 +355,7 @@ interface SidebarEvents {
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
     adjustRighPositionBasedOnRibbonPosition: { position: number }
     setPopoutsActive: boolean
+    openImageInPreview: string
     checkIfKeyValid: { apiKey: string }
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }

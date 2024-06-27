@@ -150,6 +150,7 @@ export interface AnnotationProps {
     shiftSelectItem?: () => void
     searchTerms?: string[]
     syncSettingsBG: RemoteSyncSettingsInterface
+    openImageInPreview: (imageSource: string) => Promise<void>
 }
 
 export interface AnnotationEditableEventProps {
@@ -553,6 +554,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 )
                             }
                             searchTerms={this.props.searchTerms}
+                            openImageInPreview={this.props.openImageInPreview}
                         />
                     </HighlightEditContainer>
                 </HighlightSection>
@@ -854,6 +856,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         )
                     }
                     searchTerms={this.props.searchTerms}
+                    openImageInPreview={this.props.openImageInPreview}
                 />
             </AnnotationEditContainer>
         )

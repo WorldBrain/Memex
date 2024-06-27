@@ -70,6 +70,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import ImagePreviewModal from '@worldbrain/memex-common/lib/common-ui/image-preview-modal'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -267,6 +268,8 @@ export class DashboardContainer extends StatefulUIElement<
                 : undefined,
             imageSupport: this.props.imageSupportBG,
             getRootElement: this.props.getRootElement,
+            openImageInPreview: (imageSource: string) =>
+                this.processEvent('openImageInPreview', imageSource),
         }
     }
 
@@ -937,6 +940,9 @@ export class DashboardContainer extends StatefulUIElement<
                           )
                         : []
                 }
+                openImageInPreview={(imageSource: string) =>
+                    this.processEvent('openImageInPreview', imageSource)
+                }
                 spacePickerBGProps={{
                     authBG: this.props.authBG,
                     spacesBG: this.props.listsBG,
@@ -1447,6 +1453,8 @@ export class DashboardContainer extends StatefulUIElement<
                             ...opts,
                         })
                     },
+                    openImageInPreview: () => (imageSource: string) =>
+                        this.processEvent('openImageInPreview', imageSource),
                     onGoToHighlightClick: (noteId) => () =>
                         this.processEvent('goToHighlightInNewTab', { noteId }),
                     onListPickerBarBtnClick: (noteId) => () =>
@@ -2080,6 +2088,15 @@ export class DashboardContainer extends StatefulUIElement<
                         />
                     </MainFrame>
                     {this.renderModals()}
+                    {this.state.imageSourceForPreview?.length > 0 ? (
+                        <ImagePreviewModal
+                            imageSource={this.state.imageSourceForPreview}
+                            closeModal={() =>
+                                this.processEvent('openImageInPreview', null)
+                            }
+                            getRootElement={this.props.getRootElement}
+                        />
+                    ) : null}
                     <HelpBtn
                         currentUser={this.state.currentUser}
                         theme={this.state.themeVariant}

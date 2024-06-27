@@ -80,6 +80,7 @@ export interface RootState {
     spaceSearchSuggestions: SpaceSearchSuggestion[]
     selectableBlocks: SelectableBlock[]
     focusedBlockId: number | null
+    imageSourceForPreview: string
 }
 
 export type Events = UIEvent<
@@ -195,6 +196,7 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingPageArgs: PageEventArgs & { instaDelete: boolean }
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
+    openImageInPreview: string
     setSpaceSidebarWidth: { width: string }
     setDisableMouseLeave: { disable: boolean }
     selectAllCurrentItems: null

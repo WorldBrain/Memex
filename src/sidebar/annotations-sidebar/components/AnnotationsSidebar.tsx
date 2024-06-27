@@ -171,7 +171,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     renderContextMenuForList: (listData: UnifiedList) => JSX.Element
     renderEditMenuForList: (listData: UnifiedList) => JSX.Element
     renderPageLinkMenuForList: () => JSX.Element
-
+    openImageInPreview: (imageSource: string) => Promise<void>
     setActiveTab: (tab: SidebarTab) => void
     setActiveAITab: (tab: SidebarAITab) => React.MouseEventHandler
     setActiveSuggestionsTab: (tab: SuggestionsTab) => React.MouseEventHandler
@@ -753,6 +753,7 @@ export class AnnotationsSidebar extends React.Component<
                     onCancel={() => {
                         this.setState({ autoFocusCreateForm: false })
                     }}
+                    openImageInPreview={this.props.openImageInPreview}
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
@@ -1050,6 +1051,7 @@ export class AnnotationsSidebar extends React.Component<
                             isShared
                             syncSettingsBG={this.props.syncSettingsBG}
                             getRootElement={this.props.getRootElement}
+                            openImageInPreview={this.props.openImageInPreview}
                             isBulkShareProtected
                             onSpacePickerToggle={() => {
                                 this.props.setSpacePickerAnnotationInstance(
@@ -1191,6 +1193,9 @@ export class AnnotationsSidebar extends React.Component<
                                         createdWhen: annotation.createdWhen,
                                         reference: sharedAnnotationRef,
                                     }}
+                                    openImageInPreview={
+                                        this.props.openImageInPreview
+                                    }
                                     getYoutubePlayer={
                                         this.props.getYoutubePlayer
                                     }
@@ -2006,6 +2011,7 @@ export class AnnotationsSidebar extends React.Component<
                     createNewNoteFromAISummary={
                         this.props.createNewNoteFromAISummary
                     }
+                    openImageInPreview={this.props.openImageInPreview}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
                     aiChatStateExternal={{

@@ -54,6 +54,7 @@ import { generateAnnotationCardInstanceId } from './utils'
 import type { AnnotationCardInstanceLocation } from '../types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
+import ImagePreviewModal from '@worldbrain/memex-common/lib/common-ui/image-preview-modal'
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
@@ -418,6 +419,8 @@ export class AnnotationsSidebarContainer<
             imageSupport: this.props.imageSupport,
             getRootElement: this.props.getRootElement,
             copyLoadingState: annotationCardInstance?.copyLoadingState,
+            openImageInPreview: (imageSource: string) =>
+                this.processEvent('openImageInPreview', imageSource),
         }
     }
 
@@ -504,6 +507,8 @@ export class AnnotationsSidebarContainer<
                 })
             },
             defaultMinimized: false,
+            openImageInPreview: (imageSource: string) =>
+                this.processEvent('openImageInPreview', imageSource),
         }
     }
 
@@ -1173,6 +1178,12 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('goToAnnotationInNewTab', {
                                     unifiedAnnotationId,
                                 })
+                            }
+                            openImageInPreview={(imageSource: string) =>
+                                this.processEvent(
+                                    'openImageInPreview',
+                                    imageSource,
+                                )
                             }
                             getHighlightColorSettings={() =>
                                 this.processEvent(
@@ -1865,6 +1876,15 @@ export class AnnotationsSidebarContainer<
                     </Rnd>
                 </ContainerStyled>
                 {this.renderModals()}
+                {this.state.imageSourceForPreview?.length > 0 ? (
+                    <ImagePreviewModal
+                        imageSource={this.state.imageSourceForPreview}
+                        closeModal={() =>
+                            this.processEvent('openImageInPreview', null)
+                        }
+                        getRootElement={this.props.getRootElement}
+                    />
+                ) : null}
             </ThemeProvider>
         )
     }

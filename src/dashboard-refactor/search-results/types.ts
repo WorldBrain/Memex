@@ -83,6 +83,7 @@ export type NoteInteractionProps = Omit<
     onCommentChange: (content: string) => void
     onBodyChange: (content: string) => void
     onCopyPasterDefaultExecute: () => void
+    openImageInPreview: (imageSource: string) => Promise<void>
 }
 
 // NOTE: Derived type - edit the original

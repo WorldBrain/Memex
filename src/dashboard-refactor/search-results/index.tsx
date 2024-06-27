@@ -168,6 +168,7 @@ export type Props = RootState &
         spaceSearchSuggestions?: SpaceSearchSuggestion[]
         shiftSelectItems: (itemId: string, type: 'notes' | 'pages') => void
         focusLockUntilMouseStart: boolean
+        openImageInPreview: (imageSource: string) => Promise<void>
     }
 
 export interface State {
@@ -397,6 +398,7 @@ export default class SearchResultsContainer extends React.Component<
                         ? new Date(noteData.displayTime)
                         : undefined
                 }
+                openImageInPreview={this.props.openImageInPreview}
                 searchTerms={this.state.searchTerms}
                 syncSettingsBG={this.props.syncSettingsBG}
                 bulkSelectAnnotation={() => {
@@ -540,6 +542,7 @@ export default class SearchResultsContainer extends React.Component<
                     onBodyChange: (content) =>
                         interactionProps.onBodyChange(content),
                     setEditing: interactionProps.onEditBtnClick,
+                    openImageInPreview: interactionProps.openImageInPreview,
                 }}
                 annotationFooterDependencies={{
                     onCopyPasterDefaultExecute:

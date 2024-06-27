@@ -182,6 +182,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             addNewSpaceViaWikiLinks: async (spaceName: string) => {
                 // Placeholder function, replace with actual implementation
             },
+            openImageInPreview: async (src: string) => null,
         },
         {
             annotationsBG: params.annotationsBG,

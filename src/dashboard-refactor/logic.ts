@@ -336,6 +336,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             focusLockUntilMouseStart: false,
             selectableBlocks: [],
             focusedBlockId: -1,
+            imageSourceForPreview: null,
         }
     }
 
@@ -845,6 +846,14 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 disableMouseLeave: { $set: event.disable },
             },
+        })
+    }
+
+    openImageInPreview: EventHandler<'openImageInPreview'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            imageSourceForPreview: { $set: event },
         })
     }
 
