@@ -1,6 +1,9 @@
 import { UILogic, UIEventHandler } from 'ui-logic-core'
-import type { Dependencies, State, Events, ListTreeState } from './types'
-import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import type { Dependencies, State, Events } from './types'
+import {
+    initNormalizedState,
+    normalizedStateToArray,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
@@ -9,28 +12,13 @@ import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
     Events,
     EventName
 >
-
-let initListTreeState = (
-    unifiedId: string,
-    allLists: Dependencies['lists'],
-    prevState?: ListTreeState,
-): ListTreeState => ({
-    unifiedId,
-    wasListDropped: false,
-    areChildrenShown: prevState?.areChildrenShown ?? false,
-    isNewChildInputShown: prevState?.isNewChildInputShown ?? false,
-    newChildListCreateState: prevState?.newChildListCreateState ?? 'pristine',
-    hasChildren:
-        allLists.filter(
-            (l) => l.parentUnifiedId === unifiedId && l.type === 'user-list',
-        ).length > 0,
-})
 
 export class ListTreesLogic extends UILogic<State, Events> {
     constructor(private deps: Dependencies) {
@@ -43,28 +31,55 @@ export class ListTreesLogic extends UILogic<State, Events> {
         dragOverListId: null,
     })
 
-    syncListWithTreeState(
-        lists: Dependencies['lists'],
-        { listTrees }: State,
-    ): void {
-        this.emitMutation({
-            listTrees: {
-                $set: initNormalizedState({
-                    getId: (list) => list.unifiedId,
-                    seedData: lists.map((list) =>
-                        initListTreeState(
-                            list.unifiedId,
-                            lists,
-                            listTrees.byId[list.unifiedId],
-                        ),
-                    ),
-                }),
-            },
-        })
+    init: EventHandler<'init'> = async ({ event, previousState }) => {
+        // Keep state.listTrees in-sync with the cached lists
+        this.deps.cache.events.addListener(
+            'newListsState',
+            this.cacheListsSubscription,
+        )
+        // Manually invoke once to set up the initial state
+        this.cacheListsSubscription(this.deps.cache.lists)
     }
 
-    init: EventHandler<'init'> = ({ event, previousState }) => {
-        this.syncListWithTreeState(this.deps.lists, previousState)
+    cleanup: EventHandler<'cleanup'> = async ({ previousState }) => {
+        this.deps.cache.events.removeListener(
+            'newListsState',
+            this.cacheListsSubscription,
+        )
+    }
+
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
+        nextLists,
+    ) => {
+        this.emitMutation({
+            listTrees: {
+                $apply: (prev) =>
+                    initNormalizedState({
+                        getId: (state) => state.unifiedId,
+                        seedData: normalizedStateToArray(nextLists).map(
+                            (list) => {
+                                let prevState = prev.byId[list.unifiedId]
+                                return {
+                                    unifiedId: list.unifiedId,
+                                    wasListDropped: false,
+                                    areChildrenShown:
+                                        prevState?.areChildrenShown ?? false,
+                                    isNewChildInputShown:
+                                        prevState?.isNewChildInputShown ??
+                                        false,
+                                    newChildListCreateState:
+                                        prevState?.newChildListCreateState ??
+                                        'pristine',
+                                    hasChildren:
+                                        this.deps.cache.getListsByParentId(
+                                            list.unifiedId,
+                                        ).length > 0,
+                                }
+                            },
+                        ),
+                    }),
+            },
+        })
     }
 
     createNewChildList: EventHandler<'createNewChildList'> = async ({

@@ -23,16 +23,6 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
         super(props, new ListTreesLogic(props))
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>): void {
-        // Keep state.listTrees in sync with any upstream list add/deletes
-        if (prevProps.lists.length !== this.props.lists.length) {
-            ;(this.logic as ListTreesLogic).syncListWithTreeState(
-                this.props.lists,
-                this.state,
-            )
-        }
-    }
-
     private initDropReceivingState = (listId: string): DragNDropActions => ({
         isDraggedOver: this.state.dragOverListId === listId,
         onDragEnter: (e) => {
