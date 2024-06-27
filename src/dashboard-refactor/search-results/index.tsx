@@ -140,8 +140,10 @@ export type Props = RootState &
         imageSupport: ImageSupportInterface<'caller'>
         onBulkSelect: (itemData, remove) => Promise<void>
         selectedItems: string[]
-        saveHighlightColor?: (noteId, colorId, color) => void
-        saveHighlightColorSettings: (newState: HighlightColor[]) => void
+        saveHighlightColor?: (
+            noteId: UnifiedAnnotation['unifiedId'],
+            color: HighlightColor['id'],
+        ) => void
         getHighlightColorSettings: () => void
         highlightColorSettings: HighlightColor[]
         setAnnotationInFocus: (unifiedId: string) => void
@@ -368,7 +370,7 @@ export default class SearchResultsContainer extends React.Component<
             (item: any) => {
                 return item.id === noteData.color
             },
-        )?.color
+        )
 
         return (
             <AnnotationEditable
@@ -396,9 +398,7 @@ export default class SearchResultsContainer extends React.Component<
                         : undefined
                 }
                 searchTerms={this.state.searchTerms}
-                saveHighlightColorSettings={
-                    this.props.saveHighlightColorSettings
-                }
+                syncSettingsBG={this.props.syncSettingsBG}
                 bulkSelectAnnotation={() => {
                     const data = {
                         url: noteData.url,
@@ -417,8 +417,10 @@ export default class SearchResultsContainer extends React.Component<
                 }
                 setAnnotationInFocus={this.props.setAnnotationInFocus}
                 isInFocus={noteData.isInFocus}
-                getHighlightColorSettings={this.props.getHighlightColorSettings}
                 highlightColorSettings={this.props.highlightColorSettings}
+                saveHighlightColor={async (color: HighlightColor['id']) =>
+                    this.props.saveHighlightColor(noteId, color)
+                }
                 isEditing={noteData.isEditing}
                 isEditingHighlight={noteData.isBodyEditing}
                 isDeleting={false}

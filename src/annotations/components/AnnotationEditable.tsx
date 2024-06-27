@@ -33,7 +33,7 @@ import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { Anchor } from 'src/highlighting/types'
-import HighlightColorPicker from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker'
+
 import tinycolor from 'tinycolor2'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
@@ -45,12 +45,15 @@ import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/comp
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import ListsSegment from '@worldbrain/memex-common/lib/common-ui/components/result-item-spaces-segment'
+import HighlightColorPicker from './highlightColorPicker'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
     comment?: string
     selector?: Anchor
-    color?: RGBAColor
+    color?: HighlightColor
 }
 
 export interface NoteProps extends AnnotationProps {
@@ -126,11 +129,9 @@ export interface AnnotationProps {
     shareMenuAnnotationInstanceId: string
     imageSupport: ImageSupportInterface<'caller'>
     selector?: Anchor
-    saveHighlightColor?: (noteId, colorId, color) => void
-    saveHighlightColorSettings?: (newState: HighlightColor[]) => void
-    getHighlightColorSettings?: () => void
+    saveHighlightColor?: (color: HighlightColor['id']) => Promise<void>
     highlightColorSettings: HighlightColor[]
-    color?: RGBAColor
+    color?: HighlightColor
     getRootElement: () => HTMLElement
     toggleAutoAdd: () => void
     isAutoAddEnabled?: boolean
@@ -148,6 +149,7 @@ export interface AnnotationProps {
     isInFocus?: boolean
     shiftSelectItem?: () => void
     searchTerms?: string[]
+    syncSettingsBG: RemoteSyncSettingsInterface
 }
 
 export interface AnnotationEditableEventProps {
@@ -239,21 +241,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     componentDidMount() {
         this.setTextAreaHeight()
 
-        if (!this.props.color) {
-            const defaultHighlightSettings = this.props.highlightColorSettings?.find(
-                (setting) => setting.id === 'default',
-            )
-            if (defaultHighlightSettings?.color) {
-                this.setState({
-                    defaultHighlightColor: defaultHighlightSettings.color,
-                    currentHighlightColor: defaultHighlightSettings.color,
-                })
-            }
-        } else {
-            this.setState({
-                currentHighlightColor: this.props.color,
-            })
-        }
+        // if (!this.props.color) {
+        //     const defaultHighlightSettings = this.props.highlightColorSettings?.find(
+        //         (setting) => setting.id === 'default',
+        //     )
+        //     if (defaultHighlightSettings?.color) {
+        //         this.setState({
+        //             defaultHighlightColor: defaultHighlightSettings.color,
+        //             currentHighlightColor: defaultHighlightSettings.color,
+        //         })
+        //     }
+        // } else {
+        //     this.setState({
+        //         currentHighlightColor: this.props.color,
+        //     })
+        // }
     }
 
     // This is a hack to ensure this state, which isn't available on init, only gets set once
@@ -270,11 +272,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 showShareMenu: this.props.initShowSpacePicker === 'footer',
             })
         }
-        if (prevProps.color != this.props.color) {
-            this.setState({
-                currentHighlightColor: this.props.color,
-            })
-        }
+        // if (prevProps.color != this.props.color) {
+        //     this.setState({
+        //         currentHighlightColor: this.props.color,
+        //     })
+        // }
 
         if (
             prevProps.highlightColorSettings !=
@@ -455,14 +457,17 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
 
         const isScreenshotAnnotation = this.props.selector?.dimensions != null
-        let barColor = null
+        let barColor = RGBAobjectToString(DEFAULT_HIGHLIGHT_COLOR)
+        if (this.props.color) {
+            barColor = RGBAobjectToString(this.props.color.color)
+        }
 
-        if (this.state.defaultHighlightColor) {
-            barColor = RGBAobjectToString(this.state.defaultHighlightColor)
-        }
-        if (this.state.currentHighlightColor) {
-            barColor = RGBAobjectToString(this.state.currentHighlightColor)
-        }
+        // if (this.state.defaultHighlightColor) {
+        //     barColor = RGBAobjectToString(this.props.color.color)
+        // }
+        // if (this.state.currentHighlightColor) {
+        //     barColor = RGBAobjectToString(this.props.color.color)
+        // }
 
         return (
             <HighlightStyled
@@ -605,29 +610,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     getPortalRoot={this.props.getRootElement}
                 >
                     <HighlightColorPicker
-                        saveHighlightColorSettings={
-                            this.props.saveHighlightColorSettings
-                        }
-                        changeHighlightColor={(
-                            color: RGBAColor | string,
-                            colorId,
-                        ) => {
-                            this.props.saveHighlightColor(
-                                unifiedId,
-                                colorId,
-                                color,
-                            )
-                            this.setState({
-                                showHighlightColorPicker: false,
-                            })
-                        }}
-                        getHighlightColorSettings={
-                            this.props.getHighlightColorSettings
-                        }
-                        highlightColorSettings={
-                            this.props.highlightColorSettings
-                        }
-                        selectedColor={selectedColor}
+                        syncSettingsBG={this.props.syncSettingsBG}
+                        annotationId={this.props.unifiedId}
+                        selectedColor={this.props.color.id}
+                        updateAnnotationColor={this.props.saveHighlightColor}
                     />
                 </PopoutBox>
             )

@@ -6,6 +6,7 @@ import type {
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
 import type { RGBAColor } from './cache/types'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 // export interface Annotation {
 //     /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
@@ -33,7 +34,7 @@ export interface Annotation {
     createdWhen?: Date
     lastEdited?: Date
     comment?: string
-    color?: RGBAColor | string // TODO: These types have no overlap. They shouldn't be both on the one field. Either choose one or make two fields
+    color?: HighlightColor['id']
     _body_terms?: string[]
     _comment_terms?: string[]
     tags?: string[]

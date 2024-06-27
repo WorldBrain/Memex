@@ -129,8 +129,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                         handleUIStateChange,
                     )
             },
-            getHighlightColorsSettings: () =>
-                params.getHighlightColorsSettings(),
+            getHighlightColorsSettings: () => null,
             saveHighlightColorsSettings: (newStateInput) =>
                 params.saveHighlightColorsSettings(newStateInput),
             openPDFinViewer: (url) => params.openPDFinViewer(url),
@@ -197,6 +196,8 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             getRootElement: () => target,
             inPageUI: params.inPageUI,
             syncSettingsBG: params.syncSettingsBG,
+            createHighlight: params.createHighlight,
+            getWindow: () => window,
         },
     )
 

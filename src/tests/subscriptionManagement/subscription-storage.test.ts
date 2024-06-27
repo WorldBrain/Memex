@@ -445,7 +445,6 @@ describe('Ribbon logic', () => {
             // )
             // const email = DEFAULT_TESTING_EMAIL
             // const subscriptionStatus = await checkStripePlan(email, browserAPIs)
-            // console.log(subscriptionStatus)
             // expect(subscriptionStatus.bookmarksPowerUp).toBe(true)
         })
     })

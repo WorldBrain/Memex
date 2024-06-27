@@ -17,7 +17,6 @@ type Props = SidebarContainerOptions & {
     theme: MemexTheme
     imageSupport?: ImageSupportInterface<'caller'>
     saveHighlightColor: (color, id, unifiedId) => void
-    saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: HighlightColor[]
     inPageMode?: boolean

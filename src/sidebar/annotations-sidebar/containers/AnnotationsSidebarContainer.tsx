@@ -77,7 +77,6 @@ export interface Props extends SidebarContainerOptions {
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
     saveHighlightColor?: (noteId, color: RGBAColor | string, unifiedId) => void
-    saveHighlightColorSettings?: (newState: HighlightColor[]) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: HighlightColor[]
     getRootElement: () => HTMLElement
@@ -1159,10 +1158,12 @@ export class AnnotationsSidebarContainer<
                             chapterSummaries={this.state.chapterSummaries}
                             videoDetails={this.state.videoDetails}
                             bgScriptBG={this.props.bgScriptBG}
-                            saveHighlightColor={(noteId, colorId, color) => {
+                            saveHighlightColor={(
+                                noteId: UnifiedAnnotation['unifiedId'],
+                                color: HighlightColor['id'],
+                            ) => {
                                 this.processEvent('saveHighlightColor', {
                                     noteId: noteId,
-                                    colorId: colorId,
                                     color: color,
                                 })
                             }}
@@ -1173,14 +1174,6 @@ export class AnnotationsSidebarContainer<
                                     unifiedAnnotationId,
                                 })
                             }
-                            saveHighlightColorSettings={(newState) => {
-                                this.processEvent(
-                                    'saveHighlightColorSettings',
-                                    {
-                                        newState: newState,
-                                    },
-                                )
-                            }}
                             getHighlightColorSettings={() =>
                                 this.processEvent(
                                     'getHighlightColorSettings',

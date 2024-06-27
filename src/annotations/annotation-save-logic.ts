@@ -12,6 +12,7 @@ import {
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { RGBAColor } from './cache/types'
 import type { AnnotationSharingState } from '@worldbrain/memex-common/lib/content-sharing/service/types'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -27,14 +28,14 @@ type AnnotationCreateData = {
     createdWhen?: Date
     selector?: Anchor
     localListIds?: number[]
-    color?: RGBAColor | string | string
+    color?: HighlightColor['id']
 } & ({ body: string; comment?: string } | { body?: string; comment: string })
 
 interface AnnotationUpdateData {
     localId: string
     body: string
     comment: string | null
-    color?: RGBAColor | string | string
+    color?: HighlightColor['id']
 }
 
 export interface SaveAnnotationParams<

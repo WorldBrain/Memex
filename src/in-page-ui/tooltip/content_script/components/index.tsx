@@ -30,13 +30,21 @@ import {
     TypedRemoteEventEmitter,
     getRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import {
+    AnnotationPrivacyLevels,
+    RGBAColor,
+} from '@worldbrain/memex-common/lib/annotations/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
+import HighlightColorPicker from 'src/annotations/components/highlightColorPicker'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
+import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
 
 interface TooltipRootProps {
     mount: InPageUIRootMount
@@ -54,6 +62,15 @@ interface TooltipRootProps {
     localStorageAPI: Storage.LocalStorageArea
     getRootElement: () => HTMLElement
     inPageUI: SharedInPageUIInterface
+    createHighlight(
+        selection?: PseudoSelection,
+        shouldShare?: boolean | null,
+        shouldCopyShareLink?: boolean | null,
+        drawRectangle?: boolean | null,
+        highlightColor?: HighlightColor['id'],
+        preventHideTooltip?: boolean,
+    ): Promise<any | null>
+    getWindow: () => Window
 }
 
 interface TooltipRootState {
@@ -64,9 +81,13 @@ interface TooltipRootState {
     spaceSearchResults: any[]
     askAITabActive?: boolean
     aiPrompt?: string
+    currentSelection: PseudoSelection
+    showColorPicker: boolean
 }
 
 class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
+    syncSettings: SyncSettingsStore<'highlightColors'>
+
     state: TooltipRootState = {
         currentAnnotation: null,
         currentAnnotationLists: [],
@@ -74,8 +95,17 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         spaceSearchResults: [],
         askAITabActive: false,
         aiPrompt: null,
+        currentSelection: null,
+        showColorPicker: null,
     }
     private summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
+
+    constructor(props: TooltipRootProps) {
+        super(props)
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.props.syncSettingsBG,
+        })
+    }
 
     async componentDidMount() {
         this.setState({
@@ -88,6 +118,17 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
             this.setState({
                 askAITabActive: true,
             })
+        })
+
+        document.addEventListener('selectionchange', () => {
+            const selection = cloneSelectionAsPseudoObject(
+                this.props.getWindow()?.getSelection(),
+            )
+            if (selection) {
+                this.setState({
+                    currentSelection: selection,
+                })
+            }
         })
     }
 
@@ -286,7 +327,48 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         await this.selectSpaceForAnnotation(localListId)
     }
 
-    saveAnnotation = async (commentState: string) => {
+    renderHighlightColorPicker = (createHighlight) => {
+        return (
+            <HighlightColorPicker
+                syncSettingsBG={this.props.syncSettingsBG}
+                annotationId={this.state.currentAnnotation?.unifiedId ?? null}
+                updateAnnotationColor={async (color: HighlightColor['id']) => {
+                    this.setState({
+                        showColorPicker: true,
+                    })
+                    if (!this.state.currentAnnotation) {
+                        await this.props.createHighlight(
+                            this.state.currentSelection,
+                            false,
+                            false,
+                            false,
+                            color,
+                            false,
+                        )
+                        this.setState({
+                            currentSelection: null,
+                            showColorPicker: false,
+                        })
+                    } else {
+                        await this.saveAnnotation(null, color)
+                    }
+                }}
+                selectedColor={
+                    this.state.currentAnnotation?.color ??
+                    HIGHLIGHT_COLORS_DEFAULT[0].id
+                }
+            />
+        )
+    }
+
+    getHighlightColorsSettings = async () => {
+        return await this.syncSettings.highlightColors.get('highlightColors')
+    }
+
+    saveAnnotation = async (
+        commentState: string,
+        color?: HighlightColor['id'],
+    ) => {
         const currentAnnotation = this.state.currentAnnotation
         const existingHighlight = this.props.annotationsCache.annotations.byId[
             currentAnnotation.unifiedId
@@ -297,10 +379,10 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
             {
                 unifiedId: existingHighlight.unifiedId,
                 remoteId: existingHighlight.remoteId,
-                comment: comment,
+                comment: comment ?? existingHighlight.comment,
                 body: existingHighlight.body,
                 privacyLevel: existingHighlight.privacyLevel,
-                color: null,
+                color: color ?? existingHighlight.color,
                 unifiedListIds: existingHighlight.unifiedListIds,
             },
             {
@@ -312,7 +394,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
             await this.props.annotationsBG.editAnnotation(
                 existingHighlight.localId,
                 comment,
-                null,
+                color ?? existingHighlight.color,
                 existingHighlight.body,
             )
             // shareOpts: {
@@ -325,6 +407,13 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         } catch (err) {
             console.log(err)
         }
+        this.setState({
+            currentAnnotation: {
+                ...currentAnnotation,
+                comment,
+                color: color ?? existingHighlight.color,
+            },
+        })
     }
 
     renderPromptTemplates = () => {
@@ -422,6 +511,9 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         currentAnnotationLists={
                             this.state.currentAnnotationLists
                         }
+                        getHighlightColorsSettings={
+                            this.getHighlightColorsSettings
+                        }
                         currentAnnotation={this.state.currentAnnotation}
                         getAnnotationLists={this.getAnnotationLists}
                         toggleSpacePicker={this.toggleSpacePicker}
@@ -436,6 +528,10 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         showSpacePicker={this.state.showSpacePicker}
                         aiPrompt={this.state.aiPrompt}
                         themeVariant={themeVariant}
+                        renderHighlightColorPicker={
+                            this.renderHighlightColorPicker
+                        }
+                        showColorPicker={this.state.showColorPicker}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -466,6 +562,8 @@ export function setupUIContainer(
                 getRootElement={props.getRootElement}
                 inPageUI={props.inPageUI}
                 syncSettingsBG={props.syncSettingsBG}
+                createHighlight={params.createHighlight}
+                getWindow={params.getWindow}
             />,
             mount.rootElement,
         )

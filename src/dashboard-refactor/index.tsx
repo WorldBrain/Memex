@@ -69,6 +69,7 @@ import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -953,22 +954,15 @@ export class DashboardContainer extends StatefulUIElement<
                 syncSettingsBG={this.props.syncSettingsBG}
                 listData={listsSidebar.lists}
                 saveHighlightColor={(
-                    id,
-                    color: RGBAColor | string,
-                    unifiedId,
+                    noteId: UnifiedAnnotation['unifiedId'],
+                    color: HighlightColor['id'],
                 ) => {
                     {
                         this.processEvent('saveHighlightColor', {
-                            noteId: id,
+                            noteId: noteId,
                             color: color,
-                            unifiedId: unifiedId,
                         })
                     }
-                }}
-                saveHighlightColorSettings={(newState) => {
-                    this.processEvent('saveHighlightColorSettings', {
-                        newState,
-                    })
                 }}
                 getHighlightColorSettings={() =>
                     this.processEvent('getHighlightColorSettings', null)
@@ -2064,22 +2058,16 @@ export class DashboardContainer extends StatefulUIElement<
                                     activePage: false,
                                 })
                             }}
-                            saveHighlightColor={(id, color, unifiedId) => {
+                            saveHighlightColor={(
+                                noteId: UnifiedAnnotation['unifiedId'],
+                                color: HighlightColor['id'],
+                            ) => {
                                 {
                                     this.processEvent('saveHighlightColor', {
-                                        noteId: id,
+                                        noteId: noteId,
                                         color: color,
-                                        unifiedId: unifiedId,
                                     })
                                 }
-                            }}
-                            saveHighlightColorSettings={(newState) => {
-                                this.processEvent(
-                                    'saveHighlightColorSettings',
-                                    {
-                                        newState: newState,
-                                    },
-                                )
                             }}
                             getHighlightColorSettings={() =>
                                 this.processEvent(

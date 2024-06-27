@@ -386,9 +386,8 @@ interface SidebarEvents {
     getHighlightColorSettings: null
     updateSpacesSearchSuggestions: { searchQuery: string }
     saveHighlightColor: {
-        noteId: string
-        color: RGBAColor
-        colorId: string
+        noteId: UnifiedAnnotation['unifiedId']
+        color: HighlightColor['id']
     }
     saveFeedSources: {
         sources: string
@@ -397,7 +396,6 @@ interface SidebarEvents {
         feedUrl: string
     }
     loadFeedSources: null
-    saveHighlightColorSettings: { newState: HighlightColor[] }
     youtubeTranscriptJSON: null
     saveImageAsNewNote: {
         imageData: string
