@@ -802,13 +802,6 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('confirmListDelete', null),
                     getRootElement: this.props.getRootElement,
                 })}
-                onListDragStart={(listId) => (e) =>
-                    this.processEvent('dragList', {
-                        listId,
-                        dataTransfer: e.dataTransfer,
-                    })}
-                onListDragEnd={(listId) => (e) =>
-                    this.processEvent('dropList', { listId })}
                 // TODO: Simplify this to only handle page drops (list drops handled in <ListTrees>)
                 initDropReceivingState={(listId) => ({
                     onDragEnter: (e) => {
@@ -831,12 +824,14 @@ export class DashboardContainer extends StatefulUIElement<
                             listId: undefined,
                         })
                     },
-                    onDrop: (dataTransfer, areTargetListChildrenShown) =>
+                    onDrop: (e) =>
                         this.processEvent('dropOnListItem', {
                             listId,
-                            dataTransfer,
-                            areTargetListChildrenShown,
+                            dataTransfer: e.dataTransfer,
                         }),
+                    // TODO: Implement these for page dragging
+                    onDragEnd: (e) => {},
+                    onDragStart: (e) => {},
                     isDraggedOver: listId === listsSidebar.dragOverListId,
                     wasPageDropped:
                         listsSidebar.lists.byId[listId]?.wasPageDropped,

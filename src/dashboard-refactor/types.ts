@@ -148,17 +148,6 @@ export type DashboardDependencies = {
       }
 )
 
-export interface DropReceivingState {
-    isDraggedOver?: boolean
-    wasPageDropped?: boolean
-    onDrop(
-        dataTransfer: DataTransfer,
-        areTargetListChildrenShown?: boolean,
-    ): void
-    onDragEnter: DragEventHandler
-    onDragLeave: DragEventHandler
-}
-
 export interface SearchResultTextPart {
     text: string
     match: boolean

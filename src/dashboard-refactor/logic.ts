@@ -1,11 +1,7 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
 import type { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
-import {
-    LIST_REORDER_POST_EL_POSTFIX,
-    LIST_REORDER_PRE_EL_POSTFIX,
-    sizeConstants,
-} from 'src/dashboard-refactor/constants'
+import { sizeConstants } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { RootState as State, DashboardDependencies, Events } from './types'
@@ -50,11 +46,7 @@ import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
-import type {
-    PageAnnotationsCacheEvents,
-    RGBAColor,
-    UnifiedList,
-} from 'src/annotations/cache/types'
+import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
@@ -62,19 +54,15 @@ import {
     getBulkEditItems,
     setBulkEdit,
 } from 'src/bulk-edit/utils'
-import type { DragToListAction } from './lists-sidebar/types'
-import {
-    defaultOrderableSorter,
-    insertOrderedItemBeforeIndex,
-    pushOrderedItem,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+import type { DragPageToListAction } from './lists-sidebar/types'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import MarkdownIt from 'markdown-it'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { captureException } from 'src/util/raven'
 import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import type { UnifiedSearchResult } from 'src/search/background/types'
-import { BulkEditCollection } from 'src/bulk-edit/types'
+import type { BulkEditCollection } from 'src/bulk-edit/types'
 import checkBrowser from 'src/util/check-browser'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
@@ -317,7 +305,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 areJoinedListsExpanded: true,
                 selectedListId: null,
                 themeVariant: null,
-                draggedListId: null,
                 disableMouseLeave: false,
             },
             syncMenu: {
@@ -4340,33 +4327,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    dragList: EventHandler<'dragList'> = async ({ event, previousState }) => {
-        this.emitMutation({
-            listsSidebar: {
-                draggedListId: { $set: event.listId },
-            },
-        })
-        const crt = this.options.document?.getElementById(DRAG_EL_ID)
-        crt.style.display = 'block'
-        event.dataTransfer.setDragImage(crt, 0, 0)
-
-        const list = this.options.annotationsCache.lists.byId[event.listId]
-        const action: DragToListAction<'list'> = {
-            type: 'list',
-            listId: list.unifiedId,
-        }
-
-        event.dataTransfer.setData('text/plain', JSON.stringify(action))
-    }
-
-    dropList: EventHandler<'dropList'> = async () => {
-        this.emitMutation({
-            listsSidebar: {
-                draggedListId: { $set: null },
-            },
-        })
-    }
-
     dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
         this.emitMutation({
             searchResults: { draggedPageId: { $set: event.pageResultId } },
@@ -4377,7 +4337,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const page =
             previousState.searchResults.pageData.byId[event.pageResultId]
-        const action: DragToListAction<'page'> = {
+        const action: DragPageToListAction = {
             type: 'page',
             fullPageUrl: page.fullUrl,
             normalizedPageUrl: page.normalizedUrl,
@@ -4391,20 +4351,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private parseDragDropAction<T extends 'page' | 'list'>(
+    private parseDragDropAction(
         dataTransfer: DataTransfer,
-    ): DragToListAction<T> | null {
-        let action: DragToListAction<T>
+    ): DragPageToListAction | null {
+        let action: DragPageToListAction
         try {
             action = JSON.parse(dataTransfer.getData('text/plain'))
-            if (!['page', 'list'].includes(action?.type)) {
+            if (action?.type !== 'page') {
                 throw new Error('Unexpected data received')
             }
         } catch (err) {
             console.error('Error parsing ondrop event data transfer data:', err)
             return null
         }
-
         return action
     }
 
@@ -4412,9 +4371,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { annotationsCache } = this.options
-        const action = this.parseDragDropAction<any>(event.dataTransfer)
-        if (!action) {
+        const action = this.parseDragDropAction(event.dataTransfer)
+        if (!action || action.type !== 'page') {
             return
         }
 
@@ -4423,316 +4381,18 @@ export class DashboardLogic extends UILogic<State, Events> {
             (taskState) => ({
                 listsSidebar: { listDropReceiveState: { $set: taskState } },
             }),
-            async () => {
-                if (action.type === 'page') {
-                    await this.handleDropPageOnListItem(
-                        event.listId,
-                        action,
-                        previousState,
-                    )
-                    return
-                }
-
-                if (event.listId.endsWith(LIST_REORDER_POST_EL_POSTFIX)) {
-                    const cleanedListId = event.listId.slice(
-                        0,
-                        event.listId.length -
-                            LIST_REORDER_POST_EL_POSTFIX.length,
-                    )
-                    await this.handleDropOnReorderLine(
-                        action,
-                        cleanedListId,
-                        previousState,
-                        {
-                            areTargetListChildrenShown:
-                                event.areTargetListChildrenShown,
-                        },
-                    )
-                    return
-                }
-                if (event.listId.endsWith(LIST_REORDER_PRE_EL_POSTFIX)) {
-                    const cleanedListId = event.listId.slice(
-                        0,
-                        event.listId.length -
-                            LIST_REORDER_PRE_EL_POSTFIX.length,
-                    )
-                    await this.handleDropOnReorderLine(
-                        action,
-                        cleanedListId,
-                        previousState,
-                        {
-                            isBeforeFirstRoot: true,
-                            areTargetListChildrenShown:
-                                event.areTargetListChildrenShown,
-                        },
-                    )
-                    return
-                }
-
-                const listToMove = annotationsCache.lists.byId[action.listId]
-                if (listToMove.unifiedId === event.listId) {
-                    return
-                }
-
-                // We only actualy want to perform the move if being dropped on a different parent list
-                if (listToMove.parentUnifiedId !== event.listId) {
-                    await this.performListTreeMove(
-                        action.listId,
-                        event.listId,
-                        previousState,
-                    )
-                }
-
-                const targetSiblingLists = annotationsCache
-                    .getListsByParentId(event.listId)
-                    .filter((list) => list.unifiedId !== action.listId)
-                // Ensure the moved list is ordered as the first among existing siblings
-                if (targetSiblingLists.length > 0) {
-                    await this.performListTreeReorder(
-                        action.listId,
-                        { targetListId: targetSiblingLists[0].unifiedId },
-                        previousState,
-                    )
-                }
-            },
+            async () =>
+                this.handleDropPageOnListItem(
+                    event.listId,
+                    action,
+                    previousState,
+                ),
         )
-    }
-
-    private async performListTreeMove(
-        listId: UnifiedList['unifiedId'],
-        newParentListId: UnifiedList['unifiedId'],
-        previousState: State,
-    ) {
-        const becomesTopLevelRoot = newParentListId == null
-        const { annotationsCache } = this.options
-        const listData = getListData(listId, previousState, {
-            mustBeLocal: true,
-            source: 'dropOnListItem',
-        })
-        const dropTargetListData = becomesTopLevelRoot
-            ? null
-            : getListData(newParentListId, previousState, {
-                  mustBeLocal: true,
-                  source: 'dropOnListItem',
-              })
-
-        if (
-            listData.localId == null ||
-            (!becomesTopLevelRoot && dropTargetListData.localId == null)
-        ) {
-            return
-        }
-
-        if (becomesTopLevelRoot) {
-            annotationsCache.updateList({
-                unifiedId: listId,
-                parentUnifiedId: null,
-            })
-            await this.options.listsBG.updateListTreeParent({
-                localListId: listData.localId!,
-                parentListId: dropTargetListData?.localId! ?? null,
-            })
-            return
-        }
-
-        const isListAncestorOfTargetList =
-            dropTargetListData.unifiedId === listId ||
-            dropTargetListData.pathUnifiedIds.includes(listId)
-
-        if (isListAncestorOfTargetList) {
-            this.emitMutation({
-                listsSidebar: { dragOverListId: { $set: undefined } },
-            })
-            throw new Error(
-                'Cannot make list a child of a descendent - this would result in a cycle',
-            )
-        }
-
-        this.emitMutation({
-            listsSidebar: {
-                dragOverListId: { $set: undefined },
-                lists: {
-                    byId: {
-                        [newParentListId]: {
-                            wasListDropped: { $set: true },
-                        },
-                    },
-                },
-            },
-        })
-
-        annotationsCache.updateList({
-            unifiedId: listId,
-            parentUnifiedId: newParentListId,
-        })
-
-        setTimeout(() => {
-            this.emitMutation({
-                listsSidebar: {
-                    lists: {
-                        byId: {
-                            [newParentListId]: {
-                                wasListDropped: { $set: false },
-                            },
-                        },
-                    },
-                },
-            })
-        }, 2000)
-
-        await this.options.listsBG.updateListTreeParent({
-            localListId: listData.localId!,
-            parentListId: dropTargetListData.localId!,
-        })
-    }
-
-    // TODO: Simplify this. Half the logic is just getting the same data that the callers need to get
-    private async performListTreeReorder(
-        listId: UnifiedList['unifiedId'],
-        targetListParams: {
-            targetListId: UnifiedList['unifiedId']
-            isFinalSibling?: boolean
-        },
-        previousState: State,
-    ): Promise<void> {
-        const { annotationsCache } = this.options
-        const targetList =
-            previousState.listsSidebar.lists.byId[targetListParams.targetListId]
-        const draggedList = previousState.listsSidebar.lists.byId[listId]
-
-        const targetSiblingLists = targetList
-            ? annotationsCache.getListsByParentId(targetList.parentUnifiedId)
-            : []
-        const index = targetSiblingLists.findIndex(
-            (list) => list.unifiedId === targetListParams.targetListId,
-        )
-        const items = targetSiblingLists.map((list) => ({
-            id: list.unifiedId,
-            key: list.order,
-        }))
-        const order =
-            index === -1 || targetListParams.isFinalSibling
-                ? pushOrderedItem(items, draggedList.unifiedId).create.key
-                : insertOrderedItemBeforeIndex(
-                      items,
-                      draggedList.unifiedId,
-                      index,
-                  ).create.key
-
-        if (order !== draggedList.order) {
-            annotationsCache.updateList({
-                unifiedId: draggedList.unifiedId,
-                order,
-            })
-            await this.options.listsBG.updateListTreeOrder({
-                localListId: draggedList.localId!,
-                siblingListIds: targetSiblingLists.map((list) => list.localId!),
-                intendedIndexAmongSiblings: targetListParams.isFinalSibling
-                    ? targetSiblingLists.length
-                    : index,
-            })
-        }
-
-        this.emitMutation({
-            listsSidebar: { dragOverListId: { $set: undefined } },
-        })
-    }
-
-    private async handleDropOnReorderLine(
-        { listId }: DragToListAction<'list'>,
-        dropTargetListId: string,
-        previousState: State,
-        params?: {
-            isBeforeFirstRoot?: boolean
-            areTargetListChildrenShown?: boolean
-        },
-    ): Promise<void> {
-        if (listId == null || dropTargetListId === listId) {
-            this.emitMutation({
-                listsSidebar: { dragOverListId: { $set: undefined } },
-            })
-            return
-        }
-        const { annotationsCache: cache } = this.options
-        const targetList = cache.lists.byId[dropTargetListId]
-        const draggedList = cache.lists.byId[listId]
-
-        // Edge case: dropping before the first root always orders the dragged list first among all roots
-        if (params?.isBeforeFirstRoot) {
-            const targetSiblings = cache.getListsByParentId(
-                targetList.parentUnifiedId,
-            )
-            if (draggedList.parentUnifiedId !== targetList.parentUnifiedId) {
-                await this.performListTreeMove(
-                    listId,
-                    targetList.parentUnifiedId,
-                    previousState,
-                )
-            }
-            if (targetSiblings.length) {
-                await this.performListTreeReorder(
-                    listId,
-                    { targetListId: targetSiblings[0].unifiedId },
-                    previousState,
-                )
-            }
-        } // If the target list tree is toggled open, the behavior is that the dragged list becomes a child of it (if not already)
-        else if (params?.areTargetListChildrenShown) {
-            const targetSiblings = cache.getListsByParentId(
-                targetList.unifiedId,
-            )
-            if (draggedList.parentUnifiedId !== targetList.unifiedId) {
-                await this.performListTreeMove(
-                    listId,
-                    targetList.unifiedId,
-                    previousState,
-                )
-            }
-            if (targetSiblings.length) {
-                await this.performListTreeReorder(
-                    listId,
-                    { targetListId: targetSiblings[0].unifiedId },
-                    previousState,
-                )
-            }
-        } // Else the behavior is that the dragged list becomes the next sibling after the target list
-        else {
-            const targetSiblings = cache.getListsByParentId(
-                targetList.parentUnifiedId,
-            )
-            if (draggedList.parentUnifiedId !== targetList.parentUnifiedId) {
-                await this.performListTreeMove(
-                    listId,
-                    targetList.parentUnifiedId,
-                    previousState,
-                )
-            }
-            if (targetSiblings.length) {
-                let isFinalSibling = false
-                let targetIndex = targetSiblings.findIndex(
-                    (list) => list.unifiedId === targetList.unifiedId,
-                )
-                // If we're on the last sibling we need to flag that and put the index back one to point at the last sibling
-                if (targetIndex === targetSiblings.length - 1) {
-                    targetIndex--
-                    isFinalSibling = true
-                }
-                await this.performListTreeReorder(
-                    listId,
-                    {
-                        targetListId:
-                            targetSiblings[targetIndex + 1]?.unifiedId,
-                        isFinalSibling,
-                    },
-                    previousState,
-                )
-            }
-        }
     }
 
     private async handleDropPageOnListItem(
         dropTargetListId: string,
-        { fullPageUrl, normalizedPageUrl }: DragToListAction<'page'>,
+        { fullPageUrl, normalizedPageUrl }: DragPageToListAction,
         previousState: State,
     ): Promise<void> {
         if (fullPageUrl == null || normalizedPageUrl == null) {

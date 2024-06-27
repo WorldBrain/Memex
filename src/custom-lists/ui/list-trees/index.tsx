@@ -13,7 +13,7 @@ import type {
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
-} from 'src/dashboard-refactor/constants'
+} from './constants'
 import SidebarItemInput from 'src/dashboard-refactor/lists-sidebar/components/sidebar-editable-item'
 
 export interface Props extends Dependencies {}

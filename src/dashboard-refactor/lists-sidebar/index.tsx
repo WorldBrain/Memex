@@ -20,14 +20,16 @@ import StaticSidebarItem from './components/static-sidebar-item'
 import SidebarItemInput from './components/sidebar-editable-item'
 import Margin from '../components/Margin'
 import type { RootState as ListsSidebarState } from './types'
-import type { DropReceivingState } from '../types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './constants'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { ListTrees } from 'src/custom-lists/ui/list-trees'
-import type { Dependencies as ListTreesDeps } from 'src/custom-lists/ui/list-trees/types'
+import type {
+    DragNDropActions,
+    Dependencies as ListTreesDeps,
+} from 'src/custom-lists/ui/list-trees/types'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -39,10 +41,8 @@ export interface ListsSidebarProps extends ListsSidebarState {
     openRemoteListPage: (remoteListId: string) => void
     onCancelAddList: () => void
     onConfirmAddList: (value: string) => void
-    onListDragStart: (listId: string) => React.DragEventHandler
-    onListDragEnd: (listId: string) => React.DragEventHandler
     setSidebarPeekState: (isPeeking: boolean) => () => void
-    initDropReceivingState: (listId: string) => DropReceivingState
+    initDropReceivingState: (listId: string) => DragNDropActions
     initContextMenuBtnProps: (
         listId: string,
     ) => Omit<

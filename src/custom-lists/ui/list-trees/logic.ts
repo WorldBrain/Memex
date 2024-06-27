@@ -7,7 +7,7 @@ import {
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
-} from 'src/dashboard-refactor/constants'
+} from './constants'
 import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
