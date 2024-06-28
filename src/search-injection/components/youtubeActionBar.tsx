@@ -1,22 +1,31 @@
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import VideoRangeSelector from '@worldbrain/memex-common/lib/common-ui/components/video-range-selector'
-import getYoutubeVideoDuration from '@worldbrain/memex-common/lib/common-ui/utils/youtube-video-duration'
+import getYoutubeVideoDuration, {
+    getYoutubeVideoElement,
+} from '@worldbrain/memex-common/lib/common-ui/utils/youtube-video-duration'
 import {
     constructVideoURLwithTimeStamp,
     getHTML5VideoTimestamp,
 } from '@worldbrain/memex-common/lib/editor/utils'
+import {
+    extractIdFromUrl,
+    isUrlYTVideo,
+} from '@worldbrain/memex-common/lib/utils/youtube-url'
 import React, { Component } from 'react'
 import {
     ONBOARDING_NUDGES_DEFAULT,
     ONBOARDING_NUDGES_MAX_COUNT,
     ONBOARDING_NUDGES_STORAGE,
 } from 'src/content-scripts/constants'
+import { LoadingContainer } from 'src/dashboard-refactor/styled-components'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import {
     BaseKeyboardShortcuts,
@@ -34,6 +43,7 @@ import {
 import { renderNudgeTooltip, updateNudgesCounter } from 'src/util/nudges-utils'
 import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
+import { TaskState } from 'ui-logic-core/lib/types'
 import browser, { Browser } from 'webextension-polyfill'
 
 interface Props {
@@ -44,9 +54,12 @@ interface Props {
     syncSettings: SyncSettingsStore<'openAI'>
     browserAPIs: Browser
     shortcutsData: ShortcutElData[]
+    transcriptFunctions: any
+    removeYoutubeBar: () => void
 }
 
 interface State {
+    videoElement: HTMLVideoElement
     YTChapterContainerVisible: boolean
     existingMemexButtons: boolean
     smartNoteSeconds: string
@@ -59,6 +72,14 @@ interface State {
     videoDuration: number
     adsRunning: boolean
     showYoutubeSummaryNudge: boolean
+    showTranscript: TaskState
+    transcript: TranscriptLine[] | null
+}
+
+interface TranscriptLine {
+    startTime: number
+    text: string
+    startInSec: number
 }
 
 export default class YoutubeButtonMenu extends React.Component<Props, State> {
@@ -102,6 +123,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             videoDuration: 0,
             adsRunning: false,
             showYoutubeSummaryNudge: false,
+            showTranscript: 'pristine',
+            transcript: null,
+            videoElement: null,
         }
     }
 
@@ -196,9 +220,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
     async getYoutubeVideoDuration() {
         await sleepPromise(1000)
-        const duration = await getYoutubeVideoDuration(document)
+        const videoElement = await getYoutubeVideoElement(document)
+
         this.setState({
-            videoDuration: duration,
+            videoDuration: videoElement.duration,
+            videoElement: videoElement,
         })
     }
 
@@ -207,18 +233,47 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         fromPercent: number,
         toPercent: number,
     ) {
-        const from = Math.floor((fromPercent / 100) * duration)
-        const to = Math.floor((toPercent / 100) * duration)
+        let from = Math.floor(fromPercent) / 100
+        let to = Math.floor(toPercent) / 100
+
+        from = Math.floor(from * duration)
+        to = Math.floor(to * duration)
 
         return { from, to }
     }
 
-    handleLeftButtonChange = (position) => {
-        this.setState({ fromSecondsPosition: position })
+    handleRangeChange = (from, to) => {
+        let fromSecondsPosition = from
+        if (!fromSecondsPosition) {
+            fromSecondsPosition = this.state.fromSecondsPosition
+        }
+        let toSecondsPosition = to
+        if (!toSecondsPosition) {
+            toSecondsPosition = this.state.toSecondsPosition
+        }
+
+        this.setState({
+            fromSecondsPosition: fromSecondsPosition,
+            toSecondsPosition: toSecondsPosition,
+        })
+        this.adjustTranscriptRange(fromSecondsPosition, toSecondsPosition)
     }
 
-    handleRightButtonChange = (position) => {
-        this.setState({ toSecondsPosition: position })
+    adjustTranscriptRange = (fromInput, toInput) => {
+        if (!this.state.transcript) {
+            return
+        }
+
+        const { from, to } = this.calculateRangeInSeconds(
+            this.state.videoDuration,
+            fromInput,
+            toInput,
+        )
+        const filteredTranscript = this.state.transcript.filter(
+            (line) => line.startInSec >= from && line.startInSec <= to,
+        )
+
+        return filteredTranscript
     }
 
     adjustScaleToFitParent = async () => {
@@ -260,6 +315,51 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     handleScreenshotButtonClick = async () => {
         // Logic for screenshot button click
         await this.props.annotationsFunctions.createTimestampWithScreenshot()
+    }
+    handleOpenTranscript = async () => {
+        if (this.state.showTranscript !== 'pristine') {
+            this.setState({
+                showTranscript: 'pristine',
+            })
+            this.parentContainerRef.current.style.height = 'unset'
+            return
+        }
+        this.setState({
+            showTranscript: 'running',
+        })
+        const videoId = extractIdFromUrl(window.location.href)
+
+        // Logic for screenshot button click
+        const transcript = await this.props.transcriptFunctions.fetchTranscript(
+            videoId,
+        )
+        if (transcript != null) {
+            // Function to format seconds into hh:mm:ss
+            const formatTimestamp = (seconds) => {
+                const date = new Date(0)
+                date.setSeconds(seconds)
+                const timeString = date.toISOString().substr(11, 8)
+                return timeString.startsWith('00:')
+                    ? timeString.substr(3)
+                    : timeString
+            }
+
+            // Cluster the transcript into groups of 20
+            const clusteredTranscript = []
+            for (let i = 0; i < transcript.length; i += 20) {
+                const cluster = transcript.slice(i, i + 20)
+                const startTime = formatTimestamp(cluster[0].start)
+                const startInSec = Math.floor(cluster[0].start)
+                const text = cluster.map((line) => line.text).join(' ')
+                clusteredTranscript.push({ startTime, text, startInSec })
+            }
+
+            this.setState({
+                showTranscript: 'success',
+                transcript: clusteredTranscript,
+            })
+        }
+        this.parentContainerRef.current.style.height = 'fit-content'
     }
 
     handleAnnotateButtonClick = async (
@@ -433,6 +533,37 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 'top-start',
             )
         }
+    }
+
+    jumpToTime = (time) => {
+        this.state.videoElement.currentTime = time
+    }
+
+    renderTranscriptContainer = () => {
+        const filteredTranscript = this.adjustTranscriptRange(
+            this.state.fromSecondsPosition,
+            this.state.toSecondsPosition,
+        )
+
+        return filteredTranscript.map((transcriptLine) => {
+            return (
+                <TranscriptElement>
+                    <TranscriptTimestamp
+                        onClick={() => {
+                            this.jumpToTime(transcriptLine.startInSec)
+                        }}
+                    >
+                        {transcriptLine.startTime}
+                    </TranscriptTimestamp>
+                    <TranscriptText>{transcriptLine.text}</TranscriptText>
+                    <TranscriptActionButtons>
+                        {/* <Icon />
+                                <Icon />
+                                <Icon /> */}
+                    </TranscriptActionButtons>
+                </TranscriptElement>
+            )
+        })
     }
 
     renderPromptTooltip = (ref) => {
@@ -658,11 +789,51 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     </YTPMenuItemLabel>
                                 </YTPMenuItem>
                             </TooltipBox>
+                            <TooltipBox
+                                getPortalRoot={this.props.getRootElement}
+                                tooltipText={
+                                    <span>
+                                        Take a screenshot of the current frame
+                                        <br />
+                                        and adds a linked timestamp.
+                                    </span>
+                                }
+                                placement="bottom"
+                            >
+                                <YTPMenuItem
+                                    onClick={this.handleOpenTranscript}
+                                >
+                                    <Icon
+                                        filePath={runtime.getURL(
+                                            '/img/chatWithUs.svg',
+                                        )}
+                                        heightAndWidth="20px"
+                                        color={'greyScale6'}
+                                        hoverOff
+                                    />
+                                    <YTPMenuItemLabel>
+                                        Transcript
+                                    </YTPMenuItemLabel>
+                                </YTPMenuItem>
+                            </TooltipBox>
                             <TutorialButtonContainer>
                                 <TutorialBox
                                     getRootElement={this.props.getRootElement}
                                     tutorialId="annotateVideos"
                                 />
+                                <TooltipBox
+                                    getPortalRoot={this.props.getRootElement}
+                                    tooltipText={
+                                        <span>Remove Youtube bar</span>
+                                    }
+                                    placement="bottom"
+                                >
+                                    <Icon
+                                        icon="removeX"
+                                        onClick={this.props.removeYoutubeBar}
+                                        heightAndWidth="20px"
+                                    />
+                                </TooltipBox>
                             </TutorialButtonContainer>
                         </TopArea>
                         {this.state.videoDuration != null &&
@@ -670,15 +841,27 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 <BottomArea>
                                     <VideoRangeSelector
                                         onChange={(values) => {
-                                            this.setState({
-                                                fromSecondsPosition: values[0],
-                                                toSecondsPosition: values[1],
-                                            })
+                                            this.handleRangeChange(
+                                                values[0],
+                                                values[1],
+                                            )
                                         }}
                                         videoDuration={this.state.videoDuration}
                                     />
                                 </BottomArea>
                             )}
+                        {this.state.showTranscript !== 'pristine' ? (
+                            <TranscriptContainer>
+                                {this.state.showTranscript === 'running' && (
+                                    <LoadingBox>
+                                        <LoadingIndicator size={30} />
+                                    </LoadingBox>
+                                )}
+
+                                {this.state.showTranscript === 'success' &&
+                                    this.renderTranscriptContainer()}
+                            </TranscriptContainer>
+                        ) : null}
                     </MemexButtonInnerContainer>
                 </InnerContainer>
                 {this.renderYouTubeSummaryNudge()}
@@ -717,6 +900,7 @@ const ParentContainer = styled.div`
     }
 
     scrollbar-width: none;
+    min-height: fit-content;
 `
 
 const YTChapterContainer = styled.div`
@@ -825,6 +1009,10 @@ const TutorialButtonContainer = styled.div`
     padding-left: 10px;
     padding-right: 10px;
     justify-self: flex-end;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
 `
 
 const InnerContainer = styled.div`
@@ -843,6 +1031,7 @@ const TopArea = styled.div`
     display: flex;
     align-items: center;
     width: 100%;
+    overflow-x: auto;
 `
 
 const BottomArea = styled.div`
@@ -859,4 +1048,61 @@ const TooltipContent = styled.div`
     grid-gap: 10px;
     flex-direction: row;
     justify-content: center;
+`
+
+const TranscriptContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    height: 500px;
+    width: 100%;
+    overflow-y: auto;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
+`
+
+const LoadingBox = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+`
+
+const TranscriptActionButtons = styled.div`
+    position: absolute;
+    display: none;
+    right: 20px;
+    top: 20px;
+`
+
+const TranscriptElement = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    grid-gap: 20px;
+    align-items: flex-start;
+    padding: 20px;
+    position: relative;
+
+    &:hover ${TranscriptActionButtons} {
+        display: flex;
+    }
+`
+
+const TranscriptTimestamp = styled.div`
+    padding: 5px 10px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    background: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 5px;
+    font-size: 14px;
+
+    &:hover {
+        cursor: pointer;
+    }
+`
+
+const TranscriptText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    line-height: 21px;
 `

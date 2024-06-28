@@ -13,6 +13,7 @@ import type { SearchEngineName } from 'src/search-injection/types'
 export const main: InPageUIInjectionsMain = async ({
     inPageUI,
     annotationsFunctions,
+    transcriptFunctions,
     searchDisplayProps,
     upgradeModalProps,
     syncSettings,
@@ -39,6 +40,7 @@ export const main: InPageUIInjectionsMain = async ({
                         syncSettings,
                         syncSettingsBG,
                         annotationsFunctions,
+                        transcriptFunctions,
                         upgradeModalProps.browserAPIs,
                     )
                 }
