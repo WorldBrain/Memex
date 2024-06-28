@@ -241,6 +241,15 @@ export async function hydrateCacheForPageAnnotations(
         })
     }
 
+    const syncSettingsStore = createSyncSettingsStore({
+        syncSettingsBG: args.bgModules.syncSettings,
+    })
+
+    const highlightColors =
+        (await syncSettingsStore.highlightColors.get('highlightColors')) ??
+        HIGHLIGHT_COLORS_DEFAULT
+    args.cache.setHighlightColorDictionary(highlightColors)
+
     const annotationsData = await args.bgModules.annotations.listAnnotationsByPageUrl(
         {
             pageUrl: args.fullPageUrl,
@@ -258,13 +267,6 @@ export async function hydrateCacheForPageAnnotations(
     const pageLocalListIds = await args.bgModules.customLists.fetchPageLists({
         url: args.fullPageUrl,
     })
-    const syncSettingsStore = createSyncSettingsStore({
-        syncSettingsBG: args.bgModules.syncSettings,
-    })
-    const highlightColors =
-        (await syncSettingsStore.highlightColors.get('highlightColors')) ??
-        HIGHLIGHT_COLORS_DEFAULT
-    args.cache.setHighlightColorDictionary(highlightColors)
 
     args.cache.setAnnotations(
         annotationsData.map((annot) => {
