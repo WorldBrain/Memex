@@ -129,8 +129,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                         handleUIStateChange,
                     )
             },
-            getHighlightColorsSettings: () =>
-                params.getHighlightColorsSettings(),
+            getHighlightColorsSettings: () => null,
             saveHighlightColorsSettings: (newStateInput) =>
                 params.saveHighlightColorsSettings(newStateInput),
             openPDFinViewer: (url) => params.openPDFinViewer(url),
@@ -183,6 +182,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             addNewSpaceViaWikiLinks: async (spaceName: string) => {
                 // Placeholder function, replace with actual implementation
             },
+            openImageInPreview: async (src: string) => null,
         },
         {
             annotationsBG: params.annotationsBG,
@@ -197,6 +197,8 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             getRootElement: () => target,
             inPageUI: params.inPageUI,
             syncSettingsBG: params.syncSettingsBG,
+            createHighlight: params.createHighlight,
+            getWindow: () => window,
         },
     )
 

@@ -12,7 +12,7 @@ import type {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { RGBAColor } from 'src/annotations/cache/types'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -83,6 +83,7 @@ export type NoteInteractionProps = Omit<
     onCommentChange: (content: string) => void
     onBodyChange: (content: string) => void
     onCopyPasterDefaultExecute: () => void
+    openImageInPreview: (imageSource: string) => Promise<void>
 }
 
 // NOTE: Derived type - edit the original
@@ -411,6 +412,6 @@ export type Events = UIEvent<{
         isProtected?: boolean
         mainBtnPressed?: boolean
         keepListsIfUnsharing?: boolean
-        color?: RGBAColor | string
+        color?: HighlightColor['id']
     }
 }>

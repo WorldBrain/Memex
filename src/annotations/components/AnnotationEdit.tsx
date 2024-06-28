@@ -54,6 +54,7 @@ export interface AnnotationEditGeneralProps {
     slimEditorActions?: boolean
     isEditMode?: boolean
     searchTerms?: string[]
+    openImageInPreview: (imageSource: string) => Promise<void>
 }
 
 export interface Props
@@ -214,6 +215,7 @@ class AnnotationEdit extends React.Component<Props> {
                             this.props.addNewSpaceViaWikiLinks
                         }
                         searchTerms={this.props.searchTerms}
+                        openImageInPreview={this.props.openImageInPreview}
                     />
                 </EditorContainer>
             )

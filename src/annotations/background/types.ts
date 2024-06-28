@@ -8,7 +8,7 @@ import type { AnnotSearchParams } from 'src/search/background/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { SharedAnnotationWithRefs } from '../types'
-import { RGBAColor } from '../cache/types'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAllAnnotationsByUrl: RemotePositionalFunction<
@@ -46,7 +46,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     >
     editAnnotation: RemotePositionalFunction<
         Role,
-        [string, string, RGBAColor | string, string],
+        [string, string, HighlightColor['id'] | string, string],
         any
     >
     updateAnnotationTags: RemotePositionalFunction<
@@ -102,7 +102,7 @@ export interface CreateAnnotationParams {
     title?: string
     comment?: string
     body?: string
-    color?: RGBAColor | string | string
+    color?: HighlightColor['id']
     selector?: Anchor
     isBookmarked?: boolean
     isSocialPost?: boolean

@@ -25,6 +25,7 @@ import type { SharedListMetadata } from 'src/content-sharing/background/types'
 import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -68,7 +69,7 @@ export const reshapeAnnotationForCache = (
             shouldShare: annot.isShared,
             isBulkShareProtected: annot.isBulkShareProtected,
         }),
-        color: annot.color as RGBAColor,
+        color: annot.color as HighlightColor['id'],
         ...(opts.extraData ?? {}),
     }
 }
@@ -94,7 +95,7 @@ export const reshapeSharedAnnotationForCache = (
         lastEdited: annot.updatedWhen,
         createdWhen: annot.createdWhen,
         privacyLevel: AnnotationPrivacyLevels.SHARED,
-        color: annot.color as RGBAColor,
+        color: annot.color as HighlightColor['id'],
         ...(opts.extraData ?? {}),
     }
 }

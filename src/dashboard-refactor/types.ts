@@ -38,6 +38,7 @@ import type { ContentScriptsInterface } from 'src/content-scripts/background/typ
 import type {
     PageAnnotationsCacheInterface,
     RGBAColor,
+    UnifiedAnnotation,
 } from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
@@ -79,6 +80,7 @@ export interface RootState {
     spaceSearchSuggestions: SpaceSearchSuggestion[]
     selectableBlocks: SelectableBlock[]
     focusedBlockId: number | null
+    imageSourceForPreview: string
 }
 
 export type Events = UIEvent<
@@ -183,11 +185,9 @@ export type DashboardModalsEvents = UIEvent<{
     setShowSubscriptionModal: { isShown: boolean }
     getHighlightColorSettings: null
     saveHighlightColor: {
-        noteId: string
-        color: RGBAColor | string
-        unifiedId: string
+        noteId: UnifiedAnnotation['unifiedId']
+        color: HighlightColor['id']
     }
-    saveHighlightColorSettings: { newState: HighlightColor[] }
     setShowDisplayNameSetupModal: { isShown: boolean }
     syncNow: { preventUpdateStats?: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
@@ -196,6 +196,7 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingPageArgs: PageEventArgs & { instaDelete: boolean }
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
+    openImageInPreview: string
     setSpaceSidebarWidth: { width: string }
     setDisableMouseLeave: { disable: boolean }
     selectAllCurrentItems: null

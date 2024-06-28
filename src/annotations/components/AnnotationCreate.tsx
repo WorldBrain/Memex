@@ -69,6 +69,7 @@ export interface AnnotationCreateGeneralProps {
     getRootElement: () => HTMLElement
     updateSpacesSearchSuggestions?: (query: string) => void
     spaceSearchSuggestions?: SpaceSearchSuggestion[]
+    openImageInPreview: (imageSource: string) => Promise<void>
 }
 
 export interface Props
@@ -522,6 +523,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 this.props.addNewSpaceViaWikiLinksNewNote
                             }
                             defaultMinimized={this.props.defaultMinimized}
+                            openImageInPreview={this.props.openImageInPreview}
                         />
                     </EditorContainer>
                     {this.props.comment.length > 0 &&

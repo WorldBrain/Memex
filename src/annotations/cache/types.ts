@@ -139,7 +139,7 @@ export type UnifiedAnnotation = Pick<
     lastEdited: number
     createdWhen: number
     creator?: UserReference
-    color?: RGBAColor
+    color?: HighlightColor['id']
 
     // Misc annotation feature state
     privacyLevel: AnnotationPrivacyLevels

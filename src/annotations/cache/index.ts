@@ -30,6 +30,7 @@ import {
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -63,7 +64,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         UnifiedAnnotation['unifiedId']
     >()
 
-    private highlightColorDict: { [id: string]: RGBAColor } = {}
+    private highlightColorDict: HighlightColor[]
 
     constructor(private deps: PageAnnotationCacheDeps) {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
@@ -93,7 +94,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     setHighlightColorDictionary: PageAnnotationsCacheInterface['setHighlightColorDictionary'] = (
         colors,
     ) => {
-        this.highlightColorDict = fromPairs(colors.map((c) => [c.id, c.color]))
+        this.highlightColorDict = colors
     }
 
     getAnnotationsArray: PageAnnotationsCacheInterface['getAnnotationsArray'] = () =>
@@ -199,10 +200,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         opts: { now: number },
     ): UnifiedAnnotation => {
         const unifiedAnnotationId = this.generateAnnotationId()
-        if (annotation.color != null) {
-            annotation.color =
-                this.highlightColorDict[annotation.color as string] ??
-                DEFAULT_HIGHLIGHT_COLOR
+
+        if (annotation.color == null) {
+            annotation.color = this.highlightColorDict[0].id
         }
 
         if (annotation.remoteId != null) {

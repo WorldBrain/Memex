@@ -152,6 +152,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
     selectedTextAIPreview: string
+    imageSourceForPreview: string
     queryMode: string
     isTrial: boolean
     signupDate: number
@@ -354,6 +355,7 @@ interface SidebarEvents {
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
     adjustRighPositionBasedOnRibbonPosition: { position: number }
     setPopoutsActive: boolean
+    openImageInPreview: string
     checkIfKeyValid: { apiKey: string }
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
@@ -386,9 +388,8 @@ interface SidebarEvents {
     getHighlightColorSettings: null
     updateSpacesSearchSuggestions: { searchQuery: string }
     saveHighlightColor: {
-        noteId: string
-        color: RGBAColor
-        colorId: string
+        noteId: UnifiedAnnotation['unifiedId']
+        color: HighlightColor['id']
     }
     saveFeedSources: {
         sources: string
@@ -397,7 +398,6 @@ interface SidebarEvents {
         feedUrl: string
     }
     loadFeedSources: null
-    saveHighlightColorSettings: { newState: HighlightColor[] }
     youtubeTranscriptJSON: null
     saveImageAsNewNote: {
         imageData: string
