@@ -5,6 +5,7 @@ import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexin
 import type TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { fetchYoutubeTranscript } from 'src/util/fetch-youtube-transcript'
 
 export interface PageAnalysis extends Partial<ExtractedPDFData> {
     content: PageContent
@@ -73,32 +74,11 @@ const analysePage: PageAnalyzer = async (options) => {
     }
 
     if (videoId) {
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
+        let transcriptJSON = await fetchYoutubeTranscript(videoId)
 
-        const baseUrl = isStaging
-            ? CLOUDFLARE_WORKER_URLS.staging
-            : CLOUDFLARE_WORKER_URLS.production
-
-        const normalisedYoutubeURL =
-            'https://www.youtube.com/watch?v=' + videoId
-
-        const response = await fetch(baseUrl + '/youtube-transcripts', {
-            method: 'POST',
-            body: JSON.stringify({
-                originalUrl: normalisedYoutubeURL,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-        })
-
-        let responseContent = await response.text()
-
-        let transcriptText = JSON.parse(responseContent).transcriptText
-
-        if (transcriptText != null) {
+        if (transcriptJSON != null) {
             content.fullText =
-                content.fullText + JSON.parse(responseContent).transcriptText
+                content.fullText + JSON.parse(transcriptJSON).transcriptText
         }
     }
     const favIconURI =
