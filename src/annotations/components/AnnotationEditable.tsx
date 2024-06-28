@@ -1282,9 +1282,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     handleMouseEnter = () => {
         if (!this.props.focusLockUntilMouseStart) {
             this.setState({ hoverCard: true })
-            this.hoverTimeout = setTimeout(() => {
-                this.props.setAnnotationInFocus(this.props.unifiedId)
-            }, 300)
+            if (this.props.setAnnotationInFocus) {
+                this.hoverTimeout = setTimeout(() => {
+                    this.props.setAnnotationInFocus(this.props.unifiedId)
+                }, 300)
+            }
         }
     }
 
@@ -1295,7 +1297,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 clearTimeout(this.hoverTimeout)
                 this.hoverTimeout = null
             }
-            if (!this.isAnyModalOpen()) {
+            if (!this.isAnyModalOpen() && this.props.setAnnotationInFocus) {
                 this.props.setAnnotationInFocus(null)
             }
         }
