@@ -363,13 +363,10 @@ export async function main(
             browser.storage.local.set({
                 [UNDO_HISTORY]: undoHistory,
             }),
-        getHighlightColor: async () => {
+        getHighlightColorSettings: async () => {
             const colorSettings = await getHighlightColorSettings()
-            const defaultColorSetting = colorSettings.find(
-                (setting) => setting.id === 'default',
-            )['color']
 
-            return defaultColorSetting ?? DEFAULT_HIGHLIGHT_COLOR
+            return colorSettings ?? HIGHLIGHT_COLORS_DEFAULT
         },
         onHighlightColorChange: (cb) => {
             browser.storage.onChanged.addListener((changes) => {
@@ -447,7 +444,7 @@ export async function main(
                 lastEdited: data.updatedWhen,
                 createdWhen: data.createdWhen,
                 normalizedPageUrl: normalizeUrl(data.fullPageUrl),
-                color: data.color as RGBAColor,
+                color: data.color as HighlightColor['id'],
             })
 
             const createPromise = (async () => {
@@ -481,7 +478,7 @@ export async function main(
                         fullPageUrl: data.fullPageUrl,
                         pageTitle: pageInfo.getPageTitle(),
                         createdWhen: new Date(data.createdWhen),
-                        color: data.color,
+                        color: data.color as HighlightColor['id'],
                     },
                 })
 
@@ -532,7 +529,7 @@ export async function main(
         screenshotAnchor?,
         screenshotImage?,
         imageSupport?,
-        highlightColor?: HighlightColor,
+        highlightColor?: HighlightColor['id'],
         selection?: PseudoSelection,
         anchor?: Anchor,
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
@@ -580,6 +577,7 @@ export async function main(
                 imageSupport,
                 highlightColor,
                 anchor,
+                highlightColorSettings: await getHighlightColorSettings(),
             })
             const annotationId = result.annotationId
             const createPromise = result.createPromise.catch(handleError)
@@ -615,7 +613,7 @@ export async function main(
             shouldShare: boolean,
             shouldCopyShareLink: boolean,
             drawRectangle?: boolean,
-            highlightColorSetting?: HighlightColor,
+            color?: HighlightColor['id'],
             preventHideTooltip?: boolean,
         ) => {
             highlightCreateState = 'running'
@@ -654,8 +652,8 @@ export async function main(
             }
 
             const highlightColorSettingStorage = await getHighlightColorSettings()
-            const highlightColor =
-                highlightColorSetting ?? highlightColorSettingStorage[0]
+            const highlightColor = color ?? highlightColorSettingStorage[0].id
+
             if (inPageUI.componentsShown.sidebar) {
                 inPageUI.showSidebar({
                     action: 'show_annotation',
@@ -766,7 +764,7 @@ export async function main(
             shouldCopyShareLink: boolean,
             showSpacePicker?: boolean,
             commentText?: string,
-            highlightColorSetting?: HighlightColor,
+            color?: HighlightColor['id'],
         ) => {
             highlightCreateState = 'running'
             const selectionEmpty = !selection?.toString().length
@@ -802,8 +800,7 @@ export async function main(
             }
 
             const highlightColorSettingStorage = await getHighlightColorSettings()
-            const highlightColor =
-                highlightColorSetting ?? highlightColorSettingStorage[0]
+            const highlightColor = color ?? highlightColorSettingStorage[0].id
 
             let screenshotGrabResult
             if (
@@ -1015,19 +1012,10 @@ export async function main(
 
         if (!highlightColors) {
             highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
-            await highlightColorStore.set('highlightColors', highlightColors)
         }
         return highlightColors
     }
 
-    async function saveHighlightColorSettings(newStateInput) {
-        const syncSettings = createSyncSettingsStore({ syncSettingsBG })
-        const highlightColorStore = syncSettings.highlightColors
-        const newState = JSON.parse(newStateInput)
-        await highlightColorStore.set('highlightColors', newState)
-
-        return newState
-    }
     async function maybeLoadOnDemandInPageUI() {
         if (
             shouldIncludeSearchInjection(
@@ -1172,9 +1160,6 @@ export async function main(
                     action: 'createFromTooltip',
                 }),
                 askAI: annotationsFunctions.askAI(),
-                getHighlightColorsSettings: () => getHighlightColorSettings(),
-                saveHighlightColorsSettings: (newState) =>
-                    saveHighlightColorSettings(newState),
                 openPDFinViewer: async (originalPageURL) => {
                     await contentScriptsBG.openPdfInViewer({
                         fullPageUrl: originalPageURL,
@@ -1432,8 +1417,6 @@ export async function main(
             action: 'createFromShortcut',
         }),
         askAI: annotationsFunctions.askAI(),
-        getHighlightColorsSettings: getHighlightColorSettings,
-        saveHighlightColorsSettings: saveHighlightColorSettings,
         createYoutubeTimestamp: annotationsFunctions.createYoutubeTimestamp,
     })
 

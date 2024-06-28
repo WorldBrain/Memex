@@ -76,6 +76,7 @@ import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annot
 import type { UnifiedSearchResult } from 'src/search/background/types'
 import { BulkEditCollection } from 'src/bulk-edit/types'
 import checkBrowser from 'src/util/check-browser'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -333,6 +334,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             focusLockUntilMouseStart: false,
             selectableBlocks: [],
             focusedBlockId: -1,
+            imageSourceForPreview: null,
         }
     }
 
@@ -369,6 +371,18 @@ export class DashboardLogic extends UILogic<State, Events> {
             'newListsState',
             this.cacheListsSubscription,
         )
+
+        const syncSettings = createSyncSettingsStore<'highlightColors'>({
+            syncSettingsBG: this.options.syncSettingsBG,
+        })
+
+        const highlightColorSettings = await syncSettings.highlightColors.get(
+            'highlightColors',
+        )
+
+        this.emitMutation({
+            highlightColors: { $set: highlightColorSettings },
+        })
 
         await loadInitial(this, async () => {
             if (this.options.inPageMode) {
@@ -440,18 +454,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     event: { preventUpdateStats: true },
                 })
             }
-
-            const syncSettings = createSyncSettingsStore<'highlightColors'>({
-                syncSettingsBG: this.options.syncSettingsBG,
-            })
-
-            const highlightColorSettings = await syncSettings.highlightColors.get(
-                'highlightColors',
-            )
-
-            this.emitMutation({
-                highlightColors: { $set: highlightColorSettings },
-            })
 
             const bulkSelectedItems = (await getBulkEditItems()) ?? {}
 
@@ -810,6 +812,14 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 disableMouseLeave: { $set: event.disable },
             },
+        })
+    }
+
+    openImageInPreview: EventHandler<'openImageInPreview'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            imageSourceForPreview: { $set: event },
         })
     }
 
@@ -1502,31 +1512,17 @@ export class DashboardLogic extends UILogic<State, Events> {
             )
             if (!highlightColors) {
                 highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
-                await this.syncSettings.highlightColors.set(
-                    'highlightColors',
-                    highlightColors,
-                )
             }
         }
 
         this.emitMutation({ highlightColors: { $set: highlightColors } })
     }
 
-    saveHighlightColorSettings: EventHandler<
-        'saveHighlightColorSettings'
-    > = async ({ event }) => {
-        await this.syncSettings.highlightColors.set(
-            'highlightColors',
-            event.newState,
-        )
-
-        this.emitMutation({ highlightColors: { $set: [...event.newState] } })
-    }
-
     saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
         event,
         previousState,
     }) => {
+        const colorToUpdate = event.color
         const { ...existing } = previousState.searchResults.noteData.byId[
             event.noteId
         ]
@@ -1547,7 +1543,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.noteId]: {
                                     comment: { $set: existing.comment },
-                                    color: { $set: event.color as string },
+                                    color: { $set: colorToUpdate },
                                 },
                             },
                         },
@@ -1561,15 +1557,17 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 // this.options.annotationsCache.updateAnnotation({
                 //     comment: existing.comment,
-                //     color: event.color,
+                //     color: colorToUpdate ?? existing.color,
                 //     unifiedId: event.unifiedId,
+                //     unifiedListIds: existing.unifiedListIds ?? [],
+                //     privacyLevel: existing.privacyLevel ?? 0,
                 // })
 
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,
                         comment: existing.comment,
-                        color: event.color,
+                        color: colorToUpdate ?? existing.color,
                         body: existing.highlight,
                     },
                     annotationsBG: this.options.annotationsBG,

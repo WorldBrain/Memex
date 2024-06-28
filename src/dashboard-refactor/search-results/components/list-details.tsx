@@ -33,6 +33,7 @@ export interface Props {
     clearInbox?: () => void
     imageSupport: ImageSupportInterface<'caller'>
     getRootElement: () => HTMLElement
+    openImageInPreview: (imageSource: string) => Promise<void>
 }
 
 interface State {
@@ -200,6 +201,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                     })
                 }}
                 defaultMinimized
+                openImageInPreview={this.props.openImageInPreview}
             />
         )
     }

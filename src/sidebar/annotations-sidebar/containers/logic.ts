@@ -375,6 +375,7 @@ export class SidebarContainerLogic extends UILogic<
             existingSourcesOption: 'pristine',
             localFoldersList: [],
             bulkSelectionState: [],
+            imageSourceForPreview: null,
         }
     }
 
@@ -664,10 +665,6 @@ export class SidebarContainerLogic extends UILogic<
             highlightColors = await this.fetchHighlightColors()
             if (!highlightColors) {
                 highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
-                await this.syncSettings.highlightColors.set(
-                    'highlightColors',
-                    highlightColors,
-                )
             }
         }
 
@@ -681,10 +678,6 @@ export class SidebarContainerLogic extends UILogic<
 
         if (!highlightColors) {
             highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
-            await this.syncSettings.highlightColors.set(
-                'highlightColors',
-                highlightColors,
-            )
         }
 
         return highlightColors
@@ -712,7 +705,7 @@ export class SidebarContainerLogic extends UILogic<
                 annotationData: {
                     comment: annotationData?.comment ?? '',
                     localId: annotationData?.localId,
-                    color: event.colorId,
+                    color: event.color ?? annotationData.color,
                     body: annotationData.body,
                 },
                 shareOpts: {
@@ -726,30 +719,9 @@ export class SidebarContainerLogic extends UILogic<
                 ...annotationData,
                 comment: annotationData?.comment ?? '',
                 body: annotationData?.body ?? '',
-                color: event.color,
+                color: event.color ?? annotationData.color,
                 unifiedListIds: annotationData?.unifiedListIds,
             })
-
-            let highlights: NodeListOf<Element> = document.querySelectorAll(
-                '.' + DEF_HIGHLIGHT_CSS_CLASS,
-            )
-
-            let memexHighlights: Element[] = Array.from(
-                highlights,
-            ).filter((highlight) =>
-                highlight.classList.contains(`memex-highlight-${event.noteId}`),
-            )
-
-            for (let item of memexHighlights) {
-                item.setAttribute(
-                    'style',
-                    `background-color:${RGBAobjectToString(event.color)};`,
-                )
-                item.setAttribute(
-                    'highlightcolor',
-                    `${RGBAobjectToString(event.color)}`,
-                )
-            }
 
             try {
                 await savePromise
@@ -759,86 +731,6 @@ export class SidebarContainerLogic extends UILogic<
                 throw err
             }
         })
-    }
-
-    saveHighlightColorSettings: EventHandler<
-        'saveHighlightColorSettings'
-    > = async ({ event, previousState }) => {
-        const newState = event.newState
-        const oldState = previousState.highlightColors
-        await this.syncSettings.highlightColors.set('highlightColors', newState)
-
-        const changedColors = newState
-            .map((newItem, index) => {
-                const oldItem = oldState[index]
-                if (
-                    oldItem &&
-                    newItem.id === oldItem.id &&
-                    JSON.stringify(newItem.color) !==
-                        JSON.stringify(oldItem.color)
-                ) {
-                    return {
-                        id: oldItem.id,
-                        oldColor: oldItem.color,
-                        newColor: newItem.color,
-                    }
-                }
-            })
-            .filter((item) => item != null)
-
-        this.emitMutation({
-            highlightColors: { $set: newState },
-        })
-
-        let highlights: NodeListOf<Element> = document.querySelectorAll(
-            '.' + DEF_HIGHLIGHT_CSS_CLASS,
-        )
-        for (let color of changedColors) {
-            Array.from(highlights).filter((highlight) => {
-                if (
-                    highlight.getAttribute('highlightcolor') ===
-                    RGBAobjectToString(color.oldColor)
-                ) {
-                    highlight.setAttribute(
-                        'style',
-                        `background-color:${RGBAobjectToString(
-                            color.newColor,
-                        )};`,
-                    )
-                    highlight.setAttribute(
-                        'highlightcolor',
-                        RGBAobjectToString(color.newColor),
-                    )
-                }
-            })
-            const annotationLocalIds: Annotation[] = await this.options.annotationsBG.listAnnotationIdsByColor(
-                { color: color.id },
-            )
-
-            const annotations = []
-
-            for (let annotation of annotationLocalIds) {
-                const annotationCachedData = this.options.annotationsCache.getAnnotationByLocalId(
-                    annotation.url,
-                )
-                if (annotationCachedData) {
-                    annotations.push(annotationCachedData)
-                }
-            }
-
-            for (let annotation of annotations) {
-                const colorToUpdate = color.newColor
-
-                this.options.annotationsCache.updateAnnotation({
-                    comment: annotation.comment,
-                    body: annotation.body,
-                    privacyLevel: annotation.privacyLevel,
-                    unifiedListIds: annotation.unifiedListIds,
-                    unifiedId: annotation.unifiedId,
-                    color: colorToUpdate,
-                })
-            }
-        }
     }
 
     /** Should only be used for state initialization. */
@@ -1441,6 +1333,14 @@ export class SidebarContainerLogic extends UILogic<
         //     width = width + 'px'
         //     document.body.style.width = width
         // }
+    }
+
+    openImageInPreview: EventHandler<'openImageInPreview'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            imageSourceForPreview: { $set: event },
+        })
     }
 
     setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {

@@ -1,5 +1,5 @@
-import { RGBAColor } from 'src/annotations/cache/types'
 import type { HighlightDependencies, HighlightsScriptMain } from './types'
+import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 // import { bodyLoader } from 'src/util/loader'
 
 export const main: HighlightsScriptMain = async (options) => {
@@ -34,7 +34,7 @@ const showHighlights = async (options: HighlightDependencies) => {
         options.annotationsCache.getAnnotationsArray().map((annot) => ({
             id: annot.unifiedId,
             selector: annot.selector,
-            color: annot.color as RGBAColor,
+            color: annot.color as HighlightColor['id'],
         })),
         ({ annotationId, openInEdit }) => {
             if (openInEdit || options.inPageUI.componentsShown.sidebar) {

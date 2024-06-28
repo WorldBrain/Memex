@@ -171,7 +171,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     renderContextMenuForList: (listData: UnifiedList) => JSX.Element
     renderEditMenuForList: (listData: UnifiedList) => JSX.Element
     renderPageLinkMenuForList: () => JSX.Element
-
+    openImageInPreview: (imageSource: string) => Promise<void>
     setActiveTab: (tab: SidebarTab) => void
     setActiveAITab: (tab: SidebarAITab) => React.MouseEventHandler
     setActiveSuggestionsTab: (tab: SuggestionsTab) => React.MouseEventHandler
@@ -268,8 +268,10 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     changeFetchLocalHTML: (value) => void
     setAIModel: (AImodel) => void
     syncSettingsBG: RemoteSyncSettingsInterface
-    saveHighlightColor: (noteId, colorId, color) => void
-    saveHighlightColorSettings: (newState: HighlightColor[]) => void
+    saveHighlightColor: (
+        noteId: UnifiedAnnotation['unifiedId'],
+        color: HighlightColor['id'],
+    ) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: HighlightColor[]
     onGoToAnnotation?: (unifiedId) => void
@@ -751,6 +753,7 @@ export class AnnotationsSidebar extends React.Component<
                     onCancel={() => {
                         this.setState({ autoFocusCreateForm: false })
                     }}
+                    openImageInPreview={this.props.openImageInPreview}
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
@@ -1046,7 +1049,9 @@ export class AnnotationsSidebar extends React.Component<
                             pageUrl={this.props.normalizedPageUrl}
                             toggleAutoAdd={this.props.toggleAutoAdd}
                             isShared
+                            syncSettingsBG={this.props.syncSettingsBG}
                             getRootElement={this.props.getRootElement}
+                            openImageInPreview={this.props.openImageInPreview}
                             isBulkShareProtected
                             onSpacePickerToggle={() => {
                                 this.props.setSpacePickerAnnotationInstance(
@@ -1059,17 +1064,17 @@ export class AnnotationsSidebar extends React.Component<
                                         : null,
                                 )
                             }}
-                            saveHighlightColor={(
-                                noteId,
-                                colorId,
-                                color: RGBAColor | string,
-                            ) =>
-                                this.props.saveHighlightColor(
-                                    noteId,
-                                    colorId,
+                            color={this.props.highlightColors.find((color) => {
+                                return color.id === annotation.color
+                            })}
+                            saveHighlightColor={async (
+                                color: HighlightColor['id'],
+                            ) => {
+                                return this.props.saveHighlightColor(
+                                    annotation.unifiedId,
                                     color,
                                 )
-                            }
+                            }}
                             bulkSelectAnnotation={() =>
                                 this.props.bulkSelectAnnotations([
                                     annotation.unifiedId,
@@ -1078,12 +1083,6 @@ export class AnnotationsSidebar extends React.Component<
                             isBulkSelected={this.props.bulkSelectionState.includes(
                                 annotation.unifiedId,
                             )}
-                            saveHighlightColorSettings={
-                                this.props.saveHighlightColorSettings
-                            }
-                            getHighlightColorSettings={
-                                this.props.getHighlightColorSettings
-                            }
                             highlightColorSettings={
                                 this.props.highlightColorSettings
                             }
@@ -1094,7 +1093,6 @@ export class AnnotationsSidebar extends React.Component<
                             unifiedId={annotation.unifiedId}
                             body={annotation.body}
                             comment={annotation.comment}
-                            color={annotation.color}
                             lastEdited={annotation.lastEdited}
                             createdWhen={annotation.createdWhen}
                             creatorDependencies={
@@ -1195,6 +1193,9 @@ export class AnnotationsSidebar extends React.Component<
                                         createdWhen: annotation.createdWhen,
                                         reference: sharedAnnotationRef,
                                     }}
+                                    openImageInPreview={
+                                        this.props.openImageInPreview
+                                    }
                                     getYoutubePlayer={
                                         this.props.getYoutubePlayer
                                     }
@@ -2010,6 +2011,7 @@ export class AnnotationsSidebar extends React.Component<
                     createNewNoteFromAISummary={
                         this.props.createNewNoteFromAISummary
                     }
+                    openImageInPreview={this.props.openImageInPreview}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
                     aiChatStateExternal={{
@@ -2505,23 +2507,14 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
                             )}
-                            saveHighlightColor={(
-                                noteId,
-                                colorId,
-                                color: RGBAColor | string,
-                            ) =>
-                                this.props.saveHighlightColor(
-                                    noteId,
-                                    colorId,
+                            saveHighlightColor={async (
+                                color: HighlightColor['id'],
+                            ) => {
+                                return this.props.saveHighlightColor(
+                                    annot.unifiedId,
                                     color,
                                 )
-                            }
-                            saveHighlightColorSettings={
-                                this.props.saveHighlightColorSettings
-                            }
-                            getHighlightColorSettings={
-                                this.props.getHighlightColorSettings
-                            }
+                            }}
                             highlightColorSettings={
                                 this.props.highlightColorSettings
                             }
@@ -2529,7 +2522,9 @@ export class AnnotationsSidebar extends React.Component<
                             pageUrl={this.props.normalizedPageUrl}
                             body={annot.body}
                             comment={annot.comment}
-                            color={annot.color}
+                            color={this.props.highlightColors.find((color) => {
+                                return color.id === annot.color
+                            })}
                             isShared={isShared}
                             createdWhen={annot.createdWhen}
                             isBulkShareProtected={[
@@ -2565,6 +2560,7 @@ export class AnnotationsSidebar extends React.Component<
                                 annot,
                                 'annotations-tab',
                             )}
+                            syncSettingsBG={this.props.syncSettingsBG}
                             annotationFooterDependencies={footerDeps}
                             isClickable={
                                 this.props.theme.canClickAnnotations &&

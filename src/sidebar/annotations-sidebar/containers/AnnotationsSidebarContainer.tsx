@@ -54,6 +54,7 @@ import { generateAnnotationCardInstanceId } from './utils'
 import type { AnnotationCardInstanceLocation } from '../types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
+import ImagePreviewModal from '@worldbrain/memex-common/lib/common-ui/image-preview-modal'
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
@@ -77,7 +78,6 @@ export interface Props extends SidebarContainerOptions {
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
     saveHighlightColor?: (noteId, color: RGBAColor | string, unifiedId) => void
-    saveHighlightColorSettings?: (newState: HighlightColor[]) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: HighlightColor[]
     getRootElement: () => HTMLElement
@@ -419,6 +419,8 @@ export class AnnotationsSidebarContainer<
             imageSupport: this.props.imageSupport,
             getRootElement: this.props.getRootElement,
             copyLoadingState: annotationCardInstance?.copyLoadingState,
+            openImageInPreview: (imageSource: string) =>
+                this.processEvent('openImageInPreview', imageSource),
         }
     }
 
@@ -505,6 +507,8 @@ export class AnnotationsSidebarContainer<
                 })
             },
             defaultMinimized: false,
+            openImageInPreview: (imageSource: string) =>
+                this.processEvent('openImageInPreview', imageSource),
         }
     }
 
@@ -1159,10 +1163,12 @@ export class AnnotationsSidebarContainer<
                             chapterSummaries={this.state.chapterSummaries}
                             videoDetails={this.state.videoDetails}
                             bgScriptBG={this.props.bgScriptBG}
-                            saveHighlightColor={(noteId, colorId, color) => {
+                            saveHighlightColor={(
+                                noteId: UnifiedAnnotation['unifiedId'],
+                                color: HighlightColor['id'],
+                            ) => {
                                 this.processEvent('saveHighlightColor', {
                                     noteId: noteId,
-                                    colorId: colorId,
                                     color: color,
                                 })
                             }}
@@ -1173,14 +1179,12 @@ export class AnnotationsSidebarContainer<
                                     unifiedAnnotationId,
                                 })
                             }
-                            saveHighlightColorSettings={(newState) => {
+                            openImageInPreview={(imageSource: string) =>
                                 this.processEvent(
-                                    'saveHighlightColorSettings',
-                                    {
-                                        newState: newState,
-                                    },
+                                    'openImageInPreview',
+                                    imageSource,
                                 )
-                            }}
+                            }
                             getHighlightColorSettings={() =>
                                 this.processEvent(
                                     'getHighlightColorSettings',
@@ -1872,6 +1876,15 @@ export class AnnotationsSidebarContainer<
                     </Rnd>
                 </ContainerStyled>
                 {this.renderModals()}
+                {this.state.imageSourceForPreview?.length > 0 ? (
+                    <ImagePreviewModal
+                        imageSource={this.state.imageSourceForPreview}
+                        closeModal={() =>
+                            this.processEvent('openImageInPreview', null)
+                        }
+                        getRootElement={this.props.getRootElement}
+                    />
+                ) : null}
             </ThemeProvider>
         )
     }
