@@ -28,6 +28,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
             creator: USER_1,
             createdWhen: 1,
             lastEdited: 1,
+            color: 'default',
             unifiedListIds: [LIST_IDS[0], LIST_IDS[1]],
             privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         },
@@ -38,6 +39,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
             normalizedPageUrl: NORMALIZED_PAGE_URL_1,
             comment: 'test comment 2',
             body: 'test highlight 2',
+            color: 'default',
             selector: {
                 quote: 'test highlight 2',
                 descriptor: { strategy: 'hyp-anchoring', content: [] },
@@ -52,6 +54,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
             unifiedId: ANNOTATION_IDS[2],
             localId: NORMALIZED_PAGE_URL_1 + '/#111111113',
             remoteId: 'remote-annot-id-2',
+            color: 'default',
             normalizedPageUrl: NORMALIZED_PAGE_URL_1,
             body: 'test highlight 3',
             selector: {
@@ -67,6 +70,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
         {
             unifiedId: ANNOTATION_IDS[3],
             remoteId: 'remote-annot-id-3',
+            color: 'default',
             normalizedPageUrl: NORMALIZED_PAGE_URL_1,
             comment: 'hi from another user',
             creator: USER_2,
