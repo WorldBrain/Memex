@@ -146,7 +146,6 @@ class SpacePicker extends StatefulUIElement<
         e.stopPropagation()
         this.processEvent('newEntryAllPress', {
             entry: this.state.newEntryName,
-            analyticsBG: this.props.analyticsBG,
         })
     }
 
@@ -162,7 +161,6 @@ class SpacePicker extends StatefulUIElement<
     handleNewListPress = () => {
         this.processEvent('newEntryPress', {
             entry: this.state.newEntryName,
-            analyticsBG: this.props.analyticsBG,
         })
     }
     // Adjust the event handler signatures
@@ -261,7 +259,6 @@ class SpacePicker extends StatefulUIElement<
                         ? () =>
                               this.processEvent('resultEntryAllPress', {
                                   entry,
-                                  analyticsBG: this.props.analyticsBG,
                               })
                         : undefined
                 }

@@ -694,13 +694,15 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                listTreesDeps={{
+                    lists: ownListsData,
+                    authBG: this.props.authBG,
+                    listsBG: this.props.listsBG,
+                    cache: this.props.annotationsCache,
+                    areListsBeingFiltered:
+                        this.state.listsSidebar.filteredListIds.length > 0,
+                }}
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
-                onConfirmNestedListCreate={(parentListId, name) =>
-                    this.processEvent('createdNestedList', {
-                        parentListId,
-                        name,
-                    })
-                }
                 openRemoteListPage={(remoteListId) =>
                     this.props.openSpaceInWebUI(remoteListId)
                 }
@@ -804,14 +806,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('confirmListDelete', null),
                     getRootElement: this.props.getRootElement,
                 })}
-                onListDragStart={(listId) => (e) =>
-                    this.processEvent('dragList', {
-                        listId,
-                        dataTransfer: e.dataTransfer,
-                    })}
-                onListDragEnd={(listId) => (e) =>
-                    this.processEvent('dropList', { listId })}
-                initDropReceivingState={(listId) => ({
+                initDNDActions={(listId) => ({
                     onDragEnter: (e) => {
                         e.preventDefault()
                         e.stopPropagation()
@@ -832,16 +827,14 @@ export class DashboardContainer extends StatefulUIElement<
                             listId: undefined,
                         })
                     },
-                    onDrop: (dataTransfer, areTargetListChildrenShown) =>
+                    onDrop: (e) =>
                         this.processEvent('dropOnListItem', {
                             listId,
-                            dataTransfer,
-                            areTargetListChildrenShown,
+                            dataTransfer: e.dataTransfer,
                         }),
-                    canReceiveDroppedItems: true,
+                    onDragEnd: (e) => {},
+                    onDragStart: (e) => {},
                     isDraggedOver: listId === listsSidebar.dragOverListId,
-                    wasPageDropped:
-                        listsSidebar.lists.byId[listId]?.wasPageDropped,
                 })}
                 getRootElement={this.props.getRootElement}
                 isInPageMode={isInPageMode}

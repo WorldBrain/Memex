@@ -9,7 +9,6 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<
         UnifiedList & {
             wasPageDropped?: boolean
-            wasListDropped?: boolean
         }
     >
     filteredListIds: UnifiedList['unifiedId'][]
@@ -20,7 +19,6 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     spaceSidebarWidth: string
     disableMouseLeave: boolean
 
-    draggedListId: string | null
     inboxUnreadCount: number
     dragOverListId?: string
     editingListId?: string
@@ -80,13 +78,7 @@ export type Events = UIEvent<{
     dropOnListItem: {
         listId: string
         dataTransfer: DataTransfer
-        areTargetListChildrenShown?: boolean
     }
-    dragList: { listId: string; dataTransfer: DataTransfer }
-    dropList: { listId: string }
-
-    // Tree-related events
-    createdNestedList: { parentListId: string; name: string }
 
     confirmListDelete: null
     cancelListDelete: null
@@ -96,15 +88,10 @@ export type Events = UIEvent<{
     switchToFeed: null
 }>
 
-export type DragToListAction<T extends 'page' | 'list'> = T extends 'page'
-    ? {
-          type: 'page'
-          fullPageUrl: string
-          normalizedPageUrl: string
-      }
-    : {
-          type: 'list'
-          listId: string
-      }
+export type DragPageToListAction = {
+    type: 'page'
+    fullPageUrl: string
+    normalizedPageUrl: string
+}
 
 export type ListNameHighlightIndices = [number, number]

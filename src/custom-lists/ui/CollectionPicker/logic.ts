@@ -27,7 +27,6 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { sleepPromise } from 'src/util/promises'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
@@ -331,10 +330,7 @@ export default class SpacePickerLogic extends UILogic<
             if (previousState.newEntryName !== '') {
                 await this.newEntryPress({
                     previousState,
-                    event: {
-                        entry: previousState.newEntryName,
-                        analyticsBG: this.dependencies.analyticsBG,
-                    },
+                    event: { entry: previousState.newEntryName },
                 })
             }
             this.currentKeysPressed = []
@@ -780,7 +776,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     resultEntryAllPress: EventHandler<'resultEntryAllPress'> = async ({
-        event: { entry, analyticsBG },
+        event: { entry },
         previousState,
     }) => {
         await executeUITask(this, 'spaceAddRemoveState', async () => {
@@ -894,7 +890,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     newEntryPress: EventHandler<'newEntryPress'> = async ({
-        event: { entry, analyticsBG },
+        event: { entry },
         previousState,
     }) => {
         await executeUITask(this, 'spaceCreateState', async () => {
@@ -923,7 +919,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
-        event: { entry, analyticsBG },
+        event: { entry },
         previousState,
     }) => {
         let newSpaceId: number

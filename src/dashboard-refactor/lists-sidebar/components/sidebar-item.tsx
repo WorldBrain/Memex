@@ -1,7 +1,7 @@
 import React from 'react'
 import { fonts } from 'src/dashboard-refactor/styles'
 import styled, { css } from 'styled-components'
-import type { DropReceivingState } from 'src/dashboard-refactor/types'
+import type { DragNDropActions } from 'src/custom-lists/ui/list-trees/types'
 
 export interface Props {
     name: string
@@ -11,9 +11,9 @@ export interface Props {
     indentSteps?: number
     alwaysShowRightSideIcon?: boolean
     hasChildren?: boolean
-    dropReceivingState?: DropReceivingState
-    onDragStart?: React.DragEventHandler
-    onDragEnd?: React.DragEventHandler
+    dragNDropActions?: DragNDropActions & {
+        wasPageDropped?: boolean
+    }
     onClick?: React.MouseEventHandler
     renderLeftSideIcon?: () => JSX.Element
     renderRightSideIcon?: () => JSX.Element
@@ -36,12 +36,14 @@ export default class ListsSidebarItem extends React.PureComponent<
 > {
     state: State = { isHovering: false, canDisableHover: false }
 
-    private handleDrop: React.DragEventHandler = (e) => {
-        e.preventDefault()
-        if (!this.props.dropReceivingState?.canReceiveDroppedItems) {
-            return
-        }
-        this.props.dropReceivingState?.onDrop(e.dataTransfer)
+    private get shouldShowRightSideIcon(): boolean {
+        return (
+            this.props.isShared ||
+            this.state.isHovering ||
+            this.props.dragNDropActions?.isDraggedOver ||
+            this.props.dragNDropActions?.wasPageDropped ||
+            this.props.forceRightSidePermanentDisplay
+        )
     }
 
     render() {
@@ -65,13 +67,13 @@ export default class ListsSidebarItem extends React.PureComponent<
                     })
                 }}
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
-                onDragEnter={this.props.dropReceivingState?.onDragEnter}
-                onDragLeave={this.props.dropReceivingState?.onDragLeave}
+                onDragEnter={this.props.dragNDropActions?.onDragEnter}
+                onDragLeave={this.props.dragNDropActions?.onDragLeave}
                 onDragOver={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
                 }}
-                onDrop={this.handleDrop}
+                onDrop={this.props.dragNDropActions?.onDrop}
                 onClick={this.props.onClick}
             >
                 <SidebarItem
@@ -79,7 +81,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                     spaceSidebarWidth={this.props.spaceSidebarWidth}
                     indentSteps={this.props.indentSteps ?? 0}
                     isSelected={this.props.isSelected}
-                    dropReceivingState={this.props.dropReceivingState}
+                    dragNDropActions={this.props.dragNDropActions}
                     name={this.props.name} // Add this line
                 >
                     <LeftSideIconContainer
@@ -96,8 +98,10 @@ export default class ListsSidebarItem extends React.PureComponent<
                         spaceSidebarWidth={this.props.spaceSidebarWidth}
                     >
                         <TitleBox
-                            onDragStart={this.props.onDragStart}
-                            onDragEnd={this.props.onDragEnd}
+                            onDragStart={
+                                this.props.dragNDropActions?.onDragStart
+                            }
+                            onDragEnd={this.props.dragNDropActions?.onDragEnd}
                             draggable
                         >
                             <ListTitle>
@@ -105,9 +109,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                             </ListTitle>
                         </TitleBox>
                     </SidebarItemClickContainer>
-                    {(this.props.isShared ||
-                        this.state.isHovering ||
-                        this.props.forceRightSidePermanentDisplay) && (
+                    {this.shouldShowRightSideIcon && (
                         <RightSideActionBar
                             alwaysShowRightSideIcon={
                                 this.props.alwaysShowRightSideIcon
@@ -116,9 +118,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                             <IconBox {...this.props} {...this.state}>
                                 {this.props.renderEditIcon?.()}
                             </IconBox>
-                            {(this.props.isShared ||
-                                this.state.isHovering ||
-                                this.props.forceRightSidePermanentDisplay) &&
+                            {this.shouldShowRightSideIcon &&
                                 this.props.renderRightSideIcon?.()}
                         </RightSideActionBar>
                     )}
@@ -222,7 +222,7 @@ const SidebarItem = styled.div<Props>`
     justify-content: space-between;
     align-items: center;
     background-color: ${(props) =>
-        props.dropReceivingState?.isDraggedOver
+        props.dragNDropActions?.isDraggedOver
             ? props.theme.colors.greyScale1
             : 'transparent'};
 
@@ -239,12 +239,7 @@ const SidebarItem = styled.div<Props>`
         `}
 
 
-    cursor: ${({ dropReceivingState }: Props) =>
-        !dropReceivingState?.isDraggedOver
-            ? `pointer`
-            : dropReceivingState?.canReceiveDroppedItems
-            ? `pointer`
-            : `not-allowed`};
+    cursor: 'pointer';
 
     &:hover {
         background: ${(props) => props.theme.colors.greyScale1_5};
@@ -262,7 +257,7 @@ const SidebarItem = styled.div<Props>`
     }
 
     ${(props) =>
-        props.dropReceivingState?.isDraggedOver &&
+        props.dragNDropActions?.isDraggedOver &&
         css`
             outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         `}`
@@ -300,8 +295,8 @@ const IconBox = styled.div<Props & State>`
     ${(props) =>
         (props.alwaysShowRightSideIcon ||
             props.isHovering ||
-            props.dropReceivingState?.isDraggedOver ||
-            props.dropReceivingState?.wasPageDropped ||
+            props.dragNDropActions?.isDraggedOver ||
+            props.dragNDropActions?.wasPageDropped ||
             props.isMenuDisplayed) &&
         css`
             display: flex;

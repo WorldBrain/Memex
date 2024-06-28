@@ -20,13 +20,16 @@ import StaticSidebarItem from './components/static-sidebar-item'
 import SidebarItemInput from './components/sidebar-editable-item'
 import Margin from '../components/Margin'
 import type { RootState as ListsSidebarState } from './types'
-import type { DropReceivingState } from '../types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './constants'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { ListTrees } from './list-trees'
+import { ListTrees } from 'src/custom-lists/ui/list-trees'
+import type {
+    DragNDropActions,
+    Dependencies as ListTreesDeps,
+} from 'src/custom-lists/ui/list-trees/types'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -37,12 +40,9 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onListSelection: (id: string | null) => void
     openRemoteListPage: (remoteListId: string) => void
     onCancelAddList: () => void
-    onConfirmNestedListCreate: (parentListId: string, name: string) => void
     onConfirmAddList: (value: string) => void
-    onListDragStart: (listId: string) => React.DragEventHandler
-    onListDragEnd: (listId: string) => React.DragEventHandler
     setSidebarPeekState: (isPeeking: boolean) => () => void
-    initDropReceivingState: (listId: string) => DropReceivingState
+    initDNDActions: (listId: string) => DragNDropActions
     initContextMenuBtnProps: (
         listId: string,
     ) => Omit<
@@ -69,6 +69,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     spaceSidebarWidth: string
     getRootElement: () => HTMLElement
     isInPageMode: boolean
+    listTreesDeps: Omit<ListTreesDeps, 'renderListItem'>
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -92,34 +93,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         }
         // Replace the ref object with a new one that has the element
         this.sidebarItemRefs[unifiedId] = { current: element }
-    }
-
-    private renderReorderLine = (listId: string, topItem?: boolean) => {
-        // Disable reordering when filtering lists by query
-        if (this.props.filteredListIds.length > 0) {
-            return null
-        }
-
-        const reorderLineDropReceivingState = this.props.initDropReceivingState(
-            listId,
-        )
-        return (
-            <ReorderLine
-                isActive={this.props.draggedListId != null}
-                isVisible={reorderLineDropReceivingState.isDraggedOver}
-                onDragEnter={reorderLineDropReceivingState.onDragEnter}
-                onDragLeave={reorderLineDropReceivingState.onDragLeave}
-                onDragOver={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                }} // Needed to allow the `onDrop` event to fire
-                onDrop={(e) => {
-                    e.preventDefault()
-                    reorderLineDropReceivingState.onDrop(e.dataTransfer)
-                }}
-                topItem={topItem}
-            />
-        )
     }
 
     private moveItemIntoHorizontalView = throttle((itemRef: HTMLElement) => {
@@ -239,18 +212,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             />
                         )}
                         <ListTrees
-                            lists={this.props.ownListsGroup.listData}
-                            draggedListId={this.props.draggedListId}
-                            areListsBeingFiltered={
-                                this.props.filteredListIds.length > 0
-                            }
-                            initDropReceivingState={
-                                this.props.initDropReceivingState
-                            }
-                            onConfirmChildListCreate={
-                                this.props.onConfirmNestedListCreate
-                            }
-                            renderListItem={(list, treeState, actions) => (
+                            {...this.props.listTreesDeps}
+                            renderListItem={(
+                                list,
+                                treeState,
+                                actions,
+                                dndActions,
+                            ) => (
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
                                         this.setSidebarItemRefs(
@@ -263,12 +231,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     }
                                     key={list.unifiedId}
                                     indentSteps={list.pathUnifiedIds.length}
-                                    onDragStart={this.props.onListDragStart(
-                                        list.unifiedId,
-                                    )}
-                                    onDragEnd={this.props.onListDragEnd(
-                                        list.unifiedId,
-                                    )}
                                     name={`${list.name}`}
                                     isSelected={
                                         this.props.selectedListId ===
@@ -285,9 +247,20 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         )
                                     }}
                                     hasChildren={treeState.hasChildren}
-                                    dropReceivingState={this.props.initDropReceivingState(
-                                        list.unifiedId,
-                                    )}
+                                    dragNDropActions={{
+                                        ...dndActions,
+                                        onDrop: (e) => {
+                                            // This handles list-on-list drops (state encapsulated inside <ListTrees>)
+                                            dndActions.onDrop(e)
+                                            // This handles page-on-list drops (state in dashboard)
+                                            this.props
+                                                .initDNDActions(list.unifiedId)
+                                                .onDrop(e)
+                                        },
+                                        wasPageDropped: this.props.lists.byId[
+                                            list.unifiedId
+                                        ]?.wasPageDropped,
+                                    }}
                                     isPrivate={list.isPrivate}
                                     isShared={!list.isPrivate}
                                     areAnyMenusDisplayed={
@@ -465,7 +438,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 onClick={() =>
                                     this.props.onListSelection(list.unifiedId)
                                 }
-                                dropReceivingState={this.props.initDropReceivingState(
+                                dragNDropActions={this.props.initDNDActions(
                                     list.unifiedId,
                                 )}
                                 isPrivate={list.isPrivate}
@@ -573,32 +546,6 @@ const SidebarInnerContent = styled.div`
     }
 `
 
-const NoCollectionsMessage = styled.div`
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
-    cursor: pointer;
-    padding: 0px 15px;
-    margin: 5px 10px;
-    width: fill-available;
-    margin-top: 5px;
-    height: 40px;
-    justify-content: flex-start;
-    border-radius: 5px;
-
-    & * {
-        cursor: pointer;
-    }
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale1};
-    }
-`
-
 const GlobalStyle = createGlobalStyle`
 
     .sidebarResizeHandleSidebar {
@@ -614,32 +561,6 @@ const GlobalStyle = createGlobalStyle`
             background: #5671cf30 !important;
         }
     }
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.greyScale2};
-    border: 1px solid ${(props) => props.theme.colors.greyScale6};
-    border-radius: 8px;
-    height: 24px;
-    width: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 14px;
-    font-weight: 400;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    white-space: nowrap;
-`
-
-const Link = styled.span`
-    color: ${(props) => props.theme.colors.prime1};
-    padding-left: 3px;
 `
 
 const TopGroup = styled.div`
@@ -677,58 +598,4 @@ const NewItemsCountInnerDiv = styled.div`
     font-size: 12px;
     line-height: 14px;
     padding: 2px 0px;
-`
-
-const NestedListInput = styled.div<{ indentSteps: number }>`
-    margin-left: ${(props) =>
-        props.indentSteps > 0
-            ? (props.indentSteps - 1) * 20
-            : props.indentSteps * 20}px;
-`
-
-const ReorderLine = styled.div<{
-    isVisible: boolean
-    isActive: boolean
-    topItem: boolean
-}>`
-    position: relative;
-    z-index: -1;
-    border-bottom: 3px solid
-        ${(props) =>
-            props.isVisible && props.isActive
-                ? props.theme.colors.prime3
-                : 'transparent'};
-    &::before {
-        content: '';
-        width: 100%;
-        top: -10px;
-        position: absolute;
-        height: 10px;
-        z-index: 2;
-        background: transparent;
-    }
-    &::after {
-        content: '';
-        width: 100%;
-        bottom: -13px;
-        position: absolute;
-        height: 10px;
-        z-index: 2;
-        background: transparent;
-    }
-
-    ${(props) =>
-        props.isActive &&
-        css`
-            z-index: 2147483647;
-        `}
-    ${(props) =>
-        props.topItem &&
-        css`
-            display: none;
-
-            &:first-child {
-                display: flex;
-            }
-        `}
 `
