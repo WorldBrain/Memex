@@ -30,6 +30,7 @@ import type {
     DragNDropActions,
     Dependencies as ListTreesDeps,
 } from 'src/custom-lists/ui/list-trees/types'
+import { ListTreeToggleArrow } from 'src/custom-lists/ui/list-trees/components/tree-toggle-arrow'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -73,8 +74,6 @@ export interface ListsSidebarProps extends ListsSidebarState {
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
-    private spaceToggleButtonRef = React.createRef<HTMLDivElement>()
-    private nestedInputBoxRef = React.createRef<HTMLDivElement>()
     private sidebarItemRefs: React.RefObject<HTMLDivElement>[]
 
     constructor(props: ListsSidebarProps) {
@@ -270,56 +269,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             list.unifiedId
                                     }
                                     renderLeftSideIcon={() => (
-                                        <TooltipBox
-                                            tooltipText={
-                                                !treeState.hasChildren
-                                                    ? 'Add Sub-Space'
-                                                    : treeState.areChildrenShown
-                                                    ? 'Hide Sub Spaces'
-                                                    : 'Show Sub Spaces'
-                                            }
-                                            placement="right"
-                                            targetElementRef={
-                                                this.spaceToggleButtonRef
-                                                    .current
-                                            }
-                                            getPortalRoot={
+                                        <ListTreeToggleArrow
+                                            getRootElement={
                                                 this.props.getRootElement
                                             }
-                                        >
-                                            <Icon
-                                                containerRef={
-                                                    this.spaceToggleButtonRef
-                                                }
-                                                icon={
-                                                    !treeState.hasChildren
-                                                        ? 'plus'
-                                                        : treeState.areChildrenShown
-                                                        ? 'arrowDown'
-                                                        : 'arrowRight'
-                                                }
-                                                heightAndWidth="16px"
-                                                color={
-                                                    treeState.hasChildren
-                                                        ? 'greyScale5'
-                                                        : 'greyScale3'
-                                                }
-                                                onClick={(event) => {
-                                                    if (treeState.hasChildren) {
-                                                        actions.toggleShowChildren()
-                                                    } else {
-                                                        actions.toggleShowNewChildInput()
-                                                    }
-                                                    this.moveItemIntoHorizontalView(
-                                                        this.sidebarItemRefs[
-                                                            list.unifiedId
-                                                        ].current,
-                                                    )
-
-                                                    event.stopPropagation()
-                                                }}
-                                            />
-                                        </TooltipBox>
+                                            treeState={treeState}
+                                            actions={actions}
+                                        />
                                     )}
                                     renderRightSideIcon={() => {
                                         return (

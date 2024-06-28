@@ -38,6 +38,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     bgScriptBG?: RemoteBGScriptInterface<'caller'>
     pathText?: string
     getRootElement?: () => HTMLElement
+    renderLeftSideIcon?: () => JSX.Element
 }
 
 class EntryRow extends React.Component<Props> {
@@ -247,6 +248,7 @@ class EntryRow extends React.Component<Props> {
         event.preventDefault()
         event.stopPropagation()
     }
+
     render() {
         const {
             id,
@@ -286,6 +288,9 @@ class EntryRow extends React.Component<Props> {
                 title={resultItem['props'].children}
                 zIndex={10000 - this.props.index}
             >
+                <LeftSideIconContainer>
+                    {this.props.renderLeftSideIcon?.()}
+                </LeftSideIconContainer>
                 <NameWrapper>
                     {this.props.pathText?.length > 0 && (
                         <PathBox>
@@ -445,6 +450,8 @@ class EntryRow extends React.Component<Props> {
         )
     }
 }
+
+const LeftSideIconContainer = styled.div``
 
 export const ActOnAllTabsButton = styled.div`
     pointer-events: auto !important;

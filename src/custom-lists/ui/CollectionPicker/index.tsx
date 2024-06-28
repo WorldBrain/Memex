@@ -36,6 +36,8 @@ import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 import { runInBackground } from 'src/util/webextensionRPC'
+import { ListTrees } from '../list-trees'
+import { ListTreeToggleArrow } from '../list-trees/components/tree-toggle-arrow'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
@@ -238,95 +240,6 @@ class SpacePicker extends StatefulUIElement<
         }
     }
 
-    private renderListRow = (
-        entry: UnifiedList<'user-list' | 'page-link'>,
-        index: number,
-    ) => (
-        <EntryRowContainer key={entry.unifiedId}>
-            <EntryRow
-                id={`ListKeyName-${entry.unifiedId}`}
-                onPress={() => {
-                    this.processEvent('resultEntryPress', {
-                        entry,
-                    })
-                }}
-                pathText={this.getListNameByUnifiedId(entry.parentUnifiedId)}
-                onListFocus={() => this.props.onListFocus(entry.localId)}
-                addedToAllIds={this.state.addedToAllIds}
-                keepScrollPosition={this.keepScrollPosition}
-                onPressActOnAll={
-                    this.props.actOnAllTabs
-                        ? () =>
-                              this.processEvent('resultEntryAllPress', {
-                                  entry,
-                              })
-                        : undefined
-                }
-                bgScriptBG={this.props.bgScriptBG}
-                onFocus={async () => {
-                    // const el = document.getElementById(
-                    //     `ListKeyName-${entry.unifiedId}`,
-                    // )
-                    // if (el != null) {
-                    //     el.scrollTop = el.offsetTop
-                    // }
-                    await this.processEvent('resultEntryFocus', {
-                        entry,
-                        index,
-                    })
-                }}
-                onUnfocus={() =>
-                    this.processEvent('resultEntryFocus', {
-                        entry,
-                        index: null,
-                    })
-                }
-                allTabsButtonPressed={this.state.allTabsButtonPressed}
-                index={index}
-                keyboardNavActive={this.state.keyboardNavActive}
-                selected={this.state.selectedListIds.includes(entry.localId)}
-                focused={this.state.focusedListId === entry.unifiedId}
-                localId={entry.localId}
-                resultItem={<ListResultItem>{entry.name}</ListResultItem>}
-                removeTooltipText={
-                    this.props.removeTooltipText ?? 'Remove from Space'
-                }
-                contextMenuBtnRef={this.contextMenuBtnRef}
-                goToButtonRef={this.goToButtonRef}
-                editMenuBtnRef={this.editMenuBtnRef}
-                extraMenuBtnRef={this.extraMenuBtnRef}
-                openInTabGroupButtonRef={this.openInTabGroupButtonRef}
-                onContextMenuBtnPress={
-                    entry.creator?.id === this.state.currentUser?.id
-                        ? () =>
-                              this.processEvent('toggleEntryContextMenu', {
-                                  listId: entry.localId,
-                              })
-                        : undefined
-                }
-                onEditMenuBtnPress={
-                    entry.creator?.id === this.state.currentUser?.id
-                        ? () =>
-                              this.processEvent('toggleEntryEditMenu', {
-                                  listId: entry.localId,
-                              })
-                        : undefined
-                }
-                onOpenInTabGroupPress={() =>
-                    this.processEvent('onOpenInTabGroupPress', {
-                        listId: entry.localId,
-                    })
-                }
-                actOnAllTooltipText="Add all tabs in window to Space"
-                shareState={
-                    entry?.isPrivate ?? 'private' ? 'private' : 'shared'
-                }
-                getRootElement={this.props.getRootElement}
-                {...entry}
-            />
-        </EntryRowContainer>
-    )
-
     private keepScrollPosition = () => {
         const el = this.displayListRef.current
         const scrollTop = el.scrollTop
@@ -364,7 +277,128 @@ class SpacePicker extends StatefulUIElement<
         if (!listEntries.length) {
             return this.renderEmptyList()
         }
-        return listEntries.map(this.renderListRow)
+        let index = 0 // TODO: dynamically set this in <ListTrees.props.renderListItem>
+        return (
+            <ListTrees
+                lists={listEntries}
+                authBG={this.props.authBG}
+                listsBG={this.props.spacesBG}
+                cache={this.props.annotationsCache}
+                areListsBeingFiltered={this.state.query.trim().length > 0}
+                renderListItem={(entry, treeState, actions, dndActions) => (
+                    <EntryRowContainer key={entry.unifiedId}>
+                        <EntryRow
+                            id={`ListKeyName-${entry.unifiedId}`}
+                            onPress={() => {
+                                this.processEvent('resultEntryPress', {
+                                    entry,
+                                })
+                            }}
+                            pathText={this.getListNameByUnifiedId(
+                                entry.parentUnifiedId,
+                            )}
+                            onListFocus={() =>
+                                this.props.onListFocus(entry.localId)
+                            }
+                            addedToAllIds={this.state.addedToAllIds}
+                            keepScrollPosition={this.keepScrollPosition}
+                            onPressActOnAll={
+                                this.props.actOnAllTabs
+                                    ? () =>
+                                          this.processEvent(
+                                              'resultEntryAllPress',
+                                              {
+                                                  entry,
+                                              },
+                                          )
+                                    : undefined
+                            }
+                            bgScriptBG={this.props.bgScriptBG}
+                            onFocus={() =>
+                                this.processEvent('resultEntryFocus', {
+                                    entry,
+                                    index,
+                                })
+                            }
+                            onUnfocus={() =>
+                                this.processEvent('resultEntryFocus', {
+                                    entry,
+                                    index: null,
+                                })
+                            }
+                            allTabsButtonPressed={
+                                this.state.allTabsButtonPressed
+                            }
+                            index={index}
+                            keyboardNavActive={this.state.keyboardNavActive}
+                            selected={this.state.selectedListIds.includes(
+                                entry.localId,
+                            )}
+                            focused={
+                                this.state.focusedListId === entry.unifiedId
+                            }
+                            localId={entry.localId}
+                            resultItem={
+                                <ListResultItem>{entry.name}</ListResultItem>
+                            }
+                            removeTooltipText={
+                                this.props.removeTooltipText ??
+                                'Remove from Space'
+                            }
+                            contextMenuBtnRef={this.contextMenuBtnRef}
+                            goToButtonRef={this.goToButtonRef}
+                            editMenuBtnRef={this.editMenuBtnRef}
+                            extraMenuBtnRef={this.extraMenuBtnRef}
+                            openInTabGroupButtonRef={
+                                this.openInTabGroupButtonRef
+                            }
+                            onContextMenuBtnPress={
+                                entry.creator?.id === this.state.currentUser?.id
+                                    ? () =>
+                                          this.processEvent(
+                                              'toggleEntryContextMenu',
+                                              {
+                                                  listId: entry.localId,
+                                              },
+                                          )
+                                    : undefined
+                            }
+                            onEditMenuBtnPress={
+                                entry.creator?.id === this.state.currentUser?.id
+                                    ? () =>
+                                          this.processEvent(
+                                              'toggleEntryEditMenu',
+                                              {
+                                                  listId: entry.localId,
+                                              },
+                                          )
+                                    : undefined
+                            }
+                            onOpenInTabGroupPress={() =>
+                                this.processEvent('onOpenInTabGroupPress', {
+                                    listId: entry.localId,
+                                })
+                            }
+                            actOnAllTooltipText="Add all tabs in window to Space"
+                            shareState={
+                                entry?.isPrivate ?? 'private'
+                                    ? 'private'
+                                    : 'shared'
+                            }
+                            getRootElement={this.props.getRootElement}
+                            {...entry}
+                            renderLeftSideIcon={() => (
+                                <ListTreeToggleArrow
+                                    getRootElement={this.props.getRootElement}
+                                    treeState={treeState}
+                                    actions={actions}
+                                />
+                            )}
+                        />
+                    </EntryRowContainer>
+                )}
+            />
+        )
     }
 
     private handleSpaceContextMenuClose = (listId: number) => async () => {
