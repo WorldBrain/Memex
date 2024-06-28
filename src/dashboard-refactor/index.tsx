@@ -69,7 +69,8 @@ import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import ImagePreviewModal from '@worldbrain/memex-common/lib/common-ui/image-preview-modal'
 
 export type Props = DashboardDependencies & {
@@ -666,23 +667,26 @@ export class DashboardContainer extends StatefulUIElement<
             ? { type: 'user-reference', id: currentUser.id }
             : undefined
 
-        const ownListsData = allLists.filter(
-            (list) =>
-                list.type !== 'page-link' &&
-                cacheUtils.deriveListOwnershipStatus(list, userReference) ===
-                    'Creator' &&
-                list.localId !== parseFloat(SPECIAL_LIST_STRING_IDS.INBOX),
-        )
+        const ownListsData = allLists
+            .filter(
+                (list) =>
+                    list.type === 'user-list' &&
+                    cacheUtils.deriveListOwnershipStatus(
+                        list,
+                        userReference,
+                    ) === 'Creator',
+            )
+            .sort(defaultOrderableSorter)
         const followedListsData = allLists.filter(
             (list) =>
-                list.type !== 'page-link' &&
+                list.type === 'user-list' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
                     'Follower' &&
                 !list.isForeignList,
         )
         const joinedListsData = allLists.filter(
             (list) =>
-                list.type !== 'page-link' &&
+                list.type === 'user-list' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
                     'Contributor',
         )
@@ -690,22 +694,15 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                listTreesDeps={{
+                    lists: ownListsData,
+                    authBG: this.props.authBG,
+                    listsBG: this.props.listsBG,
+                    cache: this.props.annotationsCache,
+                    areListsBeingFiltered:
+                        this.state.listsSidebar.filteredListIds.length > 0,
+                }}
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
-                onTreeToggle={(listId) =>
-                    this.processEvent('toggleListTreeShow', { listId })
-                }
-                onNestedListInputToggle={(listId) =>
-                    this.processEvent('toggleNestedListInputShow', { listId })
-                }
-                setNestedListInputValue={(listId, value) =>
-                    this.processEvent('setNewNestedListValue', {
-                        listId,
-                        value,
-                    })
-                }
-                onConfirmNestedListCreate={(parentListId) =>
-                    this.processEvent('createdNestedList', { parentListId })
-                }
                 openRemoteListPage={(remoteListId) =>
                     this.props.openSpaceInWebUI(remoteListId)
                 }
@@ -809,14 +806,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('confirmListDelete', null),
                     getRootElement: this.props.getRootElement,
                 })}
-                onListDragStart={(listId) => (e) =>
-                    this.processEvent('dragList', {
-                        listId,
-                        dataTransfer: e.dataTransfer,
-                    })}
-                onListDragEnd={(listId) => (e) =>
-                    this.processEvent('dropList', { listId })}
-                initDropReceivingState={(listId) => ({
+                initDNDActions={(listId) => ({
                     onDragEnter: (e) => {
                         e.preventDefault()
                         e.stopPropagation()
@@ -837,15 +827,14 @@ export class DashboardContainer extends StatefulUIElement<
                             listId: undefined,
                         })
                     },
-                    onDrop: (dataTransfer) =>
+                    onDrop: (e) =>
                         this.processEvent('dropOnListItem', {
                             listId,
-                            dataTransfer,
+                            dataTransfer: e.dataTransfer,
                         }),
-                    canReceiveDroppedItems: true,
+                    onDragEnd: (e) => {},
+                    onDragStart: (e) => {},
                     isDraggedOver: listId === listsSidebar.dragOverListId,
-                    wasPageDropped:
-                        listsSidebar.lists.byId[listId]?.wasPageDropped,
                 })}
                 getRootElement={this.props.getRootElement}
                 isInPageMode={isInPageMode}

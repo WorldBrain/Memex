@@ -45,12 +45,9 @@ export interface SpacePickerState {
 export type SpacePickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     searchInputChanged: { query: string; skipDebounce?: boolean }
-    resultEntryAllPress: {
-        entry: UnifiedList
-        analyticsBG: AnalyticsCoreInterface
-    }
+    resultEntryAllPress: { entry: UnifiedList }
     setSpaceWriteError: { error: string }
-    newEntryAllPress: { entry: string; analyticsBG: AnalyticsCoreInterface }
+    newEntryAllPress: { entry: string }
     resultEntryPress: {
         entry: Pick<UnifiedList, 'localId'>
         shouldRerender?: boolean
@@ -64,7 +61,7 @@ export type SpacePickerEvent = UIEvent<{
     setListPrivacy: { listId: number; isPrivate: boolean }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
-    newEntryPress: { entry: string; analyticsBG: AnalyticsCoreInterface }
+    newEntryPress: { entry: string }
     switchTab: { tab: SpacePickerTab }
     keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
     onKeyUp: { event: React.KeyboardEvent<HTMLInputElement> }

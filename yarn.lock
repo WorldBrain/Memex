@@ -1233,10 +1233,10 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.15.4":
-  version "7.23.9"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.9.tgz#47791a15e4603bb5f905bc0753801cf21d6345f7"
-  integrity sha512-0CX6F+BI2s9dkUqr08KFrAIZgNFj75rdBU/DjCyYLIaV/quFjkk6T+EJ2LkZHyZTbEV4L5p97mNkUsHl2wLFAw==
+"@babel/runtime@^7.12.1", "@babel/runtime@^7.24.1":
+  version "7.24.7"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.24.7.tgz#f4f0d5530e8dbdf59b3451b9b3e594b6ba082e12"
+  integrity sha512-UwgBRMjJP+xv857DCngvqXI3Iq6J4v0wXmwc6sapg+zyhbwmQX67LUEFrkK5tbyJ30jGuG3ZvWpBiB9LCy1kWw==
   dependencies:
     regenerator-runtime "^0.14.0"
 
@@ -2002,6 +2002,19 @@
     long "^5.0.0"
     protobufjs "^7.2.4"
     yargs "^17.7.2"
+
+"@hello-pangea/dnd@^16.6.0":
+  version "16.6.0"
+  resolved "https://registry.yarnpkg.com/@hello-pangea/dnd/-/dnd-16.6.0.tgz#7509639c7bd13f55e537b65a9dcfcd54e7c99ac7"
+  integrity sha512-vfZ4GydqbtUPXSLfAvKvXQ6xwRzIjUSjVU0Sx+70VOhc2xx6CdmJXJ8YhH70RpbTUGjxctslQTHul9sIOxCfFQ==
+  dependencies:
+    "@babel/runtime" "^7.24.1"
+    css-box-model "^1.2.1"
+    memoize-one "^6.0.0"
+    raf-schd "^4.0.3"
+    react-redux "^8.1.3"
+    redux "^4.2.1"
+    use-memo-one "^1.1.3"
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.0.0"
@@ -2848,6 +2861,26 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-strike/-/extension-strike-2.2.4.tgz#f987a6fe7b85e3179b413792ae3f33dd9c086e01"
   integrity sha512-/a2EwQgA+PpG17V2tVRspcrIY0SN3blwcgM7lxdW4aucGkqSKnf7+91dkhQEwCZ//o8kv9mBCyRoCUcGy6S5Xg==
 
+"@tiptap/extension-table-cell@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-table-cell/-/extension-table-cell-2.4.0.tgz#048d869acbf6cfbcd31076adf8130ffd679990a7"
+  integrity sha512-zylResMWLvV17Z6+GEDjvvl+YpJqJhNMyJsZPZNx/72OcNCDN3p2d6RGFwhpnCpdzZDD6LGaIgWaTj9oeg53SA==
+
+"@tiptap/extension-table-header@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-table-header/-/extension-table-header-2.4.0.tgz#618a86bc5e66149661129b7e8fbe2fd363882c2d"
+  integrity sha512-FZCOyJHSFsMTCfBh49J1DlwgpUIM5Ivpr57Za8FVvUkk8RKUIOKpNsZqxE+Wrw+2Bvy5H4X7Azb588x0NDqfOQ==
+
+"@tiptap/extension-table-row@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-table-row/-/extension-table-row-2.4.0.tgz#751ecd4ce49ebe1ccdea153f27c3a61e4449cfd4"
+  integrity sha512-K4FDI4YzyLWZbhIZYYL15uqs6M3QsPZGTpTdkSaxcKMLholcskDSHhJmySxnrjI0+JNAtyIiqlWBfA1/9Zyhng==
+
+"@tiptap/extension-table@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-table/-/extension-table-2.4.0.tgz#a29bb933a10ddbd9469263df0c7527ae1fa1de00"
+  integrity sha512-ceIUnPSqVCb+qC0XZSgApoG3dL3MRvWrGl1nIMxEqPgMsD/MP6MsYV1Lx/GmtdUlEEsV1624cGTBiRzeCuWkZA==
+
 "@tiptap/extension-text@^2.2.4":
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text/-/extension-text-2.2.4.tgz#aa101c568aa78a4ddc06a944eefcd3ac944987d4"
@@ -3125,7 +3158,7 @@
     "@types/react" "*"
     hoist-non-react-statics "^3.3.0"
 
-"@types/hoist-non-react-statics@^3.3.0":
+"@types/hoist-non-react-statics@^3.3.1":
   version "3.3.5"
   resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.5.tgz#dab7867ef789d87e2b4b0003c9d65c49cc44a494"
   integrity sha512-SbcrWzkKBw2cdwRTwQAswfpB9g9LJWfjtUeW/jvNwbhC8cpmmNYVePa+ncbUe0rGTQ7G3Ff6mYUN2VMfLVr+Sg==
@@ -3404,16 +3437,6 @@
     "@types/react" "*"
     redux "^4.0.0"
 
-"@types/react-redux@^7.1.20":
-  version "7.1.33"
-  resolved "https://registry.yarnpkg.com/@types/react-redux/-/react-redux-7.1.33.tgz#53c5564f03f1ded90904e3c90f77e4bd4dc20b15"
-  integrity sha512-NF8m5AjWCkert+fosDsN3hAlHzpjSiXlVy9EgQEmLoBhaNXbmyeGs/aj5dQzKuF+/q+S7JQagorGDW8pJ28Hmg==
-  dependencies:
-    "@types/hoist-non-react-statics" "^3.3.0"
-    "@types/react" "*"
-    hoist-non-react-statics "^3.3.0"
-    redux "^4.0.0"
-
 "@types/react@*":
   version "17.0.0"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.0.tgz#5af3eb7fad2807092f0046a1302b7823e27919b8"
@@ -3568,6 +3591,11 @@
 "@types/url-regex@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@types/url-regex/-/url-regex-4.1.0.tgz#12908eeec04e8e95d40f5c2e28af0ba64a5e62fe"
+
+"@types/use-sync-external-store@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@types/use-sync-external-store/-/use-sync-external-store-0.0.3.tgz#b6725d5f4af24ace33b36fafd295136e75509f43"
+  integrity sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==
 
 "@types/webextension-polyfill@0.10.7":
   version "0.10.7"
@@ -6743,7 +6771,7 @@ crypto@0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/crypto/-/crypto-0.0.3.tgz#470a81b86be4c5ee17acc8207a1f5315ae20dbb0"
 
-css-box-model@^1.2.0:
+css-box-model@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/css-box-model/-/css-box-model-1.2.1.tgz#59951d3b81fd6b2074a62d49444415b0d2b4d7c1"
   integrity sha512-a7Vr4Q/kd/aw96bnJG332W9V9LkJO69JRcaCYDUqjp6/z0w6VcZjgAcTbgFxEPfBgdnAwlh3iwu+hLopa+flJw==
@@ -13201,10 +13229,10 @@ mem@^1.1.0:
   dependencies:
     mimic-fn "^1.0.0"
 
-memoize-one@^5.1.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.2.1.tgz#8337aa3c4335581839ec01c3d594090cebe8f00e"
-  integrity sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==
+memoize-one@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-6.0.0.tgz#b2591b871ed82948aee4727dc6abceeeac8c1045"
+  integrity sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==
 
 memoizee@^0.4.14:
   version "0.4.14"
@@ -16217,7 +16245,7 @@ prop-types@^15.0.0, prop-types@^15.5.4, prop-types@^15.5.6, prop-types@^15.5.7, 
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -16629,7 +16657,7 @@ quick-lru@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-1.1.0.tgz#4360b17c61136ad38078397ff11416e186dcfbb8"
 
-raf-schd@^4.0.2:
+raf-schd@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/raf-schd/-/raf-schd-4.0.3.tgz#5d6c34ef46f8b2a0e880a8fcdb743efc5bfdbc1a"
   integrity sha512-tQkJl2GRWh83ui2DiPTJz9wEiMN20syf+5oKfB03yYP7ioZcJwsIK8FjrtLwH1m7C7e+Tt2yYBlrOpdT+dyeIQ==
@@ -16733,18 +16761,6 @@ react-base16-styling@^0.5.1:
     lodash.flow "^3.3.0"
     pure-color "^1.2.0"
 
-"react-beautiful-dnd@github:Bonboarding/react-beautiful-dnd":
-  version "13.1.1"
-  resolved "https://codeload.github.com/Bonboarding/react-beautiful-dnd/tar.gz/0f088123fdbbc3305d33233503fbca3b942933b5"
-  dependencies:
-    "@babel/runtime" "^7.9.2"
-    css-box-model "^1.2.0"
-    memoize-one "^5.1.1"
-    raf-schd "^4.0.2"
-    react-redux "^7.2.0"
-    redux "^4.0.4"
-    use-memo-one "^1.1.1"
-
 react-colorful@^5.6.1:
   version "5.6.1"
   resolved "https://registry.yarnpkg.com/react-colorful/-/react-colorful-5.6.1.tgz#7dc2aed2d7c72fac89694e834d179e32f3da563b"
@@ -16824,11 +16840,6 @@ react-is@^16.7.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.9.0.tgz#21ca9561399aad0ff1a7701c01683e8ca981edcb"
   integrity sha512-tJBzzzIgnnRfEm046qRcURvwQnZVXmuCbscxUO5RWrGTXpon2d4c8mI0D8WE6ydVIm29JiLB6+RslkIvym9Rjw==
 
-react-is@^17.0.2:
-  version "17.0.2"
-  resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
-  integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
-
 react-is@^18.0.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.2.0.tgz#199431eeaaa2e09f86427efbb4f1473edb47609b"
@@ -16881,17 +16892,17 @@ react-redux@^5.0.7:
     loose-envify "^1.1.0"
     prop-types "^15.6.0"
 
-react-redux@^7.2.0:
-  version "7.2.9"
-  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-7.2.9.tgz#09488fbb9416a4efe3735b7235055442b042481d"
-  integrity sha512-Gx4L3uM182jEEayZfRbI/G11ZpYdNAnBs70lFVMNdHJI76XYtR+7m0MN+eAs7UHBPhWXcnFPaS+9owSCJQHNpQ==
+react-redux@^8.1.3:
+  version "8.1.3"
+  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-8.1.3.tgz#4fdc0462d0acb59af29a13c27ffef6f49ab4df46"
+  integrity sha512-n0ZrutD7DaX/j9VscF+uTALI3oUPa/pO4Z3soOBIjuRn/FzVu6aehhysxZCLi6y7duMf52WNZGMl7CtuK5EnRw==
   dependencies:
-    "@babel/runtime" "^7.15.4"
-    "@types/react-redux" "^7.1.20"
+    "@babel/runtime" "^7.12.1"
+    "@types/hoist-non-react-statics" "^3.3.1"
+    "@types/use-sync-external-store" "^0.0.3"
     hoist-non-react-statics "^3.3.2"
-    loose-envify "^1.4.0"
-    prop-types "^15.7.2"
-    react-is "^17.0.2"
+    react-is "^18.0.0"
+    use-sync-external-store "^1.0.0"
 
 react-rnd@^10.3.5:
   version "10.3.5"
@@ -17261,7 +17272,7 @@ redux@^4.0.0:
     loose-envify "^1.1.0"
     symbol-observable "^1.2.0"
 
-redux@^4.0.4:
+redux@^4.2.1:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/redux/-/redux-4.2.1.tgz#c08f4306826c49b5e9dc901dee0452ea8fce6197"
   integrity sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==
@@ -20398,10 +20409,15 @@ url@^0.11.0:
     punycode "1.3.2"
     querystring "0.2.0"
 
-use-memo-one@^1.1.1:
+use-memo-one@^1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/use-memo-one/-/use-memo-one-1.1.3.tgz#2fd2e43a2169eabc7496960ace8c79efef975e99"
   integrity sha512-g66/K7ZQGYrI6dy8GLpVcMsBp4s17xNkYJVSMvTEevGy3nDxHOfE6z8BVE22+5G5x7t3+bhzrlTDB7ObrEE0cQ==
+
+use-sync-external-store@^1.0.0:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.2.tgz#c3b6390f3a30eba13200d2302dcdf1e7b57b2ef9"
+  integrity sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==
 
 use@^3.1.0:
   version "3.1.0"

@@ -9,16 +9,8 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<
         UnifiedList & {
             wasPageDropped?: boolean
-            wasListDropped?: boolean
         }
     >
-    listTrees: NormalizedState<{
-        isTreeToggled: boolean
-        isNestedListInputShown: boolean
-        newNestedListValue: string
-        newNestedListCreateState: TaskState
-        hasChildren: boolean
-    }>
     filteredListIds: UnifiedList['unifiedId'][]
     areLocalListsExpanded: boolean
     areFollowedListsExpanded: boolean
@@ -27,8 +19,6 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     spaceSidebarWidth: string
     disableMouseLeave: boolean
 
-    draggedListId: string | null
-    someListIsDragging: boolean
     inboxUnreadCount: number
     dragOverListId?: string
     editingListId?: string
@@ -85,15 +75,10 @@ export type Events = UIEvent<{
     setSelectedListId: { listId: string }
     setShowMoreMenuListId: { listId: string }
     setEditMenuListId: { listId: string }
-    dropOnListItem: { listId: string; dataTransfer: DataTransfer }
-    dragList: { listId: string; dataTransfer: DataTransfer }
-    dropList: { listId: string }
-
-    // Tree-related events
-    toggleListTreeShow: { listId: string }
-    toggleNestedListInputShow: { listId: string }
-    setNewNestedListValue: { listId: string; value: string }
-    createdNestedList: { parentListId: string }
+    dropOnListItem: {
+        listId: string
+        dataTransfer: DataTransfer
+    }
 
     confirmListDelete: null
     cancelListDelete: null
@@ -103,15 +88,10 @@ export type Events = UIEvent<{
     switchToFeed: null
 }>
 
-export type DragToListAction<T extends 'page' | 'list'> = T extends 'page'
-    ? {
-          type: 'page'
-          fullPageUrl: string
-          normalizedPageUrl: string
-      }
-    : {
-          type: 'list'
-          listId: string
-      }
+export type DragPageToListAction = {
+    type: 'page'
+    fullPageUrl: string
+    normalizedPageUrl: string
+}
 
 export type ListNameHighlightIndices = [number, number]

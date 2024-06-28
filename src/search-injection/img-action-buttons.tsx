@@ -100,7 +100,7 @@ class Root extends React.Component<RootProps, RootState> {
                             placement="bottom"
                         >
                             <PrimaryAction
-                                label="Analzye"
+                                label="Analyze"
                                 icon="stars"
                                 type="glass"
                                 size={'small'}

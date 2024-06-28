@@ -31,6 +31,7 @@ import {
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -202,7 +203,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const unifiedAnnotationId = this.generateAnnotationId()
 
         if (annotation.color == null) {
-            annotation.color = this.highlightColorDict[0]?.id
+            annotation.color =
+                this.highlightColorDict?.[0]?.id ??
+                HIGHLIGHT_COLORS_DEFAULT[0].id
         }
 
         if (annotation.remoteId != null) {

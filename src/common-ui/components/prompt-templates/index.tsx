@@ -11,7 +11,7 @@ import {
     Draggable,
     Droppable,
     OnDragEndResponder,
-} from 'react-beautiful-dnd'
+} from '@hello-pangea/dnd'
 import { PrimaryAction } from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import TutorialBox from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 import styled, { css } from 'styled-components'
@@ -630,7 +630,7 @@ const Row = styled.div<{
             outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         `}
 
-    
+
 `
 
 const TemplateRowTitle = styled.div<{
