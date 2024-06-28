@@ -327,7 +327,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         await this.selectSpaceForAnnotation(localListId)
     }
 
-    renderHighlightColorPicker = (createHighlight) => {
+    renderHighlightColorPicker = () => {
         return (
             <HighlightColorPicker
                 syncSettingsBG={this.props.syncSettingsBG}
