@@ -182,6 +182,7 @@ export class ListTreesLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        this.emitMutation({ dragOverListId: { $set: null } })
         let draggedListId = previousState.draggedListId
         if (!draggedListId) {
             return
@@ -248,7 +249,6 @@ export class ListTreesLogic extends UILogic<State, Events> {
         },
     ): Promise<void> {
         if (listId == null || dropTargetListId === listId) {
-            this.emitMutation({ dragOverListId: { $set: null } })
             return
         }
         let { cache: cache } = this.deps
@@ -343,14 +343,12 @@ export class ListTreesLogic extends UILogic<State, Events> {
             dropTargetListData.pathUnifiedIds.includes(listId)
 
         if (isListAncestorOfTargetList) {
-            this.emitMutation({ dragOverListId: { $set: undefined } })
             throw new Error(
                 'Cannot make list a child of a descendent - this would result in a cycle',
             )
         }
 
         this.emitMutation({
-            dragOverListId: { $set: undefined },
             listTrees: {
                 byId: {
                     [newParentListId]: {
@@ -428,7 +426,5 @@ export class ListTreesLogic extends UILogic<State, Events> {
                     : index,
             })
         }
-
-        this.emitMutation({ dragOverListId: { $set: null } })
     }
 }

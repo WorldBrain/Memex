@@ -36,6 +36,16 @@ export default class ListsSidebarItem extends React.PureComponent<
 > {
     state: State = { isHovering: false, canDisableHover: false }
 
+    private get shouldShowRightSideIcon(): boolean {
+        return (
+            this.props.isShared ||
+            this.state.isHovering ||
+            this.props.dragNDropActions?.isDraggedOver ||
+            this.props.dragNDropActions?.wasPageDropped ||
+            this.props.forceRightSidePermanentDisplay
+        )
+    }
+
     render() {
         if (!this.props.areAnyMenusDisplayed && this.state.canDisableHover) {
             this.setState({ isHovering: false, canDisableHover: false })
@@ -99,9 +109,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                             </ListTitle>
                         </TitleBox>
                     </SidebarItemClickContainer>
-                    {(this.props.isShared ||
-                        this.state.isHovering ||
-                        this.props.forceRightSidePermanentDisplay) && (
+                    {this.shouldShowRightSideIcon && (
                         <RightSideActionBar
                             alwaysShowRightSideIcon={
                                 this.props.alwaysShowRightSideIcon
@@ -110,9 +118,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                             <IconBox {...this.props} {...this.state}>
                                 {this.props.renderEditIcon?.()}
                             </IconBox>
-                            {(this.props.isShared ||
-                                this.state.isHovering ||
-                                this.props.forceRightSidePermanentDisplay) &&
+                            {this.shouldShowRightSideIcon &&
                                 this.props.renderRightSideIcon?.()}
                         </RightSideActionBar>
                     )}

@@ -42,7 +42,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onCancelAddList: () => void
     onConfirmAddList: (value: string) => void
     setSidebarPeekState: (isPeeking: boolean) => () => void
-    initDropReceivingState: (listId: string) => DragNDropActions
+    initDNDActions: (listId: string) => DragNDropActions
     initContextMenuBtnProps: (
         listId: string,
     ) => Omit<
@@ -249,6 +249,14 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     hasChildren={treeState.hasChildren}
                                     dragNDropActions={{
                                         ...dndActions,
+                                        onDrop: (e) => {
+                                            // This handles list-on-list drops (state encapsulated inside <ListTrees>)
+                                            dndActions.onDrop(e)
+                                            // This handles page-on-list drops (state in dashboard)
+                                            this.props
+                                                .initDNDActions(list.unifiedId)
+                                                .onDrop(e)
+                                        },
                                         wasPageDropped: this.props.lists.byId[
                                             list.unifiedId
                                         ]?.wasPageDropped,
@@ -430,7 +438,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 onClick={() =>
                                     this.props.onListSelection(list.unifiedId)
                                 }
-                                dragNDropActions={this.props.initDropReceivingState(
+                                dragNDropActions={this.props.initDNDActions(
                                     list.unifiedId,
                                 )}
                                 isPrivate={list.isPrivate}

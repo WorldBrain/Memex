@@ -802,8 +802,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('confirmListDelete', null),
                     getRootElement: this.props.getRootElement,
                 })}
-                // TODO: Simplify this to only handle page drops (list drops handled in <ListTrees>)
-                initDropReceivingState={(listId) => ({
+                initDNDActions={(listId) => ({
                     onDragEnter: (e) => {
                         e.preventDefault()
                         e.stopPropagation()
@@ -829,12 +828,9 @@ export class DashboardContainer extends StatefulUIElement<
                             listId,
                             dataTransfer: e.dataTransfer,
                         }),
-                    // TODO: Implement these for page dragging
                     onDragEnd: (e) => {},
                     onDragStart: (e) => {},
                     isDraggedOver: listId === listsSidebar.dragOverListId,
-                    wasPageDropped:
-                        listsSidebar.lists.byId[listId]?.wasPageDropped,
                 })}
                 getRootElement={this.props.getRootElement}
                 isInPageMode={isInPageMode}

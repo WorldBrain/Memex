@@ -4331,16 +4331,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchResults: { draggedPageId: { $set: event.pageResultId } },
         })
-        const crt = this.options.document.getElementById(DRAG_EL_ID)
+        let crt = this.options.document.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
         event.dataTransfer.setDragImage(crt, 0, 0)
 
-        const page =
-            previousState.searchResults.pageData.byId[event.pageResultId]
+        let pageResult =
+            previousState.searchResults.results[event.day].pages.byId[
+                event.pageResultId
+            ]
+        let pageData =
+            previousState.searchResults.pageData.byId[pageResult.pageId]
         const action: DragPageToListAction = {
             type: 'page',
-            fullPageUrl: page.fullUrl,
-            normalizedPageUrl: page.normalizedUrl,
+            fullPageUrl: pageData.fullUrl,
+            normalizedPageUrl: pageData.normalizedUrl,
         }
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
     }
