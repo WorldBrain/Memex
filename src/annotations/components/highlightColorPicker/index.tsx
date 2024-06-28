@@ -17,8 +17,12 @@ import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { RGBAColor } from '@worldbrain/memex-common/lib/annotations/types'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import {
+    RGBAobjectToString,
+    modifyDomHighlightColor,
+} from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import { color } from 'html2canvas/dist/types/css/types/color'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface Props {
     annotationId: string
@@ -142,7 +146,7 @@ export default class HighlightColorPicker extends React.Component<
         })
 
         for (let element of filteredHighlights) {
-            this.modifyDomHighlightColor(element, color)
+            modifyDomHighlightColor(element, color)
         }
         await this.props.updateAnnotationColor(color.id)
     }
@@ -162,7 +166,7 @@ export default class HighlightColorPicker extends React.Component<
                 },
             )
             for (let highlight of filteredHighlights) {
-                this.modifyDomHighlightColor(highlight, colorItem)
+                modifyDomHighlightColor(highlight, colorItem)
             }
         }
 
@@ -170,17 +174,6 @@ export default class HighlightColorPicker extends React.Component<
             'highlightColors',
             this.state.highlightColorSettingState,
         )
-    }
-
-    modifyDomHighlightColor = async (
-        highlight: Element,
-        color: HighlightColor,
-    ) => {
-        highlight.setAttribute(
-            'style',
-            `background-color:${RGBAobjectToString(color.color)};`,
-        )
-        highlight.setAttribute('highlightcolor', color.id)
     }
 
     renderColorPicker(
@@ -455,6 +448,12 @@ export default class HighlightColorPicker extends React.Component<
                                         <ColorPickerLabel>
                                             {label}
                                         </ColorPickerLabel>
+                                        <HotkeyNumber>
+                                            <KeyboardShortcuts
+                                                keys={[(i + 1).toString()]}
+                                                size="medium"
+                                            />
+                                        </HotkeyNumber>
                                         <EditIconBox
                                             ref={this.editButtonRef[i]}
                                         >
@@ -508,6 +507,17 @@ const EditIconBox = styled.div`
     position: absolute;
     right: 3px;
     display: none;
+    background: ${(props) => props.theme.colors.greyScale2};
+`
+const HotkeyNumber = styled.div`
+    position: absolute;
+    right: 3px;
+    display: flex;
+    font-size: 14px;
+    margin-left: 10px;
+    width: 20px;
+    border-radius: 3px;
+    justify-content: center;
 `
 
 const MenuContainer = styled.div`
@@ -542,6 +552,9 @@ const SettingsRow = styled.div<{ active; selected }>`
 
     &:hover ${EditIconBox} {
         display: flex;
+    }
+    &:hover ${HotkeyNumber} {
+        display: none;
     }
     &:hover {
         border-radius: 5px;
