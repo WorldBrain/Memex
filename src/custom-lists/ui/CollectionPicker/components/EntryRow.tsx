@@ -7,6 +7,7 @@ import type { UnifiedList } from 'src/annotations/cache/types'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { DragNDropActions } from '../../list-trees/types'
 
 export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onPress: () => void
@@ -38,7 +39,8 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     bgScriptBG?: RemoteBGScriptInterface<'caller'>
     pathText?: string
     getRootElement?: () => HTMLElement
-    renderLeftSideIcon?: () => JSX.Element
+    renderLeftSideIcon: () => JSX.Element
+    dndActions: DragNDropActions
 }
 
 class EntryRow extends React.Component<Props> {
@@ -261,6 +263,7 @@ class EntryRow extends React.Component<Props> {
             goToButtonRef,
             keyboardNavActive,
             shareState,
+            dndActions,
         } = this.props
 
         let cleanID = parseInt(id.split('ListKeyName-')[1])
@@ -271,6 +274,9 @@ class EntryRow extends React.Component<Props> {
 
         return (
             <Row
+                onDragStart={dndActions.onDragStart}
+                onDragEnd={dndActions.onDragEnd}
+                draggable
                 onClick={this.handleResultPress}
                 ref={this.resultEntryRef}
                 onMouseEnter={() => {

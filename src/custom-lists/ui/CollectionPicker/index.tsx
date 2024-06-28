@@ -286,9 +286,19 @@ class SpacePicker extends StatefulUIElement<
                 cache={this.props.annotationsCache}
                 areListsBeingFiltered={this.state.query.trim().length > 0}
                 renderListItem={(entry, treeState, actions, dndActions) => (
-                    <EntryRowContainer key={entry.unifiedId}>
+                    <EntryRowContainer
+                        onDragEnter={dndActions.onDragEnter}
+                        onDragLeave={dndActions.onDragLeave}
+                        onDragOver={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                        }}
+                        onDrop={dndActions.onDrop}
+                        key={entry.unifiedId}
+                    >
                         <EntryRow
                             id={`ListKeyName-${entry.unifiedId}`}
+                            dndActions={dndActions}
                             onPress={() => {
                                 this.processEvent('resultEntryPress', {
                                     entry,
