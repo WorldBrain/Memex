@@ -37,7 +37,6 @@ export interface SpacePickerState {
     spaceAddRemoveState: TaskState
     spaceWriteError: string | null
     renameListErrorMessage: string | null
-    allTabsButtonPressed?: string
     keyboardNavActive: boolean
     addedToAllIds: number[]
 }
@@ -95,7 +94,6 @@ export interface SpacePickerDependencies {
     dashboardSelectedListId?: number
     children?: any
     filterMode?: boolean
-    removeTooltipText?: string
     searchInputPlaceholder?: string
     onListShare?: (ids: { localListId: number; remoteListId: AutoPk }) => void
     onClickOutside?: React.MouseEventHandler

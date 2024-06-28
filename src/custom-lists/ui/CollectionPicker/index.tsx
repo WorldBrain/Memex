@@ -336,9 +336,6 @@ class SpacePicker extends StatefulUIElement<
                                     index: null,
                                 })
                             }
-                            allTabsButtonPressed={
-                                this.state.allTabsButtonPressed
-                            }
                             index={index}
                             keyboardNavActive={this.state.keyboardNavActive}
                             selected={this.state.selectedListIds.includes(
@@ -347,13 +344,8 @@ class SpacePicker extends StatefulUIElement<
                             focused={
                                 this.state.focusedListId === entry.unifiedId
                             }
-                            localId={entry.localId}
                             resultItem={
                                 <ListResultItem>{entry.name}</ListResultItem>
-                            }
-                            removeTooltipText={
-                                this.props.removeTooltipText ??
-                                'Remove from Space'
                             }
                             contextMenuBtnRef={this.contextMenuBtnRef}
                             goToButtonRef={this.goToButtonRef}

@@ -20,7 +20,6 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     index: number
     shareState: 'private' | 'shared'
     id?: string
-    removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
     contextMenuBtnRef?: React.RefObject<HTMLDivElement>
@@ -28,22 +27,37 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     openInTabGroupButtonRef?: React.RefObject<HTMLDivElement>
     extraMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
-    allTabsButtonPressed?: string
     focused?: boolean
     keyboardNavActive?: boolean
     keepScrollPosition?: () => void
     addedToAllIds?: number[]
-    onListFocus?: (listId) => void
+    onListFocus?: (listId: string) => void
     goToButtonRef?: React.RefObject<HTMLDivElement>
-    localId?: number
-    bgScriptBG?: RemoteBGScriptInterface<'caller'>
+    bgScriptBG: RemoteBGScriptInterface<'caller'>
     pathText?: string
     getRootElement?: () => HTMLElement
     renderLeftSideIcon: () => JSX.Element
     dndActions: DragNDropActions
 }
 
-class EntryRow extends React.Component<Props> {
+interface State {
+    checkBoxHover: boolean
+    mouseOverItem: boolean
+    showExtraMenu: boolean
+    confirmOpenAll: boolean
+}
+
+class EntryRow extends React.PureComponent<Props, State> {
+    private resultEntryRef = createRef<HTMLDivElement>()
+    private pressAllButtonRef = createRef<HTMLDivElement>()
+
+    state: State = {
+        checkBoxHover: false,
+        mouseOverItem: false,
+        showExtraMenu: false,
+        confirmOpenAll: false,
+    }
+
     private handleActOnAllPress: React.MouseEventHandler = (e) => {
         this.props.onPressActOnAll?.()
         e.stopPropagation()
@@ -56,12 +70,14 @@ class EntryRow extends React.Component<Props> {
         e.stopPropagation()
         return false
     }
+
     private handleEditMenuBtnPress: React.MouseEventHandler = (e) => {
         this.props.onEditMenuBtnPress()
         e.preventDefault()
         e.stopPropagation()
         return false
     }
+
     private handleOpenInTabGroup: React.MouseEventHandler = (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -83,16 +99,6 @@ class EntryRow extends React.Component<Props> {
         }
 
         return false
-    }
-
-    private resultEntryRef = createRef<HTMLDivElement>()
-    private pressAllButtonRef = createRef<HTMLDivElement>()
-
-    state = {
-        checkBoxHover: false,
-        mouseOverItem: false,
-        showExtraMenu: false,
-        confirmOpenAll: false,
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
@@ -138,111 +144,110 @@ class EntryRow extends React.Component<Props> {
         })
     }
 
-    renderShowExtraMenu(cleanID) {
-        if (this.state.showExtraMenu) {
-            return (
-                <PopoutBox
-                    targetElementRef={this.props.extraMenuBtnRef?.current}
-                    placement="top-end"
-                    offsetX={10}
-                    closeComponent={() => {
-                        this.setState({ showExtraMenu: false })
-                    }}
-                    getPortalRoot={this.props.getRootElement}
-                    blockedBackground={true}
-                >
-                    <ExtraMenuContainer>
-                        <PrimaryAction
-                            onClick={this.handleOpenSpaceFromPicker}
-                            icon="goTo"
-                            size="medium"
-                            type="tertiary"
-                            fullWidth
-                            label="Go to Space"
-                            innerRef={this.props.goToButtonRef}
-                            contentAlign={'flex-start'}
-                            width="100%"
-                        />
-                        <PrimaryAction
-                            onClick={this.handleEditMenuBtnPress}
-                            icon="edit"
-                            size="medium"
-                            type="tertiary"
-                            fullWidth
-                            label="Rename & Delete"
-                            innerRef={this.props.editMenuBtnRef}
-                            contentAlign={'flex-start'}
-                            width="100%"
-                        />
-                        <PrimaryAction
-                            onClick={this.handleOpenInTabGroup}
-                            icon="goTo"
-                            size="medium"
-                            type="tertiary"
-                            fullWidth
-                            label={
-                                this.state.confirmOpenAll
-                                    ? 'Confirm opening all urls'
-                                    : 'Open all pages in new window'
-                            }
-                            innerRef={this.props.openInTabGroupButtonRef}
-                            contentAlign={'flex-start'}
-                            width="100%"
-                        />
-                        {this.props.addedToAllIds.includes(cleanID) ? (
-                            <TooltipBox
-                                tooltipText={
-                                    <>
-                                        All open tabs in this window
-                                        <br /> have been added to this Space
-                                    </>
-                                }
-                                placement="top"
-                                getPortalRoot={this.props.getRootElement}
-                            >
-                                <PrimaryAction
-                                    icon={'checkRound'}
-                                    size="medium"
-                                    type="tertiary"
-                                    fullWidth
-                                    label="Added all tabs in window"
-                                    innerRef={this.pressAllButtonRef}
-                                    onClick={null}
-                                    contentAlign={'flex-start'}
-                                    width="100%"
-                                />
-                            </TooltipBox>
-                        ) : (
-                            <TooltipBox
-                                tooltipText={
-                                    this.props.actOnAllTooltipText ?? ''
-                                }
-                                placement="bottom"
-                                getPortalRoot={this.props.getRootElement}
-                            >
-                                <PrimaryAction
-                                    icon={'multiEdit'}
-                                    size="medium"
-                                    type="tertiary"
-                                    fullWidth
-                                    label="Add all tabs in window"
-                                    innerRef={this.pressAllButtonRef}
-                                    onClick={this.handleActOnAllPress}
-                                    contentAlign={'flex-start'}
-                                    width="100%"
-                                />
-                            </TooltipBox>
-                        )}
-                    </ExtraMenuContainer>
-                </PopoutBox>
-            )
+    private renderShowExtraMenu(cleanID: number) {
+        if (!this.state.showExtraMenu) {
+            return null
         }
+        return (
+            <PopoutBox
+                targetElementRef={this.props.extraMenuBtnRef?.current}
+                placement="top-end"
+                offsetX={10}
+                closeComponent={() => {
+                    this.setState({ showExtraMenu: false })
+                }}
+                getPortalRoot={this.props.getRootElement}
+                blockedBackground={true}
+            >
+                <ExtraMenuContainer>
+                    <PrimaryAction
+                        onClick={this.handleOpenSpaceFromPicker}
+                        icon="goTo"
+                        size="medium"
+                        type="tertiary"
+                        fullWidth
+                        label="Go to Space"
+                        innerRef={this.props.goToButtonRef}
+                        contentAlign={'flex-start'}
+                        width="100%"
+                    />
+                    <PrimaryAction
+                        onClick={this.handleEditMenuBtnPress}
+                        icon="edit"
+                        size="medium"
+                        type="tertiary"
+                        fullWidth
+                        label="Rename & Delete"
+                        innerRef={this.props.editMenuBtnRef}
+                        contentAlign={'flex-start'}
+                        width="100%"
+                    />
+                    <PrimaryAction
+                        onClick={this.handleOpenInTabGroup}
+                        icon="goTo"
+                        size="medium"
+                        type="tertiary"
+                        fullWidth
+                        label={
+                            this.state.confirmOpenAll
+                                ? 'Confirm opening all urls'
+                                : 'Open all pages in new window'
+                        }
+                        innerRef={this.props.openInTabGroupButtonRef}
+                        contentAlign={'flex-start'}
+                        width="100%"
+                    />
+                    {this.props.addedToAllIds.includes(cleanID) ? (
+                        <TooltipBox
+                            tooltipText={
+                                <>
+                                    All open tabs in this window
+                                    <br /> have been added to this Space
+                                </>
+                            }
+                            placement="top"
+                            getPortalRoot={this.props.getRootElement}
+                        >
+                            <PrimaryAction
+                                icon={'checkRound'}
+                                size="medium"
+                                type="tertiary"
+                                fullWidth
+                                label="Added all tabs in window"
+                                innerRef={this.pressAllButtonRef}
+                                onClick={null}
+                                contentAlign={'flex-start'}
+                                width="100%"
+                            />
+                        </TooltipBox>
+                    ) : (
+                        <TooltipBox
+                            tooltipText={this.props.actOnAllTooltipText ?? ''}
+                            placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
+                        >
+                            <PrimaryAction
+                                icon={'multiEdit'}
+                                size="medium"
+                                type="tertiary"
+                                fullWidth
+                                label="Add all tabs in window"
+                                innerRef={this.pressAllButtonRef}
+                                onClick={this.handleActOnAllPress}
+                                contentAlign={'flex-start'}
+                                width="100%"
+                            />
+                        </TooltipBox>
+                    )}
+                </ExtraMenuContainer>
+            </PopoutBox>
+        )
     }
 
     private handleOpenSpaceFromPicker: React.MouseEventHandler = async (
         event,
     ) => {
-        await this.props.bgScriptBG?.openOverviewTab({
+        await this.props.bgScriptBG.openOverviewTab({
             // TODO: fix type but list.localId is not working. Tetst by clicking on the pills in telegram/twitter. They should jump to the right space in the dashboard
             /** @ts-ignore */
             selectedSpace: this.props.localId,
@@ -255,12 +260,9 @@ class EntryRow extends React.Component<Props> {
         const {
             id,
             focused,
-            remoteId,
             selected,
             resultItem,
-            onPressActOnAll,
             contextMenuBtnRef,
-            goToButtonRef,
             keyboardNavActive,
             shareState,
             dndActions,
@@ -288,7 +290,6 @@ class EntryRow extends React.Component<Props> {
                 onMouseLeave={() => {
                     this.setState({ mouseOverItem: false })
                 }}
-                // onMouseLeave={!keyboardNavActive && this.props.onUnfocus}
                 isFocused={focused || this.state.showExtraMenu}
                 id={id}
                 title={resultItem['props'].children}
@@ -319,7 +320,6 @@ class EntryRow extends React.Component<Props> {
                             >
                                 <Icon
                                     heightAndWidth="14px"
-                                    // padding="6px"
                                     icon={'peopleFine'}
                                     hoverOff
                                     color="greyScale5"
@@ -378,31 +378,6 @@ class EntryRow extends React.Component<Props> {
                             </TooltipBox>
                         </>
                     )}
-                    {/*
-                    {selected && !focused && (
-                        <ButtonContainer selected={selected}>
-                            <SelectionBox
-                                onMouseEnter={() =>
-                                    this.setState({ checkBoxHover: true })
-                                }
-                                onMouseLeave={() =>
-                                    this.setState({ checkBoxHover: false })
-                                }
-                                selected={selected}
-                            >
-                                <Icon
-                                    icon={icons.check}
-                                    heightAndWidth="16px"
-                                    hoverOff
-                                    color={
-                                        !this.state.checkBoxHover
-                                            ? 'black'
-                                            : 'greyScale2'
-                                    }
-                                />
-                            </SelectionBox>
-                        </ButtonContainer>
-                    )} */}
                     {selected && (
                         <ButtonContainer>
                             <SelectionBox

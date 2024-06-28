@@ -9,8 +9,8 @@ export interface Props {
     isPrivate?: boolean
     isShared?: boolean
     indentSteps?: number
+    alwaysShowLeftSideIcon?: boolean
     alwaysShowRightSideIcon?: boolean
-    hasChildren?: boolean
     dragNDropActions?: DragNDropActions & {
         wasPageDropped?: boolean
     }
@@ -90,7 +90,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                         }
                     >
                         {(this.state.isHovering ||
-                            this.props.hasChildren ||
+                            this.props.alwaysShowLeftSideIcon ||
                             this.props.alwaysShowRightSideIcon) &&
                             this.props.renderLeftSideIcon?.()}
                     </LeftSideIconContainer>

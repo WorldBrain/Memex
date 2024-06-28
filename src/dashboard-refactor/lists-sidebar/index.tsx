@@ -245,7 +245,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 .current,
                                         )
                                     }}
-                                    hasChildren={treeState.hasChildren}
+                                    alwaysShowLeftSideIcon={
+                                        treeState.hasChildren
+                                    }
                                     dragNDropActions={{
                                         ...dndActions,
                                         onDrop: (e) => {
