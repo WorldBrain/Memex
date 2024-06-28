@@ -1,5 +1,6 @@
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
@@ -54,6 +55,7 @@ interface Props {
     browserAPIs: Browser
     shortcutsData: ShortcutElData[]
     transcriptFunctions: any
+    removeYoutubeBar: () => void
 }
 
 interface State {
@@ -803,7 +805,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 >
                                     <Icon
                                         filePath={runtime.getURL(
-                                            '/img/cameraIcon.svg',
+                                            '/img/chatWithUs.svg',
                                         )}
                                         heightAndWidth="20px"
                                         color={'greyScale6'}
@@ -819,6 +821,19 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     getRootElement={this.props.getRootElement}
                                     tutorialId="annotateVideos"
                                 />
+                                <TooltipBox
+                                    getPortalRoot={this.props.getRootElement}
+                                    tooltipText={
+                                        <span>Remove Youtube bar</span>
+                                    }
+                                    placement="bottom"
+                                >
+                                    <Icon
+                                        icon="removeX"
+                                        onClick={this.props.removeYoutubeBar}
+                                        heightAndWidth="20px"
+                                    />
+                                </TooltipBox>
                             </TutorialButtonContainer>
                         </TopArea>
                         {this.state.videoDuration != null &&
@@ -994,6 +1009,10 @@ const TutorialButtonContainer = styled.div`
     padding-left: 10px;
     padding-right: 10px;
     justify-self: flex-end;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
 `
 
 const InnerContainer = styled.div`
@@ -1012,6 +1031,7 @@ const TopArea = styled.div`
     display: flex;
     align-items: center;
     width: 100%;
+    overflow-x: auto;
 `
 
 const BottomArea = styled.div`

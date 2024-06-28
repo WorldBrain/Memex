@@ -59,6 +59,7 @@ class Root extends React.Component<RootProps, RootState> {
                         syncSettings={props.syncSettings}
                         getRootElement={() => props.rootEl}
                         browserAPIs={props.browserAPIs}
+                        removeYoutubeBar={() => props.rootEl.remove()}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
