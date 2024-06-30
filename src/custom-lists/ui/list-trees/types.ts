@@ -41,6 +41,7 @@ export interface Dependencies {
     /** Order is delegated to called - pass down already sorted. */
     lists: UnifiedList[]
     areListsBeingFiltered: boolean
+    allowRootLevelReordering?: boolean
 
     children: (
         list: UnifiedList,

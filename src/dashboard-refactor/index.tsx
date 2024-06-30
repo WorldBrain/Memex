@@ -699,6 +699,7 @@ export class DashboardContainer extends StatefulUIElement<
                     authBG: this.props.authBG,
                     listsBG: this.props.listsBG,
                     cache: this.props.annotationsCache,
+                    allowRootLevelReordering: true,
                     areListsBeingFiltered:
                         this.state.listsSidebar.filteredListIds.length > 0,
                 }}

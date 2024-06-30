@@ -56,7 +56,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
         onDragEnd: (e) => this.processEvent('endListDrag', null),
     })
 
-    private renderReorderLine = (listId: string, topItem?: boolean) => {
+    private renderReorderLine = (listId: string, topLine?: boolean) => {
         // Disable reordering when filtering lists by query
         if (this.props.areListsBeingFiltered) {
             return null
@@ -64,20 +64,20 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
 
         let reorderLineDropReceivingState = this.initDropReceivingState(
             `${listId}${
-                topItem
+                topLine
                     ? LIST_REORDER_PRE_EL_POSTFIX
                     : LIST_REORDER_POST_EL_POSTFIX
             }`,
         )
         return (
             <ReorderLine
-                topItem={topItem}
+                topItem={topLine}
                 isActive={this.state.draggedListId != null}
                 onDrop={reorderLineDropReceivingState.onDrop}
                 isVisible={reorderLineDropReceivingState.isDraggedOver}
                 onDragEnter={reorderLineDropReceivingState.onDragEnter}
                 onDragLeave={reorderLineDropReceivingState.onDragLeave}
-                onDragOver={(e: React.DragEvent) => {
+                onDragOver={(e) => {
                     // Needed to allow the `onDrop` event to fire
                     e.preventDefault()
                     e.stopPropagation()

@@ -184,7 +184,8 @@ export class ListTreesLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({ dragOverListId: { $set: null } })
         let draggedListId = previousState.draggedListId
-        if (!draggedListId) {
+        let listToMove = this.deps.cache.lists.byId[draggedListId]
+        if (!listToMove || listToMove.unifiedId === event.dropTargetListId) {
             return
         }
 
@@ -213,11 +214,6 @@ export class ListTreesLogic extends UILogic<State, Events> {
                     previousState.listTrees.byId[cleanedListId]
                         ?.areChildrenShown,
             })
-            return
-        }
-
-        let listToMove = this.deps.cache.lists.byId[draggedListId]
-        if (listToMove.unifiedId === event.dropTargetListId) {
             return
         }
 
@@ -251,12 +247,22 @@ export class ListTreesLogic extends UILogic<State, Events> {
         if (listId == null || dropTargetListId === listId) {
             return
         }
-        let { cache: cache } = this.deps
+        let { cache } = this.deps
         let targetList = cache.lists.byId[dropTargetListId]
         let draggedList = cache.lists.byId[listId]
 
+        // Edge case: if a list is being dropped on the root level, and the root level is not allowed to be reordered, simply move it to be a root
+        if (
+            !this.deps.allowRootLevelReordering &&
+            targetList.parentUnifiedId == null &&
+            draggedList != null
+        ) {
+            if (draggedList.parentUnifiedId != null) {
+                await this.performListTreeMove(listId, null)
+            }
+        }
         // Edge case: dropping before the first root always orders the dragged list first among all roots
-        if (params?.isBeforeFirstRoot) {
+        else if (params?.isBeforeFirstRoot) {
             let targetSiblings = cache.getListsByParentId(
                 targetList.parentUnifiedId,
             )
