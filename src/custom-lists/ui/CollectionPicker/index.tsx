@@ -276,6 +276,7 @@ class SpacePicker extends StatefulUIElement<
         let index = 0 // TODO: dynamically set this in <ListTrees.props.renderListItem>
         return (
             <ListTrees
+                sortChildrenByOrder
                 lists={listEntries}
                 authBG={this.props.authBG}
                 listsBG={this.props.spacesBG}

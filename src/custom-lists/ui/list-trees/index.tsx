@@ -15,8 +15,13 @@ import {
     LIST_REORDER_PRE_EL_POSTFIX,
 } from './constants'
 import SidebarItemInput from 'src/dashboard-refactor/lists-sidebar/components/sidebar-editable-item'
+import type { UnifiedList } from 'src/annotations/cache/types'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
-export interface Props extends Dependencies {}
+export interface Props extends Dependencies {
+    /** Set to reorder children lists amongst each other on every render by `order` field. Set if input lists are sorted by other predicates, but order is desired for children. */
+    sortChildrenByOrder?: boolean
+}
 
 export class ListTrees extends StatefulUIElement<Props, State, Events> {
     constructor(props: Props) {
@@ -55,6 +60,16 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
             }),
         onDragEnd: (e) => this.processEvent('endListDrag', null),
     })
+
+    private getChildrenLists = (list: UnifiedList) => {
+        let children = this.props.lists.filter(
+            (l) => l.parentUnifiedId === list.unifiedId,
+        )
+        if (this.props.sortChildrenByOrder) {
+            children.sort(defaultOrderableSorter)
+        }
+        return children.reverse()
+    }
 
     private renderReorderLine = (listId: string, topLine?: boolean) => {
         // Disable reordering when filtering lists by query
@@ -98,10 +113,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
                 mapTreeTraverse({
                     root,
                     strategy: 'dfs',
-                    getChildren: (list) =>
-                        this.props.lists
-                            .filter((l) => l.parentUnifiedId === list.unifiedId)
-                            .reverse(),
+                    getChildren: this.getChildrenLists,
                     cb: (list) => {
                         let parentListTreeState = this.state.listTrees.byId[
                             list.parentUnifiedId
