@@ -244,6 +244,7 @@ export class ListTreesLogic extends UILogic<State, Events> {
             areTargetListChildrenShown?: boolean
         },
     ): Promise<void> {
+        // = = = WARNING: Super complex untested conditional logic. Please be careful if changing = = =
         if (listId == null || dropTargetListId === listId) {
             return
         }
@@ -251,18 +252,8 @@ export class ListTreesLogic extends UILogic<State, Events> {
         let targetList = cache.lists.byId[dropTargetListId]
         let draggedList = cache.lists.byId[listId]
 
-        // Edge case: if a list is being dropped on the root level, and the root level is not allowed to be reordered, simply move it to be a root
-        if (
-            !this.deps.allowRootLevelReordering &&
-            targetList.parentUnifiedId == null &&
-            draggedList != null
-        ) {
-            if (draggedList.parentUnifiedId != null) {
-                await this.performListTreeMove(listId, null)
-            }
-        }
         // Edge case: dropping before the first root always orders the dragged list first among all roots
-        else if (params?.isBeforeFirstRoot) {
+        if (params?.isBeforeFirstRoot) {
             let targetSiblings = cache.getListsByParentId(
                 targetList.parentUnifiedId,
             )
@@ -272,10 +263,31 @@ export class ListTreesLogic extends UILogic<State, Events> {
                     targetList.parentUnifiedId,
                 )
             }
-            if (targetSiblings.length) {
+            if (targetSiblings.length && this.deps.allowRootLevelReordering) {
                 await this.performListTreeReorder(listId, {
                     targetListId: targetSiblings[0].unifiedId,
                 })
+            }
+        } // Edge case: if a list is being dropped on the root level, and the root level is not allowed to be reordered, move it to be a root
+        else if (
+            !this.deps.allowRootLevelReordering &&
+            targetList.parentUnifiedId == null &&
+            draggedList != null
+        ) {
+            // BUT - If the root list's line we're dropping on is an ancestor, then it's the line shown directly beneath the target list.
+            //  Which means it's toggled open and thus we're not simply moving it to be a root. Instead we're moving it to be a child of the target list (if not already), then ordering it first among siblings
+            if (draggedList.pathUnifiedIds.includes(targetList.unifiedId)) {
+                let targetSiblings = cache.getListsByParentId(
+                    targetList.unifiedId,
+                )
+                if (draggedList.parentUnifiedId !== targetList.unifiedId) {
+                    await this.performListTreeMove(listId, targetList.unifiedId)
+                }
+                await this.performListTreeReorder(listId, {
+                    targetListId: targetSiblings[0].unifiedId,
+                })
+            } else if (draggedList.parentUnifiedId != null) {
+                await this.performListTreeMove(listId, null)
             }
         } // If the target list tree is toggled open, the behavior is that the dragged list becomes a child of it (if not already)
         else if (params?.areTargetListChildrenShown) {
