@@ -357,7 +357,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             hoverOff
                         />
                         <OptionTitleText>
-                            Sync & web-clipper for Obsidian & Logseq
+                            Sync & web-clipper for Obsidian/Readwise/Logseq
                         </OptionTitleText>
                     </OptionTitle>
                 </OptionsContainer>
