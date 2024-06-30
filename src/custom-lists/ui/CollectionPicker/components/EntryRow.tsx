@@ -18,6 +18,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onEditMenuBtnPress?: () => void
     onOpenInTabGroupPress?: () => void
     index: number
+    indentSteps?: number
     shareState: 'private' | 'shared'
     id?: string
     actOnAllTooltipText?: string
@@ -34,7 +35,6 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onListFocus?: (listId: string) => void
     goToButtonRef?: React.RefObject<HTMLDivElement>
     bgScriptBG: RemoteBGScriptInterface<'caller'>
-    pathText?: string
     getRootElement?: () => HTMLElement
     renderLeftSideIcon: () => JSX.Element
     dndActions: DragNDropActions
@@ -294,22 +294,12 @@ class EntryRow extends React.PureComponent<Props, State> {
                 id={id}
                 title={resultItem['props'].children}
                 zIndex={10000 - this.props.index}
+                indentSteps={this.props.indentSteps ?? 0}
             >
                 <LeftSideIconContainer>
                     {this.props.renderLeftSideIcon?.()}
                 </LeftSideIconContainer>
                 <NameWrapper>
-                    {this.props.pathText?.length > 0 && (
-                        <PathBox>
-                            {this.props.pathText}{' '}
-                            <Icon
-                                filePath="arrowRight"
-                                heightAndWidth="14px"
-                                color="greyScale4"
-                                hoverOff
-                            />
-                        </PathBox>
-                    )}
                     <NameRow>
                         {resultItem}
                         {shareState === 'shared' && (
@@ -494,17 +484,21 @@ export const IconStyleWrapper = styled.div`
     height: 100%;
 `
 
-const Row = styled.div<{ isFocused; zIndex }>`
+const Row = styled.div<{
+    isFocused: boolean
+    zIndex: number
+    indentSteps: number
+}>`
     align-items: center;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     transition: background 0.3s;
 
     height: fit-content;
     width: fill-available;
     cursor: pointer;
     border-radius: 5px;
-    padding: 10px 9px;
+    padding: 10px 9px 10px ${({ indentSteps }) => 9 + indentSteps * 15}px;
     margin: 0 -5px;
     overflow: visible;
     color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
@@ -513,11 +507,6 @@ const Row = styled.div<{ isFocused; zIndex }>`
     &:last-child {
         border-bottom: none;
     }
-
-    /* &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-        background: transparent;
-    } */
 
     ${(props) =>
         props.isFocused &&
@@ -556,6 +545,7 @@ const NameWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    padding-left: 10px;
     grid-gap: 5px;
     max-width: 80%;
     font-size: 14px;

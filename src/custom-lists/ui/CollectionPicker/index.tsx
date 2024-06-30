@@ -250,10 +250,6 @@ class SpacePicker extends StatefulUIElement<
         }
     }
 
-    private getListNameByUnifiedId = (unifiedId: string) => {
-        return this.props.annotationsCache.lists.byId[unifiedId]?.name
-    }
-
     private renderListEntries() {
         let listEntries = getEntriesForCurrentPickerTab(this.state)
         if (this.state.query.trim().length > 0) {
@@ -299,15 +295,13 @@ class SpacePicker extends StatefulUIElement<
                     >
                         <EntryRow
                             id={`ListKeyName-${entry.unifiedId}`}
+                            indentSteps={entry.pathUnifiedIds.length}
                             dndActions={dndActions}
                             onPress={() => {
                                 this.processEvent('resultEntryPress', {
                                     entry,
                                 })
                             }}
-                            pathText={this.getListNameByUnifiedId(
-                                entry.parentUnifiedId,
-                            )}
                             onListFocus={() =>
                                 this.props.onListFocus(entry.localId)
                             }
