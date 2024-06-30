@@ -163,6 +163,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
     private handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (
         e,
     ) => {
+        e.stopPropagation()
         if (e.key === 'Escape') {
             this.handleClearSearch()
         }
