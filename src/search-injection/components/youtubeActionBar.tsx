@@ -793,15 +793,20 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
                                     <span>
-                                        Take a screenshot of the current frame
+                                        {this.state.showTranscript ===
+                                        'pristine'
+                                            ? 'Show Transcript'
+                                            : 'Hide Transcript'}
                                         <br />
-                                        and adds a linked timestamp.
                                     </span>
                                 }
                                 placement="bottom"
                             >
                                 <YTPMenuItem
                                     onClick={this.handleOpenTranscript}
+                                    active={
+                                        this.state.showTranscript !== 'pristine'
+                                    }
                                 >
                                     <Icon
                                         filePath={runtime.getURL(
@@ -950,6 +955,12 @@ const YTPMenuItem = styled.div`
                 ? props.theme.colors.greyScale3
                 : props.theme.colors.greyScale1_5};
     }
+
+    ${(props) =>
+        props.active &&
+        `
+        background-color: ${props.theme.colors.greyScale3};
+    `}
 `
 
 const YTPMenuItemLabel = styled.div`
