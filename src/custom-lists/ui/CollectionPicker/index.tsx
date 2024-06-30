@@ -285,7 +285,8 @@ class SpacePicker extends StatefulUIElement<
                 listsBG={this.props.spacesBG}
                 cache={this.props.annotationsCache}
                 areListsBeingFiltered={this.state.query.trim().length > 0}
-                renderListItem={(entry, treeState, actions, dndActions) => (
+            >
+                {(entry, treeState, actions, dndActions) => (
                     <EntryRowContainer
                         onDragEnter={dndActions.onDragEnter}
                         onDragLeave={dndActions.onDragLeave}
@@ -399,7 +400,7 @@ class SpacePicker extends StatefulUIElement<
                         />
                     </EntryRowContainer>
                 )}
-            />
+            </ListTrees>
         )
     }
 

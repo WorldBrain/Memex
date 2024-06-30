@@ -70,7 +70,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     spaceSidebarWidth: string
     getRootElement: () => HTMLElement
     isInPageMode: boolean
-    listTreesDeps: Omit<ListTreesDeps, 'renderListItem'>
+    listTreesDeps: Omit<ListTreesDeps, 'children'>
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -210,14 +210,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 errorMessage={this.props.addListErrorMessage}
                             />
                         )}
-                        <ListTrees
-                            {...this.props.listTreesDeps}
-                            renderListItem={(
-                                list,
-                                treeState,
-                                actions,
-                                dndActions,
-                            ) => (
+                        <ListTrees {...this.props.listTreesDeps}>
+                            {(list, treeState, actions, dndActions) => (
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
                                         this.setSidebarItemRefs(
@@ -361,7 +355,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     }}
                                 />
                             )}
-                        />
+                        </ListTrees>
                     </ListsSidebarGroup>
                     <ListsSidebarGroup
                         {...this.props.followedListsGroup}

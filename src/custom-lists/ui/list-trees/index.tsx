@@ -180,7 +180,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
                                         list.unifiedId,
                                         true,
                                     )}
-                                {this.props.renderListItem(
+                                {this.props.children(
                                     list,
                                     this.state.listTrees.byId[list.unifiedId],
                                     actions,

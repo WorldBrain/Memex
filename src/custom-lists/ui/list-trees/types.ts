@@ -42,7 +42,7 @@ export interface Dependencies {
     lists: UnifiedList[]
     areListsBeingFiltered: boolean
 
-    renderListItem: (
+    children: (
         list: UnifiedList,
         treeState: ListTreeState,
         actions: ListTreeActions,
