@@ -70,6 +70,8 @@ import {
 import { analytics } from 'firebase-functions/v1'
 import { analyticsBG } from 'src/util/remote-functions-background'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
+import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import CustomListBackground from 'src/custom-lists/background'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -91,6 +93,7 @@ export class PageIndexingBackground {
 
     storage: PageStorage
     persistentStorage: PersistentPageStorage
+    collectionsBG: CustomListBackground | null
     remoteFunctions: PageIndexingInterface<'provider'>
 
     // See `this.getIdentifierResolvableForTabPage` for how this is used
@@ -106,9 +109,10 @@ export class PageIndexingBackground {
     constructor(
         public options: {
             authBG: AuthBackground
+            collectionsBG?: CustomListBackground
             tabManagement: TabManagementBackground
             storageManager: StorageManager
-            browserAPIs: Pick<Browser, 'storage'>
+            browserAPIs: Browser
             persistentStorageManager: StorageManager
             pageIndexingSettingsStore: BrowserSettingsStore<
                 LocalPageIndexingSettings
@@ -573,6 +577,15 @@ export class PageIndexingBackground {
         if (existingPage) {
             await this.storage.updatePage(pageData, existingPage)
         } else {
+            try {
+                await pageActionAllowed(
+                    this.options.browserAPIs,
+                    analyticsBG,
+                    this.options.collectionsBG,
+                    pageData.fullUrl,
+                    false,
+                )
+            } catch (e) {}
             await this.storage.createPage(pageData, pageContentInfo, userId)
         }
 
