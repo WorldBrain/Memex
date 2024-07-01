@@ -690,7 +690,7 @@ export class RibbonContainerLogic extends UILogic<
             this.dependencies.analyticsBG,
             this.dependencies.customLists,
             previousState.fullPageUrl,
-            false,
+            true,
         )
 
         if (!isAllowed) {

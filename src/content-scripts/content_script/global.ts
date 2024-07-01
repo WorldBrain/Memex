@@ -642,7 +642,7 @@ export async function main(
                     analyticsBG,
                     collectionsBG,
                     window.location.href,
-                    false,
+                    true,
                 ))
             ) {
                 sidebarEvents.emit('showPowerUpModal', {
@@ -790,7 +790,7 @@ export async function main(
                     analyticsBG,
                     collectionsBG,
                     window.location.href,
-                    false,
+                    true,
                 ))
             ) {
                 sidebarEvents.emit('showPowerUpModal', {
