@@ -38,6 +38,7 @@ export interface State {
     highlightColorSettingLoadState: TaskState
     showColorEditorPanel: boolean
     selectedRow: number
+    highlightColorStateChanged: boolean
 }
 
 export default class HighlightColorPicker extends React.Component<
@@ -65,6 +66,7 @@ export default class HighlightColorPicker extends React.Component<
         highlightColorSettingLoadState: null,
         showColorEditorPanel: false,
         selectedRow: null,
+        highlightColorStateChanged: false,
     }
 
     async componentDidMount() {
@@ -113,7 +115,9 @@ export default class HighlightColorPicker extends React.Component<
     }
 
     componentWillUnmount(): void {
-        this.saveHighlightColorSettings()
+        if (this.state.highlightColorStateChanged) {
+            this.saveHighlightColorSettings()
+        }
     }
 
     getHighlightColorSettings = async () => {
@@ -207,6 +211,7 @@ export default class HighlightColorPicker extends React.Component<
                                     color = this.state.highlightColorSettingState.find(
                                         (color) => color.id === existingStyle,
                                     ).color
+                                    color = RGBAobjectToString(color)
                                 }
 
                                 item.setAttribute(
@@ -306,6 +311,9 @@ export default class HighlightColorPicker extends React.Component<
                         color={pickerColor}
                         onChange={(value) => {
                             {
+                                this.setState({
+                                    highlightColorStateChanged: true,
+                                })
                                 let newHighlightColorSettingState = this.state
                                     .highlightColorSettingState
 
@@ -359,6 +367,9 @@ export default class HighlightColorPicker extends React.Component<
                         this.state.highlightColorSettingState[index]['color'],
                     ).toHex8String()}
                     onChange={(event) => {
+                        this.setState({
+                            highlightColorStateChanged: true,
+                        })
                         let newHighlightColorSettingState = this.state.highlightColorSettingState.map(
                             (i) => {
                                 return JSON.parse(JSON.stringify(i))
@@ -456,22 +467,21 @@ export default class HighlightColorPicker extends React.Component<
                                         </HotkeyNumber>
                                         <EditIconBox
                                             ref={this.editButtonRef[i]}
+                                            onMouseDown={(event) => {
+                                                event.stopPropagation()
+                                                const newShowEditColor = [
+                                                    ...this.state.showEditColor,
+                                                ]
+                                                newShowEditColor[i] = true
+                                                this.setState({
+                                                    showEditColor: newShowEditColor,
+                                                    showColorEditorPanel: true,
+                                                })
+                                            }}
                                         >
                                             <Icon
                                                 icon={'edit'}
                                                 heightAndWidth={'20px'}
-                                                onClick={(event) => {
-                                                    const newShowEditColor = [
-                                                        ...this.state
-                                                            .showEditColor,
-                                                    ]
-                                                    newShowEditColor[i] = true
-                                                    this.setState({
-                                                        showEditColor: newShowEditColor,
-                                                        showColorEditorPanel: true,
-                                                    })
-                                                    event.stopPropagation()
-                                                }}
                                                 color={'greyScale6'}
                                             />
                                         </EditIconBox>

@@ -322,7 +322,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                                 null,
                                 collections,
                                 this.props.url,
-                                false,
+                                true,
                             )
 
                             if (!isAllowed) {
@@ -394,7 +394,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                             null,
                             collections,
                             this.props.url,
-                            false,
+                            true,
                         )
 
                         if (!isAllowed) {

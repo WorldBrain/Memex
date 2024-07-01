@@ -24,6 +24,7 @@ interface RootProps {
     syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<'openAI'>
     annotationsFunctions: any
+    transcriptFunctions: any
     browserAPIs: Browser
 }
 
@@ -53,10 +54,12 @@ class Root extends React.Component<RootProps, RootState> {
                     <YoutubeButtonMenu
                         runtime={runtime}
                         annotationsFunctions={props.annotationsFunctions}
+                        transcriptFunctions={props.transcriptFunctions}
                         syncSettingsBG={props.syncSettingsBG}
                         syncSettings={props.syncSettings}
                         getRootElement={() => props.rootEl}
                         browserAPIs={props.browserAPIs}
+                        removeYoutubeBar={() => props.rootEl.remove()}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -68,6 +71,7 @@ export const handleRenderYoutubeInterface = async (
     syncSettings: SyncSettingsStore<'openAI'>,
     syncSettingsBG: RemoteSyncSettingsInterface,
     annotationsFunctions: any,
+    transcriptFunctions: any,
     browserAPIs: Browser,
 ) => {
     const existingButton = document.getElementById(
@@ -256,6 +260,7 @@ export const handleRenderYoutubeInterface = async (
                 rootEl={target}
                 syncSettings={syncSettings}
                 annotationsFunctions={annotationsFunctions}
+                transcriptFunctions={transcriptFunctions}
                 browserAPIs={browserAPIs}
                 syncSettingsBG={syncSettingsBG}
             />,

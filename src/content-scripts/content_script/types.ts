@@ -66,6 +66,7 @@ export interface InPageUIInjectionsDependencies {
         | 'betaFeatures'
     >
     annotationsFunctions: any
+    transcriptFunctions: any
 }
 
 export type HighlightsScriptMain = (

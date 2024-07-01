@@ -443,6 +443,7 @@ export function createBackgroundModules(options: {
         analyticsBG,
         pkmSyncBG,
     })
+    pages.options.collectionsBG = customLists
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
         syncSettings,
         { prefix: 'readwise.' },

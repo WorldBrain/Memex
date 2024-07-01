@@ -321,7 +321,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             null,
                             this.props.customLists,
                             this.state.fullPageUrl,
-                            false,
+                            true,
                         )
 
                         if (!isAllowed) {
@@ -350,7 +350,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             null,
                             this.props.customLists,
                             this.state.fullPageUrl,
-                            false,
+                            true,
                         )
 
                         if (!isAllowed) {
