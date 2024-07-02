@@ -7,7 +7,7 @@ import type { UnifiedList } from 'src/annotations/cache/types'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import type { DragNDropActions } from '../../list-trees/types'
+import type { DragNDropActions, ListTreeActions } from '../../list-trees/types'
 
 export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onPress: () => void
@@ -37,6 +37,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     bgScriptBG: RemoteBGScriptInterface<'caller'>
     getRootElement?: () => HTMLElement
     renderLeftSideIcon: () => JSX.Element
+    toggleShowNewChildInput: ListTreeActions['toggleShowNewChildInput']
     dndActions: DragNDropActions
 }
 
@@ -50,6 +51,7 @@ interface State {
 class EntryRow extends React.PureComponent<Props, State> {
     private resultEntryRef = createRef<HTMLDivElement>()
     private pressAllButtonRef = createRef<HTMLDivElement>()
+    private addSubSpaceIconRef = React.createRef<HTMLDivElement>()
 
     state: State = {
         checkBoxHover: false,
@@ -351,6 +353,25 @@ class EntryRow extends React.PureComponent<Props, State> {
                                         }
                                     />
                                 </ButtonContainer>
+                            </TooltipBox>
+                            <TooltipBox
+                                tooltipText="Add Sub-Space"
+                                placement="right"
+                                targetElementRef={
+                                    this.addSubSpaceIconRef.current
+                                }
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    containerRef={this.addSubSpaceIconRef}
+                                    icon="plus"
+                                    heightAndWidth="16px"
+                                    color="greyScale4"
+                                    onClick={(event) => {
+                                        event.stopPropagation()
+                                        this.props.toggleShowNewChildInput()
+                                    }}
+                                />
                             </TooltipBox>
                             <TooltipBox
                                 tooltipText={'Share Space'}

@@ -385,6 +385,9 @@ class SpacePicker extends StatefulUIElement<
                             }
                             getRootElement={this.props.getRootElement}
                             {...entry}
+                            toggleShowNewChildInput={
+                                actions.toggleShowNewChildInput
+                            }
                             renderLeftSideIcon={() => (
                                 <ListTreeToggleArrow
                                     getRootElement={this.props.getRootElement}
