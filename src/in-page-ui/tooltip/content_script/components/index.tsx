@@ -449,7 +449,6 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                     unselectEntry={(listId: number) =>
                         this.removeSpaceForAnnotation(listId)
                     }
-                    autoFocus={true}
                     onSpaceCreate={() => null}
                     initialSelectedListIds={() =>
                         cacheUtils.getLocalListIdsForCacheIds(

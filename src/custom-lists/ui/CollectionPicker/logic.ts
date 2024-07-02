@@ -141,8 +141,6 @@ export default class SpacePickerLogic extends UILogic<
         spaceWriteError: null,
         renameListErrorMessage: null,
         contextMenuListId: null,
-        contextMenuPositionX: 0,
-        contextMenuPositionY: 0,
         keyboardNavActive: false,
         addedToAllIds: [],
         editMenuListId: null,
@@ -412,6 +410,7 @@ export default class SpacePickerLogic extends UILogic<
                 : event.listId
         this.emitMutation({ contextMenuListId: { $set: nextListId } })
     }
+
     toggleEntryEditMenu: EventHandler<'toggleEntryEditMenu'> = async ({
         event,
         previousState,
@@ -420,30 +419,12 @@ export default class SpacePickerLogic extends UILogic<
             previousState.editMenuListId === event.listId ? null : event.listId
         this.emitMutation({ editMenuListId: { $set: nextListId } })
     }
+
     onOpenInTabGroupPress: EventHandler<'onOpenInTabGroupPress'> = async ({
         event,
         previousState,
     }) => {
         await this.dependencies.spacesBG.createTabGroup(event.listId)
-    }
-
-    updateContextMenuPosition: EventHandler<
-        'updateContextMenuPosition'
-    > = async ({ event, previousState }) => {
-        this.emitMutation({
-            contextMenuPositionX: {
-                $set:
-                    event.x != null
-                        ? event.x
-                        : previousState.contextMenuPositionX,
-            },
-            contextMenuPositionY: {
-                $set:
-                    event.y != null
-                        ? event.y
-                        : previousState.contextMenuPositionY,
-            },
-        })
     }
 
     validateSpaceName(name: string, listIdToSkip?: number) {
@@ -553,17 +534,13 @@ export default class SpacePickerLogic extends UILogic<
             newEntryName: { $set: query },
         })
 
-        if (!query || query === '') {
+        if (!query.trim().length) {
             this.emitMutation({ filteredListIds: { $set: null } })
-            this.querySpaces(query, previousState)
         } else {
             this.querySpaces(query, previousState)
         }
     }
 
-    /**
-     * Searches for the term via the `queryEntries` function provided to the component
-     */
     private querySpaces = (query: string, state: SpacePickerState) => {
         const distinctTerms = query.split(/\s+/).filter(Boolean)
         const doAllTermsMatch = (list: UnifiedList): boolean =>
@@ -583,7 +560,6 @@ export default class SpacePickerLogic extends UILogic<
             .filter(doAllTermsMatch)
             .flatMap((entry) => [entry.unifiedId, ...entry.pathUnifiedIds])
 
-        this.emitMutation({ filteredListIds: { $set: matchingEntryIds } })
         this.maybeSetCreateEntryDisplay(query, state)
 
         const mutation: UIMutation<SpacePickerState> = {
@@ -596,7 +572,7 @@ export default class SpacePickerLogic extends UILogic<
 
         if (
             state.filteredListIds != null &&
-            state.filteredListIds?.length != nextState.filteredListIds?.length
+            state.filteredListIds.length != nextState.filteredListIds.length
         ) {
             this.setFocusedEntryIndex(0, nextState, true)
         }

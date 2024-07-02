@@ -106,37 +106,6 @@ class SpacePicker extends StatefulUIElement<
         return validateSpaceName(this.state.newEntryName, otherLists).valid
     }
 
-    private get selectedDisplayEntries(): Array<{
-        localId: number
-        name: string
-    }> {
-        const selectedIdSet = new Set(this.state.selectedListIds)
-        return getEntriesForCurrentPickerTab(this.state)
-            .filter(
-                (entry) =>
-                    entry.localId != null && selectedIdSet.has(entry.localId),
-            )
-            .map((entry) => ({
-                localId: entry.localId,
-                name: entry.name,
-            }))
-    }
-
-    componentDidUpdate(
-        prevProps: Readonly<Props>,
-        prevState: Readonly<SpacePickerState>,
-        snapshot?: any,
-    ): void {
-        if (
-            prevProps.headlessQuery !== this.props.headlessQuery &&
-            this.props.isHeadLess
-        ) {
-            this.processEvent('searchInputChanged', {
-                query: this.props.headlessQuery,
-            })
-        }
-    }
-
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
@@ -153,11 +122,6 @@ class SpacePicker extends StatefulUIElement<
 
     handleResultListFocus = (list: UnifiedList, index?: number) => {
         this.processEvent('resultEntryFocus', { entry: list, index })
-
-        // const el = document.getElementById(`ListKeyName-${list.localId}`)
-        // if (el != null) {
-        //     el.scrollTop = el.offsetTop
-        // }
     }
 
     handleNewListPress = () => {
@@ -165,7 +129,7 @@ class SpacePicker extends StatefulUIElement<
             entry: this.state.newEntryName,
         })
     }
-    // Adjust the event handler signatures
+
     private handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         this.processEvent('keyPress', { event })
     }
@@ -530,28 +494,26 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <PickerContainer>
-                {!this.props.isHeadLess && (
-                    <SearchContainer>
-                        <PickerSearchInput
-                            searchInputRef={this.searchInputRef}
-                            searchInputPlaceholder={
-                                this.props.searchInputPlaceholder
-                                    ? this.props.searchInputPlaceholder
-                                    : this.props.filterMode
-                                    ? 'Search for Spaces to filter'
-                                    : 'Search & Add Spaces'
-                            }
-                            showPlaceholder={
-                                this.state.selectedListIds.length === 0
-                            }
-                            onChange={this.handleSearchInputChanged}
-                            onKeyDown={this.handleKeyPress}
-                            onKeyUp={this.handleKeyUp}
-                            value={this.state.query}
-                            autoFocus={true}
-                        />
-                    </SearchContainer>
-                )}
+                <SearchContainer>
+                    <PickerSearchInput
+                        searchInputRef={this.searchInputRef}
+                        searchInputPlaceholder={
+                            this.props.searchInputPlaceholder
+                                ? this.props.searchInputPlaceholder
+                                : this.props.filterMode
+                                ? 'Search for Spaces to filter'
+                                : 'Search & Add Spaces'
+                        }
+                        showPlaceholder={
+                            this.state.selectedListIds.length === 0
+                        }
+                        onChange={this.handleSearchInputChanged}
+                        onKeyDown={this.handleKeyPress}
+                        onKeyUp={this.handleKeyUp}
+                        value={this.state.query}
+                        autoFocus={true}
+                    />
+                </SearchContainer>
                 <EntryList
                     shouldScroll={this.state.listEntries.allIds.length < 5}
                     ref={this.displayListRef}
@@ -674,14 +636,6 @@ const PrimaryActionBox = styled.div`
     justify-content: space-between;
 `
 
-const EntryListHeader = styled.div`
-    padding: 5px 5px;
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.greyScale4};
-    font-weight: 400;
-    margin-bottom: 5px;
-`
-
 const EntryList = styled.div<{ shouldScroll: boolean; context: string }>`
     position: relative;
     height: 100%;
@@ -788,13 +742,5 @@ const EntryRowContainer = styled.div`
     border-radius: 6px;
     position: relative;
 `
-
-const TabsBar = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const Tab = styled.div<{ active: boolean }>``
 
 export default SpacePicker
