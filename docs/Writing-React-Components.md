@@ -1,3 +1,5 @@
+❗ ATTENTION: This guide is out of date. For an example of React components in the codebase, look at the [popup menu](https://github.com/WorldBrain/Memex/blob/master/src/popup/logic.ts). You should find corresponding tests in the same directory, and `this.processEvent()` calls in the sibling `container.tsx` module.❗
+
 We try to separate UI logic as much as possible from React or any specific framework as much as possible. This not only allows for flexibility, but also to really easily develop the logic in a TDD way. To facilitate, we have written some small tools to facilitate this in `src/util/ui-logic.ts`. For starters, all new React components and their logic are written in TypeScript, allowing for much easier refactoring.
 
 We'll start with an example to show the basics of how to develop a React confirmation screen component in a TDD way with the following requirements:
