@@ -581,7 +581,7 @@ export default class SpacePickerLogic extends UILogic<
             ...normalizedStateToArray(state.pageLinkEntries),
         ]
             .filter(doAllTermsMatch)
-            .map((entry) => entry.unifiedId)
+            .flatMap((entry) => [entry.unifiedId, ...entry.pathUnifiedIds])
 
         this.emitMutation({ filteredListIds: { $set: matchingEntryIds } })
         this.maybeSetCreateEntryDisplay(query, state)
