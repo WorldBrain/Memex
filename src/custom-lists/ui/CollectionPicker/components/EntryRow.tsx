@@ -35,6 +35,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onListFocus?: (listId: string) => void
     goToButtonRef?: React.RefObject<HTMLDivElement>
     bgScriptBG: RemoteBGScriptInterface<'caller'>
+    pathText?: string
     getRootElement?: () => HTMLElement
     renderLeftSideIcon: () => JSX.Element
     toggleShowNewChildInput: ListTreeActions['toggleShowNewChildInput']
@@ -302,6 +303,17 @@ class EntryRow extends React.PureComponent<Props, State> {
                     {this.props.renderLeftSideIcon?.()}
                 </LeftSideIconContainer>
                 <NameWrapper>
+                    {this.props.pathText?.length > 0 && (
+                        <PathBox>
+                            {this.props.pathText}{' '}
+                            <Icon
+                                filePath="arrowRight"
+                                heightAndWidth="14px"
+                                color="greyScale4"
+                                hoverOff
+                            />
+                        </PathBox>
+                    )}
                     <NameRow>
                         {resultItem}
                         {shareState === 'shared' && (
