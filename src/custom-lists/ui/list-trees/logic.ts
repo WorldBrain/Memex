@@ -53,17 +53,35 @@ export class ListTreesLogic extends UILogic<State, Events> {
     ) => {
         this.emitMutation({
             listTrees: {
-                $apply: (prev) =>
-                    initNormalizedState({
+                $apply: (prev) => {
+                    let ancestorsOfListsToDisplayUnfolded = new Set<string>()
+                    let nextState = initNormalizedState({
                         getId: (state) => state.unifiedId,
                         seedData: normalizedStateToArray(nextLists).map(
                             (list) => {
                                 let prevState = prev.byId[list.unifiedId]
+                                let areChildrenShown =
+                                    prevState?.areChildrenShown
+
+                                // This should only occur on initial render - re-renders should keep their state from `prevState`
+                                if (areChildrenShown == null) {
+                                    areChildrenShown = false
+                                    if (
+                                        this.deps.initListsToDisplayUnfolded?.includes(
+                                            list.unifiedId,
+                                        )
+                                    ) {
+                                        list.pathUnifiedIds.forEach((listId) =>
+                                            ancestorsOfListsToDisplayUnfolded.add(
+                                                listId,
+                                            ),
+                                        )
+                                    }
+                                }
                                 return {
+                                    areChildrenShown,
                                     unifiedId: list.unifiedId,
                                     wasListDropped: false,
-                                    areChildrenShown:
-                                        prevState?.areChildrenShown ?? false,
                                     isNewChildInputShown:
                                         prevState?.isNewChildInputShown ??
                                         false,
@@ -77,7 +95,15 @@ export class ListTreesLogic extends UILogic<State, Events> {
                                 }
                             },
                         ),
-                    }),
+                    })
+
+                    // Toggle open any ancestors of the lists to display unfolded as specified via `deps.initListsToDisplayUnfolded`
+                    for (let listId of ancestorsOfListsToDisplayUnfolded) {
+                        nextState.byId[listId].areChildrenShown = true
+                    }
+
+                    return nextState
+                },
             },
         })
     }

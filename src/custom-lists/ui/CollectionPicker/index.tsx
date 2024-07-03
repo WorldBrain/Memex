@@ -106,6 +106,16 @@ class SpacePicker extends StatefulUIElement<
         return validateSpaceName(this.state.newEntryName, otherLists).valid
     }
 
+    private get selectedCacheListIds(): string[] {
+        return this.state.selectedListIds
+            .map(
+                (localListId) =>
+                    this.props.annotationsCache.getListByLocalId(localListId)
+                        ?.unifiedId,
+            )
+            .filter(Boolean)
+    }
+
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
@@ -245,6 +255,7 @@ class SpacePicker extends StatefulUIElement<
                 authBG={this.props.authBG}
                 listsBG={this.props.spacesBG}
                 cache={this.props.annotationsCache}
+                initListsToDisplayUnfolded={this.selectedCacheListIds}
                 areListsBeingFiltered={this.state.query.trim().length > 0}
             >
                 {(entry, treeState, actions, dndActions) => (

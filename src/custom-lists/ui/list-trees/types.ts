@@ -40,6 +40,8 @@ export interface Dependencies {
 
     /** Order is delegated to called - pass down already sorted. */
     lists: UnifiedList[]
+    /** Specify lists to have shown be default (all their ancestors will be toggled open). */
+    initListsToDisplayUnfolded?: UnifiedList['unifiedId'][]
     areListsBeingFiltered: boolean
     allowRootLevelReordering?: boolean
 
