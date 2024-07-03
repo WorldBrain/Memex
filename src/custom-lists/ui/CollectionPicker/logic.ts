@@ -28,6 +28,7 @@ import {
 } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { sleepPromise } from 'src/util/promises'
+import type { State as ListTreesState } from '../list-trees/types'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -117,7 +118,12 @@ export default class SpacePickerLogic extends UILogic<
     // For now, the only thing that needs to know if this has finished, is the tests.
     private processingUpstreamOperation: Promise<void>
 
-    constructor(protected dependencies: SpacePickerDependencies) {
+    constructor(
+        protected dependencies: SpacePickerDependencies & {
+            /** Allows direct access to list tree state encapsulated in ListTrees container component. */
+            getListTreeState: () => ListTreesState
+        },
+    ) {
         super()
         this.localStorage = new BrowserSettingsStore(
             dependencies.localStorageAPI,

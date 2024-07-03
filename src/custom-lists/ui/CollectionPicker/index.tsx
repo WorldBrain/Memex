@@ -82,9 +82,16 @@ class SpacePicker extends StatefulUIElement<
     private goToButtonRef = React.createRef<HTMLDivElement>()
     private openInTabGroupButtonRef = React.createRef<HTMLDivElement>()
     private searchInputRef = React.createRef<HTMLInputElement>()
+    private listTreesRef = React.createRef<ListTrees>()
 
     constructor(props: Props) {
-        super(props, new ListPickerLogic(props))
+        super(
+            props,
+            new ListPickerLogic({
+                ...props,
+                getListTreeState: () => this.listTreesRef.current?.state,
+            }),
+        )
     }
 
     private get shouldShowAddNewEntry(): boolean {
@@ -250,6 +257,7 @@ class SpacePicker extends StatefulUIElement<
         let index = 0 // TODO: dynamically set this in <ListTrees.props.renderListItem>
         return (
             <ListTrees
+                ref={this.listTreesRef}
                 sortChildrenByOrder
                 lists={listEntries}
                 authBG={this.props.authBG}
