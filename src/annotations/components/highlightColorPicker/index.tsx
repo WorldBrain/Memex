@@ -39,6 +39,7 @@ export interface State {
     showColorEditorPanel: boolean
     selectedRow: number
     highlightColorStateChanged: boolean
+    colorInputValue: string | null
 }
 
 export default class HighlightColorPicker extends React.Component<
@@ -67,6 +68,7 @@ export default class HighlightColorPicker extends React.Component<
         showColorEditorPanel: false,
         selectedRow: null,
         highlightColorStateChanged: false,
+        colorInputValue: null,
     }
 
     async componentDidMount() {
@@ -247,6 +249,7 @@ export default class HighlightColorPicker extends React.Component<
                             this.setState({
                                 showEditColor: newShowEditColor,
                                 showColorEditorPanel: false,
+                                colorInputValue: null,
                             })
                             this.saveHighlightColorSettings()
                             event.stopPropagation()
@@ -363,26 +366,43 @@ export default class HighlightColorPicker extends React.Component<
                     />
                 </HexPickerContainer>
                 <TextField
-                    value={tinycolor(
-                        this.state.highlightColorSettingState[index]['color'],
-                    ).toHex8String()}
+                    value={
+                        this.state.colorInputValue ??
+                        tinycolor(
+                            this.state.highlightColorSettingState[index][
+                                'color'
+                            ],
+                        ).toHex8String()
+                    }
                     onChange={(event) => {
-                        this.setState({
-                            highlightColorStateChanged: true,
-                        })
-                        let newHighlightColorSettingState = this.state.highlightColorSettingState.map(
-                            (i) => {
-                                return JSON.parse(JSON.stringify(i))
-                            },
-                        )
-                        newHighlightColorSettingState[index][
-                            'color'
-                        ] = (event.target as HTMLInputElement).value
+                        const inputValue = (event.target as HTMLInputElement)
+                            .value
 
-                        // modify the copy
-                        this.setState({
-                            highlightColorSettingState: newHighlightColorSettingState,
-                        })
+                        // Validate the input value
+                        if (tinycolor(inputValue).isValid()) {
+                            this.setState({
+                                highlightColorStateChanged: true,
+                            })
+                            let newHighlightColorSettingState = [
+                                ...this.state.highlightColorSettingState,
+                            ]
+
+                            newHighlightColorSettingState[index][
+                                'color'
+                            ] = tinycolor(inputValue).toRgb()
+
+                            // modify the copy
+                            this.setState({
+                                highlightColorSettingState: newHighlightColorSettingState,
+                                colorInputValue: (event.target as HTMLInputElement)
+                                    .value,
+                            })
+                        } else {
+                            this.setState({
+                                colorInputValue: (event.target as HTMLInputElement)
+                                    .value,
+                            })
+                        }
                     }}
                 />
             </ColorEditBox>

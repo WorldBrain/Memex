@@ -936,7 +936,7 @@ const NoScrollbar = styled.div`
     scrollbar-width: none;
 `
 
-const YTPMenuItem = styled.div`
+const YTPMenuItem = styled.div<{ active?: boolean }>`
     display: flex;
     align-items: center;
     cursor: pointer;
