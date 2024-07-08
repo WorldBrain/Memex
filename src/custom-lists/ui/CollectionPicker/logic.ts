@@ -381,15 +381,12 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        // if (event.key === 'Enter' && this.dependencies.onSubmit) {
-        //     await this.dependencies.onSubmit()
-        // }
-
         if (
             this.newTabKeys.includes(event.key as KeyEvent) &&
             previousState.listEntries.allIds.length > 0
         ) {
             if (previousState.listEntries.byId[previousState.focusedListId]) {
+                console.log('heeer')
                 await this.resultEntryPress({
                     event: {
                         entry:
@@ -579,7 +576,9 @@ export default class SpacePickerLogic extends UILogic<
         if (!query.trim().length) {
             this.emitMutation({ filteredListIds: { $set: null } })
         } else {
-            this.querySpaces(query, previousState)
+            if (query.length && previousState.query !== query) {
+                this.querySpaces(query, previousState)
+            }
         }
     }
 
