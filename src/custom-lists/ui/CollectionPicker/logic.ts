@@ -29,6 +29,7 @@ import {
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { sleepPromise } from 'src/util/promises'
 import type { State as ListTreesState } from '../list-trees/types'
+import { getVisibleTreeNodesInOrder } from '../list-trees/util'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -107,13 +108,6 @@ export default class SpacePickerLogic extends UILogic<
     /** Mirrors the state of the same name, for use in the sorting fn. */
     private selectedListIds: number[] = []
     private localListIdsMRU: number[] = []
-
-    /**
-     * Exists to have a numerical representation for the `focusedListId` state according
-     * to visual order, affording simple math on it.
-     * -1 means nothing focused, other numbers correspond to focused index of `defaultEntries.allIds` state
-     */
-    private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
     private processingUpstreamOperation: Promise<void>
@@ -269,7 +263,6 @@ export default class SpacePickerLogic extends UILogic<
                     },
                 })
             }
-            this.focusIndex = 0
         })
     }
 
@@ -310,8 +303,44 @@ export default class SpacePickerLogic extends UILogic<
     switchTab: EventHandler<'switchTab'> = async ({ event, previousState }) => {
         if (previousState.currentTab !== event.tab) {
             this.emitMutation({ currentTab: { $set: event.tab } })
-            this.setFocusedEntryIndex(-1, previousState)
+            this.calcNextFocusedEntry(previousState)
         }
+    }
+
+    private calcNextFocusedEntry(state: SpacePickerState, change: -1 | 1 = 1) {
+        let entries = getEntriesForCurrentPickerTab(state)
+        if (state.filteredListIds?.length) {
+            entries = entries.filter((e) =>
+                state.filteredListIds.includes(e.unifiedId),
+            )
+        }
+        let visibleTreeNodes = getVisibleTreeNodesInOrder(
+            entries,
+            this.dependencies.getListTreeState(),
+            {
+                areListsBeingFiltered: state.query.trim().length > 0,
+                sortChildrenByOrder: true,
+            },
+        )
+
+        let currentIndex = -1
+        if (state.focusedListId != null) {
+            currentIndex = visibleTreeNodes.findIndex(
+                (node) => node.unifiedId === state.focusedListId,
+            )
+        }
+
+        let nextIndex = currentIndex === -1 ? 0 : currentIndex + change
+
+        // Loop back around if going out-of-bounds
+        if (nextIndex < 0) {
+            nextIndex = visibleTreeNodes.length - 1
+        } else if (nextIndex >= visibleTreeNodes.length) {
+            nextIndex = 0
+        }
+
+        let nextFocusedListId = visibleTreeNodes[nextIndex].unifiedId
+        this.emitMutation({ focusedListId: { $set: nextFocusedListId } })
     }
 
     keyPress: EventHandler<'keyPress'> = async ({
@@ -367,7 +396,7 @@ export default class SpacePickerLogic extends UILogic<
         if (event.key === 'ArrowUp') {
             event.preventDefault()
             this.emitMutation({ keyboardNavActive: { $set: true } })
-            this.setFocusedEntryIndex(this.focusIndex - 1, previousState)
+            this.calcNextFocusedEntry(previousState, -1)
             await sleepPromise(50)
             this.emitMutation({ keyboardNavActive: { $set: false } })
             return
@@ -376,7 +405,7 @@ export default class SpacePickerLogic extends UILogic<
         if (event.key === 'ArrowDown') {
             event.preventDefault()
             this.emitMutation({ keyboardNavActive: { $set: true } })
-            this.setFocusedEntryIndex(this.focusIndex + 1, previousState)
+            this.calcNextFocusedEntry(previousState, 1)
             await sleepPromise(50)
             this.emitMutation({ keyboardNavActive: { $set: false } })
             return
@@ -580,7 +609,7 @@ export default class SpacePickerLogic extends UILogic<
             state.filteredListIds != null &&
             state.filteredListIds.length != nextState.filteredListIds.length
         ) {
-            this.setFocusedEntryIndex(0, nextState, true)
+            this.calcNextFocusedEntry(state)
         }
 
         if (state.query.length > 0 && nextState.query.length === 0) {
@@ -612,7 +641,7 @@ export default class SpacePickerLogic extends UILogic<
             this.emitMutation(mutation)
 
             const nextState = this.withMutation(state, mutation)
-            this.setFocusedEntryIndex(0, nextState)
+            this.calcNextFocusedEntry(nextState)
         }
     }
 
@@ -632,11 +661,7 @@ export default class SpacePickerLogic extends UILogic<
 
         if (alreadyExists) {
             this.emitMutation({ newEntryName: { $set: '' } })
-            // N.B. We update this focus index to this found entry, so that
-            // enter keys will action it. But we don't emit that focus
-            // to the user, because otherwise the style of the button changes
-            // showing the tick and it might seem like it's already selected.
-            this.setFocusedEntryIndex(1, state, false)
+            this.calcNextFocusedEntry(state)
             return
         }
 
@@ -647,33 +672,7 @@ export default class SpacePickerLogic extends UILogic<
             }
         }
         this.emitMutation({ newEntryName: { $set: _input } })
-        this.setFocusedEntryIndex(-1, state)
-    }
-
-    private setFocusedEntryIndex = (
-        nextFocusIndex: number | null,
-        state: SpacePickerState,
-        emit = true,
-    ) => {
-        let entries = getEntriesForCurrentPickerTab(state)
-        if (state.filteredListIds?.length) {
-            entries = entries.filter((entry) =>
-                state.filteredListIds.includes(entry.unifiedId),
-            )
-        }
-
-        if (nextFocusIndex < 0 || nextFocusIndex >= entries.length) {
-            return
-        }
-
-        this.focusIndex = nextFocusIndex ?? 0
-        const focusEntryData = entries[nextFocusIndex]
-
-        if (emit) {
-            this.emitMutation({
-                focusedListId: { $set: focusEntryData?.unifiedId ?? null },
-            })
-        }
+        this.calcNextFocusedEntry(state)
     }
 
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
@@ -858,7 +857,7 @@ export default class SpacePickerLogic extends UILogic<
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
 
-        this.setFocusedEntryIndex(0, nextState)
+        this.calcNextFocusedEntry(nextState)
 
         return localListId
     }
@@ -937,10 +936,7 @@ export default class SpacePickerLogic extends UILogic<
         })
     }
 
-    resultEntryFocus: EventHandler<'resultEntryFocus'> = ({
-        event: { entry, index },
-        previousState,
-    }) => {
-        this.setFocusedEntryIndex(index, previousState)
+    focusListEntry: EventHandler<'focusListEntry'> = ({ event }) => {
+        this.emitMutation({ focusedListId: { $set: event.listId } })
     }
 }

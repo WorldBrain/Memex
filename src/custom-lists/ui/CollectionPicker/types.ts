@@ -47,7 +47,7 @@ export type SpacePickerEvent = UIEvent<{
         entry: Pick<UnifiedList, 'localId'>
         shouldRerender?: boolean
     }
-    resultEntryFocus: { entry: UnifiedList; index: number }
+    focusListEntry: { listId: UnifiedList['unifiedId'] | null }
     toggleEntryContextMenu: { listId: number }
     toggleEntryEditMenu: { listId: number }
     onOpenInTabGroupPress: { listId: number }

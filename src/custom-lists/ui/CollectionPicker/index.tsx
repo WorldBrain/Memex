@@ -137,10 +137,6 @@ class SpacePicker extends StatefulUIElement<
         })
     }
 
-    handleResultListFocus = (list: UnifiedList, index?: number) => {
-        this.processEvent('resultEntryFocus', { entry: list, index })
-    }
-
     handleNewListPress = () => {
         this.processEvent('newEntryPress', {
             entry: this.state.newEntryName,
@@ -304,15 +300,13 @@ class SpacePicker extends StatefulUIElement<
                             }
                             bgScriptBG={this.props.bgScriptBG}
                             onFocus={() =>
-                                this.processEvent('resultEntryFocus', {
-                                    entry,
-                                    index,
+                                this.processEvent('focusListEntry', {
+                                    listId: entry.unifiedId,
                                 })
                             }
                             onUnfocus={() =>
-                                this.processEvent('resultEntryFocus', {
-                                    entry,
-                                    index: null,
+                                this.processEvent('focusListEntry', {
+                                    listId: null,
                                 })
                             }
                             index={index}
