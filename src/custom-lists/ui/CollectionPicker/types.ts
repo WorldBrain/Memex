@@ -33,7 +33,6 @@ export interface SpacePickerState {
     spaceAddRemoveState: TaskState
     spaceWriteError: string | null
     renameListErrorMessage: string | null
-    keyboardNavActive: boolean
     addedToAllIds: number[]
 }
 

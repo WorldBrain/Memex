@@ -27,9 +27,9 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { sleepPromise } from 'src/util/promises'
 import type { State as ListTreesState } from '../list-trees/types'
 import { getVisibleTreeNodesInOrder } from '../list-trees/util'
+import type EntryRow from './components/EntryRow'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -116,6 +116,7 @@ export default class SpacePickerLogic extends UILogic<
         protected dependencies: SpacePickerDependencies & {
             /** Allows direct access to list tree state encapsulated in ListTrees container component. */
             getListTreeState: () => ListTreesState
+            getEntryRowRefs: () => { [unifiedId: string]: EntryRow }
         },
     ) {
         super()
@@ -141,7 +142,6 @@ export default class SpacePickerLogic extends UILogic<
         spaceWriteError: null,
         renameListErrorMessage: null,
         contextMenuListId: null,
-        keyboardNavActive: false,
         addedToAllIds: [],
         editMenuListId: null,
     })
@@ -307,7 +307,10 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
-    private calcNextFocusedEntry(state: SpacePickerState, change: -1 | 1 = 1) {
+    private calcNextFocusedEntry(
+        state: SpacePickerState,
+        change: -1 | 1 = 1,
+    ): string {
         let entries = getEntriesForCurrentPickerTab(state)
         if (state.filteredListIds?.length) {
             entries = entries.filter((e) =>
@@ -341,6 +344,7 @@ export default class SpacePickerLogic extends UILogic<
 
         let nextFocusedListId = visibleTreeNodes[nextIndex].unifiedId
         this.emitMutation({ focusedListId: { $set: nextFocusedListId } })
+        return nextFocusedListId
     }
 
     keyPress: EventHandler<'keyPress'> = async ({
@@ -395,19 +399,15 @@ export default class SpacePickerLogic extends UILogic<
 
         if (event.key === 'ArrowUp') {
             event.preventDefault()
-            this.emitMutation({ keyboardNavActive: { $set: true } })
-            this.calcNextFocusedEntry(previousState, -1)
-            await sleepPromise(50)
-            this.emitMutation({ keyboardNavActive: { $set: false } })
+            let focusedListId = this.calcNextFocusedEntry(previousState, -1)
+            this.dependencies.getEntryRowRefs()[focusedListId]?.scrollIntoView()
             return
         }
 
         if (event.key === 'ArrowDown') {
             event.preventDefault()
-            this.emitMutation({ keyboardNavActive: { $set: true } })
-            this.calcNextFocusedEntry(previousState, 1)
-            await sleepPromise(50)
-            this.emitMutation({ keyboardNavActive: { $set: false } })
+            let focusedListId = this.calcNextFocusedEntry(previousState, 1)
+            this.dependencies.getEntryRowRefs()[focusedListId]?.scrollIntoView()
             return
         }
         if (event.key === 'Escape') {

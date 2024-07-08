@@ -29,7 +29,6 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     extraMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
     focused?: boolean
-    keyboardNavActive?: boolean
     keepScrollPosition?: () => void
     addedToAllIds?: number[]
     onListFocus?: (listId: string) => void
@@ -141,7 +140,7 @@ class EntryRow extends React.PureComponent<Props, State> {
         e.stopPropagation()
     }
 
-    private scrollIntoView = () => {
+    scrollIntoView = () => {
         this.resultEntryRef?.current.scrollIntoView({
             block: 'center',
         })
@@ -266,16 +265,11 @@ class EntryRow extends React.PureComponent<Props, State> {
             selected,
             resultItem,
             contextMenuBtnRef,
-            keyboardNavActive,
             shareState,
             dndActions,
         } = this.props
 
         let cleanID = parseInt(id.split('ListKeyName-')[1])
-
-        if (keyboardNavActive && focused && this.resultEntryRef.current) {
-            this.scrollIntoView()
-        }
 
         return (
             <Row
@@ -285,10 +279,8 @@ class EntryRow extends React.PureComponent<Props, State> {
                 onClick={this.handleResultPress}
                 ref={this.resultEntryRef}
                 onMouseEnter={() => {
-                    if (!keyboardNavActive) {
-                        this.props.onFocus()
-                    }
                     this.setState({ mouseOverItem: true })
+                    this.props.onFocus()
                 }}
                 onMouseLeave={() => {
                     this.setState({ mouseOverItem: false })

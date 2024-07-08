@@ -112,6 +112,7 @@ const setupLogicHelper = async ({
             dragOverListId: null,
             listTrees: initNormalizedState(),
         }),
+        getEntryRowRefs: () => ({}),
     })
 
     const testLogic = device.createElement(entryPickerLogic)

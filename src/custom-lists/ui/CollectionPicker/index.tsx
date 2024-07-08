@@ -83,6 +83,7 @@ class SpacePicker extends StatefulUIElement<
     private openInTabGroupButtonRef = React.createRef<HTMLDivElement>()
     private searchInputRef = React.createRef<HTMLInputElement>()
     private listTreesRef = React.createRef<ListTrees>()
+    private entryRowRefs: { [unifiedId: string]: EntryRow } = {}
 
     constructor(props: Props) {
         super(
@@ -90,6 +91,7 @@ class SpacePicker extends StatefulUIElement<
             new ListPickerLogic({
                 ...props,
                 getListTreeState: () => this.listTreesRef.current?.state,
+                getEntryRowRefs: () => this.entryRowRefs,
             }),
         )
     }
@@ -275,6 +277,9 @@ class SpacePicker extends StatefulUIElement<
                     >
                         <EntryRow
                             id={`ListKeyName-${entry.unifiedId}`}
+                            ref={(ref) =>
+                                (this.entryRowRefs[entry.unifiedId] = ref)
+                            }
                             indentSteps={entry.pathUnifiedIds.length}
                             dndActions={dndActions}
                             onPress={() => {
@@ -310,7 +315,6 @@ class SpacePicker extends StatefulUIElement<
                                 })
                             }
                             index={index}
-                            keyboardNavActive={this.state.keyboardNavActive}
                             selected={this.state.selectedListIds.includes(
                                 entry.localId,
                             )}
