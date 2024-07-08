@@ -252,6 +252,25 @@ class SpacePicker extends StatefulUIElement<
         if (!listEntries.length) {
             return this.renderEmptyList()
         }
+
+        // Function to highlight matching text
+        const highlightText = (text: string, query: string) => {
+            if (!query) return text
+            const segments = query.split('/')
+            const lastQuery = segments.length > 0 ? segments.pop() : query
+
+            const parts = text.split(new RegExp(`(${lastQuery})`, 'gi'))
+            return parts.map((part, index) =>
+                part.toLowerCase() === lastQuery.toLowerCase() &&
+                lastQuery.length > 0 ? (
+                    <HighlightedTextSpan key={index}>
+                        {part}
+                    </HighlightedTextSpan>
+                ) : (
+                    part
+                ),
+            )
+        }
         let index = 0 // TODO: dynamically set this in <ListTrees.props.renderListItem>
         return (
             <ListTrees
@@ -319,13 +338,18 @@ class SpacePicker extends StatefulUIElement<
                                 entry.localId,
                             )}
                             focused={
-                                this.state.focusedListId === entry.unifiedId
-                            }
-                            resultItem={
-                                <ListResultItem>{entry.name}</ListResultItem>
-                            }
-                            contextMenuBtnRef={this.contextMenuBtnRef}
-                            goToButtonRef={this.goToButtonRef}
+                                    this.state.focusedListId === entry.unifiedId
+                                }
+                                resultItem={
+                                    <ListResultItem>
+                                        {highlightText(
+                                            entry.name,
+                                            this.state.query,
+                                        )}
+                                    </ListResultItem>
+                                }
+                                contextMenuBtnRef={this.contextMenuBtnRef}
+                                goToButtonRef={this.goToButtonRef}
                             editMenuBtnRef={this.editMenuBtnRef}
                             extraMenuBtnRef={this.extraMenuBtnRef}
                             openInTabGroupButtonRef={
@@ -758,6 +782,14 @@ const EntryRowContainer = styled.div`
     margin: 0 5px;
     border-radius: 6px;
     position: relative;
+`
+
+const HighlightedTextSpan = styled.span`
+    background: ${(props) => props.theme.colors.prime1};
+    border-radius: 4px;
+    margin: 0 2px;
+    color: ${(props) => props.theme.colors.black};
+    white-space: nowrap;
 `
 
 export default SpacePicker
