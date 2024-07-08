@@ -386,7 +386,6 @@ export default class SpacePickerLogic extends UILogic<
             previousState.listEntries.allIds.length > 0
         ) {
             if (previousState.listEntries.byId[previousState.focusedListId]) {
-                console.log('heeer')
                 await this.resultEntryPress({
                     event: {
                         entry:
@@ -583,25 +582,47 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     private querySpaces = (query: string, state: SpacePickerState) => {
-        const distinctTerms = query.split(/\s+/).filter(Boolean)
-        const doAllTermsMatch = (list: UnifiedList): boolean =>
-            distinctTerms.reduce((acc, term) => {
-                const matches =
-                    acc &&
-                    list.name
-                        .toLocaleLowerCase()
-                        .includes(term.toLocaleLowerCase())
-
-                return matches
-            }, true)
+        let isPathSearch = false
+        let pathSearchItems = []
+        if (query.includes('/')) {
+            isPathSearch = true
+        }
+        if (isPathSearch) {
+            pathSearchItems = query.split('/')
+        } else {
+            pathSearchItems = [query]
+        }
 
         const listEntryIds = [
             ...normalizedStateToArray(state.listEntries),
             ...normalizedStateToArray(state.pageLinkEntries),
         ]
-        const filteredEntryIds = listEntryIds.filter(doAllTermsMatch)
+        let filteredEntries = []
+        pathSearchItems.forEach((item, i) => {
+            const distinctTerms = item.split(/\s+/).filter(Boolean)
+            const doAllTermsMatch = (list: UnifiedList): boolean =>
+                distinctTerms.reduce((acc, term) => {
+                    const matches =
+                        acc &&
+                        list.name
+                            .toLocaleLowerCase()
+                            .includes(term.toLocaleLowerCase())
 
-        const matchingEntryIds = filteredEntryIds.flatMap((entry) => [
+                    return matches
+                }, true)
+            if (i === 0) {
+                filteredEntries = listEntryIds.filter(doAllTermsMatch)
+            } else {
+                const children = filteredEntries.flatMap((listItem) => {
+                    return this.dependencies.annotationsCache.getListsByParentId(
+                        listItem.unifiedId,
+                    )
+                })
+                filteredEntries = children.filter(doAllTermsMatch)
+            }
+        })
+
+        const matchingEntryIds = filteredEntries.flatMap((entry) => [
             entry.unifiedId,
             ...entry.pathUnifiedIds,
         ])
