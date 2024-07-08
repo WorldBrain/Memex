@@ -309,7 +309,8 @@ export default class SpacePickerLogic extends UILogic<
 
     private calcNextFocusedEntry(
         state: SpacePickerState,
-        change: -1 | 1 = 1,
+        change: -1 | 1 = null,
+        focusedListId?: string,
     ): string {
         let entries = getEntriesForCurrentPickerTab(state)
         if (state.filteredListIds?.length) {
@@ -330,6 +331,12 @@ export default class SpacePickerLogic extends UILogic<
         if (state.focusedListId != null) {
             currentIndex = visibleTreeNodes.findIndex(
                 (node) => node.unifiedId === state.focusedListId,
+            )
+        }
+
+        if (focusedListId) {
+            currentIndex = visibleTreeNodes.findIndex(
+                (node) => node.unifiedId === focusedListId,
             )
         }
 
@@ -580,22 +587,25 @@ export default class SpacePickerLogic extends UILogic<
         const distinctTerms = query.split(/\s+/).filter(Boolean)
         const doAllTermsMatch = (list: UnifiedList): boolean =>
             distinctTerms.reduce((acc, term) => {
-                return (
+                const matches =
                     acc &&
                     list.name
                         .toLocaleLowerCase()
                         .includes(term.toLocaleLowerCase())
-                )
+
+                return matches
             }, true)
 
-        const matchingEntryIds = [
+        const listEntryIds = [
             ...normalizedStateToArray(state.listEntries),
             ...normalizedStateToArray(state.pageLinkEntries),
         ]
-            .filter(doAllTermsMatch)
-            .flatMap((entry) => [entry.unifiedId, ...entry.pathUnifiedIds])
+        const filteredEntryIds = listEntryIds.filter(doAllTermsMatch)
 
-        this.maybeSetCreateEntryDisplay(query, state)
+        const matchingEntryIds = filteredEntryIds.flatMap((entry) => [
+            entry.unifiedId,
+            ...entry.pathUnifiedIds,
+        ])
 
         const mutation: UIMutation<SpacePickerState> = {
             filteredListIds: { $set: matchingEntryIds },
@@ -604,12 +614,12 @@ export default class SpacePickerLogic extends UILogic<
 
         this.emitMutation(mutation)
         const nextState = this.withMutation(state, mutation)
-
-        if (
-            state.filteredListIds != null &&
-            state.filteredListIds.length != nextState.filteredListIds.length
-        ) {
-            this.calcNextFocusedEntry(state)
+        // added this to give the focus function a specific ID to focus on so we can focus on a specific item id
+        if (matchingEntryIds && matchingEntryIds.length > 0) {
+            const listIdToFocusFirst = matchingEntryIds[0]
+            this.calcNextFocusedEntry(nextState, null, listIdToFocusFirst)
+        } else {
+            this.maybeSetCreateEntryDisplay(query, state)
         }
 
         if (state.query.length > 0 && nextState.query.length === 0) {
@@ -640,8 +650,9 @@ export default class SpacePickerLogic extends UILogic<
 
             this.emitMutation(mutation)
 
+            const listIdToFocusFirst = toSet.byId[0].unifiedId
             const nextState = this.withMutation(state, mutation)
-            this.calcNextFocusedEntry(nextState)
+            this.calcNextFocusedEntry(nextState, null, listIdToFocusFirst)
         }
     }
 
