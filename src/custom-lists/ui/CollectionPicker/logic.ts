@@ -371,7 +371,7 @@ export default class SpacePickerLogic extends UILogic<
             (event.key === 'Enter' &&
                 previousState.filteredListIds?.length === 0)
         ) {
-            if (previousState.newEntryName !== '') {
+            if (previousState.newEntryName != null) {
                 await this.newEntryPress({
                     previousState,
                     event: { entry: previousState.newEntryName },
@@ -582,6 +582,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     private querySpaces = (query: string, state: SpacePickerState) => {
+        console.log('query', query)
         let isPathSearch = false
         let pathSearchItems: string[] = []
         if (query.includes('/')) {
@@ -600,7 +601,11 @@ export default class SpacePickerLogic extends UILogic<
         let filteredEntries: UnifiedList[] = []
         let newEntryObject: { unifiedId: string; name: string }[] =
             state.newEntryName ?? []
+        console.log('entryObject', newEntryObject)
         pathSearchItems.forEach((item, i) => {
+            if (item.length === 0) {
+                return
+            }
             const distinctTerms = item.split(/\s+/).filter(Boolean)
             const doAllTermsMatch = (list: UnifiedList): boolean =>
                 distinctTerms.reduce((acc, term) => {
@@ -637,7 +642,7 @@ export default class SpacePickerLogic extends UILogic<
 
         this.emitMutation(mutation)
         const nextState = this.withMutation(state, mutation)
-        const slashCount = query.split('/').length - 1
+        const slashCount = (query.match(/\//g) || []).length
         // added this to give the focus function a specific ID to focus on so we can focus on a specific item id
         if (matchingEntryIds && matchingEntryIds.length > 0) {
             const listIdToFocusFirst = matchingEntryIds[0]
@@ -659,19 +664,29 @@ export default class SpacePickerLogic extends UILogic<
                 ]
             }
 
-            newEntryObject = [...getListHierarchy(listIdToFocusFirst)]
-            if (newEntryObject.length > slashCount) {
-                newEntryObject.pop()
+            if (slashCount === 0) {
+                newEntryObject = [
+                    { unifiedId: listIdToFocusFirst, name: query },
+                ]
+            } else {
+                newEntryObject = [...getListHierarchy(listIdToFocusFirst)]
+                console.log('newEntryObject', newEntryObject)
+                if (newEntryObject.length > slashCount) {
+                    newEntryObject.pop()
+                }
             }
+
             this.emitMutation({ newEntryName: { $set: newEntryObject } })
             this.calcNextFocusedEntry(nextState, null, listIdToFocusFirst)
         } else {
+            console.log('newEntryObject3', newEntryObject)
             if (newEntryObject[newEntryObject.length - 1].unifiedId == null) {
                 newEntryObject.pop()
             }
             const queryParts = query.split('/').pop()
             newEntryObject.push({ unifiedId: null, name: queryParts })
 
+            console.log('newEntryObject2', newEntryObject)
             this.maybeSetCreateEntryDisplay(query, state)
         }
 
