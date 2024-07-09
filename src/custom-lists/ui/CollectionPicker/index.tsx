@@ -36,6 +36,8 @@ import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 import { runInBackground } from 'src/util/webextensionRPC'
+import { ListTrees } from '../list-trees'
+import { ListTreeToggleArrow } from '../list-trees/components/tree-toggle-arrow'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
@@ -80,9 +82,18 @@ class SpacePicker extends StatefulUIElement<
     private goToButtonRef = React.createRef<HTMLDivElement>()
     private openInTabGroupButtonRef = React.createRef<HTMLDivElement>()
     private searchInputRef = React.createRef<HTMLInputElement>()
+    private listTreesRef = React.createRef<ListTrees>()
+    private entryRowRefs: { [unifiedId: string]: EntryRow } = {}
 
     constructor(props: Props) {
-        super(props, new ListPickerLogic(props))
+        super(
+            props,
+            new ListPickerLogic({
+                ...props,
+                getListTreeState: () => this.listTreesRef.current?.state,
+                getEntryRowRefs: () => this.entryRowRefs,
+            }),
+        )
     }
 
     private get shouldShowAddNewEntry(): boolean {
@@ -104,35 +115,14 @@ class SpacePicker extends StatefulUIElement<
         return validateSpaceName(this.state.newEntryName, otherLists).valid
     }
 
-    private get selectedDisplayEntries(): Array<{
-        localId: number
-        name: string
-    }> {
-        const selectedIdSet = new Set(this.state.selectedListIds)
-        return getEntriesForCurrentPickerTab(this.state)
-            .filter(
-                (entry) =>
-                    entry.localId != null && selectedIdSet.has(entry.localId),
+    private get selectedCacheListIds(): string[] {
+        return this.state.selectedListIds
+            .map(
+                (localListId) =>
+                    this.props.annotationsCache.getListByLocalId(localListId)
+                        ?.unifiedId,
             )
-            .map((entry) => ({
-                localId: entry.localId,
-                name: entry.name,
-            }))
-    }
-
-    componentDidUpdate(
-        prevProps: Readonly<Props>,
-        prevState: Readonly<SpacePickerState>,
-        snapshot?: any,
-    ): void {
-        if (
-            prevProps.headlessQuery !== this.props.headlessQuery &&
-            this.props.isHeadLess
-        ) {
-            this.processEvent('searchInputChanged', {
-                query: this.props.headlessQuery,
-            })
-        }
+            .filter(Boolean)
     }
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
@@ -149,21 +139,12 @@ class SpacePicker extends StatefulUIElement<
         })
     }
 
-    handleResultListFocus = (list: UnifiedList, index?: number) => {
-        this.processEvent('resultEntryFocus', { entry: list, index })
-
-        // const el = document.getElementById(`ListKeyName-${list.localId}`)
-        // if (el != null) {
-        //     el.scrollTop = el.offsetTop
-        // }
-    }
-
     handleNewListPress = () => {
         this.processEvent('newEntryPress', {
             entry: this.state.newEntryName,
         })
     }
-    // Adjust the event handler signatures
+
     private handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         this.processEvent('keyPress', { event })
     }
@@ -238,95 +219,6 @@ class SpacePicker extends StatefulUIElement<
         }
     }
 
-    private renderListRow = (
-        entry: UnifiedList<'user-list' | 'page-link'>,
-        index: number,
-    ) => (
-        <EntryRowContainer key={entry.unifiedId}>
-            <EntryRow
-                id={`ListKeyName-${entry.unifiedId}`}
-                onPress={() => {
-                    this.processEvent('resultEntryPress', {
-                        entry,
-                    })
-                }}
-                pathText={this.getListNameByUnifiedId(entry.parentUnifiedId)}
-                onListFocus={() => this.props.onListFocus(entry.localId)}
-                addedToAllIds={this.state.addedToAllIds}
-                keepScrollPosition={this.keepScrollPosition}
-                onPressActOnAll={
-                    this.props.actOnAllTabs
-                        ? () =>
-                              this.processEvent('resultEntryAllPress', {
-                                  entry,
-                              })
-                        : undefined
-                }
-                bgScriptBG={this.props.bgScriptBG}
-                onFocus={async () => {
-                    // const el = document.getElementById(
-                    //     `ListKeyName-${entry.unifiedId}`,
-                    // )
-                    // if (el != null) {
-                    //     el.scrollTop = el.offsetTop
-                    // }
-                    await this.processEvent('resultEntryFocus', {
-                        entry,
-                        index,
-                    })
-                }}
-                onUnfocus={() =>
-                    this.processEvent('resultEntryFocus', {
-                        entry,
-                        index: null,
-                    })
-                }
-                allTabsButtonPressed={this.state.allTabsButtonPressed}
-                index={index}
-                keyboardNavActive={this.state.keyboardNavActive}
-                selected={this.state.selectedListIds.includes(entry.localId)}
-                focused={this.state.focusedListId === entry.unifiedId}
-                localId={entry.localId}
-                resultItem={<ListResultItem>{entry.name}</ListResultItem>}
-                removeTooltipText={
-                    this.props.removeTooltipText ?? 'Remove from Space'
-                }
-                contextMenuBtnRef={this.contextMenuBtnRef}
-                goToButtonRef={this.goToButtonRef}
-                editMenuBtnRef={this.editMenuBtnRef}
-                extraMenuBtnRef={this.extraMenuBtnRef}
-                openInTabGroupButtonRef={this.openInTabGroupButtonRef}
-                onContextMenuBtnPress={
-                    entry.creator?.id === this.state.currentUser?.id
-                        ? () =>
-                              this.processEvent('toggleEntryContextMenu', {
-                                  listId: entry.localId,
-                              })
-                        : undefined
-                }
-                onEditMenuBtnPress={
-                    entry.creator?.id === this.state.currentUser?.id
-                        ? () =>
-                              this.processEvent('toggleEntryEditMenu', {
-                                  listId: entry.localId,
-                              })
-                        : undefined
-                }
-                onOpenInTabGroupPress={() =>
-                    this.processEvent('onOpenInTabGroupPress', {
-                        listId: entry.localId,
-                    })
-                }
-                actOnAllTooltipText="Add all tabs in window to Space"
-                shareState={
-                    entry?.isPrivate ?? 'private' ? 'private' : 'shared'
-                }
-                getRootElement={this.props.getRootElement}
-                {...entry}
-            />
-        </EntryRowContainer>
-    )
-
     private keepScrollPosition = () => {
         const el = this.displayListRef.current
         const scrollTop = el.scrollTop
@@ -335,10 +227,6 @@ class SpacePicker extends StatefulUIElement<
                 el.scroll({ top: 0 })
             }
         }
-    }
-
-    private getListNameByUnifiedId = (unifiedId: string) => {
-        return this.props.annotationsCache.lists.byId[unifiedId]?.name
     }
 
     private renderListEntries() {
@@ -364,7 +252,159 @@ class SpacePicker extends StatefulUIElement<
         if (!listEntries.length) {
             return this.renderEmptyList()
         }
-        return listEntries.map(this.renderListRow)
+
+        // Function to highlight matching text
+        const highlightText = (text: string, query: string) => {
+            if (!query) return text
+            const segments = query.split('/')
+            const lastQuery = segments.length > 0 ? segments.pop() : query
+
+            const parts = text.split(new RegExp(`(${lastQuery})`, 'gi'))
+            return parts.map((part, index) =>
+                part.toLowerCase() === lastQuery.toLowerCase() &&
+                lastQuery.length > 0 ? (
+                    <HighlightedTextSpan key={index}>
+                        {part}
+                    </HighlightedTextSpan>
+                ) : (
+                    part
+                ),
+            )
+        }
+        let index = 0 // TODO: dynamically set this in <ListTrees.props.renderListItem>
+        return (
+            <ListTrees
+                ref={this.listTreesRef}
+                sortChildrenByOrder
+                lists={listEntries}
+                authBG={this.props.authBG}
+                listsBG={this.props.spacesBG}
+                cache={this.props.annotationsCache}
+                initListsToDisplayUnfolded={this.selectedCacheListIds}
+                areListsBeingFiltered={this.state.query.trim().length > 0}
+            >
+                {(entry, treeState, actions, dndActions) => (
+                    <EntryRowContainer
+                        onDragEnter={dndActions.onDragEnter}
+                        onDragLeave={dndActions.onDragLeave}
+                        onDragOver={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                        }}
+                        onDrop={dndActions.onDrop}
+                        key={entry.unifiedId}
+                    >
+                        <EntryRow
+                            id={`ListKeyName-${entry.unifiedId}`}
+                            ref={(ref) =>
+                                (this.entryRowRefs[entry.unifiedId] = ref)
+                            }
+                            indentSteps={entry.pathUnifiedIds.length}
+                            dndActions={dndActions}
+                            onPress={() => {
+                                this.processEvent('resultEntryPress', {
+                                    entry,
+                                })
+                            }}
+                            onListFocus={() =>
+                                this.props.onListFocus(entry.localId)
+                            }
+                            addedToAllIds={this.state.addedToAllIds}
+                            keepScrollPosition={this.keepScrollPosition}
+                            onPressActOnAll={
+                                this.props.actOnAllTabs
+                                    ? () =>
+                                          this.processEvent(
+                                              'resultEntryAllPress',
+                                              {
+                                                  entry,
+                                              },
+                                          )
+                                    : undefined
+                            }
+                            bgScriptBG={this.props.bgScriptBG}
+                            onFocus={() =>
+                                this.processEvent('focusListEntry', {
+                                    listId: entry.unifiedId,
+                                })
+                            }
+                            onUnfocus={() =>
+                                this.processEvent('focusListEntry', {
+                                    listId: null,
+                                })
+                            }
+                            index={index}
+                            selected={this.state.selectedListIds.includes(
+                                entry.localId,
+                            )}
+                            focused={
+                                this.state.focusedListId === entry.unifiedId
+                            }
+                            resultItem={
+                                <ListResultItem>
+                                    {highlightText(
+                                        entry.name,
+                                        this.state.query,
+                                    )}
+                                </ListResultItem>
+                            }
+                            contextMenuBtnRef={this.contextMenuBtnRef}
+                            goToButtonRef={this.goToButtonRef}
+                            editMenuBtnRef={this.editMenuBtnRef}
+                            extraMenuBtnRef={this.extraMenuBtnRef}
+                            openInTabGroupButtonRef={
+                                this.openInTabGroupButtonRef
+                            }
+                            onContextMenuBtnPress={
+                                entry.creator?.id === this.state.currentUser?.id
+                                    ? () =>
+                                          this.processEvent(
+                                              'toggleEntryContextMenu',
+                                              {
+                                                  listId: entry.localId,
+                                              },
+                                          )
+                                    : undefined
+                            }
+                            onEditMenuBtnPress={
+                                entry.creator?.id === this.state.currentUser?.id
+                                    ? () =>
+                                          this.processEvent(
+                                              'toggleEntryEditMenu',
+                                              {
+                                                  listId: entry.localId,
+                                              },
+                                          )
+                                    : undefined
+                            }
+                            onOpenInTabGroupPress={() =>
+                                this.processEvent('onOpenInTabGroupPress', {
+                                    listId: entry.localId,
+                                })
+                            }
+                            actOnAllTooltipText="Add all tabs in window to Space"
+                            shareState={
+                                entry?.isPrivate ?? 'private'
+                                    ? 'private'
+                                    : 'shared'
+                            }
+                            getRootElement={this.props.getRootElement}
+                            {...entry}
+                            toggleShowNewChildInput={
+                                actions.toggleShowNewChildInput
+                            }
+                            renderLeftSideIcon={() => (
+                                <ListTreeToggleArrow
+                                    getRootElement={this.props.getRootElement}
+                                    treeState={treeState}
+                                    actions={actions}
+                                />
+                            )}
+                        />
+                    </EntryRowContainer>
+                )}
+            </ListTrees>
+        )
     }
 
     private handleSpaceContextMenuClose = (listId: number) => async () => {
@@ -495,28 +535,26 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <PickerContainer>
-                {!this.props.isHeadLess && (
-                    <SearchContainer>
-                        <PickerSearchInput
-                            searchInputRef={this.searchInputRef}
-                            searchInputPlaceholder={
-                                this.props.searchInputPlaceholder
-                                    ? this.props.searchInputPlaceholder
-                                    : this.props.filterMode
-                                    ? 'Search for Spaces to filter'
-                                    : 'Search & Add Spaces'
-                            }
-                            showPlaceholder={
-                                this.state.selectedListIds.length === 0
-                            }
-                            onChange={this.handleSearchInputChanged}
-                            onKeyDown={this.handleKeyPress}
-                            onKeyUp={this.handleKeyUp}
-                            value={this.state.query}
-                            autoFocus={true}
-                        />
-                    </SearchContainer>
-                )}
+                <SearchContainer>
+                    <PickerSearchInput
+                        searchInputRef={this.searchInputRef}
+                        searchInputPlaceholder={
+                            this.props.searchInputPlaceholder
+                                ? this.props.searchInputPlaceholder
+                                : this.props.filterMode
+                                ? 'Search for Spaces to filter'
+                                : 'Search & Add Spaces'
+                        }
+                        showPlaceholder={
+                            this.state.selectedListIds.length === 0
+                        }
+                        onChange={this.handleSearchInputChanged}
+                        onKeyDown={this.handleKeyPress}
+                        onKeyUp={this.handleKeyUp}
+                        value={this.state.query}
+                        autoFocus={true}
+                    />
+                </SearchContainer>
                 <EntryList
                     shouldScroll={this.state.listEntries.allIds.length < 5}
                     ref={this.displayListRef}
@@ -639,14 +677,6 @@ const PrimaryActionBox = styled.div`
     justify-content: space-between;
 `
 
-const EntryListHeader = styled.div`
-    padding: 5px 5px;
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.greyScale4};
-    font-weight: 400;
-    margin-bottom: 5px;
-`
-
 const EntryList = styled.div<{ shouldScroll: boolean; context: string }>`
     position: relative;
     height: 100%;
@@ -754,12 +784,12 @@ const EntryRowContainer = styled.div`
     position: relative;
 `
 
-const TabsBar = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
+const HighlightedTextSpan = styled.span`
+    background: ${(props) => props.theme.colors.prime1};
+    border-radius: 4px;
+    margin: 0 2px;
+    color: ${(props) => props.theme.colors.black};
+    white-space: nowrap;
 `
-
-const Tab = styled.div<{ active: boolean }>``
 
 export default SpacePicker

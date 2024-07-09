@@ -468,7 +468,6 @@ export class AnnotationsSidebarContainer<
                         this.processEvent('setSelectedList', { unifiedListId })
                     }}
                     getRootElement={this.props.getRootElement}
-                    autoFocus={true}
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -552,7 +551,6 @@ export class AnnotationsSidebarContainer<
             showPageLinks: true,
             bgScriptBG: this.props.bgScriptBG,
             localStorageAPI: this.props.storageAPI.local,
-            unifiedAnnotationId: params.annotation.unifiedId,
             initialSelectedListIds: () =>
                 cacheUtils.getLocalListIdsForCacheIds(
                     annotationsCache,
@@ -693,7 +691,6 @@ export class AnnotationsSidebarContainer<
                     closePicker()
                 }}
                 getRootElement={this.props.getRootElement}
-                autoFocus
             />
         )
     }
@@ -729,7 +726,6 @@ export class AnnotationsSidebarContainer<
                     this.processEvent('setSelectedList', { unifiedListId })
                 }}
                 getRootElement={this.props.getRootElement}
-                autoFocus
             />
         )
     }

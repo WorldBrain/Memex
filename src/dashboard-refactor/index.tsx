@@ -294,13 +294,6 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('toggleShowSpacePicker', {
                 isActive: !searchFilters.isSpaceFilterActive,
             })
-        const selectedLocalListId =
-            listsSidebar.selectedListId != null
-                ? getListData(listsSidebar.selectedListId, {
-                      listsSidebar,
-                  })?.localId
-                : undefined
-
         return (
             <FiltersBar
                 spaceSidebarLocked={this.state.listsSidebar.isSidebarLocked}
@@ -391,12 +384,10 @@ export class DashboardContainer extends StatefulUIElement<
                     authBG: this.props.authBG,
                     contentSharingBG: this.props.contentShareBG,
                     analyticsBG: this.props.analyticsBG,
-                    onClickOutside: toggleSpacesFilter,
                     localStorageAPI: this.props.localStorage,
                     annotationsCache: this.props.annotationsCache,
                     pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
-                    dashboardSelectedListId: selectedLocalListId,
                     selectEntry: (spaceId) =>
                         this.processEvent('addIncludedSpace', {
                             spaceId,
@@ -699,6 +690,7 @@ export class DashboardContainer extends StatefulUIElement<
                     authBG: this.props.authBG,
                     listsBG: this.props.listsBG,
                     cache: this.props.annotationsCache,
+                    allowRootLevelReordering: true,
                     areListsBeingFiltered:
                         this.state.listsSidebar.filteredListIds.length > 0,
                 }}
@@ -2206,7 +2198,6 @@ export class DashboardContainer extends StatefulUIElement<
                                         )
                                     }}
                                     width={'300px'}
-                                    autoFocus={false}
                                 />
                             )
                         }}

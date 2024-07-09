@@ -391,11 +391,12 @@ export default class CustomListBackground {
     getInboxUnreadCount = () => {
         return this.storage.countInboxUnread()
     }
+
     createTabGroup = async (id: number) => {
         const listId = id
 
         if (listId == null) {
-            return false
+            return
         }
         const spaceData = await this.fetchListById({ id: listId })
         const spaceEntries = spaceData.pages

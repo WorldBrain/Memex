@@ -67,7 +67,6 @@ const setupLogicHelper = async ({
     initialSelectedListIds,
     skipTestData,
     url,
-    onSubmit = () => undefined,
     ...args
 }: {
     device: UILogicTestDevice
@@ -76,7 +75,6 @@ const setupLogicHelper = async ({
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
     queryEntries?: (query: string) => Promise<UnifiedList[]>
-    onSubmit?: () => void
     initialSelectedListIds?: number[]
     skipTestData?: boolean
     url?: string
@@ -108,8 +106,13 @@ const setupLogicHelper = async ({
         authBG: device.backgroundModules.auth.remoteFunctions,
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
-        onSubmit,
         analyticsBG: device.backgroundModules.analyticsBG,
+        getListTreeState: () => ({
+            draggedListId: null,
+            dragOverListId: null,
+            listTrees: initNormalizedState(),
+        }),
+        getEntryRowRefs: () => ({}),
     })
 
     const testLogic = device.createElement(entryPickerLogic)

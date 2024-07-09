@@ -53,17 +53,35 @@ export class ListTreesLogic extends UILogic<State, Events> {
     ) => {
         this.emitMutation({
             listTrees: {
-                $apply: (prev) =>
-                    initNormalizedState({
+                $apply: (prev) => {
+                    let ancestorsOfListsToDisplayUnfolded = new Set<string>()
+                    let nextState = initNormalizedState({
                         getId: (state) => state.unifiedId,
                         seedData: normalizedStateToArray(nextLists).map(
                             (list) => {
                                 let prevState = prev.byId[list.unifiedId]
+                                let areChildrenShown =
+                                    prevState?.areChildrenShown
+
+                                // This should only occur on initial render - re-renders should keep their state from `prevState`
+                                if (areChildrenShown == null) {
+                                    areChildrenShown = false
+                                    if (
+                                        this.deps.initListsToDisplayUnfolded?.includes(
+                                            list.unifiedId,
+                                        )
+                                    ) {
+                                        list.pathUnifiedIds.forEach((listId) =>
+                                            ancestorsOfListsToDisplayUnfolded.add(
+                                                listId,
+                                            ),
+                                        )
+                                    }
+                                }
                                 return {
+                                    areChildrenShown,
                                     unifiedId: list.unifiedId,
                                     wasListDropped: false,
-                                    areChildrenShown:
-                                        prevState?.areChildrenShown ?? false,
                                     isNewChildInputShown:
                                         prevState?.isNewChildInputShown ??
                                         false,
@@ -77,7 +95,15 @@ export class ListTreesLogic extends UILogic<State, Events> {
                                 }
                             },
                         ),
-                    }),
+                    })
+
+                    // Toggle open any ancestors of the lists to display unfolded as specified via `deps.initListsToDisplayUnfolded`
+                    for (let listId of ancestorsOfListsToDisplayUnfolded) {
+                        nextState.byId[listId].areChildrenShown = true
+                    }
+
+                    return nextState
+                },
             },
         })
     }
@@ -184,7 +210,8 @@ export class ListTreesLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({ dragOverListId: { $set: null } })
         let draggedListId = previousState.draggedListId
-        if (!draggedListId) {
+        let listToMove = this.deps.cache.lists.byId[draggedListId]
+        if (!listToMove || listToMove.unifiedId === event.dropTargetListId) {
             return
         }
 
@@ -216,11 +243,6 @@ export class ListTreesLogic extends UILogic<State, Events> {
             return
         }
 
-        let listToMove = this.deps.cache.lists.byId[draggedListId]
-        if (listToMove.unifiedId === event.dropTargetListId) {
-            return
-        }
-
         // We only actualy want to perform the move if being dropped on a different parent list
         if (listToMove.parentUnifiedId !== event.dropTargetListId) {
             await this.performListTreeMove(
@@ -248,10 +270,11 @@ export class ListTreesLogic extends UILogic<State, Events> {
             areTargetListChildrenShown?: boolean
         },
     ): Promise<void> {
+        // = = = WARNING: Super complex untested conditional logic. Please be careful if changing = = =
         if (listId == null || dropTargetListId === listId) {
             return
         }
-        let { cache: cache } = this.deps
+        let { cache } = this.deps
         let targetList = cache.lists.byId[dropTargetListId]
         let draggedList = cache.lists.byId[listId]
 
@@ -266,10 +289,31 @@ export class ListTreesLogic extends UILogic<State, Events> {
                     targetList.parentUnifiedId,
                 )
             }
-            if (targetSiblings.length) {
+            if (targetSiblings.length && this.deps.allowRootLevelReordering) {
                 await this.performListTreeReorder(listId, {
                     targetListId: targetSiblings[0].unifiedId,
                 })
+            }
+        } // Edge case: if a list is being dropped on the root level, and the root level is not allowed to be reordered, move it to be a root
+        else if (
+            !this.deps.allowRootLevelReordering &&
+            targetList.parentUnifiedId == null &&
+            draggedList != null
+        ) {
+            // BUT - If the root list's line we're dropping on is an ancestor, then it's the line shown directly beneath the target list.
+            //  Which means it's toggled open and thus we're not simply moving it to be a root. Instead we're moving it to be a child of the target list (if not already), then ordering it first among siblings
+            if (draggedList.pathUnifiedIds.includes(targetList.unifiedId)) {
+                let targetSiblings = cache.getListsByParentId(
+                    targetList.unifiedId,
+                )
+                if (draggedList.parentUnifiedId !== targetList.unifiedId) {
+                    await this.performListTreeMove(listId, targetList.unifiedId)
+                }
+                await this.performListTreeReorder(listId, {
+                    targetListId: targetSiblings[0].unifiedId,
+                })
+            } else if (draggedList.parentUnifiedId != null) {
+                await this.performListTreeMove(listId, null)
             }
         } // If the target list tree is toggled open, the behavior is that the dragged list becomes a child of it (if not already)
         else if (params?.areTargetListChildrenShown) {

@@ -9,8 +9,8 @@ export interface Props {
     isPrivate?: boolean
     isShared?: boolean
     indentSteps?: number
+    alwaysShowLeftSideIcon?: boolean
     alwaysShowRightSideIcon?: boolean
-    hasChildren?: boolean
     dragNDropActions?: DragNDropActions & {
         wasPageDropped?: boolean
     }
@@ -90,7 +90,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                         }
                     >
                         {(this.state.isHovering ||
-                            this.props.hasChildren ||
+                            this.props.alwaysShowLeftSideIcon ||
                             this.props.alwaysShowRightSideIcon) &&
                             this.props.renderLeftSideIcon?.()}
                     </LeftSideIconContainer>
@@ -211,7 +211,7 @@ const SidebarItem = styled.div<Props>`
     /* margin: 0px 12px; */
     position: relative;
     scroll-margin: 20px;
-    padding-left: ${({ indentSteps }: Props) => indentSteps * 15}px;
+    padding-left: ${({ indentSteps }) => indentSteps * 15}px;
     display: flex;
     width: fill-available;
     width: -moz-available;
@@ -231,7 +231,7 @@ const SidebarItem = styled.div<Props>`
         width: 30%;
     }
 
-    ${({ isSelected }: Props) =>
+    ${({ isSelected }) =>
         isSelected &&
         css`
             color: ${(props) => props.theme.colors.darkText};
