@@ -574,16 +574,17 @@ export default class SpacePickerLogic extends UILogic<
 
         if (!query.trim().length) {
             this.emitMutation({ filteredListIds: { $set: null } })
-        } else {
-            if (query.length && previousState.query !== query) {
-                this.querySpaces(query, previousState)
-            }
+        } else if (
+            query.trim().length &&
+            previousState.query !== query.trim()
+        ) {
+            this.querySpaces(query, previousState)
         }
     }
 
     private querySpaces = (query: string, state: SpacePickerState) => {
         let isPathSearch = false
-        let pathSearchItems = []
+        let pathSearchItems: string[] = []
         if (query.includes('/')) {
             isPathSearch = true
         }
@@ -610,6 +611,7 @@ export default class SpacePickerLogic extends UILogic<
 
                     return matches
                 }, true)
+
             if (i === 0) {
                 filteredEntries = listEntryIds.filter(doAllTermsMatch)
             } else {
