@@ -594,11 +594,11 @@ export default class SpacePickerLogic extends UILogic<
             pathSearchItems = [query]
         }
 
-        const listEntryIds = [
+        const entireListEntryPool = [
             ...normalizedStateToArray(state.listEntries),
             ...normalizedStateToArray(state.pageLinkEntries),
         ]
-        let filteredEntries = []
+        let filteredEntries: UnifiedList[] = []
         pathSearchItems.forEach((item, i) => {
             const distinctTerms = item.split(/\s+/).filter(Boolean)
             const doAllTermsMatch = (list: UnifiedList): boolean =>
@@ -613,7 +613,7 @@ export default class SpacePickerLogic extends UILogic<
                 }, true)
 
             if (i === 0) {
-                filteredEntries = listEntryIds.filter(doAllTermsMatch)
+                filteredEntries = entireListEntryPool.filter(doAllTermsMatch)
             } else {
                 const children = filteredEntries.flatMap((listItem) => {
                     return this.dependencies.annotationsCache.getListsByParentId(
