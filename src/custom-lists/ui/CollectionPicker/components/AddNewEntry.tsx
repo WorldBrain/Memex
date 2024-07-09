@@ -4,20 +4,36 @@ import { fontSizeSmall } from 'src/common-ui/components/design-library/typograph
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { UnifiedList } from 'src/annotations/cache/types'
 interface Props {
     onPress: () => void
     children?: ReactNode | ReactNode[]
-    resultItem: ReactNode
+    resultItem: {
+        unifiedId: UnifiedList['unifiedId']
+        name: UnifiedList['name']
+    }[]
     resultsCount: number
     commandKey: string
     getRootElement: () => HTMLElement
 }
 
 export default (props: Props) => {
+    const newSpacesString = props.resultItem.map((item, i) => {
+        if (i === props.resultItem.length - 1) {
+            return item.name
+        }
+
+        if (props.resultItem.length > 1) {
+            return item.name + '/'
+        }
+
+        return item.name
+    })
+
     return (
         <AddNew onClick={props.onPress}>
             <ContentBox>
-                <Title>Create "{props.resultItem}"</Title>
+                <Title>Create "{newSpacesString}"</Title>
                 {props.resultsCount === 0 && (
                     <KeyboardShortcuts
                         getRootElement={props.getRootElement}

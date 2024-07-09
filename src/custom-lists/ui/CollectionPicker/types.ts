@@ -18,7 +18,10 @@ type SpacePickerTab = 'user-lists' | 'page-links'
 
 export interface SpacePickerState {
     query: string
-    newEntryName: string
+    newEntryName: {
+        unifiedId: UnifiedList['unifiedId']
+        name: UnifiedList['name']
+    }[]
     currentTab: SpacePickerTab
     currentUser: UserReference | null
     focusedListId: UnifiedList['unifiedId'] | null
@@ -54,7 +57,7 @@ export type SpacePickerEvent = UIEvent<{
     setListPrivacy: { listId: number; isPrivate: boolean }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
-    newEntryPress: { entry: string }
+    newEntryPress: { entry: SpacePickerState['newEntryName'] }
     switchTab: { tab: SpacePickerTab }
     keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
     onKeyUp: { event: React.KeyboardEvent<HTMLInputElement> }

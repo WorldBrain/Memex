@@ -112,7 +112,11 @@ class SpacePicker extends StatefulUIElement<
             }),
         )
 
-        return validateSpaceName(this.state.newEntryName, otherLists).valid
+        const newName =
+            this.state.newEntryName?.[this.state.newEntryName.length - 1]
+                ?.name ?? ''
+
+        return validateSpaceName(newName, otherLists).valid
     }
 
     private get selectedCacheListIds(): string[] {
@@ -134,9 +138,9 @@ class SpacePicker extends StatefulUIElement<
 
     handleNewListAllPress: React.MouseEventHandler = (e) => {
         e.stopPropagation()
-        this.processEvent('newEntryAllPress', {
-            entry: this.state.newEntryName,
-        })
+        // this.processEvent('newEntryAllPress', {
+        //     entry: this.state.newEntryName,
+        // })
     }
 
     handleNewListPress = () => {
@@ -155,7 +159,7 @@ class SpacePicker extends StatefulUIElement<
 
     private renderEmptyList() {
         if (
-            (this.state.newEntryName.length > 0 && !this.props.filterMode) ||
+            (this.state.newEntryName?.length > 0 && !this.props.filterMode) ||
             (this.state.query.trim().length > 0 &&
                 this.state.filteredListIds?.length === 0)
         ) {
