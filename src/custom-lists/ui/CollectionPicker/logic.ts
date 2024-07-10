@@ -349,12 +349,10 @@ export default class SpacePickerLogic extends UILogic<
             nextIndex = 0
         }
 
-        let nextFocusedListId = visibleTreeNodes[nextIndex].unifiedId
-        this.emitMutation({ focusedListId: { $set: nextFocusedListId } })
-        // if (focusedListId === '-1') {
-        //     return state.focusedListId
-        // } else {
-        // }
+        let nextFocusedListId = visibleTreeNodes[nextIndex]?.unifiedId
+        if (nextFocusedListId != null) {
+            this.emitMutation({ focusedListId: { $set: nextFocusedListId } })
+        }
         return nextFocusedListId
     }
 

@@ -242,55 +242,39 @@ describe('SpacePickerLogic', () => {
             device,
         })
         await testLogic.init()
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: '',
-                newEntryName: '',
-                filteredListIds: null,
-            }),
-        )
+        expect(testLogic.state.query).toEqual('')
+        expect(testLogic.state.newEntryName).toEqual('')
+        expect(testLogic.state.filteredListIds).toEqual(null)
 
         await testLogic.processEvent('searchInputChanged', {
             query: 'LIST Test',
         })
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'LIST Test',
-                newEntryName: 'LIST Test',
-                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
-            }),
-        )
+        expect(testLogic.state.query).toEqual('LIST Test')
+        expect(testLogic.state.newEntryName).toEqual('LIST Test')
+        expect(testLogic.state.filteredListIds).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId,
+        ])
 
         await testLogic.processEvent('searchInputChanged', {
             query: 'non-existent',
         })
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'non-existent',
-                newEntryName: 'non-existent',
-                filteredListIds: [],
-            }),
-        )
+        expect(testLogic.state.query).toEqual('non-existent')
+        expect(testLogic.state.newEntryName).toEqual('non-existent')
+        expect(testLogic.state.filteredListIds).toEqual([])
 
         await testLogic.processEvent('searchInputChanged', { query: '' })
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: '',
-                newEntryName: '',
-                filteredListIds: null,
-            }),
-        )
+        expect(testLogic.state.query).toEqual('')
+        expect(testLogic.state.newEntryName).toEqual('')
+        expect(testLogic.state.filteredListIds).toEqual(null)
 
         await testLogic.processEvent('searchInputChanged', {
             query: 'list test',
         })
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'list test',
-                newEntryName: 'list test',
-                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
-            }),
-        )
+        expect(testLogic.state.query).toEqual('list test')
+        expect(testLogic.state.newEntryName).toEqual('list test')
+        expect(testLogic.state.filteredListIds).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId,
+        ])
     })
 
     it("should be able to search for any entry when it's already selected", async ({
@@ -510,14 +494,11 @@ describe('SpacePickerLogic', () => {
         })
         const newEntryText = 'testwerwerwerwer'
 
-        const expectDefaultState = () =>
-            expect(testLogic.state).toEqual(
-                expect.objectContaining({
-                    query: '',
-                    newEntryName: '',
-                    filteredListIds: null,
-                }),
-            )
+        const expectDefaultState = () => {
+            expect(testLogic.state.query).toEqual('')
+            expect(testLogic.state.newEntryName).toEqual('')
+            expect(testLogic.state.filteredListIds).toEqual(null)
+        }
 
         await testLogic.init()
 
@@ -527,13 +508,9 @@ describe('SpacePickerLogic', () => {
             query: newEntryText,
         })
 
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: newEntryText,
-                newEntryName: newEntryText,
-                filteredListIds: [],
-            }),
-        )
+        expect(testLogic.state.query).toEqual(newEntryText)
+        expect(testLogic.state.newEntryName).toEqual(newEntryText)
+        expect(testLogic.state.filteredListIds).toEqual([])
 
         await testLogic.processEvent('searchInputChanged', {
             query: '',
