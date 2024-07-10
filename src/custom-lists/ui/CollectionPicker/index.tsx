@@ -116,7 +116,8 @@ class SpacePicker extends StatefulUIElement<
             this.state.newEntryName?.[this.state.newEntryName.length - 1]
                 ?.name ?? ''
 
-        return validateSpaceName(newName, otherLists).valid
+        const validSpaceName = validateSpaceName(newName, otherLists).valid
+        return validSpaceName
     }
 
     private get selectedCacheListIds(): string[] {

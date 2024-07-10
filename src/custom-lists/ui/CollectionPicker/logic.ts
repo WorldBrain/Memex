@@ -351,6 +351,10 @@ export default class SpacePickerLogic extends UILogic<
 
         let nextFocusedListId = visibleTreeNodes[nextIndex].unifiedId
         this.emitMutation({ focusedListId: { $set: nextFocusedListId } })
+        // if (focusedListId === '-1') {
+        //     return state.focusedListId
+        // } else {
+        // }
         return nextFocusedListId
     }
 
@@ -571,18 +575,20 @@ export default class SpacePickerLogic extends UILogic<
             query: { $set: query },
         })
 
-        if (!query.trim().length) {
-            this.emitMutation({ filteredListIds: { $set: null } })
-        } else if (
-            query.trim().length &&
-            previousState.query !== query.trim()
-        ) {
+        if (previousState.query !== query.trim()) {
             this.querySpaces(query, previousState)
         }
     }
 
     private querySpaces = (query: string, state: SpacePickerState) => {
-        console.log('query', query)
+        if (query.trim().length === 0) {
+            this.emitMutation({
+                newEntryName: { $set: null },
+                query: { $set: '' },
+                filteredListIds: { $set: null },
+            })
+            return
+        }
         let isPathSearch = false
         let pathSearchItems: string[] = []
         if (query.includes('/')) {
@@ -594,104 +600,132 @@ export default class SpacePickerLogic extends UILogic<
             pathSearchItems = [query]
         }
 
+        // 1. when a term update comes in that does not have a / in it, just do a regular search
+        // 2. when a / is typed, save the current item as "in-focus", add it to the searchpath array focus only on the list of childre of the last focused listitem
+        // 3. the actual search term is only the stuff after the last / or if not present, the entire query
+
         const entireListEntryPool = [
             ...normalizedStateToArray(state.listEntries),
             ...normalizedStateToArray(state.pageLinkEntries),
         ]
-        let filteredEntries: UnifiedList[] = []
+
+        // construct query
+
         let newEntryObject: { unifiedId: string; name: string }[] =
             state.newEntryName ?? []
-        console.log('entryObject', newEntryObject)
-        pathSearchItems.forEach((item, i) => {
-            if (item.length === 0) {
-                return
-            }
-            const distinctTerms = item.split(/\s+/).filter(Boolean)
-            const doAllTermsMatch = (list: UnifiedList): boolean =>
-                distinctTerms.reduce((acc, term) => {
-                    const matches =
-                        acc &&
-                        list.name
-                            .toLocaleLowerCase()
-                            .includes(term.toLocaleLowerCase())
+        let queryForNewSpaces = pathSearchItems[pathSearchItems.length - 1]
 
-                    return matches
-                }, true)
-
-            if (i === 0) {
-                filteredEntries = entireListEntryPool.filter(doAllTermsMatch)
-            } else {
-                const children = filteredEntries.flatMap((listItem) => {
-                    return this.dependencies.annotationsCache.getListsByParentId(
-                        listItem.unifiedId,
-                    )
+        let lastSelectedId = state.focusedListId
+        if (query.endsWith('/')) {
+            const isBackspaced = query.length < state.query.length
+            let lastSpaceName = null
+            let updatedQuery = query
+            newEntryObject.pop()
+            if (!isBackspaced) {
+                lastSpaceName = state.listEntries.byId[lastSelectedId].name
+                newEntryObject.push({
+                    unifiedId: lastSelectedId,
+                    name: lastSpaceName,
                 })
-                filteredEntries = children.filter(doAllTermsMatch)
+                updatedQuery = query.replace(/[^\/]*\/?$/, `${lastSpaceName}/`)
             }
-        })
+            newEntryObject.push({
+                unifiedId: null,
+                name: '',
+            })
+            this.emitMutation({ query: { $set: updatedQuery } })
+        } else if (query.includes('/') && !query.endsWith('/')) {
+            const lastNonNullUnifiedIdEntry = newEntryObject
+                .slice()
+                .reverse()
+                .find((entry) => entry.unifiedId !== null)
+            lastSelectedId = lastNonNullUnifiedIdEntry?.unifiedId
 
-        const matchingEntryIds = filteredEntries.flatMap((entry) => [
+            newEntryObject.pop()
+
+            newEntryObject.push({
+                unifiedId: null,
+                name: queryForNewSpaces,
+            })
+        }
+
+        let filteredEntries: UnifiedList[] = []
+        const distinctTerms = queryForNewSpaces.split(/\s+/).filter(Boolean)
+        const doAllTermsMatch = (list: UnifiedList): boolean =>
+            distinctTerms.reduce((acc, term) => {
+                const matches =
+                    acc &&
+                    list.name
+                        .toLocaleLowerCase()
+                        .includes(term.toLocaleLowerCase())
+
+                return matches
+            }, true)
+
+        if (pathSearchItems.length === 1) {
+            filteredEntries = entireListEntryPool.filter(doAllTermsMatch)
+        } else {
+            const children = this.dependencies.annotationsCache.getListsByParentId(
+                lastSelectedId,
+            )
+            filteredEntries = children.filter(doAllTermsMatch)
+            if (
+                filteredEntries.length === 0 &&
+                queryForNewSpaces.length === 0
+            ) {
+                filteredEntries = children
+            }
+        }
+
+        let matchingEntryIds = filteredEntries.flatMap((entry) => [
             entry.unifiedId,
             ...entry.pathUnifiedIds,
         ])
+        if (pathSearchItems.length > 1 && filteredEntries.length === 0) {
+            const lastNonNullUnifiedIdEntry = newEntryObject
+                .slice()
+                .reverse()
+                .find((entry) => entry.unifiedId !== null)
+            lastSelectedId = lastNonNullUnifiedIdEntry?.unifiedId
+
+            const pathOfLastEntry = [
+                lastSelectedId,
+                ...state.listEntries.byId[lastSelectedId].pathUnifiedIds,
+            ]
+            matchingEntryIds = pathOfLastEntry
+        }
 
         const mutation: UIMutation<SpacePickerState> = {
             filteredListIds: { $set: matchingEntryIds },
-            query: { $set: query },
         }
 
         this.emitMutation(mutation)
         const nextState = this.withMutation(state, mutation)
-        const slashCount = (query.match(/\//g) || []).length
+
         // added this to give the focus function a specific ID to focus on so we can focus on a specific item id
         if (matchingEntryIds && matchingEntryIds.length > 0) {
-            const listIdToFocusFirst = matchingEntryIds[0]
-
-            const getListHierarchy = (
-                unifiedId: string,
-            ): { unifiedId: string; name: string }[] => {
-                const list = this.dependencies.annotationsCache.lists.byId[
-                    unifiedId
-                ]
-                if (!list) return []
-
-                const parentList = list.parentUnifiedId
-                    ? getListHierarchy(list.parentUnifiedId)
-                    : []
-                return [
-                    ...parentList,
-                    { unifiedId: list.unifiedId, name: list.name },
-                ]
-            }
-
-            if (slashCount === 0) {
-                newEntryObject = [
-                    { unifiedId: listIdToFocusFirst, name: query },
-                ]
-            } else {
-                newEntryObject = [...getListHierarchy(listIdToFocusFirst)]
-                console.log('newEntryObject', newEntryObject)
-                if (newEntryObject.length > slashCount) {
-                    newEntryObject.pop()
-                }
-            }
-
+            let listIdToFocusFirst = matchingEntryIds[0]
             this.emitMutation({ newEntryName: { $set: newEntryObject } })
+
+            if (filteredEntries.length === 0 && queryForNewSpaces.length > 0) {
+                listIdToFocusFirst = '-1'
+            }
             this.calcNextFocusedEntry(nextState, null, listIdToFocusFirst)
         } else {
-            console.log('newEntryObject3', newEntryObject)
             if (newEntryObject[newEntryObject.length - 1].unifiedId == null) {
                 newEntryObject.pop()
             }
             const queryParts = query.split('/').pop()
             newEntryObject.push({ unifiedId: null, name: queryParts })
 
-            console.log('newEntryObject2', newEntryObject)
-            this.maybeSetCreateEntryDisplay(query, state)
+            // this.maybeSetCreateEntryDisplay(query, state)
         }
 
         if (state.query.length > 0 && nextState.query.length === 0) {
-            this.emitMutation({ newEntryName: { $set: null } })
+            this.emitMutation({
+                newEntryName: { $set: null },
+                query: { $set: '' },
+            })
             const listData: NormalizedState<UnifiedList> = this.dependencies
                 .annotationsCache.lists
 
@@ -883,6 +917,10 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
+        const parentPath = this.dependencies.annotationsCache.getListByLocalId(
+            parentList,
+        )?.pathLocalIds
+
         const {
             collabKey,
             localListId,
@@ -908,6 +946,7 @@ export default class SpacePickerLogic extends UILogic<
             creator: previousState.currentUser ?? undefined,
             parentLocalId: parentList,
             isPrivate: true,
+            pathLocalIds: [...parentPath, parentList],
         })
 
         this.localListIdsMRU.unshift(localListId)
