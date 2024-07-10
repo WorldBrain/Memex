@@ -119,6 +119,8 @@ export class MemexLocalBackend {
             syncKey: syncKey,
         })
 
+        console.log('body', body)
+
         const response = await fetch(`${this.deps.url}/update-file`, {
             method: 'PUT',
             headers: {
@@ -133,8 +135,11 @@ export class MemexLocalBackend {
             })
         }
 
-        if (!response.ok || response.status !== 200) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+        if (!response.ok) {
+            const errorResponse = await response.json()
+            throw new Error(
+                `HTTP error! status: ${response.status}, message: ${errorResponse.error}`,
+            )
         }
     }
 
