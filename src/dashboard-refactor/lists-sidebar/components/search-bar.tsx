@@ -114,6 +114,7 @@ const CreateBox = styled.div`
 
 export interface ListsSidebarSearchBarProps {
     onInputClear(): void
+    onInputKeyDown(key: string): void
     onCreateNew(newListName: string): void
     onSearchQueryChange(inputString: string): void
     areLocalListsEmpty: boolean
@@ -164,14 +165,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
         e,
     ) => {
         e.stopPropagation()
-        if (e.key === 'Escape') {
-            this.handleClearSearch()
-        }
-
-        if (e.key === 'Enter') {
-            this.props.onCreateNew(this.props.searchQuery)
-            this.handleClearSearch()
-        }
+        this.props.onInputKeyDown(e.key)
     }
 
     render(): JSX.Element {

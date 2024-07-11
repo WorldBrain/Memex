@@ -15,7 +15,12 @@ import {
     MISSING_PDF_QUERY_PARAM,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
-import { updatePickerValues, stateToSearchParams, getListData } from './util'
+import {
+    updatePickerValues,
+    stateToSearchParams,
+    getListData,
+    getOwnLists,
+} from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { NoResultsType, SelectableBlock } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
@@ -45,7 +50,10 @@ import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/cons
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
-import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
+import {
+    deriveListOwnershipStatus,
+    hydrateCacheForListUsage,
+} from 'src/annotations/cache/utils'
 import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
@@ -64,7 +72,8 @@ import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annot
 import type { UnifiedSearchResult } from 'src/search/background/types'
 import type { BulkEditCollection } from 'src/bulk-edit/types'
 import checkBrowser from 'src/util/check-browser'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { getVisibleTreeNodesInOrder } from 'src/custom-lists/ui/list-trees/util'
+import type { State as ListTreesState } from 'src/custom-lists/ui/list-trees/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -119,7 +128,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     currentSearchID = 0
     observer: MutationObserver // This line explicitly declares the observer property for clarity.
 
-    constructor(private options: DashboardDependencies) {
+    constructor(
+        private options: DashboardDependencies & {
+            /** Allows direct access to list tree state encapsulated in ListTrees container component. */
+            getListTreeState: () => ListTreesState
+        },
+    ) {
         super()
         this.syncSettings = createSyncSettingsStore({
             syncSettingsBG: options.syncSettingsBG,
@@ -287,6 +301,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 spaceSidebarWidth: sizeConstants.listsSidebar.width + 'px',
                 addListErrorMessage: null,
                 editListErrorMessage: null,
+                focusedListId: null,
                 listShareLoadingState: 'pristine',
                 listDropReceiveState: 'pristine',
                 listCreateState: 'pristine',
@@ -4096,6 +4111,78 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    private calcNextFocusedList(state: State, change: -1 | 1 = 1): string {
+        let lists = getOwnLists(
+            normalizedStateToArray(state.listsSidebar.lists),
+            state.currentUser,
+        )
+            .filter((list) =>
+                state.listsSidebar.filteredListIds.length
+                    ? state.listsSidebar.filteredListIds.includes(
+                          list.unifiedId,
+                      )
+                    : true,
+            )
+            .sort(defaultOrderableSorter)
+
+        let visibleTreeNodes = getVisibleTreeNodesInOrder(
+            lists,
+            this.options.getListTreeState(),
+            {
+                areListsBeingFiltered:
+                    state.listsSidebar.filteredListIds.length > 0,
+            },
+        )
+
+        let currentIndex = -1
+        if (state.listsSidebar.focusedListId != null) {
+            currentIndex = visibleTreeNodes.findIndex(
+                (node) => node.unifiedId === state.listsSidebar.focusedListId,
+            )
+        }
+
+        let nextIndex = currentIndex === -1 ? 0 : currentIndex + change
+
+        // Loop back around if going out-of-bounds
+        if (nextIndex < 0) {
+            nextIndex = visibleTreeNodes.length - 1
+        } else if (nextIndex >= visibleTreeNodes.length) {
+            nextIndex = 0
+        }
+
+        let nextFocusedListId = visibleTreeNodes[nextIndex]?.unifiedId
+        if (nextFocusedListId != null) {
+            this.emitMutation({
+                listsSidebar: { focusedListId: { $set: nextFocusedListId } },
+            })
+        }
+        return nextFocusedListId
+    }
+
+    handleListQueryKeyPress: EventHandler<'handleListQueryKeyPress'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (event.key === 'Escape') {
+            this.emitMutation({ listsSidebar: { searchQuery: { $set: '' } } })
+        } else if (event.key === 'Enter') {
+            await this.createNewList(
+                previousState,
+                previousState.listsSidebar.searchQuery,
+            )
+        } else if (event.key === 'ArrowUp') {
+            this.calcNextFocusedList(previousState, -1)
+        } else if (event.key === 'ArrowDown') {
+            this.calcNextFocusedList(previousState, 1)
+        }
+    }
+
+    setFocusedListId: EventHandler<'setFocusedListId'> = async ({ event }) => {
+        this.emitMutation({
+            listsSidebar: { focusedListId: { $set: event.listId } },
+        })
+    }
+
     setAddListInputShown: EventHandler<'setAddListInputShown'> = async ({
         event,
     }) => {
@@ -4120,7 +4207,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const newListName = event.value.trim()
+        await this.createNewList(previousState, event.value)
+        this.emitMutation({ listsSidebar: { searchQuery: { $set: '' } } })
+    }
+
+    private async createNewList(previousState: State, name: string) {
+        const newListName = name.trim()
         const validationResult = validateSpaceName(
             newListName,
             normalizedStateToArray(previousState.listsSidebar.lists)

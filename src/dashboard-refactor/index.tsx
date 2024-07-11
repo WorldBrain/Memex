@@ -18,7 +18,12 @@ import SidebarToggle from './header/sidebar-toggle'
 import { Rnd } from 'react-rnd'
 import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
-import { updatePickerValues, stateToSearchParams, getListData } from './util'
+import {
+    updatePickerValues,
+    stateToSearchParams,
+    getListData,
+    getOwnLists,
+} from './util'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
@@ -72,6 +77,7 @@ import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import ImagePreviewModal from '@worldbrain/memex-common/lib/common-ui/image-preview-modal'
+import type { ListTrees } from 'src/custom-lists/ui/list-trees'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -166,6 +172,7 @@ export class DashboardContainer extends StatefulUIElement<
         imageSupportBG: runInBackground(),
     }
 
+    private listTreesRef = React.createRef<ListTrees>()
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
     private syncStatusButtonRef = React.createRef<HTMLDivElement>()
     youtubeService: YoutubeService
@@ -175,7 +182,13 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     constructor(props: Props) {
-        super(props, new DashboardLogic(props))
+        super(
+            props,
+            new DashboardLogic({
+                ...props,
+                getListTreeState: () => this.listTreesRef.current?.state,
+            }),
+        )
 
         this.youtubeService = new YoutubeService(createYoutubeServiceOptions())
         ;(window as any)['_state'] = () => ({ ...this.state })
@@ -658,16 +671,9 @@ export class DashboardContainer extends StatefulUIElement<
             ? { type: 'user-reference', id: currentUser.id }
             : undefined
 
-        const ownListsData = allLists
-            .filter(
-                (list) =>
-                    list.type === 'user-list' &&
-                    cacheUtils.deriveListOwnershipStatus(
-                        list,
-                        userReference,
-                    ) === 'Creator',
-            )
-            .sort(defaultOrderableSorter)
+        const ownListsData = getOwnLists(allLists, currentUser).sort(
+            defaultOrderableSorter,
+        )
         const followedListsData = allLists.filter(
             (list) =>
                 list.type === 'user-list' &&
@@ -686,6 +692,7 @@ export class DashboardContainer extends StatefulUIElement<
             <ListsSidebarContainer
                 {...listsSidebar}
                 listTreesDeps={{
+                    ref: this.listTreesRef,
                     lists: ownListsData,
                     authBG: this.props.authBG,
                     listsBG: this.props.listsBG,
@@ -694,6 +701,9 @@ export class DashboardContainer extends StatefulUIElement<
                     areListsBeingFiltered:
                         this.state.listsSidebar.filteredListIds.length > 0,
                 }}
+                setFocusedListId={(listId) =>
+                    this.processEvent('setFocusedListId', { listId })
+                }
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 openRemoteListPage={(remoteListId) =>
                     this.props.openSpaceInWebUI(remoteListId)
@@ -726,6 +736,8 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('confirmListCreate', { value }),
                     onSearchQueryChange: (query) =>
                         this.processEvent('setListQueryValue', { query }),
+                    onInputKeyDown: (key) =>
+                        this.processEvent('handleListQueryKeyPress', { key }),
                     onInputClear: () =>
                         this.processEvent('setListQueryValue', { query: '' }),
                     areLocalListsEmpty: !ownListsData.length,
