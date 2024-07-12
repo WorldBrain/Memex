@@ -143,6 +143,7 @@ export default class SpacePickerLogic extends UILogic<
         spaceWriteError: null,
         renameListErrorMessage: null,
         contextMenuListId: null,
+        listIdsShownAsTrees: [],
         addedToAllIds: [],
         editMenuListId: null,
     })
@@ -285,6 +286,37 @@ export default class SpacePickerLogic extends UILogic<
         previousState,
     }) => {
         this.searchInputRef = ref
+    }
+
+    toggleListShownAsTree: EventHandler<'toggleListShownAsTree'> = ({
+        event,
+        previousState,
+    }) => {
+        let cachedList = this.dependencies.annotationsCache.lists.byId[
+            event.unifiedListId
+        ]
+        if (!cachedList) {
+            throw new Error(
+                'Attempted to toggle tree view for list ID that does not exist in cache',
+            )
+        }
+
+        let rootIdOfTree =
+            cachedList.pathUnifiedIds.length === 0
+                ? cachedList.unifiedId
+                : cachedList.pathUnifiedIds[0]
+        let alreadyShown =
+            previousState.listIdsShownAsTrees.indexOf(rootIdOfTree) !== -1
+
+        this.emitMutation({
+            listIdsShownAsTrees: {
+                $set: alreadyShown
+                    ? previousState.listIdsShownAsTrees.filter(
+                          (id) => id !== rootIdOfTree,
+                      )
+                    : [...previousState.listIdsShownAsTrees, rootIdOfTree],
+            },
+        })
     }
 
     focusInput: EventHandler<'focusInput'> = () => {

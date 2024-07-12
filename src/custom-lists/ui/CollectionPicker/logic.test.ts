@@ -118,6 +118,65 @@ const setupLogicHelper = async ({
 describe('SpacePickerLogic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
+    it('should be able to add and remove specific lists to show as trees', async ({
+        device,
+    }) => {
+        const { testLogic, annotationsCache } = await setupLogicHelper({
+            device,
+        })
+
+        let listA = annotationsCache.addList({
+            name: 'a',
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            hasRemoteAnnotationsToLoad: false,
+        })
+        let listB = annotationsCache.addList({
+            name: 'b',
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            hasRemoteAnnotationsToLoad: false,
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listA.unifiedId,
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+        ])
+
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([listA.unifiedId])
+
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+        ])
+
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listA.unifiedId,
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+    })
+
     it(
         'should correctly load initial entries',
         async ({ device }) => {
