@@ -361,7 +361,6 @@ export default class SpacePickerLogic extends UILogic<
             listTreesState,
             {
                 areListsBeingFiltered: state.query.trim().length > 0,
-                sortChildrenByOrder: true,
             },
         )
 

@@ -158,11 +158,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     ) => {
         return [
             ...normalizedStateToArray(this.lists).filter((list) =>
-                list.pathUnifiedIds.length === 0
+                list.type === 'user-list' && list.pathUnifiedIds.length === 0
                     ? list.unifiedId === rootUnifiedId
                     : list.pathUnifiedIds[0] === rootUnifiedId,
             ),
-        ]
+        ].sort(defaultOrderableSorter)
     }
 
     private prepareListForCaching = (

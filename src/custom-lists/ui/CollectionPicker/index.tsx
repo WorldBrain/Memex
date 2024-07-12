@@ -292,7 +292,6 @@ class SpacePicker extends StatefulUIElement<
                 )
                 return (
                     <ListTrees
-                        sortChildrenByOrder
                         lists={allTreeMembers}
                         ref={this.listTreesRef}
                         authBG={this.props.authBG}

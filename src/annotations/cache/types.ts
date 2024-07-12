@@ -107,7 +107,7 @@ export interface PageAnnotationsCacheInterface {
     getListsByParentId: (
         unifiedId: UnifiedList['unifiedId'] | null,
     ) => UnifiedList[]
-    /** Gets all members of the tree, in unspecified order. */
+    /** Gets all members of the tree, sorted by their order. */
     getAllListsInTreeByRootId: (
         unifiedId: UnifiedList['unifiedId'] | null,
     ) => UnifiedList[]
