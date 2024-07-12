@@ -186,7 +186,7 @@ export class DashboardContainer extends StatefulUIElement<
             props,
             new DashboardLogic({
                 ...props,
-                getListTreeState: () => this.listTreesRef.current?.state,
+                getListTreesRef: () => this.listTreesRef.current,
             }),
         )
 

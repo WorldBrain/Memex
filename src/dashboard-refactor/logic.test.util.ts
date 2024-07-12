@@ -210,11 +210,7 @@ export async function setupTest(
             device.backgroundModules.bgScript.remoteFunctions,
         ) as any,
         browserAPIs: device.browserAPIs,
-        getListTreeState: () => ({
-            draggedListId: null,
-            dragOverListId: null,
-            listTrees: initNormalizedState(),
-        }),
+        getListTreesRef: () => undefined,
     })
 
     if (args.overrideSearchTrigger) {

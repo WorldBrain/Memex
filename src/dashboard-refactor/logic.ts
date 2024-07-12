@@ -74,6 +74,7 @@ import type { BulkEditCollection } from 'src/bulk-edit/types'
 import checkBrowser from 'src/util/check-browser'
 import { getVisibleTreeNodesInOrder } from 'src/custom-lists/ui/list-trees/util'
 import type { State as ListTreesState } from 'src/custom-lists/ui/list-trees/types'
+import type { ListTrees } from 'src/custom-lists/ui/list-trees'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -131,7 +132,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     constructor(
         private options: DashboardDependencies & {
             /** Allows direct access to list tree state encapsulated in ListTrees container component. */
-            getListTreeState: () => ListTreesState
+            getListTreesRef: () => ListTrees | undefined
         },
     ) {
         super()
@@ -4125,7 +4126,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private calcNextFocusedList(state: State, change: -1 | 1 = 1): string {
+    private calcNextFocusedList(
+        state: State,
+        listTreesState: ListTreesState,
+        change: -1 | 1 = 1,
+    ): string {
         let lists = getOwnLists(
             normalizedStateToArray(state.listsSidebar.lists),
             state.currentUser,
@@ -4141,7 +4146,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         let visibleTreeNodes = getVisibleTreeNodesInOrder(
             lists,
-            this.options.getListTreeState(),
+            listTreesState,
             {
                 areListsBeingFiltered:
                     state.listsSidebar.filteredListIds.length > 0,
@@ -4177,6 +4182,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        let listTreesRef = this.options.getListTreesRef()
         if (event.key === 'Escape') {
             this.emitMutation({ listsSidebar: { searchQuery: { $set: '' } } })
         } else if (event.key === 'Enter') {
@@ -4195,10 +4201,23 @@ export class DashboardLogic extends UILogic<State, Events> {
                     previousState.listsSidebar.searchQuery,
                 )
             }
-        } else if (event.key === 'ArrowUp') {
-            this.calcNextFocusedList(previousState, -1)
-        } else if (event.key === 'ArrowDown') {
-            this.calcNextFocusedList(previousState, 1)
+        } else if (event.key === 'ArrowUp' && listTreesRef) {
+            this.calcNextFocusedList(previousState, listTreesRef.state, -1)
+        } else if (event.key === 'ArrowDown' && listTreesRef) {
+            this.calcNextFocusedList(previousState, listTreesRef.state, 1)
+        } else if (
+            (event.key === 'ArrowRight' &&
+                listTreesRef?.state.listTrees.byId[
+                    previousState.listsSidebar.focusedListId
+                ]?.areChildrenShown === false) ||
+            (event.key === 'ArrowLeft' &&
+                listTreesRef?.state.listTrees.byId[
+                    previousState.listsSidebar.focusedListId
+                ]?.areChildrenShown === true)
+        ) {
+            listTreesRef.processEvent('toggleShowChildren', {
+                listId: previousState.listsSidebar.focusedListId,
+            })
         }
     }
 
