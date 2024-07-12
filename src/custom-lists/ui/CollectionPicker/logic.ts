@@ -28,6 +28,7 @@ import {
 } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { State as ListTreesState } from '../list-trees/types'
+import type { ListTrees } from '../list-trees'
 import { getVisibleTreeNodesInOrder } from '../list-trees/util'
 import type EntryRow from './components/EntryRow'
 
@@ -115,7 +116,7 @@ export default class SpacePickerLogic extends UILogic<
     constructor(
         protected dependencies: SpacePickerDependencies & {
             /** Allows direct access to list tree state encapsulated in ListTrees container component. */
-            getListTreeState: () => ListTreesState
+            getListTreesRef: () => ListTrees | undefined
             getEntryRowRefs: () => { [unifiedId: string]: EntryRow }
         },
     ) {
@@ -310,8 +311,13 @@ export default class SpacePickerLogic extends UILogic<
     private calcNextFocusedEntry(
         state: SpacePickerState,
         change: -1 | 1 = null,
-        focusedListId?: string,
+        overriddenFocusedListId?: string,
     ): string {
+        let listTreesState = this.dependencies.getListTreesRef()?.state
+        if (!listTreesState) {
+            return null
+        }
+
         let entries = getEntriesForCurrentPickerTab(state)
         if (state.filteredListIds?.length) {
             entries = entries.filter((e) =>
@@ -320,7 +326,7 @@ export default class SpacePickerLogic extends UILogic<
         }
         let visibleTreeNodes = getVisibleTreeNodesInOrder(
             entries,
-            this.dependencies.getListTreeState(),
+            listTreesState,
             {
                 areListsBeingFiltered: state.query.trim().length > 0,
                 sortChildrenByOrder: true,
@@ -334,9 +340,9 @@ export default class SpacePickerLogic extends UILogic<
             )
         }
 
-        if (focusedListId) {
+        if (overriddenFocusedListId) {
             currentIndex = visibleTreeNodes.findIndex(
-                (node) => node.unifiedId === focusedListId,
+                (node) => node.unifiedId === overriddenFocusedListId,
             )
         }
 
@@ -415,9 +421,26 @@ export default class SpacePickerLogic extends UILogic<
             this.dependencies.getEntryRowRefs()[focusedListId]?.scrollIntoView()
             return
         }
+
+        let listTreesRef = this.dependencies.getListTreesRef()
+        if (
+            (event.key === 'ArrowRight' &&
+                listTreesRef?.state.listTrees.byId[previousState.focusedListId]
+                    ?.areChildrenShown === false) ||
+            (event.key === 'ArrowLeft' &&
+                listTreesRef?.state.listTrees.byId[previousState.focusedListId]
+                    ?.areChildrenShown === true)
+        ) {
+            listTreesRef.processEvent('toggleShowChildren', {
+                listId: previousState.focusedListId,
+            })
+            return
+        }
+
         if (event.key === 'Escape') {
             this.dependencies.closePicker(event)
         }
+
         event.stopPropagation()
     }
 

@@ -90,7 +90,7 @@ class SpacePicker extends StatefulUIElement<
             props,
             new ListPickerLogic({
                 ...props,
-                getListTreeState: () => this.listTreesRef.current?.state,
+                getListTreesRef: () => this.listTreesRef.current,
                 getEntryRowRefs: () => this.entryRowRefs,
             }),
         )

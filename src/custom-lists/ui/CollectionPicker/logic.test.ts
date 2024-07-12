@@ -107,11 +107,7 @@ const setupLogicHelper = async ({
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
         analyticsBG: device.backgroundModules.analyticsBG,
-        getListTreeState: () => ({
-            draggedListId: null,
-            dragOverListId: null,
-            listTrees: initNormalizedState(),
-        }),
+        getListTreesRef: () => undefined,
         getEntryRowRefs: () => ({}),
     })
 
