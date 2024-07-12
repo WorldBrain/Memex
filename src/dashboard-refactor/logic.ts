@@ -4086,26 +4086,40 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const filteredLists = filterListsByQuery(
+        let filteredLists = filterListsByQuery(
             event.query,
             normalizedStateToArray(previousState.listsSidebar.lists),
         )
+        let trimmedQuery = event.query.trim()
+        let nextFilteredListIds =
+            trimmedQuery.length > 0
+                ? [
+                      ...new Set(
+                          filteredLists.flatMap((list) => [
+                              list.unifiedId,
+                              ...list.pathUnifiedIds, // Include ancestors of matched lists
+                          ]),
+                      ),
+                  ]
+                : []
 
         this.emitMutation({
             listsSidebar: {
                 searchQuery: { $set: event.query },
-                filteredListIds: {
-                    $set:
-                        event.query.trim().length > 0
-                            ? [
-                                  ...new Set(
-                                      filteredLists.flatMap((list) => [
-                                          list.unifiedId,
-                                          ...list.pathUnifiedIds, // Include ancestors of matched lists
-                                      ]),
-                                  ),
-                              ]
-                            : [],
+                filteredListIds: { $set: nextFilteredListIds },
+                // Basically we want to reset state.focusedListId to null if the prev list no longer shows up in the filtered lists.
+                // This is so "Enter" press on focused list can easily distingush the actions of "select list" and "create new list"
+                //  - the latter only working when there is NO focused list AND some query exists AND no matches to the query.
+                focusedListId: {
+                    $apply: (prev) => {
+                        if (
+                            !nextFilteredListIds.length &&
+                            !trimmedQuery.length
+                        ) {
+                            return prev
+                        }
+                        return nextFilteredListIds.includes(prev) ? prev : null
+                    },
                 },
             },
         })
@@ -4166,10 +4180,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (event.key === 'Escape') {
             this.emitMutation({ listsSidebar: { searchQuery: { $set: '' } } })
         } else if (event.key === 'Enter') {
-            await this.createNewList(
-                previousState,
-                previousState.listsSidebar.searchQuery,
-            )
+            let canCreateNewList =
+                previousState.listsSidebar.searchQuery.trim().length &&
+                !previousState.listsSidebar.filteredListIds.length
+
+            if (previousState.listsSidebar.focusedListId != null) {
+                await this._setSelectedListId(
+                    previousState,
+                    previousState.listsSidebar.focusedListId,
+                )
+            } else if (canCreateNewList) {
+                await this.createNewList(
+                    previousState,
+                    previousState.listsSidebar.searchQuery,
+                )
+            }
         } else if (event.key === 'ArrowUp') {
             this.calcNextFocusedList(previousState, -1)
         } else if (event.key === 'ArrowDown') {
@@ -4208,7 +4233,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         await this.createNewList(previousState, event.value)
-        this.emitMutation({ listsSidebar: { searchQuery: { $set: '' } } })
     }
 
     private async createNewList(previousState: State, name: string) {
@@ -4259,6 +4283,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         isAddListInputShown: { $set: false },
                         areLocalListsExpanded: { $set: true },
                         addListErrorMessage: { $set: null },
+                        searchQuery: { $set: '' },
                     },
                 })
                 const {
@@ -4312,10 +4337,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        await this._setSelectedListId(previousState, event.listId)
+    }
+
+    private async _setSelectedListId(previousState: State, listId: string) {
         const listIdToSet =
-            previousState.listsSidebar.selectedListId === event.listId
-                ? null
-                : event.listId
+            previousState.listsSidebar.selectedListId === listId ? null : listId
 
         if (listIdToSet != null) {
             if (listIdToSet === '20201014' || listIdToSet === '20201015') {
