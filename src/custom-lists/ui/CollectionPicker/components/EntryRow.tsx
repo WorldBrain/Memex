@@ -18,7 +18,6 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onEditMenuBtnPress?: () => void
     onOpenInTabGroupPress?: () => void
     index: number
-    indentSteps?: number
     shareState: 'private' | 'shared'
     id?: string
     actOnAllTooltipText?: string
@@ -34,11 +33,13 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onListFocus?: (listId: string) => void
     goToButtonRef?: React.RefObject<HTMLDivElement>
     bgScriptBG: RemoteBGScriptInterface<'caller'>
-    pathText?: string
+    onAncestryPathClick?: React.MouseEventHandler
+    ancestryPath?: React.ReactChild[]
     getRootElement?: () => HTMLElement
-    renderLeftSideIcon: () => JSX.Element
-    toggleShowNewChildInput: ListTreeActions['toggleShowNewChildInput']
-    dndActions: DragNDropActions
+    renderLeftSideIcon?: () => JSX.Element
+    toggleShowNewChildInput?: ListTreeActions['toggleShowNewChildInput']
+    dndActions?: DragNDropActions
+    indentSteps?: number
 }
 
 interface State {
@@ -273,8 +274,8 @@ class EntryRow extends React.PureComponent<Props, State> {
 
         return (
             <Row
-                onDragStart={dndActions.onDragStart}
-                onDragEnd={dndActions.onDragEnd}
+                onDragStart={dndActions?.onDragStart}
+                onDragEnd={dndActions?.onDragEnd}
                 draggable
                 onClick={this.handleResultPress}
                 ref={this.resultEntryRef}
@@ -295,15 +296,9 @@ class EntryRow extends React.PureComponent<Props, State> {
                     {this.props.renderLeftSideIcon?.()}
                 </LeftSideIconContainer>
                 <NameWrapper>
-                    {this.props.pathText?.length > 0 && (
-                        <PathBox>
-                            {this.props.pathText}{' '}
-                            <Icon
-                                filePath="arrowRight"
-                                heightAndWidth="14px"
-                                color="greyScale4"
-                                hoverOff
-                            />
+                    {this.props.ancestryPath?.length && (
+                        <PathBox onClick={this.props.onAncestryPathClick}>
+                            {this.props.ancestryPath}{' '}
                         </PathBox>
                     )}
                     <NameRow>
@@ -358,25 +353,27 @@ class EntryRow extends React.PureComponent<Props, State> {
                                     />
                                 </ButtonContainer>
                             </TooltipBox>
-                            <TooltipBox
-                                tooltipText="Add Sub-Space"
-                                placement="right"
-                                targetElementRef={
-                                    this.addSubSpaceIconRef.current
-                                }
-                                getPortalRoot={this.props.getRootElement}
-                            >
-                                <Icon
-                                    containerRef={this.addSubSpaceIconRef}
-                                    icon="plus"
-                                    heightAndWidth="16px"
-                                    color="greyScale4"
-                                    onClick={(event) => {
-                                        event.stopPropagation()
-                                        this.props.toggleShowNewChildInput()
-                                    }}
-                                />
-                            </TooltipBox>
+                            {this.props.toggleShowNewChildInput && (
+                                <TooltipBox
+                                    tooltipText="Add Sub-Space"
+                                    placement="right"
+                                    targetElementRef={
+                                        this.addSubSpaceIconRef.current
+                                    }
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <Icon
+                                        containerRef={this.addSubSpaceIconRef}
+                                        icon="plus"
+                                        heightAndWidth="16px"
+                                        color="greyScale4"
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                            this.props.toggleShowNewChildInput()
+                                        }}
+                                    />
+                                </TooltipBox>
+                            )}
                             <TooltipBox
                                 tooltipText={'Share Space'}
                                 placement="bottom"
@@ -586,6 +583,10 @@ const PathBox = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     grid-gap: 0px;
     align-items: center;
+    &:hover {
+        border: 1px solid ${(props) => props.theme.colors.greyScale3};
+        border-radius: 5px;
+    }
 `
 
 const NameRow = styled.div`
