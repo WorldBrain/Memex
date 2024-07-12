@@ -27,7 +27,6 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import type { State as ListTreesState } from '../list-trees/types'
 import type { ListTrees } from '../list-trees'
 import { getVisibleTreeNodesInOrder } from '../list-trees/util'
 import type EntryRow from './components/EntryRow'
@@ -300,23 +299,31 @@ export default class SpacePickerLogic extends UILogic<
                 'Attempted to toggle tree view for list ID that does not exist in cache',
             )
         }
-
-        let rootIdOfTree =
-            cachedList.pathUnifiedIds.length === 0
-                ? cachedList.unifiedId
-                : cachedList.pathUnifiedIds[0]
         let alreadyShown =
-            previousState.listIdsShownAsTrees.indexOf(rootIdOfTree) !== -1
+            previousState.listIdsShownAsTrees.indexOf(event.unifiedListId) !==
+            -1
 
         this.emitMutation({
             listIdsShownAsTrees: {
                 $set: alreadyShown
                     ? previousState.listIdsShownAsTrees.filter(
-                          (id) => id !== rootIdOfTree,
+                          (id) => id !== event.unifiedListId,
                       )
-                    : [...previousState.listIdsShownAsTrees, rootIdOfTree],
+                    : [
+                          ...previousState.listIdsShownAsTrees,
+                          event.unifiedListId,
+                      ],
             },
         })
+
+        // Timeout is needed here to allow the UI to react to the prev state mutation before we actually scroll to the entry
+        setTimeout(
+            () =>
+                this.dependencies
+                    .getEntryRowRefs()
+                    [event.unifiedListId]?.scrollIntoView(),
+            50,
+        )
     }
 
     focusInput: EventHandler<'focusInput'> = () => {

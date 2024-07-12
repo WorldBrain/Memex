@@ -276,17 +276,29 @@ class SpacePicker extends StatefulUIElement<
                 ),
             )
         }
+
+        // Easier to work with the root list IDs (as it's easy to get the root from anywhere in the tree),
+        //  so use these for calcs relating to the tree views
+        let rootIdsForListsShownAsTrees = this.state.listIdsShownAsTrees.map(
+            (id) => {
+                const cachedList = this.props.annotationsCache.lists.byId[id]
+                return cachedList.pathUnifiedIds.length
+                    ? cachedList.pathUnifiedIds[0]
+                    : id
+            },
+        )
+
         return listEntries.map((entry, index) => {
-            // If the root of this tree is flagged to be shown in tree view, then don't render anything for this entry
-            //  - it will be rendered as part of the tree view rendered for the root entry (next case)
+            // If the tree which this list is in is flagged to be shown in tree view, then don't render anything for this entry
+            //  - it will be rendered as part of the tree view rendered from the root entry (next case)
             if (
                 entry.pathUnifiedIds.length &&
-                this.state.listIdsShownAsTrees.includes(entry.pathUnifiedIds[0])
+                rootIdsForListsShownAsTrees.includes(entry.pathUnifiedIds[0])
             ) {
                 return null
             }
-            // If this entry is flagged to be shown in tree view, then we assume it's a root and render it with all descendents in tree view
-            if (this.state.listIdsShownAsTrees.includes(entry.unifiedId)) {
+            // If this entry is a root of a tree flagged to be shown in tree view, render it with all descendents in tree view
+            if (rootIdsForListsShownAsTrees.includes(entry.unifiedId)) {
                 let allTreeMembers = this.props.annotationsCache.getAllListsInTreeByRootId(
                     entry.unifiedId,
                 )
@@ -297,7 +309,10 @@ class SpacePicker extends StatefulUIElement<
                         authBG={this.props.authBG}
                         listsBG={this.props.spacesBG}
                         cache={this.props.annotationsCache}
-                        initListsToDisplayUnfolded={this.selectedCacheListIds}
+                        initListsToDisplayUnfolded={[
+                            ...this.selectedCacheListIds,
+                            ...this.state.listIdsShownAsTrees,
+                        ]}
                         areListsBeingFiltered={
                             this.state.query.trim().length > 0
                         }
@@ -455,6 +470,7 @@ class SpacePicker extends StatefulUIElement<
                 .filter(Boolean)
                 .slice(1)
 
+            // Base case: flat view
             return (
                 <EntryRowContainer key={entry.unifiedId}>
                     <EntryRow
