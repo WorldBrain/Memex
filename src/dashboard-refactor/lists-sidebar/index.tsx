@@ -44,6 +44,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onConfirmAddList: (value: string) => void
     setSidebarPeekState: (isPeeking: boolean) => () => void
     initDNDActions: (listId: string) => DragNDropActions
+    setFocusedListId: (listId: UnifiedList['unifiedId'] | null) => void
     initContextMenuBtnProps: (
         listId: string,
     ) => Omit<
@@ -70,7 +71,9 @@ export interface ListsSidebarProps extends ListsSidebarState {
     spaceSidebarWidth: string
     getRootElement: () => HTMLElement
     isInPageMode: boolean
-    listTreesDeps: Omit<ListTreesDeps, 'children'>
+    listTreesDeps: Omit<ListTreesDeps, 'children'> & {
+        ref: React.RefObject<ListTrees>
+    }
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -225,6 +228,15 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     key={list.unifiedId}
                                     indentSteps={list.pathUnifiedIds.length}
                                     name={`${list.name}`}
+                                    isFocused={
+                                        this.props.focusedListId ===
+                                        list.unifiedId
+                                    }
+                                    setFocused={(isFocused) =>
+                                        this.props.setFocusedListId(
+                                            isFocused ? list.unifiedId : null,
+                                        )
+                                    }
                                     isSelected={
                                         this.props.selectedListId ===
                                         list.unifiedId
