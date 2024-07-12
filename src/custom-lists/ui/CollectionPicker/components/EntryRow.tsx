@@ -296,7 +296,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                     {this.props.renderLeftSideIcon?.()}
                 </LeftSideIconContainer>
                 <NameWrapper>
-                    {this.props.ancestryPath?.length && (
+                    {this.props.ancestryPath?.length > 0 && (
                         <PathBox onClick={this.props.onAncestryPathClick}>
                             {this.props.ancestryPath}{' '}
                         </PathBox>

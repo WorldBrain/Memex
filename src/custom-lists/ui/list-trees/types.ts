@@ -38,7 +38,7 @@ export interface Dependencies {
     listsBG: RemoteCollectionsInterface
     authBG: AuthRemoteFunctionsInterface
 
-    /** Order is delegated to called - pass down already sorted. */
+    /** Order is delegated to caller - pass down already sorted. */
     lists: UnifiedList[]
     /** Specify lists to have shown be default (all their ancestors will be toggled open). */
     initListsToDisplayUnfolded?: UnifiedList['unifiedId'][]

@@ -153,6 +153,18 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         ].sort(defaultOrderableSorter)
     }
 
+    getAllListsInTreeByRootId: PageAnnotationsCacheInterface['getAllListsInTreeByRootId'] = (
+        rootUnifiedId,
+    ) => {
+        return [
+            ...normalizedStateToArray(this.lists).filter((list) =>
+                list.pathUnifiedIds.length === 0
+                    ? list.unifiedId === rootUnifiedId
+                    : list.pathUnifiedIds[0] === rootUnifiedId,
+            ),
+        ]
+    }
+
     private prepareListForCaching = (
         list: UnifiedListForCache,
         opts?: { skipAssociatingAnnotations?: boolean },

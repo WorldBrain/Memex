@@ -276,140 +276,278 @@ class SpacePicker extends StatefulUIElement<
                 ),
             )
         }
-        let index = 0 // TODO: dynamically set this in <ListTrees.props.renderListItem>
-        return (
-            <ListTrees
-                ref={this.listTreesRef}
-                sortChildrenByOrder
-                lists={listEntries}
-                authBG={this.props.authBG}
-                listsBG={this.props.spacesBG}
-                cache={this.props.annotationsCache}
-                initListsToDisplayUnfolded={this.selectedCacheListIds}
-                areListsBeingFiltered={this.state.query.trim().length > 0}
-            >
-                {(entry, treeState, actions, dndActions) => (
-                    <EntryRowContainer
-                        onDragEnter={dndActions.onDragEnter}
-                        onDragLeave={dndActions.onDragLeave}
-                        onDragOver={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                        }}
-                        onDrop={dndActions.onDrop}
-                        key={entry.unifiedId}
+        return listEntries.map((entry, index) => {
+            // If the root of this tree is flagged to be shown in tree view, then don't render anything for this entry
+            //  - it will be rendered as part of the tree view rendered for the root entry (next case)
+            if (
+                entry.pathUnifiedIds.length &&
+                this.state.listIdsShownAsTrees.includes(entry.pathUnifiedIds[0])
+            ) {
+                return null
+            }
+            // If this entry is flagged to be shown in tree view, then we assume it's a root and render it with all descendents in tree view
+            if (this.state.listIdsShownAsTrees.includes(entry.unifiedId)) {
+                let allTreeMembers = this.props.annotationsCache.getAllListsInTreeByRootId(
+                    entry.unifiedId,
+                )
+                return (
+                    <ListTrees
+                        sortChildrenByOrder
+                        lists={allTreeMembers}
+                        ref={this.listTreesRef}
+                        authBG={this.props.authBG}
+                        listsBG={this.props.spacesBG}
+                        cache={this.props.annotationsCache}
+                        initListsToDisplayUnfolded={this.selectedCacheListIds}
+                        areListsBeingFiltered={
+                            this.state.query.trim().length > 0
+                        }
                     >
-                        <EntryRow
-                            id={`ListKeyName-${entry.unifiedId}`}
-                            ref={(ref) =>
-                                (this.entryRowRefs[entry.unifiedId] = ref)
-                            }
-                            indentSteps={entry.pathUnifiedIds.length}
-                            dndActions={dndActions}
-                            onPress={() => {
-                                this.processEvent('resultEntryPress', {
-                                    entry,
-                                })
-                            }}
-                            onListFocus={() =>
-                                this.props.onListFocus(entry.localId)
-                            }
-                            addedToAllIds={this.state.addedToAllIds}
-                            keepScrollPosition={this.keepScrollPosition}
-                            onPressActOnAll={
-                                this.props.actOnAllTabs
-                                    ? () =>
-                                          this.processEvent(
-                                              'resultEntryAllPress',
-                                              {
-                                                  entry,
-                                              },
-                                          )
-                                    : undefined
-                            }
-                            bgScriptBG={this.props.bgScriptBG}
-                            onFocus={() =>
-                                this.processEvent('focusListEntry', {
-                                    listId: entry.unifiedId,
-                                })
-                            }
-                            onUnfocus={() =>
-                                this.processEvent('focusListEntry', {
-                                    listId: null,
-                                })
-                            }
-                            index={index}
-                            selected={this.state.selectedListIds.includes(
-                                entry.localId,
-                            )}
-                            focused={
-                                this.state.focusedListId === entry.unifiedId
-                            }
-                            resultItem={
-                                <ListResultItem>
-                                    {highlightText(
-                                        entry.name,
-                                        this.state.query,
+                        {(entry, treeState, actions, dndActions) => (
+                            <EntryRowContainer
+                                onDragEnter={dndActions.onDragEnter}
+                                onDragLeave={dndActions.onDragLeave}
+                                onDragOver={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                }}
+                                onDrop={dndActions.onDrop}
+                                key={entry.unifiedId}
+                            >
+                                <EntryRow
+                                    id={`ListKeyName-${entry.unifiedId}`}
+                                    ref={(ref) =>
+                                        (this.entryRowRefs[
+                                            entry.unifiedId
+                                        ] = ref)
+                                    }
+                                    indentSteps={entry.pathUnifiedIds.length}
+                                    dndActions={dndActions}
+                                    onPress={() => {
+                                        this.processEvent('resultEntryPress', {
+                                            entry,
+                                        })
+                                    }}
+                                    onListFocus={() =>
+                                        this.props.onListFocus(entry.localId)
+                                    }
+                                    addedToAllIds={this.state.addedToAllIds}
+                                    keepScrollPosition={this.keepScrollPosition}
+                                    onPressActOnAll={
+                                        this.props.actOnAllTabs
+                                            ? () =>
+                                                  this.processEvent(
+                                                      'resultEntryAllPress',
+                                                      {
+                                                          entry,
+                                                      },
+                                                  )
+                                            : undefined
+                                    }
+                                    bgScriptBG={this.props.bgScriptBG}
+                                    onFocus={() =>
+                                        this.processEvent('focusListEntry', {
+                                            listId: entry.unifiedId,
+                                        })
+                                    }
+                                    onUnfocus={() =>
+                                        this.processEvent('focusListEntry', {
+                                            listId: null,
+                                        })
+                                    }
+                                    index={index}
+                                    selected={this.state.selectedListIds.includes(
+                                        entry.localId,
                                     )}
-                                </ListResultItem>
-                            }
-                            contextMenuBtnRef={this.contextMenuBtnRef}
-                            goToButtonRef={this.goToButtonRef}
-                            editMenuBtnRef={this.editMenuBtnRef}
-                            extraMenuBtnRef={this.extraMenuBtnRef}
-                            openInTabGroupButtonRef={
-                                this.openInTabGroupButtonRef
-                            }
-                            onContextMenuBtnPress={
-                                entry.creator?.id === this.state.currentUser?.id
-                                    ? () =>
-                                          this.processEvent(
-                                              'toggleEntryContextMenu',
-                                              {
-                                                  listId: entry.localId,
-                                              },
-                                          )
-                                    : undefined
-                            }
-                            onEditMenuBtnPress={
-                                entry.creator?.id === this.state.currentUser?.id
-                                    ? () =>
-                                          this.processEvent(
-                                              'toggleEntryEditMenu',
-                                              {
-                                                  listId: entry.localId,
-                                              },
-                                          )
-                                    : undefined
-                            }
-                            onOpenInTabGroupPress={() =>
-                                this.processEvent('onOpenInTabGroupPress', {
-                                    listId: entry.localId,
-                                })
-                            }
-                            actOnAllTooltipText="Add all tabs in window to Space"
-                            shareState={
-                                entry?.isPrivate ?? 'private'
-                                    ? 'private'
-                                    : 'shared'
-                            }
-                            getRootElement={this.props.getRootElement}
-                            {...entry}
-                            toggleShowNewChildInput={
-                                actions.toggleShowNewChildInput
-                            }
-                            renderLeftSideIcon={() => (
-                                <ListTreeToggleArrow
+                                    focused={
+                                        this.state.focusedListId ===
+                                        entry.unifiedId
+                                    }
+                                    resultItem={
+                                        <ListResultItem>
+                                            {highlightText(
+                                                entry.name,
+                                                this.state.query,
+                                            )}
+                                        </ListResultItem>
+                                    }
+                                    contextMenuBtnRef={this.contextMenuBtnRef}
+                                    goToButtonRef={this.goToButtonRef}
+                                    editMenuBtnRef={this.editMenuBtnRef}
+                                    extraMenuBtnRef={this.extraMenuBtnRef}
+                                    openInTabGroupButtonRef={
+                                        this.openInTabGroupButtonRef
+                                    }
+                                    onContextMenuBtnPress={
+                                        entry.creator?.id ===
+                                        this.state.currentUser?.id
+                                            ? () =>
+                                                  this.processEvent(
+                                                      'toggleEntryContextMenu',
+                                                      {
+                                                          listId: entry.localId,
+                                                      },
+                                                  )
+                                            : undefined
+                                    }
+                                    onEditMenuBtnPress={
+                                        entry.creator?.id ===
+                                        this.state.currentUser?.id
+                                            ? () =>
+                                                  this.processEvent(
+                                                      'toggleEntryEditMenu',
+                                                      {
+                                                          listId: entry.localId,
+                                                      },
+                                                  )
+                                            : undefined
+                                    }
+                                    onOpenInTabGroupPress={() =>
+                                        this.processEvent(
+                                            'onOpenInTabGroupPress',
+                                            {
+                                                listId: entry.localId,
+                                            },
+                                        )
+                                    }
+                                    actOnAllTooltipText="Add all tabs in window to Space"
+                                    shareState={
+                                        entry?.isPrivate ?? 'private'
+                                            ? 'private'
+                                            : 'shared'
+                                    }
                                     getRootElement={this.props.getRootElement}
-                                    treeState={treeState}
-                                    actions={actions}
+                                    {...entry}
+                                    toggleShowNewChildInput={
+                                        actions.toggleShowNewChildInput
+                                    }
+                                    renderLeftSideIcon={() => (
+                                        <ListTreeToggleArrow
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
+                                            treeState={treeState}
+                                            actions={actions}
+                                        />
+                                    )}
                                 />
-                            )}
-                        />
-                    </EntryRowContainer>
-                )}
-            </ListTrees>
-        )
+                            </EntryRowContainer>
+                        )}
+                    </ListTrees>
+                )
+            }
+
+            let pathText = entry.pathUnifiedIds
+                .flatMap((id) => {
+                    let cachedList = this.props.annotationsCache.lists.byId[id]
+                    if (!cachedList) {
+                        return null
+                    }
+                    return [
+                        <Icon
+                            filePath="arrowRight"
+                            heightAndWidth="14px"
+                            color="greyScale4"
+                            hoverOff
+                        />,
+                        cachedList.name,
+                    ]
+                })
+                .filter(Boolean)
+                .slice(1)
+
+            return (
+                <EntryRowContainer key={entry.unifiedId}>
+                    <EntryRow
+                        ancestryPath={pathText}
+                        onAncestryPathClick={(e) => {
+                            e.stopPropagation()
+                            this.processEvent('toggleListShownAsTree', {
+                                unifiedListId: entry.unifiedId,
+                            })
+                        }}
+                        id={`ListKeyName-${entry.unifiedId}`}
+                        ref={(ref) =>
+                            (this.entryRowRefs[entry.unifiedId] = ref)
+                        }
+                        onPress={() => {
+                            this.processEvent('resultEntryPress', {
+                                entry,
+                            })
+                        }}
+                        onListFocus={() =>
+                            this.props.onListFocus(entry.localId)
+                        }
+                        addedToAllIds={this.state.addedToAllIds}
+                        keepScrollPosition={this.keepScrollPosition}
+                        onPressActOnAll={
+                            this.props.actOnAllTabs
+                                ? () =>
+                                      this.processEvent('resultEntryAllPress', {
+                                          entry,
+                                      })
+                                : undefined
+                        }
+                        bgScriptBG={this.props.bgScriptBG}
+                        onFocus={() =>
+                            this.processEvent('focusListEntry', {
+                                listId: entry.unifiedId,
+                            })
+                        }
+                        onUnfocus={() =>
+                            this.processEvent('focusListEntry', {
+                                listId: null,
+                            })
+                        }
+                        index={index}
+                        selected={this.state.selectedListIds.includes(
+                            entry.localId,
+                        )}
+                        focused={this.state.focusedListId === entry.unifiedId}
+                        resultItem={
+                            <ListResultItem>
+                                {highlightText(entry.name, this.state.query)}
+                            </ListResultItem>
+                        }
+                        contextMenuBtnRef={this.contextMenuBtnRef}
+                        goToButtonRef={this.goToButtonRef}
+                        editMenuBtnRef={this.editMenuBtnRef}
+                        extraMenuBtnRef={this.extraMenuBtnRef}
+                        openInTabGroupButtonRef={this.openInTabGroupButtonRef}
+                        onContextMenuBtnPress={
+                            entry.creator?.id === this.state.currentUser?.id
+                                ? () =>
+                                      this.processEvent(
+                                          'toggleEntryContextMenu',
+                                          {
+                                              listId: entry.localId,
+                                          },
+                                      )
+                                : undefined
+                        }
+                        onEditMenuBtnPress={
+                            entry.creator?.id === this.state.currentUser?.id
+                                ? () =>
+                                      this.processEvent('toggleEntryEditMenu', {
+                                          listId: entry.localId,
+                                      })
+                                : undefined
+                        }
+                        onOpenInTabGroupPress={() =>
+                            this.processEvent('onOpenInTabGroupPress', {
+                                listId: entry.localId,
+                            })
+                        }
+                        actOnAllTooltipText="Add all tabs in window to Space"
+                        shareState={
+                            entry?.isPrivate ?? 'private' ? 'private' : 'shared'
+                        }
+                        getRootElement={this.props.getRootElement}
+                        {...entry}
+                    />
+                </EntryRowContainer>
+            )
+        })
     }
 
     private handleSpaceContextMenuClose = (listId: number) => async () => {
@@ -589,10 +727,6 @@ class SpacePicker extends StatefulUIElement<
                             </OutputSwitcher>
                         </OutputSwitcherContainer>
                     )}
-                    {/* {this.state.currentTab === 'user-lists' &&
-                        this.state.query.trim().length === 0 && (
-                            <EntryListHeader>Recently used</EntryListHeader>
-                        )} */}
                     {this.renderListEntries()}
                 </EntryList>
                 {this.shouldShowAddNewEntry && (
