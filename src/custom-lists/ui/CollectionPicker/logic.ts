@@ -128,7 +128,7 @@ export default class SpacePickerLogic extends UILogic<
 
     getInitialState = (): SpacePickerState => ({
         query: '',
-        newEntryName: null,
+        newEntryName: [],
         currentTab: 'user-lists',
         currentUser: null,
         focusedListId: null,
@@ -347,14 +347,14 @@ export default class SpacePickerLogic extends UILogic<
             })
         }
 
-        // Timeout is needed here to allow the UI to react to the prev state mutation before we actually scroll to the entry
-        setTimeout(
-            () =>
-                this.dependencies
-                    .getEntryRowRefs()
-                    [event.listIndex]?.scrollIntoView(),
-            50,
-        )
+        // // Timeout is needed here to allow the UI to react to the prev state mutation before we actually scroll to the entry
+        // setTimeout(
+        //     () =>
+        //         this.dependencies
+        //             .getEntryRowRefs()
+        //             [event.listIndex]?.scrollIntoView(),
+        //     50,
+        // )
     }
 
     focusInput: EventHandler<'focusInput'> = () => {
@@ -690,56 +690,15 @@ export default class SpacePickerLogic extends UILogic<
             pathSearchItems = [query]
         }
 
-        // 1. when a term update comes in that does not have a / in it, just do a regular search
-        // 2. when a / is typed, save the current item as "in-focus", add it to the searchpath array focus only on the list of childre of the last focused listitem
-        // 3. the actual search term is only the stuff after the last / or if not present, the entire query
-
         const entireListEntryPool = [
             ...normalizedStateToArray(state.listEntries),
             ...normalizedStateToArray(state.pageLinkEntries),
         ]
 
-        // construct query
-
         let newEntryObject: { unifiedId: string; name: string }[] =
             state.newEntryName ?? []
         let queryForNewSpaces = pathSearchItems[pathSearchItems.length - 1]
 
-        let lastSelectedId = state.focusedListId
-        if (query.endsWith('/')) {
-            const isBackspaced = query.length < state.query.length
-            let lastSpaceName = null
-            let updatedQuery = query
-            newEntryObject.pop()
-            if (!isBackspaced) {
-                lastSpaceName = state.listEntries.byId[lastSelectedId].name
-                newEntryObject.push({
-                    unifiedId: lastSelectedId,
-                    name: lastSpaceName,
-                })
-                updatedQuery = query.replace(/[^\/]*\/?$/, `${lastSpaceName}/`)
-            }
-            newEntryObject.push({
-                unifiedId: null,
-                name: '',
-            })
-            this.emitMutation({ query: { $set: updatedQuery } })
-        } else if (query.includes('/') && !query.endsWith('/')) {
-            const lastNonNullUnifiedIdEntry = newEntryObject
-                .slice()
-                .reverse()
-                .find((entry) => entry.unifiedId !== null)
-            lastSelectedId = lastNonNullUnifiedIdEntry?.unifiedId
-
-            newEntryObject.pop()
-
-            newEntryObject.push({
-                unifiedId: null,
-                name: queryForNewSpaces,
-            })
-        }
-
-        let filteredEntries: UnifiedList[] = []
         const distinctTerms = queryForNewSpaces.split(/\s+/).filter(Boolean)
         const doAllTermsMatch = (list: UnifiedList): boolean =>
             distinctTerms.reduce((acc, term) => {
@@ -752,6 +711,111 @@ export default class SpacePickerLogic extends UILogic<
                 return matches
             }, true)
 
+        let lastSelectedId = state.focusedListId
+        if (query.endsWith('/')) {
+            console.log(
+                'lastfocusedlistid',
+                this.dependencies.annotationsCache.annotations.byId[
+                    lastSelectedId
+                ],
+            )
+            const isBackspaced = query.length < state.query.length
+            let lastSpaceName = null
+            let updatedQuery = query
+
+            if (!isBackspaced) {
+                let path =
+                    state.listEntries?.byId[lastSelectedId]?.pathUnifiedIds
+                lastSpaceName = state.listEntries?.byId[lastSelectedId]?.name
+                // checks if the last item in teh path is a null on the unifiedId to detect if the next item should be appended appended without clearning the object list
+                const isMultiplePathAdditions =
+                    newEntryObject[newEntryObject.length - 1]?.unifiedId ===
+                    null
+
+                console.log('isMultiplePathAdditions', isMultiplePathAdditions)
+                console.log('newEntryObjectbefore', newEntryObject)
+                if (
+                    (!isMultiplePathAdditions || newEntryObject.length === 0) &&
+                    state.query.includes('/')
+                ) {
+                    if (path.length > 0) {
+                        newEntryObject = []
+                        updatedQuery = ''
+                        for (let unifiedId of path) {
+                            console.log('unifiedId', unifiedId)
+                            const list = this.dependencies.annotationsCache
+                                .lists.byId[unifiedId]
+                            const name = list.name
+                            newEntryObject.push({
+                                unifiedId: unifiedId,
+                                name: name,
+                            })
+
+                            updatedQuery += `${name}/`
+                        }
+                    }
+
+                    newEntryObject.push({
+                        unifiedId: lastSelectedId,
+                        name: lastSpaceName,
+                    })
+                    updatedQuery += `${lastSpaceName}/`
+                } else if (!state.query.includes('/')) {
+                    newEntryObject.push({
+                        unifiedId: lastSelectedId,
+                        name: lastSpaceName,
+                    })
+                    updatedQuery = `${lastSpaceName}/`
+                }
+            } else {
+                newEntryObject.pop()
+                newEntryObject.push({
+                    unifiedId: null,
+                    name: '',
+                })
+            }
+
+            // take the unifiedId and search the filteredentries for the position in it
+            // then add it to the listidsfortree
+
+            const indexInResults = state.filteredListIds.indexOf(lastSelectedId)
+
+            const listIdForTree = state.listIdsShownAsTrees
+            listIdForTree.push(indexInResults)
+
+            this.emitMutation({
+                query: { $set: updatedQuery },
+                listIdsShownAsTrees: { $set: listIdForTree },
+            })
+        } else if (query.includes('/') && !query.endsWith('/')) {
+            const lastNonNullUnifiedIdEntry = newEntryObject
+                .slice()
+                .reverse()
+                .find((entry) => entry.unifiedId !== null)
+            lastSelectedId = lastNonNullUnifiedIdEntry?.unifiedId
+
+            if (queryForNewSpaces.length > 1) {
+                newEntryObject.pop()
+            }
+
+            newEntryObject.push({
+                unifiedId: null,
+                name: queryForNewSpaces,
+            })
+        } else if (!query.includes('/')) {
+            console.log(
+                'lastfocusedlistid',
+                this.dependencies.annotationsCache.annotations.byId[
+                    lastSelectedId
+                ],
+            )
+        }
+
+        console.log('newEntryObjectAFter', newEntryObject)
+
+        this.emitMutation({ newEntryName: { $set: newEntryObject } })
+
+        let filteredEntries: UnifiedList[] = []
         if (pathSearchItems.length === 1) {
             filteredEntries = entireListEntryPool.filter(doAllTermsMatch)
         } else {
@@ -769,8 +833,9 @@ export default class SpacePickerLogic extends UILogic<
 
         let matchingEntryIds = filteredEntries.flatMap((entry) => [
             entry.unifiedId,
-            ...entry.pathUnifiedIds,
+            // ...entry.pathUnifiedIds,
         ])
+
         if (pathSearchItems.length > 1 && filteredEntries.length === 0) {
             const lastNonNullUnifiedIdEntry = newEntryObject
                 .slice()
@@ -778,21 +843,19 @@ export default class SpacePickerLogic extends UILogic<
                 .find((entry) => entry.unifiedId !== null)
             lastSelectedId = lastNonNullUnifiedIdEntry?.unifiedId
 
-            const pathOfLastEntry = [
-                lastSelectedId,
-                ...state.listEntries.byId[lastSelectedId].pathUnifiedIds,
-            ]
+            const pathOfLastEntry = [lastSelectedId]
             matchingEntryIds = pathOfLastEntry
         }
 
+        lastSelectedId = matchingEntryIds[0] ?? state.focusedListId
         const mutation: UIMutation<SpacePickerState> = {
             filteredListIds: { $set: matchingEntryIds },
+            focusedListId: { $set: lastSelectedId },
         }
 
         this.emitMutation(mutation)
         const nextState = this.withMutation(state, mutation)
-
-        // added this to give the focus function a specific ID to focus on so we can focus on a specific item id
+        // added this to give the focus function a specific ID to focus on specific item id
         if (matchingEntryIds && matchingEntryIds.length > 0) {
             let listIdToFocusFirst = matchingEntryIds[0]
             this.emitMutation({ newEntryName: { $set: newEntryObject } })
@@ -800,15 +863,19 @@ export default class SpacePickerLogic extends UILogic<
             if (filteredEntries.length === 0 && queryForNewSpaces.length > 0) {
                 listIdToFocusFirst = '-1'
             }
+            console.log(
+                'listIdToFocusFirst',
+                filteredEntries,
+                queryForNewSpaces,
+                listIdToFocusFirst,
+            )
             this.calcNextFocusedEntry(nextState, null, listIdToFocusFirst)
         } else {
-            if (newEntryObject[newEntryObject.length - 1].unifiedId == null) {
+            if (newEntryObject[newEntryObject.length - 1]?.unifiedId == null) {
                 newEntryObject.pop()
             }
             const queryParts = query.split('/').pop()
             newEntryObject.push({ unifiedId: null, name: queryParts })
-
-            // this.maybeSetCreateEntryDisplay(query, state)
         }
 
         if (state.query.length > 0 && nextState.query.length === 0) {
@@ -1002,15 +1069,17 @@ export default class SpacePickerLogic extends UILogic<
         name: string,
         previousState: SpacePickerState,
         parentList: UnifiedList['localId'] = null,
+        skipSelecting: boolean = false,
     ): Promise<number> {
         if (this.dependencies.filterMode) {
             return
         }
-
-        const parentPath = this.dependencies.annotationsCache.getListByLocalId(
-            parentList,
-        )?.pathLocalIds
-
+        let parentPath = null
+        if (parentList != null) {
+            parentPath = this.dependencies.annotationsCache.getListByLocalId(
+                parentList,
+            )?.pathLocalIds
+        }
         const {
             collabKey,
             localListId,
@@ -1018,12 +1087,6 @@ export default class SpacePickerLogic extends UILogic<
         } = await this.dependencies.spacesBG.createCustomList({
             name,
             parentListId: parentList,
-        })
-        this.dependencies.onSpaceCreate?.({
-            name,
-            localListId,
-            collabKey,
-            remoteListId,
         })
         this.dependencies.annotationsCache.addList({
             name,
@@ -1036,11 +1099,19 @@ export default class SpacePickerLogic extends UILogic<
             creator: previousState.currentUser ?? undefined,
             parentLocalId: parentList,
             isPrivate: true,
-            pathLocalIds: [...parentPath, parentList],
+            pathLocalIds: parentPath ? [...parentPath, parentList] : [],
         })
 
         this.localListIdsMRU.unshift(localListId)
-        this.selectedListIds.unshift(localListId)
+        if (!skipSelecting) {
+            this.selectedListIds.unshift(localListId)
+            this.dependencies.onSpaceCreate?.({
+                name,
+                localListId,
+                collabKey,
+                remoteListId,
+            })
+        }
 
         const listData = this.dependencies.annotationsCache.lists
 
@@ -1061,10 +1132,10 @@ export default class SpacePickerLogic extends UILogic<
 
         this.emitMutation({
             query: { $set: '' },
-            // newEntryName: { $set: '' },
-            selectedListIds: { $set: this.selectedListIds },
+            newEntryName: { $set: [] },
         })
 
+        console.log('selectedListIds', this.selectedListIds)
         const mutation: UIMutation<SpacePickerState> = {
             selectedListIds: { $set: this.selectedListIds },
             filteredListIds: { $set: null },
@@ -1092,6 +1163,7 @@ export default class SpacePickerLogic extends UILogic<
         previousState,
     }) => {
         let entries = entry
+        console.log('entry', entry.length, entry)
         await executeUITask(this, 'spaceCreateState', async () => {
             // NOTE: This is here as the enter press event from the context menu to confirm a space rename
             //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
@@ -1100,33 +1172,45 @@ export default class SpacePickerLogic extends UILogic<
                 return
             }
 
+            let parentLocalId = null
+
             for (let i = 0; i < entry.length; i++) {
                 const item = entry[i]
                 if (item.unifiedId == null) {
-                    const { valid } = this.validateSpaceName(item.name)
+                    // const { valid } = this.validateSpaceName(item.name)
+                    // console.log('valid', valid)
                     try {
-                        if (!valid) {
-                            return
-                        }
+                        // if (!valid) {
+                        //     return
+                        // }
 
-                        const parentLocalId = this.dependencies.annotationsCache
-                            .lists.byId[entry[i - 1]?.unifiedId]?.localId
-
+                        parentLocalId = this.dependencies.annotationsCache.lists
+                            .byId[entry[i - 1]?.unifiedId]?.localId
                         const listId = await this.createAndDisplayNewList(
                             item.name,
                             previousState,
                             parentLocalId,
+                            i === entry.length - 1 ? false : true,
                         )
 
-                        entries[
-                            i
-                        ].unifiedId = this.dependencies.annotationsCache.getListByLocalId(
+                        const newListUnifiedId = this.dependencies.annotationsCache.getListByLocalId(
                             listId,
-                        ).unifiedId
+                        )?.unifiedId
 
-                        if (i === entry.length - 1) {
-                            await this.dependencies.selectEntry(listId)
-                        }
+                        entries[i].unifiedId = newListUnifiedId
+
+                        let listTreesRef = this.dependencies.getListTreesRef()
+
+                        listTreesRef?.processEvent('toggleShowChildren', {
+                            listId: this.dependencies.annotationsCache.getListByLocalId(
+                                listId,
+                            ).unifiedId,
+                        })
+
+                        // if (i === entry.length - 1) {
+                        //     console.log('last item')
+                        //     await this.dependencies.selectEntry(listId)
+                        // }
                     } catch (err) {
                         this.emitMutation({
                             spaceWriteError: { $set: err.message },

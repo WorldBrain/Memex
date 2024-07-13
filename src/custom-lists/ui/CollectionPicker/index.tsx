@@ -105,19 +105,29 @@ class SpacePicker extends StatefulUIElement<
             return false
         }
 
-        const otherLists = normalizedStateToArray(this.state.listEntries).map(
-            (e) => ({
-                id: e.localId,
-                name: e.name,
-            }),
-        )
+        if (
+            this.state.newEntryName?.length > 0 &&
+            this.state.newEntryName[this.state.newEntryName?.length - 1]
+                ?.unifiedId === null
+        ) {
+            return true
+        } else {
+            return false
+        }
 
-        const newName =
-            this.state.newEntryName?.[this.state.newEntryName.length - 1]
-                ?.name ?? ''
+        // const otherLists = normalizedStateToArray(this.state.listEntries).map(
+        //     (e) => ({
+        //         id: e.localId,
+        //         name: e.name,
+        //     }),
+        // )
 
-        const validSpaceName = validateSpaceName(newName, otherLists).valid
-        return validSpaceName
+        // const newName =
+        //     this.state.newEntryName?.[this.state.newEntryName.length - 1]
+        //         ?.name ?? ''
+
+        // const validSpaceName = validateSpaceName(newName, otherLists).valid
+        // return validSpaceName
     }
 
     private get selectedCacheListIds(): string[] {
@@ -471,7 +481,7 @@ class SpacePicker extends StatefulUIElement<
                             color="greyScale4"
                             hoverOff
                         />,
-                        cachedList.name,
+                        <BreadCrumbItem>{cachedList.name}</BreadCrumbItem>,
                     ]
                 })
                 .filter(Boolean)
@@ -951,6 +961,17 @@ const HighlightedTextSpan = styled.span`
     margin: 0 2px;
     color: ${(props) => props.theme.colors.black};
     white-space: nowrap;
+`
+
+const BreadCrumbItem = styled.div`
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    margin-right: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 40px;
+    text-overflow: ellipsis;
+    overflow: hidden;
 `
 
 export default SpacePicker

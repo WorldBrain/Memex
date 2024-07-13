@@ -504,6 +504,8 @@ export const IconStyleWrapper = styled.div`
     align-items: center;
     justify-content: flex-end;
     height: 100%;
+    position: absolute;
+    right: 10px;
 `
 
 const Row = styled.div<{
@@ -586,6 +588,7 @@ const PathBox = styled.div`
     margin: 0 -3px;
     border-radius: 5px;
     align-items: center;
+    white-space: nowrap;
 
     &:hover {
         background: ${(props) => props.theme.colors.greyScale2};
