@@ -128,12 +128,22 @@ describe('SpacePickerLogic', () => {
         let listA = annotationsCache.addList({
             name: 'a',
             type: 'user-list',
+            localId: 1,
             unifiedAnnotationIds: [],
             hasRemoteAnnotationsToLoad: false,
         })
         let listB = annotationsCache.addList({
             name: 'b',
             type: 'user-list',
+            localId: 2,
+            unifiedAnnotationIds: [],
+            hasRemoteAnnotationsToLoad: false,
+        })
+        let listC = annotationsCache.addList({
+            name: 'c',
+            type: 'user-list',
+            localId: 3,
+            parentLocalId: 2,
             unifiedAnnotationIds: [],
             hasRemoteAnnotationsToLoad: false,
         })
@@ -174,6 +184,16 @@ describe('SpacePickerLogic', () => {
             unifiedListId: listB.unifiedId,
         })
 
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+
+        // C is a child of B, so toggling C then B should result in C in being removed (as it's the same tree)
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listC.unifiedId,
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([listC.unifiedId])
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
         expect(testLogic.state.listIdsShownAsTrees).toEqual([])
     })
 

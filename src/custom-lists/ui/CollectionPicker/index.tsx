@@ -441,7 +441,26 @@ class SpacePicker extends StatefulUIElement<
                                                 this.props.getRootElement
                                             }
                                             treeState={treeState}
-                                            actions={actions}
+                                            actions={{
+                                                ...actions,
+                                                toggleShowChildren: () => {
+                                                    // Toggling roots should close tree-view
+                                                    if (
+                                                        entry.parentUnifiedId ==
+                                                        null
+                                                    ) {
+                                                        this.processEvent(
+                                                            'toggleListShownAsTree',
+                                                            {
+                                                                unifiedListId:
+                                                                    entry.unifiedId,
+                                                            },
+                                                        )
+                                                    } else {
+                                                        actions.toggleShowChildren()
+                                                    }
+                                                },
+                                            }}
                                         />
                                     )}
                                 />

@@ -16,7 +16,10 @@ import {
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { getEntriesForCurrentPickerTab } from './utils'
+import {
+    getEntriesForCurrentPickerTab,
+    getRootIdsForListsShownAsTrees,
+} from './utils'
 import type {
     SpacePickerState,
     SpacePickerEvent,
@@ -299,22 +302,46 @@ export default class SpacePickerLogic extends UILogic<
                 'Attempted to toggle tree view for list ID that does not exist in cache',
             )
         }
-        let alreadyShown =
-            previousState.listIdsShownAsTrees.indexOf(event.unifiedListId) !==
-            -1
 
-        this.emitMutation({
-            listIdsShownAsTrees: {
-                $set: alreadyShown
-                    ? previousState.listIdsShownAsTrees.filter(
-                          (id) => id !== event.unifiedListId,
-                      )
-                    : [
-                          ...previousState.listIdsShownAsTrees,
-                          event.unifiedListId,
-                      ],
-            },
-        })
+        // Find if any tree-view toggled lists have the list we're toggling as their root
+        let correspondingToggledListId: string = null
+        for (let listId of previousState.listIdsShownAsTrees) {
+            let list = this.dependencies.annotationsCache.lists.byId[listId]
+            if (list?.pathUnifiedIds[0] === event.unifiedListId) {
+                correspondingToggledListId = listId
+                break
+            }
+        }
+
+        // If so we're untoggling this tree from tree-view back into flat-view
+        if (correspondingToggledListId != null) {
+            this.emitMutation({
+                listIdsShownAsTrees: {
+                    $set: previousState.listIdsShownAsTrees.filter(
+                        (id) => id !== correspondingToggledListId,
+                    ),
+                },
+            })
+            // Else we're either adding/removing a list to be shown in tree-view
+        } else {
+            let alreadyShown =
+                previousState.listIdsShownAsTrees.indexOf(
+                    event.unifiedListId,
+                ) !== -1
+
+            this.emitMutation({
+                listIdsShownAsTrees: {
+                    $set: alreadyShown
+                        ? previousState.listIdsShownAsTrees.filter(
+                              (id) => id !== event.unifiedListId,
+                          )
+                        : [
+                              ...previousState.listIdsShownAsTrees,
+                              event.unifiedListId,
+                          ],
+                },
+            })
+        }
 
         // Timeout is needed here to allow the UI to react to the prev state mutation before we actually scroll to the entry
         setTimeout(
