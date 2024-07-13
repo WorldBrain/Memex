@@ -92,6 +92,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
             this.state,
             this.props,
         )
+
         return orderedTreeNodes.map((list, index) => {
             let actions: ListTreeActions = {
                 createChildList: (name) =>

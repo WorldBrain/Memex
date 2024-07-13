@@ -29,7 +29,7 @@ export interface SpacePickerState {
     listEntries: NormalizedState<UnifiedList<'user-list'>>
     pageLinkEntries: NormalizedState<UnifiedList<'page-link'>>
     /** This should only ever contain list IDs for tree roots */
-    listIdsShownAsTrees: UnifiedList['unifiedId'][]
+    listIdsShownAsTrees: number[]
     selectedListIds: number[]
     contextMenuListId: number | null
     editMenuListId: number | null
@@ -64,7 +64,7 @@ export type SpacePickerEvent = UIEvent<{
     keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
     onKeyUp: { event: React.KeyboardEvent<HTMLInputElement> }
     focusInput: {}
-    toggleListShownAsTree: { unifiedListId: UnifiedList['unifiedId'] }
+    toggleListShownAsTree: { listIndex: number }
 }>
 
 export interface SpacePickerDependencies {

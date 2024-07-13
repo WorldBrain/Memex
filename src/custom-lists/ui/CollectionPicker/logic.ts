@@ -16,10 +16,7 @@ import {
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { BrowserSettingsStore } from 'src/util/settings'
-import {
-    getEntriesForCurrentPickerTab,
-    getRootIdsForListsShownAsTrees,
-} from './utils'
+import { getEntriesForCurrentPickerTab } from './utils'
 import type {
     SpacePickerState,
     SpacePickerEvent,
@@ -295,7 +292,7 @@ export default class SpacePickerLogic extends UILogic<
         previousState,
     }) => {
         let cachedList = this.dependencies.annotationsCache.lists.byId[
-            event.unifiedListId
+            event.listIndex
         ]
         if (!cachedList) {
             throw new Error(
@@ -303,12 +300,20 @@ export default class SpacePickerLogic extends UILogic<
             )
         }
 
+        const index = event.listIndex
+
+        let listEntries = getEntriesForCurrentPickerTab(previousState)
+        if (previousState.query.trim().length > 0) {
+            listEntries = listEntries.filter((list) =>
+                previousState.filteredListIds.includes(list.unifiedId),
+            )
+        }
         // Find if any tree-view toggled lists have the list we're toggling as their root
-        let correspondingToggledListId: string = null
+        let correspondingToggledListId: number = null
         for (let listId of previousState.listIdsShownAsTrees) {
             let list = this.dependencies.annotationsCache.lists.byId[listId]
-            if (list?.pathUnifiedIds[0] === event.unifiedListId) {
-                correspondingToggledListId = listId
+            if (list?.pathUnifiedIds[0] === event.listIndex.toString()) {
+                correspondingToggledListId = index
                 break
             }
         }
@@ -325,19 +330,18 @@ export default class SpacePickerLogic extends UILogic<
             // Else we're either adding/removing a list to be shown in tree-view
         } else {
             let alreadyShown =
-                previousState.listIdsShownAsTrees.indexOf(
-                    event.unifiedListId,
-                ) !== -1
+                previousState.listIdsShownAsTrees.indexOf(event.listIndex) !==
+                -1
 
             this.emitMutation({
                 listIdsShownAsTrees: {
                     $set: alreadyShown
                         ? previousState.listIdsShownAsTrees.filter(
-                              (id) => id !== event.unifiedListId,
+                              (id) => id !== event.listIndex,
                           )
                         : [
                               ...previousState.listIdsShownAsTrees,
-                              event.unifiedListId,
+                              event.listIndex,
                           ],
                 },
             })
@@ -348,7 +352,7 @@ export default class SpacePickerLogic extends UILogic<
             () =>
                 this.dependencies
                     .getEntryRowRefs()
-                    [event.unifiedListId]?.scrollIntoView(),
+                    [event.listIndex]?.scrollIntoView(),
             50,
         )
     }

@@ -582,10 +582,14 @@ const PathBox = styled.div`
     font-size: 12px;
     color: ${(props) => props.theme.colors.greyScale5};
     grid-gap: 0px;
+    padding: 0 3px;
+    margin: 0 -3px;
+    border-radius: 5px;
     align-items: center;
+
     &:hover {
-        border: 1px solid ${(props) => props.theme.colors.greyScale3};
-        border-radius: 5px;
+        background: ${(props) => props.theme.colors.greyScale2};
+        cursor: pointer;
     }
 `
 
