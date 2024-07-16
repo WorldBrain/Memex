@@ -55,12 +55,20 @@ export default class PromptTemplatesLogic extends UILogic<
             activatedPowerUps: null,
             authLoadState: 'running',
             userEmail: null,
+            confirmPowerups: null,
         }
     }
 
     changeModalType: EventHandler<'changeModalType'> = async ({ event }) => {
         this.emitMutation({
             powerUpType: { $set: event },
+        })
+    }
+    setPowerUpConfirmation: EventHandler<'setPowerUpConfirmation'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            confirmPowerups: { $set: event.selected },
         })
     }
 
@@ -71,6 +79,18 @@ export default class PromptTemplatesLogic extends UILogic<
         if (previousState.activatedPowerUps.lifetime === true) {
             return
         }
+
+        if (event.plan !== previousState.confirmPowerups) {
+            this.emitMutation({
+                confirmPowerups: { $set: event.plan },
+            })
+            return
+        } else {
+            this.emitMutation({
+                confirmPowerups: { $set: null },
+            })
+        }
+
         this.emitMutation({
             checkoutLoading: { $set: 'running' },
         })
@@ -89,28 +109,28 @@ export default class PromptTemplatesLogic extends UILogic<
 
         let newSelection: PremiumPlans[] = currentlySelected
 
-        if (event === 'AIpowerupBasic') {
+        if (event.plan === 'AIpowerupBasic') {
             newSelection = newSelection.filter(
                 (key) => key !== 'AIpowerup' && key !== 'AIpowerupOwnKey',
             )
-        } else if (event === 'bookmarksPowerUpBasic') {
+        } else if (event.plan === 'bookmarksPowerUpBasic') {
             newSelection = newSelection.filter(
                 (key) => key !== 'bookmarksPowerUp',
             )
-        } else if (event === 'AIpowerup') {
+        } else if (event.plan === 'AIpowerup') {
             newSelection = newSelection.filter(
                 (key) => key !== 'AIpowerupOwnKey',
             )
-            newSelection.push(event)
-        } else if (event === 'AIpowerupOwnKey') {
+            newSelection.push(event.plan)
+        } else if (event.plan === 'AIpowerupOwnKey') {
             newSelection = newSelection.filter((key) => key !== 'AIpowerup')
-            newSelection.push(event)
-        } else if (event === 'lifetime') {
+            newSelection.push(event.plan)
+        } else if (event.plan === 'lifetime') {
             newSelection = ['lifetime']
             billingPeriod = null
             doNotOpen = false
         } else {
-            newSelection.push(event)
+            newSelection.push(event.plan)
         }
 
         const upgradeResponse = await this.dependencies.createCheckOutLink({

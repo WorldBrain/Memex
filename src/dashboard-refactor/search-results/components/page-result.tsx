@@ -944,7 +944,7 @@ export default class PageResultView extends PureComponent<Props> {
             }
             this.hoverTimeout = setTimeout(() => {
                 this.props.onMainContentHover(event)
-            }, 300)
+            }, 50)
         }
     }
 
@@ -957,6 +957,26 @@ export default class PageResultView extends PureComponent<Props> {
             }
             this.props.onUnhover(event)
         }
+    }
+
+    renderListsSegment = () => {
+        return (
+            <ListsSegment
+                lists={this.displayLists}
+                onListClick={(listId) => {
+                    this.props.filterbyList(listId)
+                }}
+                onEditBtnClick={this.props.onListPickerBarBtnClick}
+                renderSpacePicker={
+                    this.props.listPickerShowStatus === 'lists-bar'
+                        ? this.renderSpacePicker
+                        : null
+                }
+                filteredbyListID={this.props.filteredbyListID}
+                padding={'0px 20px 0px 20px'}
+                spacePickerButtonRef={this.spacePickerBarRef}
+            />
+        )
     }
 
     render() {
@@ -1034,37 +1054,8 @@ export default class PageResultView extends PureComponent<Props> {
                                 ) : null
                             }}
                             renderSpacePicker={() => {
-                                if (this.displayLists.length > 0) {
-                                    return (
-                                        <ListSegmentContainer>
-                                            <ListsSegment
-                                                lists={this.displayLists}
-                                                onListClick={(listId) => {
-                                                    this.props.filterbyList(
-                                                        listId,
-                                                    )
-                                                }}
-                                                onEditBtnClick={
-                                                    this.props
-                                                        .onListPickerBarBtnClick
-                                                }
-                                                renderSpacePicker={
-                                                    this.props
-                                                        .listPickerShowStatus ===
-                                                    'lists-bar'
-                                                        ? this.renderSpacePicker
-                                                        : null
-                                                }
-                                                filteredbyListID={
-                                                    this.props.filteredbyListID
-                                                }
-                                                padding={'0px 20px 0px 20px'}
-                                                spacePickerButtonRef={
-                                                    this.spacePickerBarRef
-                                                }
-                                            />
-                                        </ListSegmentContainer>
-                                    )
+                                if (this.displayLists.length < 3) {
+                                    return this.renderListsSegment()
                                 }
                             }}
                             memexIcon={MemexIcon}
@@ -1084,7 +1075,11 @@ export default class PageResultView extends PureComponent<Props> {
                             editTitleState={this.props.editTitleState}
                         />
                     </PageContentBox>
-
+                    {this.displayLists.length >= 3 && (
+                        <ListSegmentContainer>
+                            {this.renderListsSegment()}
+                        </ListSegmentContainer>
+                    )}
                     {this.props.searchType !== 'notes' &&
                         this.props.searchTerms?.length > 0 &&
                         this.props.text?.length > 0 &&
@@ -1111,6 +1106,11 @@ export default class PageResultView extends PureComponent<Props> {
                             !this.props.editTitleState
                         }
                         inFocus={this.props.isInFocus}
+                        position={
+                            this.displayLists.length > 0
+                                ? 'relative'
+                                : 'absolute'
+                        }
                     >
                         <ItemBoxBottom
                             // firstDivProps={{
@@ -1196,6 +1196,7 @@ const FooterBar = styled.div<{
     inFocus: boolean
     inPageMode?: boolean
     inTitleEditMode?: boolean
+    position: 'absolute' | 'relative'
 }>`
     display: none;
     bottom: 0;
@@ -1206,7 +1207,7 @@ const FooterBar = styled.div<{
     background: unset;
     backdrop-filter: unset;
     margin-top: -5px;
-    position: relative;
+    position: ${(props) => props.position ?? 'absolute'};
     opacity: 0;
     background: ${(props) => props.theme.colors.black}98;
     backdrop-filter: blur(5px);
@@ -1216,14 +1217,12 @@ const FooterBar = styled.div<{
         css`
             animation: ${slideInFromBottom} 1s cubic-bezier(0.22, 0.61, 0.36, 1)
                 forwards;
-            position: relative;
             display: flex;
         `};
     ${(props) =>
         props.inTitleEditMode &&
         css`
             display: flex;
-            position: relative;
         `};
     ${(props) =>
         props.shouldShow &&
@@ -1328,8 +1327,8 @@ const PageActionBox = styled.div<{
     grid-gap: 5px;
     padding: 5px;
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 10px;
+    right: 10px;
     z-index: 999;
     background: ${(props) => props.theme.colors.black}95;
     backdrop-filter: blur(5px);
@@ -1494,4 +1493,6 @@ const TooltipContent = styled.div`
     justify-content: center;
 `
 
-const ListSegmentContainer = styled.div``
+const ListSegmentContainer = styled.div`
+    margin-bottom: 15px;
+`

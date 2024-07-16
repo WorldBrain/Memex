@@ -106,12 +106,13 @@ export const getInitialPageResultState = (
     pageId: string,
     pageResultId: string,
     noteIds: string[] = [],
+    areNotesShown: boolean,
 ): PageResult => ({
     pageId,
     pageResultId,
     notesType: 'user',
     activePage: undefined,
-    areNotesShown: true,
+    areNotesShown: areNotesShown ?? true,
     isTagPickerShown: false,
     isShareMenuShown: false,
     isCopyPasterShown: false,
@@ -212,6 +213,7 @@ export const pageSearchResultToState = (
     result: StandardSearchResponse,
     params: UnifiedSearchPaginationParams,
     cache: PageAnnotationsCacheInterface,
+    areNotesShown: boolean,
 ): Pick<
     RootState,
     'results' | 'noteData' | 'pageData' | 'pageIdToResultIds'
@@ -235,6 +237,7 @@ export const pageSearchResultToState = (
             pageId,
             resultId,
             noteIds,
+            areNotesShown,
         )
 
         pageData.allIds.push(pageId)
