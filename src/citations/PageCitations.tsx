@@ -230,7 +230,7 @@ const ButtonContainer = styled.div`
 
 const LoadingBox = styled.div`
     position: absolute;
-    right: 15px;
+    left: 15px;
 `
 const TopArea = styled.div<{ context: string }>`
     padding: 10px 15px 10px 15px;
