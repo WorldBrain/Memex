@@ -81,6 +81,7 @@ export interface RootState {
     selectableBlocks: SelectableBlock[]
     focusedBlockId: number | null
     imageSourceForPreview: string
+    showAllNotes: boolean
 }
 
 export type Events = UIEvent<

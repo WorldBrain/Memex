@@ -13,6 +13,7 @@ import Icon from '../../../external/@worldbrain/memex-common/ts/common-ui/compon
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { DEFAULT_POWERUP_LIMITS } from '@worldbrain/memex-common/lib/subscriptions/constants'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 export default class UpgradeModal extends UIElement<
     PromptTemplatesDependencies,
@@ -30,6 +31,50 @@ export default class UpgradeModal extends UIElement<
     componentDidUpdate(prevProps) {}
 
     async componentWillUnmount(): Promise<void> {}
+
+    renderConfirmUpgradeOverlay = (powerup: PremiumPlans) => {
+        let confirmTitle = 'Confirm Upgrade'
+        let confirmSubTitle = 'with obligation to pay'
+
+        if (
+            this.state.confirmPowerups === 'AIpowerupBasic' ||
+            this.state.confirmPowerups === 'bookmarksPowerUpBasic'
+        ) {
+            confirmTitle = 'Confirm Downgrade'
+            confirmSubTitle = 'Ends at the current billig period'
+        }
+
+        return (
+            <ConfirmOverlay>
+                <ConfirmContainer>
+                    <ConfirmText>{confirmTitle}</ConfirmText>
+                    <ConfirmSubText>{confirmSubTitle}</ConfirmSubText>
+                </ConfirmContainer>
+                <ButtonBox>
+                    <PrimaryAction
+                        label="Confirm"
+                        type="primary"
+                        size="medium"
+                        onClick={() => {
+                            this.processEvent('processCheckoutOpen', {
+                                plan: powerup,
+                            })
+                        }}
+                    />
+                    <PrimaryAction
+                        label="Go Back"
+                        type="tertiary"
+                        size="medium"
+                        onClick={() => {
+                            this.processEvent('setPowerUpConfirmation', {
+                                selected: null,
+                            })
+                        }}
+                    />
+                </ButtonBox>
+            </ConfirmOverlay>
+        )
+    }
 
     renderAIPowerUpsOptionsList = () => {
         if (
@@ -97,10 +142,9 @@ export default class UpgradeModal extends UIElement<
                             this.state.activatedPowerUps['AIpowerupOwnKey'] ===
                                 true
                         ) {
-                            this.processEvent(
-                                'processCheckoutOpen',
-                                'AIpowerupBasic',
-                            )
+                            this.processEvent('processCheckoutOpen', {
+                                plan: 'AIpowerupBasic',
+                            })
                         }
                     }}
                     activated={
@@ -128,10 +172,9 @@ export default class UpgradeModal extends UIElement<
                             this.state.activatedPowerUps &&
                             this.state.activatedPowerUps['AIpowerup'] === false
                         ) {
-                            this.processEvent(
-                                'processCheckoutOpen',
-                                'AIpowerup',
-                            )
+                            this.processEvent('processCheckoutOpen', {
+                                plan: 'AIpowerup',
+                            })
                         }
                     }}
                     activated={
@@ -176,15 +219,18 @@ export default class UpgradeModal extends UIElement<
                             this.state.activatedPowerUps['AIpowerupOwnKey'] ===
                                 false
                         ) {
-                            this.processEvent(
-                                'processCheckoutOpen',
-                                'AIpowerupOwnKey',
-                            )
+                            this.processEvent('processCheckoutOpen', {
+                                plan: 'AIpowerupOwnKey',
+                            })
                         }
                     }}
                     activated={
                         this.state.activatedPowerUps &&
                         this.state.activatedPowerUps['AIpowerupOwnKey'] === true
+                    }
+                    disabled={
+                        this.state.activatedPowerUps &&
+                        this.state.activatedPowerUps['AIpowerup'] === true
                     }
                 >
                     <PowerUpTitleBox>
@@ -276,10 +322,9 @@ export default class UpgradeModal extends UIElement<
                             this.state.activatedPowerUps.bookmarksPowerUp ===
                                 true
                         ) {
-                            this.processEvent(
-                                'processCheckoutOpen',
-                                'bookmarksPowerUpBasic',
-                            )
+                            this.processEvent('processCheckoutOpen', {
+                                plan: 'bookmarksPowerUpBasic',
+                            })
                         }
                     }}
                     activated={
@@ -287,19 +332,21 @@ export default class UpgradeModal extends UIElement<
                         this.state.activatedPowerUps.bookmarksPowerUp === false
                     }
                 >
-                    <PowerUpTitleBox>
-                        <PowerUpTitle>
+                    <>
+                        <PowerUpTitleBox>
+                            <PowerUpTitle>
+                                {' '}
+                                {powerUp.powerUps.basic.title}
+                            </PowerUpTitle>
+                            <PowerUpSubTitle>
+                                {powerUp.powerUps.basic.subTitle}
+                            </PowerUpSubTitle>
+                        </PowerUpTitleBox>
+                        <PowerUpPricing>
                             {' '}
-                            {powerUp.powerUps.basic.title}
-                        </PowerUpTitle>
-                        <PowerUpSubTitle>
-                            {powerUp.powerUps.basic.subTitle}
-                        </PowerUpSubTitle>
-                    </PowerUpTitleBox>
-                    <PowerUpPricing>
-                        {' '}
-                        {powerUp.powerUps.basic.pricing}
-                    </PowerUpPricing>
+                            {powerUp.powerUps.basic.pricing}
+                        </PowerUpPricing>
+                    </>
                 </PowerUpItem>
                 <PowerUpItem
                     onClick={() => {
@@ -308,10 +355,9 @@ export default class UpgradeModal extends UIElement<
                             this.state.activatedPowerUps.bookmarksPowerUp ===
                                 false
                         ) {
-                            this.processEvent(
-                                'processCheckoutOpen',
-                                'bookmarksPowerUp',
-                            )
+                            this.processEvent('processCheckoutOpen', {
+                                plan: 'bookmarksPowerUp',
+                            })
                         }
                     }}
                     activated={
@@ -389,7 +435,9 @@ export default class UpgradeModal extends UIElement<
                 </UpgradeOverlayTextContainer>
                 <PowerUpItem
                     onClick={() => {
-                        this.processEvent('processCheckoutOpen', 'lifetime')
+                        this.processEvent('processCheckoutOpen', {
+                            plan: 'lifetime',
+                        })
                     }}
                     activated={
                         this.state.activatedPowerUps &&
@@ -433,71 +481,79 @@ export default class UpgradeModal extends UIElement<
 
         const upgradeContent = (
             <OverlayContainer>
-                <SideBar>
-                    <SidebarTitle>Powerups</SidebarTitle>
-                    {Powerups.map((powerUp) => (
-                        <SidebarItem
-                            onClick={() => {
-                                this.processEvent(
-                                    'changeModalType',
-                                    powerUp.id as PowerUpModalVersion,
-                                )
-                            }}
-                            selected={powerUp.id === this.state.powerUpType}
-                        >
-                            <Icon
-                                icon={powerUp.icon}
-                                heightAndWidth="18px"
-                                color="greyScale6"
-                                hoverOff
-                            />
-                            {powerUp.title}
-                        </SidebarItem>
-                    ))}
-                    <SidebarBottomArea>
-                        {this.state.authLoadState === 'running' ? (
-                            <LoadingIndicator size={20} />
-                        ) : (
-                            this.state.activatedPowerUps != null && (
-                                <PrimaryAction
-                                    label="Manage Subscription"
-                                    type="naked"
-                                    size="medium"
+                {this.state.confirmPowerups ? (
+                    this.renderConfirmUpgradeOverlay(this.state.confirmPowerups)
+                ) : (
+                    <>
+                        <SideBar>
+                            <SidebarTitle>Powerups</SidebarTitle>
+                            {Powerups.map((powerUp) => (
+                                <SidebarItem
                                     onClick={() => {
-                                        const isStaging =
-                                            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
-                                                'staging',
-                                            ) ||
-                                            process.env.NODE_ENV ===
-                                                'development'
-                                        window.open(
-                                            isStaging
-                                                ? `https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU?prefilled_email=${this.state.userEmail}`
-                                                : `https://billing.stripe.com/p/login/8wM015dIp6uPdb2288?prefilled_email=${this.state.userEmail}`,
-                                            '_blank',
+                                        this.processEvent(
+                                            'changeModalType',
+                                            powerUp.id as PowerUpModalVersion,
                                         )
                                     }}
-                                    width="100%"
-                                />
-                            )
-                        )}
-                    </SidebarBottomArea>
-                </SideBar>
+                                    selected={
+                                        powerUp.id === this.state.powerUpType
+                                    }
+                                >
+                                    <Icon
+                                        icon={powerUp.icon}
+                                        heightAndWidth="18px"
+                                        color="greyScale6"
+                                        hoverOff
+                                    />
+                                    {powerUp.title}
+                                </SidebarItem>
+                            ))}
+                            <SidebarBottomArea>
+                                {this.state.authLoadState === 'running' ? (
+                                    <LoadingIndicator size={20} />
+                                ) : (
+                                    this.state.activatedPowerUps != null && (
+                                        <PrimaryAction
+                                            label="Manage Subscription"
+                                            type="naked"
+                                            size="medium"
+                                            onClick={() => {
+                                                const isStaging =
+                                                    process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
+                                                        'staging',
+                                                    ) ||
+                                                    process.env.NODE_ENV ===
+                                                        'development'
+                                                window.open(
+                                                    isStaging
+                                                        ? `https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU?prefilled_email=${this.state.userEmail}`
+                                                        : `https://billing.stripe.com/p/login/8wM015dIp6uPdb2288?prefilled_email=${this.state.userEmail}`,
+                                                    '_blank',
+                                                )
+                                            }}
+                                            width="100%"
+                                        />
+                                    )
+                                )}
+                            </SidebarBottomArea>
+                        </SideBar>
 
-                <UpgradeContainer>
-                    {modalToShow}{' '}
-                    {this.props.componentVariant !== 'AccountPage' && (
-                        <MoneyBackContainer>
-                            <Icon
-                                filePath="reload"
-                                heightAndWidth="20px"
-                                color="greyScale7"
-                                hoverOff
-                            />
-                            60-day money back guarantee
-                        </MoneyBackContainer>
-                    )}
-                </UpgradeContainer>
+                        <UpgradeContainer>
+                            {modalToShow}{' '}
+                            {this.props.componentVariant !== 'AccountPage' && (
+                                <MoneyBackContainer>
+                                    <Icon
+                                        filePath="reload"
+                                        heightAndWidth="20px"
+                                        color="greyScale7"
+                                        hoverOff
+                                    />
+                                    60-day money back guarantee
+                                </MoneyBackContainer>
+                            )}
+                        </UpgradeContainer>
+                    </>
+                )}
             </OverlayContainer>
         )
 
@@ -618,6 +674,7 @@ const OverlayContainer = styled.div`
     height: fit-content;
     min-height: 470px;
     box-sizing: border-box;
+    border-radius: 20px;
 `
 
 const PowerUpOptions = styled.div`
@@ -634,6 +691,7 @@ const PowerUpOptions = styled.div`
 
 const PowerUpItem = styled.div<{
     activated?: boolean
+    disabled?: boolean
 }>`
     display: flex;
     align-items: center;
@@ -666,6 +724,30 @@ const PowerUpItem = styled.div<{
                 display: flex;
                 align-items: center;
                 justify-content: center;
+            }
+        `}
+    ${(props) =>
+        props.disabled &&
+        css`
+            border: initial;
+            position: relative;
+            opacity: 0.8;
+            &::after {
+                content: 'Included in Pro';
+                background-color: ${(props) => props.theme.colors.prime1};
+                border-radius: 0 5px 0 5px;
+                position: absolute;
+                top: 0px;
+                right: 0px;
+                height: 20px;
+                font-size: 12px;
+                padding: 0 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            &:hover {
+                background: unset;
             }
         `}
 `
@@ -925,4 +1007,48 @@ const LifetimePlanTermsListItem = styled.div`
     grid-gap: 15px;
     align-items: center;
     color: ${(props) => props.theme.colors.greyScale6};
+`
+
+const ConfirmOverlay = styled.div`
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: ${(props) => props.theme.colors.greyScale1};
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 30px;
+    border-radius: inherit;
+`
+
+const ConfirmText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    justify-content: center;
+`
+const ConfirmSubText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 18px;
+    font-weight: 400;
+    text-align: center;
+    justify-content: center;
+`
+
+const ButtonBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 10px;
+`
+
+const ConfirmContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
 `

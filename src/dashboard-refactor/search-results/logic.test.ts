@@ -931,7 +931,10 @@ describe('Dashboard search results logic', () => {
                     expect(
                         searchResults.state.searchResults.results[day].pages
                             .byId[pageId].notesType,
-                    ).toEqual(utils.getInitialPageResultState('', '').notesType)
+                    ).toEqual(
+                        utils.getInitialPageResultState('', '', null, true)
+                            .notesType,
+                    )
                     await searchResults.processEvent('setPageNotesType', {
                         day,
                         pageResultId: pageId,
@@ -1321,7 +1324,8 @@ describe('Dashboard search results logic', () => {
                             searchResults.state.searchResults.results[day].pages
                                 .byId[pageId].notesType,
                         ).toEqual(
-                            utils.getInitialPageResultState('', '').notesType,
+                            utils.getInitialPageResultState('', '', null, true)
+                                .notesType,
                         )
                         await searchResults.processEvent('setPageNotesType', {
                             day,
