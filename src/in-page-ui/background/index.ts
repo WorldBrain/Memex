@@ -113,7 +113,7 @@ export class InPageUIBackground {
         await this.options.tabsAPI.create({ url: OVERVIEW_URL })
     }
     async checkStripePlan(email: string) {
-        await checkStripePlan(email, this.options.browserAPIs)
+        return await checkStripePlan(email, this.options.browserAPIs)
     }
     async getCurrentTabURL() {
         const tabs = await this.options.tabsAPI.query({
