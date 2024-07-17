@@ -131,16 +131,10 @@ function getShortcutHandlers({
             return
         },
         createHighlight: async () => {
-            const isYouTube = isUrlYTVideo(window.location.href)
-
-            if (isYouTube) {
-                await annotationFunctions.createYoutubeTimestamp()
-            } else {
-                await annotationFunctions.createHighlight(
-                    cloneSelectionAsPseudoObject(window.getSelection()),
-                    null,
-                )
-            }
+            await annotationFunctions.createHighlight(
+                cloneSelectionAsPseudoObject(window.getSelection()),
+                null,
+            )
 
             inPageUI.hideTooltip()
         },
