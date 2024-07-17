@@ -292,15 +292,13 @@ export default class SpacePickerLogic extends UILogic<
         previousState,
     }) => {
         let cachedList = this.dependencies.annotationsCache.lists.byId[
-            event.listIndex
+            event.unifiedListId
         ]
         if (!cachedList) {
             throw new Error(
                 'Attempted to toggle tree view for list ID that does not exist in cache',
             )
         }
-
-        const index = event.listIndex
 
         let listEntries = getEntriesForCurrentPickerTab(previousState)
         if (previousState.query.trim().length > 0) {
@@ -309,11 +307,11 @@ export default class SpacePickerLogic extends UILogic<
             )
         }
         // Find if any tree-view toggled lists have the list we're toggling as their root
-        let correspondingToggledListId: number = null
+        let correspondingToggledListId: string = null
         for (let listId of previousState.listIdsShownAsTrees) {
             let list = this.dependencies.annotationsCache.lists.byId[listId]
-            if (list?.pathUnifiedIds[0] === event.listIndex.toString()) {
-                correspondingToggledListId = index
+            if (list?.pathUnifiedIds[0] === event.unifiedListId) {
+                correspondingToggledListId = listId
                 break
             }
         }
@@ -330,31 +328,23 @@ export default class SpacePickerLogic extends UILogic<
             // Else we're either adding/removing a list to be shown in tree-view
         } else {
             let alreadyShown =
-                previousState.listIdsShownAsTrees.indexOf(event.listIndex) !==
-                -1
+                previousState.listIdsShownAsTrees.indexOf(
+                    event.unifiedListId,
+                ) !== -1
 
             this.emitMutation({
                 listIdsShownAsTrees: {
                     $set: alreadyShown
                         ? previousState.listIdsShownAsTrees.filter(
-                              (id) => id !== event.listIndex,
+                              (id) => id !== event.unifiedListId,
                           )
                         : [
                               ...previousState.listIdsShownAsTrees,
-                              event.listIndex,
+                              event.unifiedListId,
                           ],
                 },
             })
         }
-
-        // // Timeout is needed here to allow the UI to react to the prev state mutation before we actually scroll to the entry
-        // setTimeout(
-        //     () =>
-        //         this.dependencies
-        //             .getEntryRowRefs()
-        //             [event.listIndex]?.scrollIntoView(),
-        //     50,
-        // )
     }
 
     focusInput: EventHandler<'focusInput'> = () => {
@@ -713,12 +703,6 @@ export default class SpacePickerLogic extends UILogic<
 
         let lastSelectedId = state.focusedListId
         if (query.endsWith('/')) {
-            console.log(
-                'lastfocusedlistid',
-                this.dependencies.annotationsCache.annotations.byId[
-                    lastSelectedId
-                ],
-            )
             const isBackspaced = query.length < state.query.length
             let lastSpaceName = null
             let updatedQuery = query
@@ -732,8 +716,6 @@ export default class SpacePickerLogic extends UILogic<
                     newEntryObject[newEntryObject.length - 1]?.unifiedId ===
                     null
 
-                console.log('isMultiplePathAdditions', isMultiplePathAdditions)
-                console.log('newEntryObjectbefore', newEntryObject)
                 if (
                     (!isMultiplePathAdditions || newEntryObject.length === 0) &&
                     state.query.includes('/')
@@ -742,7 +724,6 @@ export default class SpacePickerLogic extends UILogic<
                         newEntryObject = []
                         updatedQuery = ''
                         for (let unifiedId of path) {
-                            console.log('unifiedId', unifiedId)
                             const list = this.dependencies.annotationsCache
                                 .lists.byId[unifiedId]
                             const name = list.name
@@ -775,17 +756,14 @@ export default class SpacePickerLogic extends UILogic<
                 })
             }
 
-            // take the unifiedId and search the filteredentries for the position in it
-            // then add it to the listidsfortree
-
-            const indexInResults = state.filteredListIds.indexOf(lastSelectedId)
-
-            const listIdForTree = state.listIdsShownAsTrees
-            listIdForTree.push(indexInResults)
-
             this.emitMutation({
                 query: { $set: updatedQuery },
-                listIdsShownAsTrees: { $set: listIdForTree },
+                listIdsShownAsTrees: {
+                    $apply: (prev) =>
+                        prev.includes(lastSelectedId)
+                            ? prev
+                            : [...prev, lastSelectedId],
+                },
             })
         } else if (query.includes('/') && !query.endsWith('/')) {
             const lastNonNullUnifiedIdEntry = newEntryObject
@@ -802,16 +780,7 @@ export default class SpacePickerLogic extends UILogic<
                 unifiedId: null,
                 name: queryForNewSpaces,
             })
-        } else if (!query.includes('/')) {
-            console.log(
-                'lastfocusedlistid',
-                this.dependencies.annotationsCache.annotations.byId[
-                    lastSelectedId
-                ],
-            )
         }
-
-        console.log('newEntryObjectAFter', newEntryObject)
 
         this.emitMutation({ newEntryName: { $set: newEntryObject } })
 
@@ -863,12 +832,6 @@ export default class SpacePickerLogic extends UILogic<
             if (filteredEntries.length === 0 && queryForNewSpaces.length > 0) {
                 listIdToFocusFirst = '-1'
             }
-            console.log(
-                'listIdToFocusFirst',
-                filteredEntries,
-                queryForNewSpaces,
-                listIdToFocusFirst,
-            )
             this.calcNextFocusedEntry(nextState, null, listIdToFocusFirst)
         } else {
             if (newEntryObject[newEntryObject.length - 1]?.unifiedId == null) {
@@ -1135,7 +1098,6 @@ export default class SpacePickerLogic extends UILogic<
             newEntryName: { $set: [] },
         })
 
-        console.log('selectedListIds', this.selectedListIds)
         const mutation: UIMutation<SpacePickerState> = {
             selectedListIds: { $set: this.selectedListIds },
             filteredListIds: { $set: null },
@@ -1163,7 +1125,6 @@ export default class SpacePickerLogic extends UILogic<
         previousState,
     }) => {
         let entries = entry
-        console.log('entry', entry.length, entry)
         await executeUITask(this, 'spaceCreateState', async () => {
             // NOTE: This is here as the enter press event from the context menu to confirm a space rename
             //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
@@ -1177,13 +1138,7 @@ export default class SpacePickerLogic extends UILogic<
             for (let i = 0; i < entry.length; i++) {
                 const item = entry[i]
                 if (item.unifiedId == null) {
-                    // const { valid } = this.validateSpaceName(item.name)
-                    // console.log('valid', valid)
                     try {
-                        // if (!valid) {
-                        //     return
-                        // }
-
                         parentLocalId = this.dependencies.annotationsCache.lists
                             .byId[entry[i - 1]?.unifiedId]?.localId
                         const listId = await this.createAndDisplayNewList(
@@ -1206,11 +1161,6 @@ export default class SpacePickerLogic extends UILogic<
                                 listId,
                             ).unifiedId,
                         })
-
-                        // if (i === entry.length - 1) {
-                        //     console.log('last item')
-                        //     await this.dependencies.selectEntry(listId)
-                        // }
                     } catch (err) {
                         this.emitMutation({
                             spaceWriteError: { $set: err.message },

@@ -150,51 +150,51 @@ describe('SpacePickerLogic', () => {
 
         expect(testLogic.state.listIdsShownAsTrees).toEqual([])
 
-        // testLogic.processEvent('toggleListShownAsTree', {
-        //     listIndex: listA.unifiedId,
-        // })
-        // testLogic.processEvent('toggleListShownAsTree', {
-        //     listIndex: listB.unifiedId,
-        // })
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listA.unifiedId,
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
 
-        // expect(testLogic.state.listIdsShownAsTrees).toEqual([
-        //     listA.unifiedId,
-        //     listB.unifiedId,
-        // ])
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+        ])
 
-        // testLogic.processEvent('toggleListShownAsTree', {
-        //     listIndex: listB.unifiedId,
-        // })
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
 
-        // expect(testLogic.state.listIdsShownAsTrees).toEqual([listA.unifiedId])
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([listA.unifiedId])
 
-        // testLogic.processEvent('toggleListShownAsTree', {
-        //     listIndex: listB.unifiedId,
-        // })
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
 
-        // expect(testLogic.state.listIdsShownAsTrees).toEqual([
-        //     listA.unifiedId,
-        //     listB.unifiedId,
-        // ])
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+        ])
 
-        // testLogic.processEvent('toggleListShownAsTree', {
-        //     listIndex: listA.unifiedId,
-        // })
-        // testLogic.processEvent('toggleListShownAsTree', {
-        //     listIndex: listB.unifiedId,
-        // })
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listA.unifiedId,
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
 
-        // expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
 
-        // // C is a child of B, so toggling C then B should result in C in being removed (as it's the same tree)
-        // testLogic.processEvent('toggleListShownAsTree', {
-        //     listIndex: listC.unifiedId,
-        // })
-        // expect(testLogic.state.listIdsShownAsTrees).toEqual([listC.unifiedId])
-        // testLogic.processEvent('toggleListShownAsTree', {
-        //     listIndex: listB.unifiedId,
-        // })
-        // expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+        // C is a child of B, so toggling C then B should result in C in being removed (as it's the same tree)
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listC.unifiedId,
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([listC.unifiedId])
+        testLogic.processEvent('toggleListShownAsTree', {
+            unifiedListId: listB.unifiedId,
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
     })
 
     it(

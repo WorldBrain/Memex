@@ -287,13 +287,9 @@ class SpacePicker extends StatefulUIElement<
             )
         }
 
-        // Easier to work with the root list IDs (as it's easy to get the root from anywhere in the tree),
-        //  so use these for calcs relating to the tree views
-        let rootIdsForListsShownAsTrees = this.state.listIdsShownAsTrees
-
         return listEntries.map((entry, index) => {
             // If this entry is a root of a tree flagged to be shown in tree view, render it with all descendents in tree view
-            if (rootIdsForListsShownAsTrees.includes(index)) {
+            if (this.state.listIdsShownAsTrees.includes(entry.unifiedId)) {
                 let allTreeMembers = this.props.annotationsCache.getAllListsInTreeByRootId(
                     entry.pathUnifiedIds[0],
                 )
@@ -451,7 +447,8 @@ class SpacePicker extends StatefulUIElement<
                                                         this.processEvent(
                                                             'toggleListShownAsTree',
                                                             {
-                                                                listIndex: index,
+                                                                unifiedListId:
+                                                                    entry.unifiedId,
                                                             },
                                                         )
                                                     } else {
@@ -495,7 +492,7 @@ class SpacePicker extends StatefulUIElement<
                         onAncestryPathClick={(e) => {
                             e.stopPropagation()
                             this.processEvent('toggleListShownAsTree', {
-                                listIndex: index,
+                                unifiedListId: entry.unifiedId,
                             })
                         }}
                         id={`ListKeyName-${entry.unifiedId}`}
