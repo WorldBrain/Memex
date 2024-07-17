@@ -24,13 +24,11 @@ import {
 } from 'src/util/remote-functions-background'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import SpaceEditMenu from 'src/custom-lists/ui/space-edit-menu'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
@@ -299,6 +297,7 @@ class SpacePicker extends StatefulUIElement<
                 })
                 return (
                     <ListTrees
+                        key={entry.unifiedId}
                         lists={allTreeMembers}
                         ref={this.listTreesRef}
                         authBG={this.props.authBG}
@@ -312,7 +311,7 @@ class SpacePicker extends StatefulUIElement<
                             this.state.query.trim().length > 0
                         }
                     >
-                        {(entry, treeState, actions, dndActions) => (
+                        {(treeEntry, treeState, actions, dndActions) => (
                             <EntryRowContainer
                                 onDragEnter={dndActions.onDragEnter}
                                 onDragLeave={dndActions.onDragLeave}
@@ -321,24 +320,28 @@ class SpacePicker extends StatefulUIElement<
                                     e.stopPropagation()
                                 }}
                                 onDrop={dndActions.onDrop}
-                                key={entry.unifiedId}
+                                key={`${entry.unifiedId}-${treeEntry.unifiedId}`}
                             >
                                 <EntryRow
-                                    id={`ListKeyName-${entry.unifiedId}`}
+                                    id={`ListKeyName-${treeEntry.unifiedId}`}
                                     ref={(ref) =>
                                         (this.entryRowRefs[
-                                            entry.unifiedId
+                                            treeEntry.unifiedId
                                         ] = ref)
                                     }
-                                    indentSteps={entry.pathUnifiedIds.length}
+                                    indentSteps={
+                                        treeEntry.pathUnifiedIds.length
+                                    }
                                     dndActions={dndActions}
                                     onPress={() => {
                                         this.processEvent('resultEntryPress', {
-                                            entry,
+                                            entry: treeEntry,
                                         })
                                     }}
                                     onListFocus={() =>
-                                        this.props.onListFocus(entry.localId)
+                                        this.props.onListFocus(
+                                            treeEntry.localId,
+                                        )
                                     }
                                     addedToAllIds={this.state.addedToAllIds}
                                     keepScrollPosition={this.keepScrollPosition}
@@ -348,7 +351,7 @@ class SpacePicker extends StatefulUIElement<
                                                   this.processEvent(
                                                       'resultEntryAllPress',
                                                       {
-                                                          entry,
+                                                          entry: treeEntry,
                                                       },
                                                   )
                                             : undefined
@@ -356,7 +359,7 @@ class SpacePicker extends StatefulUIElement<
                                     bgScriptBG={this.props.bgScriptBG}
                                     onFocus={() =>
                                         this.processEvent('focusListEntry', {
-                                            listId: entry.unifiedId,
+                                            listId: treeEntry.unifiedId,
                                         })
                                     }
                                     onUnfocus={() =>
@@ -366,16 +369,16 @@ class SpacePicker extends StatefulUIElement<
                                     }
                                     index={index}
                                     selected={this.state.selectedListIds.includes(
-                                        entry.localId,
+                                        treeEntry.localId,
                                     )}
                                     focused={
                                         this.state.focusedListId ===
-                                        entry.unifiedId
+                                        treeEntry.unifiedId
                                     }
                                     resultItem={
                                         <ListResultItem>
                                             {highlightText(
-                                                entry.name,
+                                                treeEntry.name,
                                                 this.state.query,
                                             )}
                                         </ListResultItem>
@@ -388,25 +391,27 @@ class SpacePicker extends StatefulUIElement<
                                         this.openInTabGroupButtonRef
                                     }
                                     onContextMenuBtnPress={
-                                        entry.creator?.id ===
+                                        treeEntry.creator?.id ===
                                         this.state.currentUser?.id
                                             ? () =>
                                                   this.processEvent(
                                                       'toggleEntryContextMenu',
                                                       {
-                                                          listId: entry.localId,
+                                                          listId:
+                                                              treeEntry.localId,
                                                       },
                                                   )
                                             : undefined
                                     }
                                     onEditMenuBtnPress={
-                                        entry.creator?.id ===
+                                        treeEntry.creator?.id ===
                                         this.state.currentUser?.id
                                             ? () =>
                                                   this.processEvent(
                                                       'toggleEntryEditMenu',
                                                       {
-                                                          listId: entry.localId,
+                                                          listId:
+                                                              treeEntry.localId,
                                                       },
                                                   )
                                             : undefined
@@ -415,18 +420,18 @@ class SpacePicker extends StatefulUIElement<
                                         this.processEvent(
                                             'onOpenInTabGroupPress',
                                             {
-                                                listId: entry.localId,
+                                                listId: treeEntry.localId,
                                             },
                                         )
                                     }
                                     actOnAllTooltipText="Add all tabs in window to Space"
                                     shareState={
-                                        entry?.isPrivate ?? 'private'
+                                        treeEntry?.isPrivate ?? 'private'
                                             ? 'private'
                                             : 'shared'
                                     }
                                     getRootElement={this.props.getRootElement}
-                                    {...entry}
+                                    {...treeEntry}
                                     toggleShowNewChildInput={
                                         actions.toggleShowNewChildInput
                                     }
@@ -441,14 +446,14 @@ class SpacePicker extends StatefulUIElement<
                                                 toggleShowChildren: () => {
                                                     // Toggling roots should close tree-view
                                                     if (
-                                                        entry.parentUnifiedId ==
+                                                        treeEntry.parentUnifiedId ==
                                                         null
                                                     ) {
                                                         this.processEvent(
                                                             'toggleListShownAsTree',
                                                             {
                                                                 unifiedListId:
-                                                                    entry.unifiedId,
+                                                                    treeEntry.unifiedId,
                                                             },
                                                         )
                                                     } else {
@@ -466,23 +471,26 @@ class SpacePicker extends StatefulUIElement<
             }
 
             let pathText = entry.pathUnifiedIds
-                .flatMap((id) => {
+                .map((id, i) => {
                     let cachedList = this.props.annotationsCache.lists.byId[id]
                     if (!cachedList) {
                         return null
                     }
-                    return [
-                        <Icon
-                            filePath="arrowRight"
-                            heightAndWidth="14px"
-                            color="greyScale4"
-                            hoverOff
-                        />,
-                        <BreadCrumbItem>{cachedList.name}</BreadCrumbItem>,
-                    ]
+                    return (
+                        <React.Fragment key={id}>
+                            {i > 0 && (
+                                <Icon
+                                    filePath="arrowRight"
+                                    heightAndWidth="14px"
+                                    color="greyScale4"
+                                    hoverOff
+                                />
+                            )}
+                            <BreadCrumbItem>{cachedList.name}</BreadCrumbItem>
+                        </React.Fragment>
+                    )
                 })
                 .filter(Boolean)
-                .slice(1)
 
             // Base case: flat view
             return (
