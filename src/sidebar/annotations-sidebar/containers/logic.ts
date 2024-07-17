@@ -249,8 +249,13 @@ export class SidebarContainerLogic extends UILogic<
         if (
             this.options.windowAPI.location.href.includes('youtube.com/watch')
         ) {
-            const sidebarContainerWidth = document.getElementById('secondary')
-                .clientWidth
+            const sidebarWidthNumber = parseFloat(
+                SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+            )
+            const sidebarContainerWidth =
+                document.getElementById('secondary')?.clientWidth ??
+                sidebarWidthNumber
+
             sidebarWidth = sidebarContainerWidth - 50 + 'px'
         }
 
@@ -3542,7 +3547,7 @@ export class SidebarContainerLogic extends UILogic<
                     isEditing: null,
                     isFocused: false,
                 }))
-            prompt = syncsettings[0].text
+            prompt = marked.parse(syncsettings[0].text)
         }
 
         if (event.textToProcess) {
@@ -3580,7 +3585,7 @@ export class SidebarContainerLogic extends UILogic<
                         isEditing: null,
                         isFocused: false,
                     }))
-                prompt = syncsettings[0].text
+                prompt = marked.parse(syncsettings[0].text)
             }
 
             let retries = 0

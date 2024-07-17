@@ -631,10 +631,6 @@ export async function main(
                 })
                 anchor = { quote, descriptor }
             }
-            if (quote?.length === 0 && !drawRectangle) {
-                highlightCreateState = 'success'
-                return
-            }
 
             if (
                 !(await pageActionAllowed(
@@ -649,6 +645,19 @@ export async function main(
                     limitReachedNotif: 'Bookmarks',
                 })
                 highlightCreateState = 'error'
+                return
+            }
+
+            if (
+                (quote?.length === 0 || !selection) &&
+                window.location.href.includes('youtube.com')
+            ) {
+                await inPageUI.showSidebar({
+                    action: 'youtube_timestamp',
+                })
+                return
+            } else if (quote?.length === 0 && !drawRectangle) {
+                highlightCreateState = 'success'
                 return
             }
 
