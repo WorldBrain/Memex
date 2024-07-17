@@ -9,6 +9,7 @@ export function htmlToMarkdown(
     if (!html?.length) {
         return ''
     }
+
     const { document: doc } = parseHTML(html)
 
     const turndownService = new TurndownService({
@@ -16,7 +17,14 @@ export function htmlToMarkdown(
         hr: '---',
         codeBlockStyle: 'fenced',
     })
+
     applyCustomRules?.(turndownService)
-    const markdown = turndownService.turndown(doc)
+
+    let markdown = turndownService.turndown(doc)
+
+    // Replace escaped double brackets with unescaped double brackets
+    markdown = markdown.replace(/\\\[\\\[/g, '[[')
+    markdown = markdown.replace(/\\\]\\\]/g, ']]')
+
     return markdown
 }

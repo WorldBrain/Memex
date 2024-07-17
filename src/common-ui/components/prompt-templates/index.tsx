@@ -17,7 +17,6 @@ import TutorialBox from '../../../../external/@worldbrain/memex-common/ts/common
 import styled, { css } from 'styled-components'
 import Icon from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/icon'
 import ReactDOM from 'react-dom'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
@@ -101,17 +100,6 @@ export default class PromptTemplatesComponent extends UIElement<
                             getRootElement={this.props.getRootElement}
                             tutorialId={'useTemplates'}
                         />
-                        {/* <Icon
-                            filePath={icons.helpIcon}
-                            heightAndWidth="18px"
-                            padding={'5px'}
-                            onClick={() =>
-                                window.open(
-                                    'https://links.memex.garden/tutorials/text-exporter',
-                                )
-                            }
-                        /> */}
-
                         <PrimaryAction
                             label={'New'}
                             onClick={() =>
@@ -430,6 +418,7 @@ export default class PromptTemplatesComponent extends UIElement<
 
 const TextAreaContainer = styled.div`
     position: relative;
+    margin-top: 3px;
 `
 const TextAreaSaveButton = styled.div`
     position: absolute;

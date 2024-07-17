@@ -3547,7 +3547,7 @@ export class SidebarContainerLogic extends UILogic<
                     isEditing: null,
                     isFocused: false,
                 }))
-            prompt = syncsettings[0].text
+            prompt = marked.parse(syncsettings[0].text)
         }
 
         if (event.textToProcess) {
@@ -3585,7 +3585,7 @@ export class SidebarContainerLogic extends UILogic<
                         isEditing: null,
                         isFocused: false,
                     }))
-                prompt = syncsettings[0].text
+                prompt = marked.parse(syncsettings[0].text)
             }
 
             let retries = 0
