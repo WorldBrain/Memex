@@ -249,8 +249,13 @@ export class SidebarContainerLogic extends UILogic<
         if (
             this.options.windowAPI.location.href.includes('youtube.com/watch')
         ) {
-            const sidebarContainerWidth = document.getElementById('secondary')
-                .clientWidth
+            const sidebarWidthNumber = parseFloat(
+                SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+            )
+            const sidebarContainerWidth =
+                document.getElementById('secondary')?.clientWidth ??
+                sidebarWidthNumber
+
             sidebarWidth = sidebarContainerWidth - 50 + 'px'
         }
 
