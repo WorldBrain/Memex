@@ -649,7 +649,7 @@ export async function main(
             }
 
             if (
-                (quote.length === 0 || !selection) &&
+                (quote?.length === 0 || !selection) &&
                 window.location.href.includes('youtube.com')
             ) {
                 await inPageUI.showSidebar({
