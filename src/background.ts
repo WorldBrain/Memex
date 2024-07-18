@@ -41,6 +41,7 @@ import delay from './util/delay'
 import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
 import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
 import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 let __debugCounter = 0
 let __BGInitAttemptCounter = 0
@@ -227,6 +228,7 @@ export async function main(): Promise<void> {
     globalThis['analytics'] = analytics
     globalThis['dataSeeders'] = setupDataSeeders(storageManager)
     globalThis['setStorageLoggingEnabled'] = setStorageLoggingEnabled
+    globalThis['normalizeUrl'] = normalizeUrl
 
     if (process.env.NODE_ENV === 'development') {
         globalThis['selfTests'] = createSelfTests({
