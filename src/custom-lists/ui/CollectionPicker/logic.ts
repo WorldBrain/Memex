@@ -16,7 +16,10 @@ import {
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { getEntriesForCurrentPickerTab } from './utils'
+import {
+    generateRenderedListEntryId,
+    getEntriesForCurrentPickerTab,
+} from './utils'
 import type {
     SpacePickerState,
     SpacePickerEvent,
@@ -115,8 +118,9 @@ export default class SpacePickerLogic extends UILogic<
     constructor(
         protected dependencies: SpacePickerDependencies & {
             /** Allows direct access to list tree state encapsulated in ListTrees container component. */
-            getListTreesRef: () => ListTrees | undefined
-            getEntryRowRefs: () => { [unifiedId: string]: EntryRow }
+            getListTreesRefs: () => { [unifiedId: string]: ListTrees }
+            /** Allows direct access to each EntryRow comp. Each referenced to via their rendered ID (NOT unified ID). */
+            getEntryRowRefs: () => { [renderedId: string]: EntryRow }
         },
     ) {
         super()
@@ -131,7 +135,7 @@ export default class SpacePickerLogic extends UILogic<
         newEntryName: [],
         currentTab: 'user-lists',
         currentUser: null,
-        focusedListId: null,
+        focusedListRenderedId: null,
         listEntries: initNormalizedState(),
         pageLinkEntries: initNormalizedState(),
         selectedListIds: [],
@@ -247,7 +251,7 @@ export default class SpacePickerLogic extends UILogic<
 
             if (this.selectedListIds.length > 0) {
                 this.emitMutation({
-                    focusedListId: {
+                    focusedListRenderedId: {
                         $set:
                             this.dependencies.annotationsCache.getListByLocalId(
                                 this.selectedListIds[0],
@@ -256,7 +260,7 @@ export default class SpacePickerLogic extends UILogic<
                 })
             } else {
                 this.emitMutation({
-                    focusedListId: {
+                    focusedListRenderedId: {
                         $set:
                             this.dependencies.annotationsCache.getListByLocalId(
                                 this.localListIdsMRU[0],
@@ -371,40 +375,66 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
+    private deriveFlatListOfRenderedEntries(
+        state: SpacePickerState,
+    ): Array<UnifiedList & { renderedId: string }> {
+        let listTreesRefs = this.dependencies.getListTreesRefs()
+        let areListsBeingFiltered = state.query.trim().length > 0
+
+        let baseEntries = getEntriesForCurrentPickerTab(
+            this.dependencies,
+            state,
+        )
+        if (state.filteredListIds?.length > 0) {
+            baseEntries = baseEntries.filter((e) =>
+                state.filteredListIds.includes(e.unifiedId),
+            )
+        }
+
+        // For each entry, expand it into its entire (flattened) tree if tree view mode is set
+        return baseEntries.flatMap((baseEntry) => {
+            if (!state.listIdsShownAsTrees.includes(baseEntry.unifiedId)) {
+                return {
+                    ...baseEntry,
+                    renderedId: generateRenderedListEntryId(baseEntry),
+                }
+            }
+            let listTreeState = listTreesRefs[baseEntry.unifiedId]?.state
+            if (!listTreeState) {
+                return []
+            }
+            let allTreeMembers = this.dependencies.annotationsCache.getAllListsInTreeByRootId(
+                baseEntry.pathUnifiedIds[0],
+            )
+            return getVisibleTreeNodesInOrder(allTreeMembers, listTreeState, {
+                areListsBeingFiltered,
+            }).map((listNodeEntry) => ({
+                ...listNodeEntry,
+                renderedId: generateRenderedListEntryId(
+                    baseEntry,
+                    listNodeEntry,
+                ),
+            }))
+        })
+    }
+
     private calcNextFocusedEntry(
         state: SpacePickerState,
         change: -1 | 1 = null,
         overriddenFocusedListId?: string,
     ): string {
-        let listTreesState = this.dependencies.getListTreesRef()?.state
-        if (!listTreesState) {
-            return null
-        }
-
-        let entries = getEntriesForCurrentPickerTab(this.dependencies, state)
-        if (state.filteredListIds?.length > 0) {
-            entries = entries.filter((e) =>
-                state.filteredListIds.includes(e.unifiedId),
-            )
-        }
-        let visibleTreeNodes = getVisibleTreeNodesInOrder(
-            entries,
-            listTreesState,
-            {
-                areListsBeingFiltered: state.query.trim().length > 0,
-            },
-        )
+        let renderedEntries = this.deriveFlatListOfRenderedEntries(state)
 
         let currentIndex = -1
-        if (state.focusedListId != null) {
-            currentIndex = visibleTreeNodes.findIndex(
-                (node) => node.unifiedId === state.focusedListId,
+        if (state.focusedListRenderedId != null) {
+            currentIndex = renderedEntries.findIndex(
+                (node) => node.renderedId === state.focusedListRenderedId,
             )
         }
 
         if (overriddenFocusedListId) {
-            currentIndex = visibleTreeNodes.findIndex(
-                (node) => node.unifiedId === overriddenFocusedListId,
+            currentIndex = renderedEntries.findIndex(
+                (node) => node.renderedId === overriddenFocusedListId,
             )
         }
 
@@ -412,14 +442,16 @@ export default class SpacePickerLogic extends UILogic<
 
         // Loop back around if going out-of-bounds
         if (nextIndex < 0) {
-            nextIndex = visibleTreeNodes.length - 1
-        } else if (nextIndex >= visibleTreeNodes.length) {
+            nextIndex = renderedEntries.length - 1
+        } else if (nextIndex >= renderedEntries.length) {
             nextIndex = 0
         }
 
-        let nextFocusedListId = visibleTreeNodes[nextIndex]?.unifiedId
+        let nextFocusedListId = renderedEntries[nextIndex]?.renderedId
         if (nextFocusedListId != null) {
-            this.emitMutation({ focusedListId: { $set: nextFocusedListId } })
+            this.emitMutation({
+                focusedListRenderedId: { $set: nextFocusedListId },
+            })
         }
         return nextFocusedListId
     }
@@ -455,12 +487,16 @@ export default class SpacePickerLogic extends UILogic<
             this.newTabKeys.includes(event.key as KeyEvent) &&
             previousState.listEntries.allIds.length > 0
         ) {
-            if (previousState.listEntries.byId[previousState.focusedListId]) {
+            if (
+                previousState.listEntries.byId[
+                    previousState.focusedListRenderedId
+                ]
+            ) {
                 await this.resultEntryPress({
                     event: {
                         entry:
                             previousState.listEntries.byId[
-                                previousState.focusedListId
+                                previousState.focusedListRenderedId
                             ],
                     },
                     previousState,
@@ -484,20 +520,23 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        let listTreesRef = this.dependencies.getListTreesRef()
-        if (
-            (event.key === 'ArrowRight' &&
-                listTreesRef?.state.listTrees.byId[previousState.focusedListId]
-                    ?.areChildrenShown === false) ||
-            (event.key === 'ArrowLeft' &&
-                listTreesRef?.state.listTrees.byId[previousState.focusedListId]
-                    ?.areChildrenShown === true)
-        ) {
-            listTreesRef.processEvent('toggleShowChildren', {
-                listId: previousState.focusedListId,
-            })
-            return
-        }
+        // TODO: Reimplement this
+        // let listTreesRef = this.dependencies.getListTreesRefs()
+        // if (
+        //     (event.key === 'ArrowRight' &&
+        //         listTreesRef?.state.listTrees.byId[
+        //             previousState.focusedListRenderedId
+        //         ]?.areChildrenShown === false) ||
+        //     (event.key === 'ArrowLeft' &&
+        //         listTreesRef?.state.listTrees.byId[
+        //             previousState.focusedListRenderedId
+        //         ]?.areChildrenShown === true)
+        // ) {
+        //     listTreesRef.processEvent('toggleShowChildren', {
+        //         listId: previousState.focusedListRenderedId,
+        //     })
+        //     return
+        // }
 
         if (event.key === 'Escape') {
             this.dependencies.closePicker(event)
@@ -704,7 +743,7 @@ export default class SpacePickerLogic extends UILogic<
                 return matches
             }, true)
 
-        let lastSelectedId = state.focusedListId
+        let lastSelectedId = state.focusedListRenderedId
         if (query.endsWith('/')) {
             const isBackspaced = query.length < state.query.length
             let lastSpaceName = null
@@ -819,10 +858,10 @@ export default class SpacePickerLogic extends UILogic<
             matchingEntryIds = pathOfLastEntry
         }
 
-        lastSelectedId = matchingEntryIds[0] ?? state.focusedListId
+        lastSelectedId = matchingEntryIds[0] ?? state.focusedListRenderedId
         const mutation: UIMutation<SpacePickerState> = {
             filteredListIds: { $set: matchingEntryIds },
-            focusedListId: { $set: lastSelectedId },
+            focusedListRenderedId: { $set: lastSelectedId },
         }
 
         this.emitMutation(mutation)
@@ -1127,7 +1166,6 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        let entries = entry
         await executeUITask(this, 'spaceCreateState', async () => {
             // NOTE: This is here as the enter press event from the context menu to confirm a space rename
             //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
@@ -1136,7 +1174,7 @@ export default class SpacePickerLogic extends UILogic<
                 return
             }
 
-            let parentLocalId = null
+            let parentLocalId: number = null
 
             for (let i = 0; i < entry.length; i++) {
                 const item = entry[i]
@@ -1155,15 +1193,14 @@ export default class SpacePickerLogic extends UILogic<
                             listId,
                         )?.unifiedId
 
-                        entries[i].unifiedId = newListUnifiedId
+                        let listTreesRef = this.dependencies.getListTreesRefs()
 
-                        let listTreesRef = this.dependencies.getListTreesRef()
-
-                        listTreesRef?.processEvent('toggleShowChildren', {
-                            listId: this.dependencies.annotationsCache.getListByLocalId(
-                                listId,
-                            ).unifiedId,
-                        })
+                        listTreesRef[newListUnifiedId]?.processEvent(
+                            'toggleShowChildren',
+                            {
+                                listId: newListUnifiedId,
+                            },
+                        )
                     } catch (err) {
                         this.emitMutation({
                             spaceWriteError: { $set: err.message },
@@ -1213,6 +1250,8 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     focusListEntry: EventHandler<'focusListEntry'> = ({ event }) => {
-        this.emitMutation({ focusedListId: { $set: event.listId } })
+        this.emitMutation({
+            focusedListRenderedId: { $set: event.listRenderedId },
+        })
     }
 }

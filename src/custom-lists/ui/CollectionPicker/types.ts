@@ -24,7 +24,7 @@ export interface SpacePickerState {
     }[]
     currentTab: SpacePickerTab
     currentUser: UserReference | null
-    focusedListId: UnifiedList['unifiedId'] | null
+    focusedListRenderedId: string | null
     filteredListIds: UnifiedList['unifiedId'][] | null
     listEntries: NormalizedState<UnifiedList<'user-list'>>
     pageLinkEntries: NormalizedState<UnifiedList<'page-link'>>
@@ -50,7 +50,7 @@ export type SpacePickerEvent = UIEvent<{
         entry: Pick<UnifiedList, 'localId'>
         shouldRerender?: boolean
     }
-    focusListEntry: { listId: UnifiedList['unifiedId'] | null }
+    focusListEntry: { listRenderedId: UnifiedList['unifiedId'] | null }
     toggleEntryContextMenu: { listId: number }
     toggleEntryEditMenu: { listId: number }
     onOpenInTabGroupPress: { listId: number }

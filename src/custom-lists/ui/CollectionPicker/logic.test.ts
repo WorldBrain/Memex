@@ -107,7 +107,7 @@ const setupLogicHelper = async ({
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
         analyticsBG: device.backgroundModules.analyticsBG,
-        getListTreesRef: () => undefined,
+        getListTreesRefs: () => undefined,
         getEntryRowRefs: () => ({}),
     })
 
@@ -464,7 +464,7 @@ describe('SpacePickerLogic', () => {
             focusedEntryId: number,
             iteration: number,
         ) =>
-            expect([iteration, testLogic.state.focusedListId]).toEqual([
+            expect([iteration, testLogic.state.focusedListRenderedId]).toEqual([
                 iteration,
                 annotationsCache.getListByLocalId(focusedEntryId)?.unifiedId ??
                     null,
@@ -1083,7 +1083,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
         expect(testLogic.state.currentTab).toEqual('user-lists')
-        expect(testLogic.state.focusedListId).toEqual(null)
+        expect(testLogic.state.focusedListRenderedId).toEqual(null)
         expect(entryPickerLogic['focusIndex']).toBe(0)
 
         await testLogic.processEvent('keyPress', {
@@ -1102,14 +1102,14 @@ describe('SpacePickerLogic', () => {
             >,
         })
         expect(entryPickerLogic['focusIndex']).toBe(3)
-        expect(testLogic.state.focusedListId).toEqual(
+        expect(testLogic.state.focusedListRenderedId).toEqual(
             annotationsCache.getListByLocalId(DATA.TEST_LISTS[3].id).unifiedId,
         )
 
         await testLogic.processEvent('switchTab', { tab: 'page-links' })
         expect(testLogic.state.currentTab).toEqual('page-links')
         expect(entryPickerLogic['focusIndex']).toBe(-1)
-        expect(testLogic.state.focusedListId).toEqual(null)
+        expect(testLogic.state.focusedListRenderedId).toEqual(null)
 
         await testLogic.processEvent('keyPress', {
             event: { key: 'ArrowDown' } as React.KeyboardEvent<
@@ -1122,13 +1122,13 @@ describe('SpacePickerLogic', () => {
             >,
         })
         expect(entryPickerLogic['focusIndex']).toBe(1)
-        expect(testLogic.state.focusedListId).toEqual(
+        expect(testLogic.state.focusedListRenderedId).toEqual(
             DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
         )
 
         await testLogic.processEvent('switchTab', { tab: 'user-lists' })
         expect(testLogic.state.currentTab).toEqual('user-lists')
         expect(entryPickerLogic['focusIndex']).toBe(-1)
-        expect(testLogic.state.focusedListId).toEqual(null)
+        expect(testLogic.state.focusedListRenderedId).toEqual(null)
     })
 })

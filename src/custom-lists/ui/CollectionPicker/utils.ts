@@ -17,3 +17,11 @@ export const getEntriesForCurrentPickerTab = (
               return true
           })
         : normalizedStateToArray(state.listEntries)
+
+export const generateRenderedListEntryId = (
+    entry: UnifiedList,
+    treeNodeEntry?: UnifiedList,
+): string =>
+    !treeNodeEntry
+        ? entry.unifiedId
+        : `tree-node-${entry.unifiedId}-${treeNodeEntry.unifiedId}`

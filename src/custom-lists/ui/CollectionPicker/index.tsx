@@ -30,7 +30,10 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { PageAnnotationsCache } from 'src/annotations/cache'
-import { getEntriesForCurrentPickerTab } from './utils'
+import {
+    generateRenderedListEntryId,
+    getEntriesForCurrentPickerTab,
+} from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -80,15 +83,15 @@ class SpacePicker extends StatefulUIElement<
     private goToButtonRef = React.createRef<HTMLDivElement>()
     private openInTabGroupButtonRef = React.createRef<HTMLDivElement>()
     private searchInputRef = React.createRef<HTMLInputElement>()
-    private listTreesRef = React.createRef<ListTrees>()
-    private entryRowRefs: { [unifiedId: string]: EntryRow } = {}
+    private listTreesRefs: { [unifiedId: string]: ListTrees } = {}
+    private entryRowRefs: { [renderedId: string]: EntryRow } = {}
 
     constructor(props: Props) {
         super(
             props,
             new ListPickerLogic({
                 ...props,
-                getListTreesRef: () => this.listTreesRef.current,
+                getListTreesRefs: () => this.listTreesRefs,
                 getEntryRowRefs: () => this.entryRowRefs,
             }),
         )
@@ -273,11 +276,11 @@ class SpacePicker extends StatefulUIElement<
             )
         }
 
-        return listEntries.map((entry, index) => {
+        return listEntries.map((baseEntry, index) => {
             // If this entry is a root of a tree flagged to be shown in tree view, render it with all descendents in tree view
-            if (this.state.listIdsShownAsTrees.includes(entry.unifiedId)) {
+            if (this.state.listIdsShownAsTrees.includes(baseEntry.unifiedId)) {
                 let allTreeMembers = this.props.annotationsCache.getAllListsInTreeByRootId(
-                    entry.pathUnifiedIds[0],
+                    baseEntry.pathUnifiedIds[0],
                 )
 
                 let allTreeMembersIds = allTreeMembers.map((list) => {
@@ -285,9 +288,11 @@ class SpacePicker extends StatefulUIElement<
                 })
                 return (
                     <ListTrees
-                        key={entry.unifiedId}
+                        key={baseEntry.unifiedId}
                         lists={allTreeMembers}
-                        ref={this.listTreesRef}
+                        ref={(ref) =>
+                            (this.listTreesRefs[baseEntry.unifiedId] = ref)
+                        }
                         authBG={this.props.authBG}
                         listsBG={this.props.spacesBG}
                         cache={this.props.annotationsCache}
@@ -299,7 +304,7 @@ class SpacePicker extends StatefulUIElement<
                             this.state.query.trim().length > 0
                         }
                     >
-                        {(treeEntry, treeState, actions, dndActions) => (
+                        {(treeNodeEntry, treeState, actions, dndActions) => (
                             <EntryRowContainer
                                 onDragEnter={dndActions.onDragEnter}
                                 onDragLeave={dndActions.onDragLeave}
@@ -308,27 +313,33 @@ class SpacePicker extends StatefulUIElement<
                                     e.stopPropagation()
                                 }}
                                 onDrop={dndActions.onDrop}
-                                key={`${entry.unifiedId}-${treeEntry.unifiedId}`}
+                                key={generateRenderedListEntryId(
+                                    baseEntry,
+                                    treeNodeEntry,
+                                )}
                             >
                                 <EntryRow
-                                    id={`ListKeyName-${treeEntry.unifiedId}`}
+                                    id={`ListKeyName-${treeNodeEntry.unifiedId}`}
                                     ref={(ref) =>
                                         (this.entryRowRefs[
-                                            treeEntry.unifiedId
+                                            generateRenderedListEntryId(
+                                                baseEntry,
+                                                treeNodeEntry,
+                                            )
                                         ] = ref)
                                     }
                                     indentSteps={
-                                        treeEntry.pathUnifiedIds.length
+                                        treeNodeEntry.pathUnifiedIds.length
                                     }
                                     dndActions={dndActions}
                                     onPress={() => {
                                         this.processEvent('resultEntryPress', {
-                                            entry: treeEntry,
+                                            entry: treeNodeEntry,
                                         })
                                     }}
                                     onListFocus={() =>
                                         this.props.onListFocus(
-                                            treeEntry.localId,
+                                            treeNodeEntry.localId,
                                         )
                                     }
                                     addedToAllIds={this.state.addedToAllIds}
@@ -339,7 +350,7 @@ class SpacePicker extends StatefulUIElement<
                                                   this.processEvent(
                                                       'resultEntryAllPress',
                                                       {
-                                                          entry: treeEntry,
+                                                          entry: treeNodeEntry,
                                                       },
                                                   )
                                             : undefined
@@ -347,26 +358,32 @@ class SpacePicker extends StatefulUIElement<
                                     bgScriptBG={this.props.bgScriptBG}
                                     onFocus={() =>
                                         this.processEvent('focusListEntry', {
-                                            listId: treeEntry.unifiedId,
+                                            listRenderedId: generateRenderedListEntryId(
+                                                baseEntry,
+                                                treeNodeEntry,
+                                            ),
                                         })
                                     }
                                     onUnfocus={() =>
                                         this.processEvent('focusListEntry', {
-                                            listId: null,
+                                            listRenderedId: null,
                                         })
                                     }
                                     index={index}
                                     selected={this.state.selectedListIds.includes(
-                                        treeEntry.localId,
+                                        treeNodeEntry.localId,
                                     )}
                                     focused={
-                                        this.state.focusedListId ===
-                                        treeEntry.unifiedId
+                                        this.state.focusedListRenderedId ===
+                                        generateRenderedListEntryId(
+                                            baseEntry,
+                                            treeNodeEntry,
+                                        )
                                     }
                                     resultItem={
                                         <ListResultItem>
                                             {highlightText(
-                                                treeEntry.name,
+                                                treeNodeEntry.name,
                                                 this.state.query,
                                             )}
                                         </ListResultItem>
@@ -379,27 +396,27 @@ class SpacePicker extends StatefulUIElement<
                                         this.openInTabGroupButtonRef
                                     }
                                     onContextMenuBtnPress={
-                                        treeEntry.creator?.id ===
+                                        treeNodeEntry.creator?.id ===
                                         this.state.currentUser?.id
                                             ? () =>
                                                   this.processEvent(
                                                       'toggleEntryContextMenu',
                                                       {
                                                           listId:
-                                                              treeEntry.localId,
+                                                              treeNodeEntry.localId,
                                                       },
                                                   )
                                             : undefined
                                     }
                                     onEditMenuBtnPress={
-                                        treeEntry.creator?.id ===
+                                        treeNodeEntry.creator?.id ===
                                         this.state.currentUser?.id
                                             ? () =>
                                                   this.processEvent(
                                                       'toggleEntryEditMenu',
                                                       {
                                                           listId:
-                                                              treeEntry.localId,
+                                                              treeNodeEntry.localId,
                                                       },
                                                   )
                                             : undefined
@@ -408,18 +425,18 @@ class SpacePicker extends StatefulUIElement<
                                         this.processEvent(
                                             'onOpenInTabGroupPress',
                                             {
-                                                listId: treeEntry.localId,
+                                                listId: treeNodeEntry.localId,
                                             },
                                         )
                                     }
                                     actOnAllTooltipText="Add all tabs in window to Space"
                                     shareState={
-                                        treeEntry?.isPrivate ?? 'private'
+                                        treeNodeEntry?.isPrivate ?? 'private'
                                             ? 'private'
                                             : 'shared'
                                     }
                                     getRootElement={this.props.getRootElement}
-                                    {...treeEntry}
+                                    {...treeNodeEntry}
                                     toggleShowNewChildInput={
                                         actions.toggleShowNewChildInput
                                     }
@@ -434,14 +451,14 @@ class SpacePicker extends StatefulUIElement<
                                                 toggleShowChildren: () => {
                                                     // Toggling roots should close tree-view
                                                     if (
-                                                        treeEntry.parentUnifiedId ==
+                                                        treeNodeEntry.parentUnifiedId ==
                                                         null
                                                     ) {
                                                         this.processEvent(
                                                             'toggleListShownAsTree',
                                                             {
                                                                 unifiedListId:
-                                                                    treeEntry.unifiedId,
+                                                                    treeNodeEntry.unifiedId,
                                                             },
                                                         )
                                                     } else {
@@ -458,7 +475,7 @@ class SpacePicker extends StatefulUIElement<
                 )
             }
 
-            let pathText = entry.pathUnifiedIds
+            let pathText = baseEntry.pathUnifiedIds
                 .map((id, i) => {
                     let cachedList = this.props.annotationsCache.lists.byId[id]
                     if (!cachedList) {
@@ -482,26 +499,28 @@ class SpacePicker extends StatefulUIElement<
 
             // Base case: flat view
             return (
-                <EntryRowContainer key={entry.unifiedId}>
+                <EntryRowContainer key={baseEntry.unifiedId}>
                     <EntryRow
                         ancestryPath={pathText}
                         onAncestryPathClick={(e) => {
                             e.stopPropagation()
                             this.processEvent('toggleListShownAsTree', {
-                                unifiedListId: entry.unifiedId,
+                                unifiedListId: baseEntry.unifiedId,
                             })
                         }}
-                        id={`ListKeyName-${entry.unifiedId}`}
+                        id={`ListKeyName-${baseEntry.unifiedId}`}
                         ref={(ref) =>
-                            (this.entryRowRefs[entry.unifiedId] = ref)
+                            (this.entryRowRefs[
+                                generateRenderedListEntryId(baseEntry)
+                            ] = ref)
                         }
                         onPress={() => {
                             this.processEvent('resultEntryPress', {
-                                entry,
+                                entry: baseEntry,
                             })
                         }}
                         onListFocus={() =>
-                            this.props.onListFocus(entry.localId)
+                            this.props.onListFocus(baseEntry.localId)
                         }
                         addedToAllIds={this.state.addedToAllIds}
                         keepScrollPosition={this.keepScrollPosition}
@@ -509,29 +528,37 @@ class SpacePicker extends StatefulUIElement<
                             this.props.actOnAllTabs
                                 ? () =>
                                       this.processEvent('resultEntryAllPress', {
-                                          entry,
+                                          entry: baseEntry,
                                       })
                                 : undefined
                         }
                         bgScriptBG={this.props.bgScriptBG}
                         onFocus={() =>
                             this.processEvent('focusListEntry', {
-                                listId: entry.unifiedId,
+                                listRenderedId: generateRenderedListEntryId(
+                                    baseEntry,
+                                ),
                             })
                         }
                         onUnfocus={() =>
                             this.processEvent('focusListEntry', {
-                                listId: null,
+                                listRenderedId: null,
                             })
                         }
                         index={index}
                         selected={this.state.selectedListIds.includes(
-                            entry.localId,
+                            baseEntry.localId,
                         )}
-                        focused={this.state.focusedListId === entry.unifiedId}
+                        focused={
+                            this.state.focusedListRenderedId ===
+                            generateRenderedListEntryId(baseEntry)
+                        }
                         resultItem={
                             <ListResultItem>
-                                {highlightText(entry.name, this.state.query)}
+                                {highlightText(
+                                    baseEntry.name,
+                                    this.state.query,
+                                )}
                             </ListResultItem>
                         }
                         contextMenuBtnRef={this.contextMenuBtnRef}
@@ -540,35 +567,37 @@ class SpacePicker extends StatefulUIElement<
                         extraMenuBtnRef={this.extraMenuBtnRef}
                         openInTabGroupButtonRef={this.openInTabGroupButtonRef}
                         onContextMenuBtnPress={
-                            entry.creator?.id === this.state.currentUser?.id
+                            baseEntry.creator?.id === this.state.currentUser?.id
                                 ? () =>
                                       this.processEvent(
                                           'toggleEntryContextMenu',
                                           {
-                                              listId: entry.localId,
+                                              listId: baseEntry.localId,
                                           },
                                       )
                                 : undefined
                         }
                         onEditMenuBtnPress={
-                            entry.creator?.id === this.state.currentUser?.id
+                            baseEntry.creator?.id === this.state.currentUser?.id
                                 ? () =>
                                       this.processEvent('toggleEntryEditMenu', {
-                                          listId: entry.localId,
+                                          listId: baseEntry.localId,
                                       })
                                 : undefined
                         }
                         onOpenInTabGroupPress={() =>
                             this.processEvent('onOpenInTabGroupPress', {
-                                listId: entry.localId,
+                                listId: baseEntry.localId,
                             })
                         }
                         actOnAllTooltipText="Add all tabs in window to Space"
                         shareState={
-                            entry?.isPrivate ?? 'private' ? 'private' : 'shared'
+                            baseEntry?.isPrivate ?? 'private'
+                                ? 'private'
+                                : 'shared'
                         }
                         getRootElement={this.props.getRootElement}
-                        {...entry}
+                        {...baseEntry}
                     />
                 </EntryRowContainer>
             )
