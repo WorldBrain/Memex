@@ -243,22 +243,10 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private renderListEntries() {
-        let listEntries = getEntriesForCurrentPickerTab(this.state)
+        let listEntries = getEntriesForCurrentPickerTab(this.props, this.state)
         if (this.state.query.trim().length > 0) {
             listEntries = listEntries.filter((list) =>
                 this.state.filteredListIds.includes(list.unifiedId),
-            )
-        }
-
-        if (
-            this.state.currentTab === 'page-links' &&
-            this.props.normalizedPageUrlToFilterPageLinksBy
-        ) {
-            listEntries = listEntries.filter(
-                (list) =>
-                    list.type === 'page-link' &&
-                    list.normalizedPageUrl ===
-                        this.props.normalizedPageUrlToFilterPageLinksBy,
             )
         }
 

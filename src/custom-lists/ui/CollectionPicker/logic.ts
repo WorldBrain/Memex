@@ -300,7 +300,10 @@ export default class SpacePickerLogic extends UILogic<
             )
         }
 
-        let listEntries = getEntriesForCurrentPickerTab(previousState)
+        let listEntries = getEntriesForCurrentPickerTab(
+            this.dependencies,
+            previousState,
+        )
         if (previousState.query.trim().length > 0) {
             listEntries = listEntries.filter((list) =>
                 previousState.filteredListIds.includes(list.unifiedId),
@@ -378,8 +381,8 @@ export default class SpacePickerLogic extends UILogic<
             return null
         }
 
-        let entries = getEntriesForCurrentPickerTab(state)
-        if (state.filteredListIds?.length) {
+        let entries = getEntriesForCurrentPickerTab(this.dependencies, state)
+        if (state.filteredListIds?.length > 0) {
             entries = entries.filter((e) =>
                 state.filteredListIds.includes(e.unifiedId),
             )
