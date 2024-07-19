@@ -9,7 +9,6 @@ const search = browser.runtime.getURL('/img/search.svg')
 interface Props {
     onChange: (value: string) => void
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void // Adjusted type here
-    onKeyUp: (e: React.KeyboardEvent<HTMLInputElement>) => void // Adjusted type here
     searchInputPlaceholder: string
     value: string
     searchInputRef?: React.RefObject<HTMLInputElement>
@@ -53,10 +52,6 @@ export class PickerSearchInput extends React.Component<Props, State> {
                 onChange={this.onChange}
                 onKeyDown={(e) => {
                     this.props.onKeyDown(e)
-                    e.stopPropagation()
-                }}
-                onKeyUp={(e) => {
-                    this.props.onKeyUp(e)
                     e.stopPropagation()
                 }}
                 type={'input'}

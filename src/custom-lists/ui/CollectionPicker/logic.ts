@@ -108,7 +108,6 @@ export default class SpacePickerLogic extends UILogic<
 > {
     private searchInputRef?: HTMLInputElement
     private newTabKeys: KeyEvent[] = ['Enter', ',', 'Tab']
-    private currentKeysPressed: KeyEvent[] = []
     private localStorage: BrowserSettingsStore<CollectionsSettings>
     /** Mirrors the state of the same name, for use in the sorting fn. */
     private selectedListIds: number[] = []
@@ -360,16 +359,6 @@ export default class SpacePickerLogic extends UILogic<
         this.searchInputRef?.focus()
     }
 
-    onKeyUp: EventHandler<'onKeyUp'> = async ({ event: { event } }) => {
-        let currentKeys = this.currentKeysPressed
-        if (currentKeys.includes('Meta')) {
-            this.currentKeysPressed = []
-            return
-        }
-        currentKeys = currentKeys.filter((key) => key !== event.key)
-        this.currentKeysPressed = currentKeys
-    }
-
     switchTab: EventHandler<'switchTab'> = async ({ event, previousState }) => {
         if (previousState.currentTab !== event.tab) {
             this.emitMutation({ currentTab: { $set: event.tab } })
@@ -534,18 +523,9 @@ export default class SpacePickerLogic extends UILogic<
         event: { event },
         previousState,
     }) => {
-        let currentKeys: KeyEvent[] = this.currentKeysPressed
-        let keyPressed: any = event.key
-        currentKeys.push(keyPressed)
-
-        this.currentKeysPressed = currentKeys
-
         if (
-            (!this.dependencies.filterMode &&
-                currentKeys.includes('Enter') &&
-                currentKeys.includes('Meta')) ||
-            (event.key === 'Enter' &&
-                previousState.filteredListIds?.length === 0)
+            event.key === 'Enter' &&
+            previousState.filteredListIds?.length === 0
         ) {
             if (previousState.newEntryName != null) {
                 await this.newEntryPress({
@@ -553,7 +533,6 @@ export default class SpacePickerLogic extends UILogic<
                     event: { entry: previousState.newEntryName },
                 })
             }
-            this.currentKeysPressed = []
             return
         }
 
@@ -576,7 +555,6 @@ export default class SpacePickerLogic extends UILogic<
                     },
                     previousState,
                 })
-                this.currentKeysPressed = []
                 return
             }
         }

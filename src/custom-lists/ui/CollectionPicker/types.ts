@@ -61,7 +61,6 @@ export type SpacePickerEvent = UIEvent<{
     newEntryPress: { entry: SpacePickerState['newEntryName'] }
     switchTab: { tab: SpacePickerTab }
     keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
-    onKeyUp: { event: React.KeyboardEvent<HTMLInputElement> }
     focusInput: {}
     toggleListShownAsTree: { unifiedListId: UnifiedList['unifiedId'] }
 }>

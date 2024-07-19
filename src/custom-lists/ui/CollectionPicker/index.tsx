@@ -165,10 +165,6 @@ class SpacePicker extends StatefulUIElement<
         this.processEvent('keyPress', { event })
     }
 
-    private handleKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        this.processEvent('onKeyUp', { event })
-    }
-
     private renderEmptyList() {
         if (
             (this.state.newEntryName?.length > 0 && !this.props.filterMode) ||
@@ -747,7 +743,6 @@ class SpacePicker extends StatefulUIElement<
                         }
                         onChange={this.handleSearchInputChanged}
                         onKeyDown={this.handleKeyPress}
-                        onKeyUp={this.handleKeyUp}
                         value={this.state.query}
                         autoFocus={true}
                     />
