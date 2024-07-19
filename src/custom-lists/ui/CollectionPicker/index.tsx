@@ -155,12 +155,6 @@ class SpacePicker extends StatefulUIElement<
         // })
     }
 
-    handleNewListPress = () => {
-        this.processEvent('newEntryPress', {
-            entry: this.state.newEntryName,
-        })
-    }
-
     private handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         this.processEvent('keyPress', { event })
     }
@@ -329,7 +323,7 @@ class SpacePicker extends StatefulUIElement<
                                     }
                                     dndActions={dndActions}
                                     onPress={() => {
-                                        this.processEvent('resultEntryPress', {
+                                        this.processEvent('pressEntry', {
                                             entry: treeNodeEntry,
                                         })
                                     }}
@@ -511,7 +505,7 @@ class SpacePicker extends StatefulUIElement<
                             ] = ref)
                         }
                         onPress={() => {
-                            this.processEvent('resultEntryPress', {
+                            this.processEvent('pressEntry', {
                                 entry: baseEntry,
                             })
                         }}
@@ -781,7 +775,7 @@ class SpacePicker extends StatefulUIElement<
                 {this.shouldShowAddNewEntry && (
                     <AddNewEntry
                         resultItem={this.state.newEntryName}
-                        onPress={this.handleNewListPress}
+                        onPress={() => this.processEvent('pressNewEntry', null)}
                         resultsCount={this.state.filteredListIds?.length}
                         commandKey={SpacePicker.MOD_KEY}
                         getRootElement={this.props.getRootElement}

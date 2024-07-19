@@ -107,7 +107,6 @@ export default class SpacePickerLogic extends UILogic<
     SpacePickerEvent
 > {
     private searchInputRef?: HTMLInputElement
-    private newTabKeys: KeyEvent[] = ['Enter', ',', 'Tab']
     private localStorage: BrowserSettingsStore<CollectionsSettings>
     /** Mirrors the state of the same name, for use in the sorting fn. */
     private selectedListIds: number[] = []
@@ -448,7 +447,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     // TODO: I'm not satisfied that this conditional logic is as clear as it could be. Improve
-    private handleLeftRightArrowKeyPress(
+    private async handleLeftRightArrowKeyPress(
         state: SpacePickerState,
         key: 'ArrowLeft' | 'ArrowRight',
     ) {
@@ -501,7 +500,7 @@ export default class SpacePickerLogic extends UILogic<
                 !isEventHappeningOnRootNode) ||
             (key === 'ArrowRight' && listTreeState?.areChildrenShown === false)
         ) {
-            listTrees.processEvent('toggleShowChildren', {
+            await listTrees.processEvent('toggleShowChildren', {
                 listId: treeNodeUnifiedId,
             })
         } else if (
@@ -519,44 +518,30 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
+    private async handleEnterKeyPress(state: SpacePickerState) {
+        if (state.filteredListIds?.length === 0 && state.newEntryName != null) {
+            await this._pressNewEntry(state)
+        } else if (state.focusedListRenderedId != null) {
+            let {
+                baseUnifiedId,
+                treeNodeUnifiedId,
+            } = extractUnifiedIdsFromRenderedId(state.focusedListRenderedId)
+            let unifiedId = treeNodeUnifiedId ?? baseUnifiedId
+            let localListId = state.listEntries.byId[unifiedId]?.localId
+            if (localListId == null) {
+                return
+            }
+            await this._pressEntry(localListId, state)
+        }
+    }
+
     keyPress: EventHandler<'keyPress'> = async ({
         event: { event },
         previousState,
     }) => {
-        if (
-            event.key === 'Enter' &&
-            previousState.filteredListIds?.length === 0
-        ) {
-            if (previousState.newEntryName != null) {
-                await this.newEntryPress({
-                    previousState,
-                    event: { entry: previousState.newEntryName },
-                })
-            }
+        if (event.key === 'Enter') {
+            await this.handleEnterKeyPress(previousState)
             return
-        }
-
-        if (
-            this.newTabKeys.includes(event.key as KeyEvent) &&
-            previousState.listEntries.allIds.length > 0
-        ) {
-            // TODO: Extract underlying list ID from rendered ID
-            if (
-                previousState.listEntries.byId[
-                    previousState.focusedListRenderedId
-                ]
-            ) {
-                await this.resultEntryPress({
-                    event: {
-                        entry:
-                            previousState.listEntries.byId[
-                                previousState.focusedListRenderedId
-                            ],
-                    },
-                    previousState,
-                })
-                return
-            }
         }
 
         if (event.key === 'ArrowUp') {
@@ -577,11 +562,13 @@ export default class SpacePickerLogic extends UILogic<
             (event.key === 'ArrowRight' || event.key === 'ArrowLeft') &&
             previousState.focusedListRenderedId
         ) {
-            this.handleLeftRightArrowKeyPress(previousState, event.key)
+            await this.handleLeftRightArrowKeyPress(previousState, event.key)
+            return
         }
 
         if (event.key === 'Escape') {
             this.dependencies.closePicker(event)
+            return
         }
 
         event.stopPropagation()
@@ -997,28 +984,35 @@ export default class SpacePickerLogic extends UILogic<
         const queryParts = query.split('/')
     }
 
-    resultEntryPress: EventHandler<'resultEntryPress'> = async ({
-        event: { entry, shouldRerender },
+    pressEntry: EventHandler<'pressEntry'> = async ({
+        event,
         previousState,
     }) => {
+        await this._pressEntry(event.entry.localId, previousState)
+    }
+
+    private async _pressEntry(
+        localListId: number,
+        previousState: SpacePickerState,
+    ) {
         let nextState: SpacePickerState
         const listData = __getListDataByLocalId(
-            entry.localId,
+            localListId,
             this.dependencies,
-            { source: 'resultEntryPress' },
+            { source: 'pressEntry' },
         )
 
         await executeUITask(this, 'spaceAddRemoveState', async () => {
             try {
                 let entrySelectPromise: Promise<void | boolean> | void
                 // If we're going to unselect it
-                if (previousState.selectedListIds.includes(entry.localId)) {
+                if (previousState.selectedListIds.includes(localListId)) {
                     this.selectedListIds = previousState.selectedListIds.filter(
-                        (id) => id !== entry.localId,
+                        (id) => id !== localListId,
                     )
 
                     entrySelectPromise = this.dependencies.unselectEntry(
-                        entry.localId,
+                        localListId,
                     )
                 } else {
                     // If we're going to select it
@@ -1033,20 +1027,13 @@ export default class SpacePickerLogic extends UILogic<
                     )
 
                     entrySelectPromise = this.dependencies.selectEntry(
-                        entry.localId,
+                        localListId,
                     )
                 }
 
                 nextState = this.applyAndEmitMutation(previousState, {
                     selectedListIds: { $set: this.selectedListIds },
                 })
-
-                // Manually trigger list subscription - which does the list state mutation - as it won't be auto-triggered here
-                if (shouldRerender) {
-                    this.cacheListsSubscription(
-                        this.dependencies.annotationsCache.lists,
-                    )
-                }
 
                 let entrySelectResult = null
                 if (entrySelectPromise instanceof Promise) {
@@ -1204,10 +1191,14 @@ export default class SpacePickerLogic extends UILogic<
         })
     }
 
-    newEntryPress: EventHandler<'newEntryPress'> = async ({
-        event: { entry },
+    pressNewEntry: EventHandler<'pressNewEntry'> = async ({
         previousState,
     }) => {
+        await this._pressNewEntry(previousState)
+    }
+
+    private async _pressNewEntry(previousState: SpacePickerState) {
+        let entry = previousState.newEntryName
         await executeUITask(this, 'spaceCreateState', async () => {
             // NOTE: This is here as the enter press event from the context menu to confirm a space rename
             //   was also bubbling up into the space menu and being interpretted as a new space confirmation.

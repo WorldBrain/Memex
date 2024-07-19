@@ -46,10 +46,7 @@ export type SpacePickerEvent = UIEvent<{
     resultEntryAllPress: { entry: UnifiedList }
     setSpaceWriteError: { error: string }
     newEntryAllPress: { entry: string }
-    resultEntryPress: {
-        entry: Pick<UnifiedList, 'localId'>
-        shouldRerender?: boolean
-    }
+    pressEntry: { entry: Pick<UnifiedList, 'localId'> }
     focusListEntry: { listRenderedId: UnifiedList['unifiedId'] | null }
     toggleEntryContextMenu: { listId: number }
     toggleEntryEditMenu: { listId: number }
@@ -58,7 +55,7 @@ export type SpacePickerEvent = UIEvent<{
     setListPrivacy: { listId: number; isPrivate: boolean }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
-    newEntryPress: { entry: SpacePickerState['newEntryName'] }
+    pressNewEntry: null
     switchTab: { tab: SpacePickerTab }
     keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
     focusInput: {}

@@ -794,7 +794,7 @@ describe('SpacePickerLogic', () => {
         expect(selectedEntryId).toBe(null)
         expect(unselectedEntryId).toBe(null)
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
         })
 
@@ -812,7 +812,7 @@ describe('SpacePickerLogic', () => {
         expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[1].localId)
         expect(unselectedEntryId).toBe(null)
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
         })
 
@@ -830,7 +830,7 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         )
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
@@ -850,7 +850,7 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         )
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[3],
         })
 
@@ -889,7 +889,7 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
@@ -907,7 +907,7 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
