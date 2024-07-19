@@ -17,8 +17,10 @@ import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { BrowserSettingsStore } from 'src/util/settings'
 import {
+    extractUnifiedIdsFromRenderedId,
     generateRenderedListEntryId,
     getEntriesForCurrentPickerTab,
+    isRenderedListEntryIdForTreeNode,
 } from './utils'
 import type {
     SpacePickerState,
@@ -118,7 +120,7 @@ export default class SpacePickerLogic extends UILogic<
     constructor(
         protected dependencies: SpacePickerDependencies & {
             /** Allows direct access to list tree state encapsulated in ListTrees container component. */
-            getListTreesRefs: () => { [unifiedId: string]: ListTrees }
+            getListTreeRefs: () => { [unifiedId: string]: ListTrees }
             /** Allows direct access to each EntryRow comp. Each referenced to via their rendered ID (NOT unified ID). */
             getEntryRowRefs: () => { [renderedId: string]: EntryRow }
         },
@@ -378,7 +380,7 @@ export default class SpacePickerLogic extends UILogic<
     private deriveFlatListOfRenderedEntries(
         state: SpacePickerState,
     ): Array<UnifiedList & { renderedId: string }> {
-        let listTreesRefs = this.dependencies.getListTreesRefs()
+        let listTreesRefs = this.dependencies.getListTreeRefs()
         let areListsBeingFiltered = state.query.trim().length > 0
 
         let baseEntries = getEntriesForCurrentPickerTab(
@@ -456,6 +458,78 @@ export default class SpacePickerLogic extends UILogic<
         return nextFocusedListId
     }
 
+    // TODO: I'm not satisfied that this conditional logic is as clear as it could be. Improve
+    private handleLeftRightArrowKeyPress(
+        state: SpacePickerState,
+        key: 'ArrowLeft' | 'ArrowRight',
+    ) {
+        let {
+            baseUnifiedId,
+            treeNodeUnifiedId,
+        } = extractUnifiedIdsFromRenderedId(state.focusedListRenderedId)
+
+        let listTreeRootNoteId =
+            state.listEntries.byId[treeNodeUnifiedId]?.pathUnifiedIds[0] ??
+            treeNodeUnifiedId
+        let isEventHappeningOnRootNode =
+            listTreeRootNoteId === treeNodeUnifiedId
+        let isEventHappeningOnBaseEntry = treeNodeUnifiedId == null
+
+        if (isEventHappeningOnBaseEntry) {
+            if (key === 'ArrowRight') {
+                listTreeRootNoteId =
+                    state.listEntries.byId[baseUnifiedId]?.pathUnifiedIds[0]
+                // Should only be able to unfold trees for nested lists
+                if (listTreeRootNoteId == null) {
+                    return
+                }
+                // Figure out what the rendered ID of the tree's root would be, and focus that
+                let renderedId = generateRenderedListEntryId(
+                    {
+                        unifiedId: baseUnifiedId,
+                    },
+                    { unifiedId: listTreeRootNoteId },
+                )
+                this.emitMutation({
+                    focusedListRenderedId: { $set: renderedId },
+                    listIdsShownAsTrees: { $push: [baseUnifiedId] },
+                })
+            }
+            return
+        }
+
+        let listTrees = this.dependencies.getListTreeRefs()[baseUnifiedId]
+        if (!listTrees) {
+            throw new Error(
+                'Attempted to toggle list tree with KB arrows, though ref cannot be found.',
+            )
+        }
+
+        let listTreeState = listTrees.state.listTrees.byId[treeNodeUnifiedId]
+        if (
+            (key === 'ArrowLeft' &&
+                listTreeState?.areChildrenShown === true &&
+                !isEventHappeningOnRootNode) ||
+            (key === 'ArrowRight' && listTreeState?.areChildrenShown === false)
+        ) {
+            listTrees.processEvent('toggleShowChildren', {
+                listId: treeNodeUnifiedId,
+            })
+        } else if (
+            key === 'ArrowLeft' &&
+            listTreeState?.areChildrenShown === true &&
+            isEventHappeningOnRootNode
+        ) {
+            this.emitMutation({
+                focusedListRenderedId: { $set: baseUnifiedId },
+                listIdsShownAsTrees: {
+                    $apply: (ids: string[]) =>
+                        ids.filter((id) => id !== baseUnifiedId),
+                },
+            })
+        }
+    }
+
     keyPress: EventHandler<'keyPress'> = async ({
         event: { event },
         previousState,
@@ -487,6 +561,7 @@ export default class SpacePickerLogic extends UILogic<
             this.newTabKeys.includes(event.key as KeyEvent) &&
             previousState.listEntries.allIds.length > 0
         ) {
+            // TODO: Extract underlying list ID from rendered ID
             if (
                 previousState.listEntries.byId[
                     previousState.focusedListRenderedId
@@ -520,23 +595,12 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        // TODO: Reimplement this
-        // let listTreesRef = this.dependencies.getListTreesRefs()
-        // if (
-        //     (event.key === 'ArrowRight' &&
-        //         listTreesRef?.state.listTrees.byId[
-        //             previousState.focusedListRenderedId
-        //         ]?.areChildrenShown === false) ||
-        //     (event.key === 'ArrowLeft' &&
-        //         listTreesRef?.state.listTrees.byId[
-        //             previousState.focusedListRenderedId
-        //         ]?.areChildrenShown === true)
-        // ) {
-        //     listTreesRef.processEvent('toggleShowChildren', {
-        //         listId: previousState.focusedListRenderedId,
-        //     })
-        //     return
-        // }
+        if (
+            (event.key === 'ArrowRight' || event.key === 'ArrowLeft') &&
+            previousState.focusedListRenderedId
+        ) {
+            this.handleLeftRightArrowKeyPress(previousState, event.key)
+        }
 
         if (event.key === 'Escape') {
             this.dependencies.closePicker(event)
@@ -1193,7 +1257,7 @@ export default class SpacePickerLogic extends UILogic<
                             listId,
                         )?.unifiedId
 
-                        let listTreesRef = this.dependencies.getListTreesRefs()
+                        let listTreesRef = this.dependencies.getListTreeRefs()
 
                         listTreesRef[newListUnifiedId]?.processEvent(
                             'toggleShowChildren',

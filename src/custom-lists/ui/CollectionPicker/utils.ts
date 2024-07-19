@@ -19,9 +19,34 @@ export const getEntriesForCurrentPickerTab = (
         : normalizedStateToArray(state.listEntries)
 
 export const generateRenderedListEntryId = (
-    entry: UnifiedList,
-    treeNodeEntry?: UnifiedList,
+    entry: Pick<UnifiedList, 'unifiedId'>,
+    treeNodeEntry?: Pick<UnifiedList, 'unifiedId'>,
 ): string =>
     !treeNodeEntry
         ? entry.unifiedId
-        : `tree-node-${entry.unifiedId}-${treeNodeEntry.unifiedId}`
+        : `${RENDERED_ID_TREE_NODE_PREFIX}-${entry.unifiedId}-${treeNodeEntry.unifiedId}`
+
+export const isRenderedListEntryIdForTreeNode = (renderedId: string): boolean =>
+    renderedId.startsWith(RENDERED_ID_TREE_NODE_PREFIX)
+
+export const extractUnifiedIdsFromRenderedId = (
+    renderedId: string,
+): { baseUnifiedId: string; treeNodeUnifiedId?: string } => {
+    if (!isRenderedListEntryIdForTreeNode(renderedId)) {
+        return { baseUnifiedId: renderedId }
+    }
+    let matchResult = renderedId.match(
+        new RegExp(`^${RENDERED_ID_TREE_NODE_PREFIX}-(\\d+)-(\\d+)$`),
+    )
+    if (!matchResult || (!matchResult[1] && !matchResult[2])) {
+        throw new Error(
+            `Failed to extract unified ID from rendered ID for space picker entry: ${renderedId}`,
+        )
+    }
+    return {
+        baseUnifiedId: matchResult[1],
+        treeNodeUnifiedId: matchResult[2],
+    }
+}
+
+const RENDERED_ID_TREE_NODE_PREFIX = 'tree-node'

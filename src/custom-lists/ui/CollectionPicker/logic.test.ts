@@ -107,7 +107,7 @@ const setupLogicHelper = async ({
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
         analyticsBG: device.backgroundModules.analyticsBG,
-        getListTreesRefs: () => undefined,
+        getListTreeRefs: () => undefined,
         getEntryRowRefs: () => ({}),
     })
 
