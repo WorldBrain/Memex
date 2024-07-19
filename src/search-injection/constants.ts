@@ -80,6 +80,7 @@ export const SEARCH_INJECTION_DEFAULT = {
 
 export const REACT_ROOTS = {
     youtubeInterface: '__MEMEX-YOUTUBE-INTERFACE-ROOT',
+    twitterInterface: '__MEMEX-TWITTER-INTERFACE-ROOT',
     searchEngineInjection: '__MEMEX-SEARCH-INJECTION-ROOT',
     pdfOpenButtons: '__PDF-OPEN-BUTTONS-INJECTION-ROOT',
     imgActionButtons: '__IMG-ACTION-BUTTONS-INJECTION-ROOT',

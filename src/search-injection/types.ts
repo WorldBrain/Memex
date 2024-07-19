@@ -37,10 +37,12 @@ export interface OnDemandInPageUIProps {
     embedElements?: HTMLCollectionOf<HTMLEmbedElement>
     imageElements?: HTMLCollectionOf<HTMLImageElement>
     contentScriptsBG?: ContentScriptsInterface<'caller'>
+    handleDownloadAudio?: (url: string) => Promise<Float32Array>
 }
 
 export type OnDemandInPageUIComponents =
     | 'youtube-integration'
+    | 'twitter-integration'
     | 'search-engine-integration'
     | 'dashboard'
     | 'error-display'

@@ -127,6 +127,7 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 import debounce from 'lodash/debounce'
 import { updateNudgesCounter } from 'src/util/nudges-utils'
 import { fetchYoutubeTranscript } from 'src/util/fetch-youtube-transcript'
+import { captureScreenshotFromHTMLVideo } from './utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -995,23 +996,6 @@ export async function main(
         },
     }
 
-    async function captureScreenshotFromHTMLVideo(screenshotTarget) {
-        let canvas = document.createElement('canvas')
-        let height = screenshotTarget.offsetHeight
-        let width = screenshotTarget.offsetWidth
-
-        canvas.width = width
-        canvas.height = height
-
-        let ctx = canvas.getContext('2d')
-
-        ctx.drawImage(screenshotTarget, 0, 0, canvas.width, canvas.height)
-
-        let image = canvas.toDataURL('image/jpeg')
-
-        return image
-    }
-
     async function getHighlightColorSettings() {
         const syncSettings = createSyncSettingsStore({ syncSettingsBG })
         const highlightColorStore = syncSettings.highlightColors
@@ -1038,6 +1022,26 @@ export async function main(
             await components.in_page_ui_injections
             inPageUI.loadOnDemandInPageUI({
                 component: 'youtube-integration',
+            })
+        } else if (
+            /https:\/\/(?:mobile\.)?x\.com/.test(window.location.href) ||
+            window.location.href.includes('twitter.com')
+        ) {
+            async function handleDownloadAudio(url: string) {
+                const downloadAudioUrl = await runInBackground<
+                    InPageUIInterface<'caller'>
+                >().transcribeAudioUrl(url)
+
+                // Handle the result of downloadAudioUrl if needed
+                return downloadAudioUrl
+            }
+
+            await components.in_page_ui_injections
+            inPageUI.loadOnDemandInPageUI({
+                component: 'twitter-integration',
+                options: {
+                    handleDownloadAudio,
+                },
             })
         }
     }

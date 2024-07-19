@@ -43,4 +43,11 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
         },
         void
     >
+    downloadAudioUrl: RemoteFunction<
+        Role,
+        {
+            url: string
+        },
+        { array: Float32Array }
+    >
 }

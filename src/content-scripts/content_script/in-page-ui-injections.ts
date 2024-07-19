@@ -9,6 +9,7 @@ import { renderUpgradeModal } from 'src/search-injection/upgrade-modal-display'
 import { handleRenderPDFOpenButton } from 'src/search-injection/pdf-open-button'
 import { handleRenderImgActionButtons } from 'src/search-injection/img-action-buttons'
 import type { SearchEngineName } from 'src/search-injection/types'
+import { handleRenderTwitterInterface } from 'src/search-injection/twitterInterface'
 
 export const main: InPageUIInjectionsMain = async ({
     inPageUI,
@@ -44,6 +45,15 @@ export const main: InPageUIInjectionsMain = async ({
                         upgradeModalProps.browserAPIs,
                     )
                 }
+            } else if (component === 'twitter-integration') {
+                await handleRenderTwitterInterface(
+                    syncSettings,
+                    syncSettingsBG,
+                    annotationsFunctions,
+                    transcriptFunctions,
+                    upgradeModalProps.browserAPIs,
+                    options.handleDownloadAudio,
+                )
             } else if (component === 'pdf-open-button') {
                 await handleRenderPDFOpenButton(
                     syncSettings,
