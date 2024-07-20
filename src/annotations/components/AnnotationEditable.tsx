@@ -323,7 +323,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     private handleCmdCKeyPress = (event: KeyboardEvent) => {
-        if (event.key === 'c' && (event.metaKey || event.ctrlKey)) {
+        if (
+            event.key === 'c' &&
+            (event.metaKey || event.ctrlKey) &&
+            this.state.hoverCard &&
+            window.getSelection().toString().length === 0
+        ) {
             this.props.annotationFooterDependencies.onCopyPasterDefaultExecute()
             this.setState({ showCopyPaster: false })
         }
@@ -1591,8 +1596,8 @@ const ShareMenuContainer = styled.div`
 const Highlightbar = styled.div<{ barColor: string }>`
     background: ${(props) => props.theme.colors.prime1};
     border-radius: 2px;
-    width: 5px;
-    margin: 10px 10px 10px 0px;
+    min-width: 5px;
+    margin: 10px 0px 10px 0px;
     cursor: pointer;
 
     &:hover {
