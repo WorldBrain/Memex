@@ -746,7 +746,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
-                        heightAndWidth="24px"
+                        heightAndWidth="28px"
                         icon={'spread'}
                         color={this.props.isShared ? 'prime1' : 'greyScale3'}
                         onClick={(event) => {
@@ -946,10 +946,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.shareMenuAnnotationInstanceId ===
                     this.props.unifiedId,
                 buttonRef: this.shareMenuButtonRef,
-                leftSideItem:
-                    this.displayLists.length === 0
-                        ? this.renderAutoAddedIndicator()
-                        : null,
                 showKeyShortcut: this.props.isInFocus && 'S',
             },
             {
@@ -1385,6 +1381,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             </HighlightActionsBox>
         ) : null
 
+        console.log('this.props.zIndex', this.displayLists.length)
         return (
             <ThemeProvider theme={this.theme}>
                 <AnnotationBox
@@ -1441,35 +1438,35 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                                 />
                                             </CreationInfoBox>
                                         )}
-                                    {this.displayLists.length >= 1 && (
-                                        <ListSegmentBox>
-                                            {this.renderAutoAddedIndicator()}
-                                            <ListsSegment
-                                                tabIndex={0}
-                                                lists={this.displayLists}
-                                                onMouseEnter={
-                                                    this.props.onListsHover
-                                                }
-                                                onListClick={
-                                                    this.props.onListClick
-                                                }
-                                                onEditBtnClick={() => null}
-                                                spacePickerButtonRef={
-                                                    this
-                                                        .spacePickerBodyButtonRef
-                                                }
-                                                padding={
-                                                    this.props.isEditing
-                                                        ? '0px'
-                                                        : '0px'
-                                                }
-                                                removeSpaceForAnnotation={
-                                                    this.props
-                                                        .removeSpaceFromEditorPicker
-                                                }
-                                            />
-                                        </ListSegmentBox>
-                                    )}
+                                    {!this.props.isShared &&
+                                        this.displayLists.length >= 1 && (
+                                            <ListSegmentBox>
+                                                <ListsSegment
+                                                    tabIndex={0}
+                                                    lists={this.displayLists}
+                                                    onMouseEnter={
+                                                        this.props.onListsHover
+                                                    }
+                                                    onListClick={
+                                                        this.props.onListClick
+                                                    }
+                                                    onEditBtnClick={() => null}
+                                                    spacePickerButtonRef={
+                                                        this
+                                                            .spacePickerBodyButtonRef
+                                                    }
+                                                    padding={
+                                                        this.props.isEditing
+                                                            ? '0px'
+                                                            : '0px'
+                                                    }
+                                                    removeSpaceForAnnotation={
+                                                        this.props
+                                                            .removeSpaceFromEditorPicker
+                                                    }
+                                                />
+                                            </ListSegmentBox>
+                                        )}
                                 </DateAndSpaces>
                             ) : null}
                             {this.renderFooter()}
@@ -1480,6 +1477,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.spacePickerBodyButtonRef,
                         'lists-bar',
                     )} */}
+                    <AutoAddButtonContainer>
+                        {this.renderAutoAddedIndicator()}
+                    </AutoAddButtonContainer>
                 </AnnotationBox>
                 {this.state.showQuickTutorial && (
                     <PopoutBox
@@ -1501,6 +1501,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 }
+
+const AutoAddButtonContainer = styled.div`
+    position: absolute;
+    bottom: 2px;
+    left: 10px;
+    z-index: 100;
+`
 
 const ListSegmentBox = styled.div`
     display: flex;
@@ -1661,6 +1668,7 @@ const AnnotationBox = styled(Margin)<{ zIndex: number }>`
     width: 100%;
     align-self: center;
     z-index: ${(props) => props.zIndex};
+    position: relative;
 `
 
 const LabelBox = styled.div`
@@ -1997,6 +2005,10 @@ const TooltipTextBox = styled.div`
 
 const CreationInfoBox = styled.div`
     display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    padding-left: 30px;
+    margin-bottom: -2px;
 `
 
 const BulkSelectButtonBox = styled.div`
