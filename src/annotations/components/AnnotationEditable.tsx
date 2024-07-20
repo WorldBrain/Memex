@@ -732,13 +732,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     tooltipText={
                         this.props.isShared ? (
                             <span>
-                                Disable Auto-Add
-                                <br /> Only added to Spaces you manually select
+                                <strong>Auto-Added: ON</strong>
+                                <br />
+                                Visible in all Spaces the page is in
                             </span>
                         ) : (
                             <span>
-                                Enable Auto-Add
-                                <br /> Added to all Spaces the page is in
+                                <strong>Add-added: OFF</strong>
+                                <br /> Only visible in manually added Spaces
                             </span>
                         )
                     }
@@ -746,9 +747,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
-                        heightAndWidth="28px"
+                        heightAndWidth="26px"
                         icon={'spread'}
-                        color={this.props.isShared ? 'prime1' : 'greyScale3'}
+                        color={this.props.isShared ? 'prime1' : 'greyScale4'}
                         onClick={(event) => {
                             event.stopPropagation()
                             if (event.shiftKey) {
@@ -759,7 +760,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 )(!this.props.isShared, !this.props.isShared)
                             }
                         }}
-                        padding={'1px'}
+                        padding={'2px'}
                     />
                 </TooltipBox>
             </AutoAddedIndicator>
@@ -1504,7 +1505,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
 const AutoAddButtonContainer = styled.div`
     position: absolute;
-    bottom: 2px;
+    bottom: 3px;
     left: 10px;
     z-index: 100;
 `
