@@ -11,7 +11,7 @@ import {
     Draggable,
     Droppable,
     OnDragEndResponder,
-} from '@hello-pangea/dnd'
+} from 'react-beautiful-dnd'
 import { PrimaryAction } from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import TutorialBox from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 import styled, { css } from 'styled-components'
@@ -444,7 +444,7 @@ const ButtonBox = styled.div`
 
 const SectionTitle = styled.div`
     color: ${(props) => props.theme.colors.white};
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     flex: 1;
     white-space: nowrap;
