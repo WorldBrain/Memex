@@ -11,7 +11,7 @@ import {
     Draggable,
     Droppable,
     OnDragEndResponder,
-} from '@hello-pangea/dnd'
+} from 'react-beautiful-dnd'
 import { PrimaryAction } from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import TutorialBox from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 import styled, { css } from 'styled-components'
