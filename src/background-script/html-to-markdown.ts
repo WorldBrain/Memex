@@ -22,9 +22,8 @@ export function htmlToMarkdown(
 
     let markdown = turndownService.turndown(doc)
 
-    // Replace escaped double brackets with unescaped double brackets
-    markdown = markdown.replace(/\\\[\\\[/g, '[[')
-    markdown = markdown.replace(/\\\]\\\]/g, ']]')
+    // Replace escaped backslashes with nothing
+    markdown = markdown.replace(/\\(.)/g, '$1')
 
     return markdown
 }
