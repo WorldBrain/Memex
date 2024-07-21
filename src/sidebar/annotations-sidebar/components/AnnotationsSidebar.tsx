@@ -2166,13 +2166,13 @@ export class AnnotationsSidebar extends React.Component<
                             hideDescriptionInPreview
                             menuItems={[
                                 {
-                                    id: 'gpt-3',
-                                    name: 'GPT 3.5',
+                                    id: 'gpt-4o-mini',
+                                    name: 'GPT-4o Mini',
                                     info: 'Faster & good for summarization',
                                 },
                                 {
-                                    id: 'gpt-4',
-                                    name: 'GPT 4',
+                                    id: 'gpt-4o',
+                                    name: 'GPT-4o',
                                     isDisabled: this.props.hasKey
                                         ? false
                                         : true,
