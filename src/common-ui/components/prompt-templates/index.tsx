@@ -444,7 +444,7 @@ const ButtonBox = styled.div`
 
 const SectionTitle = styled.div`
     color: ${(props) => props.theme.colors.white};
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     flex: 1;
     white-space: nowrap;
