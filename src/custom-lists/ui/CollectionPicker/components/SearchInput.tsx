@@ -15,6 +15,7 @@ interface Props {
     showPlaceholder?: boolean
     loading?: boolean
     autoFocus?: boolean
+    borderRadius?: string
 }
 
 interface State {
@@ -61,6 +62,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
                     this.props.autoFocus != null ? this.props.autoFocus : true
                 }
                 id={'pickerSearchBox'}
+                borderRadius={this.props.borderRadius}
             />
         )
     }
@@ -69,7 +71,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
 const SearchBox = styled.div<{ isFocused: boolean }>`
     align-items: center;
     background-color: ${(props) => props.theme.colors.greyScale2};
-    border-radius: 3px;
+
     color: ${(props) => props.theme.colors.white};
     display: flex;
     flex-wrap: wrap;

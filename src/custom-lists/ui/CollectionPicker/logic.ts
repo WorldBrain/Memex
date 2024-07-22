@@ -150,6 +150,7 @@ export default class SpacePickerLogic extends UILogic<
         listIdToShowNewChildInput: null,
         addedToAllIds: [],
         editMenuListId: null,
+        blockMouseOver: false,
     })
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']
@@ -505,8 +506,11 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
-    private async handleEnterKeyPress(state: SpacePickerState) {
-        if (state.filteredListIds?.length === 0 && state.newEntryName != null) {
+    private async handleEnterKeyPress(
+        state: SpacePickerState,
+        isCmdKey?: boolean,
+    ) {
+        if (state.newEntryName != null && isCmdKey) {
             await this._pressNewEntry(state)
         } else if (state.focusedListRenderedId != null) {
             let {
@@ -522,12 +526,18 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
+    private handleMouseOver = () => {
+        this.emitMutation({ blockMouseOver: { $set: false } })
+        document.removeEventListener('mousemove', this.handleMouseOver)
+    }
+
     keyPress: EventHandler<'keyPress'> = async ({
         event: { event },
         previousState,
     }) => {
         if (event.key === 'Enter') {
-            await this.handleEnterKeyPress(previousState)
+            const isCmdKey = event.metaKey || event.ctrlKey
+            await this.handleEnterKeyPress(previousState, isCmdKey)
             return
         }
 
@@ -535,6 +545,8 @@ export default class SpacePickerLogic extends UILogic<
             event.preventDefault()
             let focusedListId = this.calcNextFocusedEntry(previousState, -1)
             this.dependencies.getEntryRowRefs()[focusedListId]?.scrollIntoView()
+            this.emitMutation({ blockMouseOver: { $set: true } })
+            document.addEventListener('mousemove', this.handleMouseOver)
             return
         }
 
@@ -542,6 +554,8 @@ export default class SpacePickerLogic extends UILogic<
             event.preventDefault()
             let focusedListId = this.calcNextFocusedEntry(previousState, 1)
             this.dependencies.getEntryRowRefs()[focusedListId]?.scrollIntoView()
+            this.emitMutation({ blockMouseOver: { $set: true } })
+            document.addEventListener('mousemove', this.handleMouseOver)
             return
         }
 

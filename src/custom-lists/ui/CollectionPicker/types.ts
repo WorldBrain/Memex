@@ -39,6 +39,7 @@ export interface SpacePickerState {
     spaceWriteError: string | null
     renameListErrorMessage: string | null
     addedToAllIds: number[]
+    blockMouseOver: boolean
 }
 
 export type SpacePickerEvent = UIEvent<{
