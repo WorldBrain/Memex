@@ -447,8 +447,10 @@ class SpacePicker extends StatefulUIElement<
                                                         this.processEvent(
                                                             'toggleListShownAsTree',
                                                             {
-                                                                unifiedListId:
-                                                                    treeNodeEntry.unifiedId,
+                                                                listRenderedId: generateRenderedListEntryId(
+                                                                    baseEntry,
+                                                                    treeNodeEntry,
+                                                                ),
                                                             },
                                                         )
                                                     } else {
@@ -495,7 +497,9 @@ class SpacePicker extends StatefulUIElement<
                         onAncestryPathClick={(e) => {
                             e.stopPropagation()
                             this.processEvent('toggleListShownAsTree', {
-                                unifiedListId: baseEntry.unifiedId,
+                                listRenderedId: generateRenderedListEntryId(
+                                    baseEntry,
+                                ),
                             })
                         }}
                         id={`ListKeyName-${baseEntry.unifiedId}`}
@@ -603,8 +607,9 @@ class SpacePicker extends StatefulUIElement<
                                         this.processEvent(
                                             'toggleListShownAsTree',
                                             {
-                                                unifiedListId:
-                                                    baseEntry.unifiedId,
+                                                listRenderedId: generateRenderedListEntryId(
+                                                    baseEntry,
+                                                ),
                                                 shouldShowNewChildInput: true,
                                             },
                                         )

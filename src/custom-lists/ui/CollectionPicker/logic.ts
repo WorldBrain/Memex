@@ -296,8 +296,29 @@ export default class SpacePickerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        let {
+            baseUnifiedId,
+            treeNodeUnifiedId,
+        } = extractUnifiedIdsFromRenderedId(event.listRenderedId)
+
+        // Toggling a flat-view entry (i.e., no tree node part in the rendered ID) can only mean we're changing it to be a tree-view entry
+        if (!treeNodeUnifiedId) {
+            this.emitMutation({
+                listIdsShownAsTrees: {
+                    $apply: (ids: string[]) =>
+                        ids.includes(baseUnifiedId)
+                            ? ids
+                            : [...ids, baseUnifiedId],
+                },
+                listIdToShowNewChildInput: {
+                    $set: event.shouldShowNewChildInput ? baseUnifiedId : null,
+                },
+            })
+            return
+        }
+
         let cachedList = this.dependencies.annotationsCache.lists.byId[
-            event.unifiedListId
+            treeNodeUnifiedId
         ]
         if (!cachedList) {
             throw new Error(
@@ -305,60 +326,17 @@ export default class SpacePickerLogic extends UILogic<
             )
         }
 
-        let listEntries = getEntriesForCurrentPickerTab(
-            this.dependencies,
-            previousState,
-        )
-        if (previousState.query.trim().length > 0) {
-            listEntries = listEntries.filter((list) =>
-                previousState.filteredListIds.includes(list.unifiedId),
-            )
-        }
-        // Find if any tree-view toggled lists have the list we're toggling as their root
-        let correspondingToggledListId: string = null
-        for (let listId of previousState.listIdsShownAsTrees) {
-            let list = this.dependencies.annotationsCache.lists.byId[listId]
-            if (list?.pathUnifiedIds[0] === event.unifiedListId) {
-                correspondingToggledListId = listId
-                break
-            }
-        }
-
-        // If so we're untoggling this tree from tree-view back into flat-view
-        if (correspondingToggledListId != null) {
-            this.emitMutation({
-                listIdsShownAsTrees: {
-                    $set: previousState.listIdsShownAsTrees.filter(
-                        (id) => id !== correspondingToggledListId,
-                    ),
-                },
-            })
-            // Else we're either adding/removing a list to be shown in tree-view
-        } else {
-            let alreadyShown =
-                previousState.listIdsShownAsTrees.indexOf(
-                    event.unifiedListId,
-                ) !== -1
-
-            this.emitMutation({
-                listIdsShownAsTrees: {
-                    $set: alreadyShown
-                        ? previousState.listIdsShownAsTrees.filter(
-                              (id) => id !== event.unifiedListId,
-                          )
-                        : [
-                              ...previousState.listIdsShownAsTrees,
-                              event.unifiedListId,
-                          ],
-                },
-            })
+        // The only other case of interest is toggling closed a tree-view's root entry
+        if (cachedList.parentUnifiedId != null) {
+            return
         }
 
         this.emitMutation({
-            listIdToShowNewChildInput: {
-                $set: event.shouldShowNewChildInput
-                    ? event.unifiedListId
-                    : null,
+            listIdToShowNewChildInput: { $set: null },
+            listIdsShownAsTrees: {
+                $set: previousState.listIdsShownAsTrees.filter(
+                    (id) => id !== baseUnifiedId,
+                ),
             },
         })
     }

@@ -19,6 +19,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SpacePickerDependencies } from './types'
+import { generateRenderedListEntryId } from './utils'
 
 async function insertTestData({
     storageManager,
@@ -143,56 +144,97 @@ describe('SpacePickerLogic', () => {
             name: 'c',
             type: 'user-list',
             localId: 3,
-            parentLocalId: 2,
+            parentLocalId: 2, // Child of listB
             unifiedAnnotationIds: [],
             hasRemoteAnnotationsToLoad: false,
         })
 
         expect(testLogic.state.listIdsShownAsTrees).toEqual([])
 
+        // Toggle list A and B to change them from flat-view to tree-view
         testLogic.processEvent('toggleListShownAsTree', {
-            unifiedListId: listA.unifiedId,
+            listRenderedId: generateRenderedListEntryId(listA),
         })
         testLogic.processEvent('toggleListShownAsTree', {
-            unifiedListId: listB.unifiedId,
+            listRenderedId: generateRenderedListEntryId(listB),
         })
-
-        expect(testLogic.state.listIdsShownAsTrees).toEqual([
-            listA.unifiedId,
-            listB.unifiedId,
-        ])
-
         testLogic.processEvent('toggleListShownAsTree', {
-            unifiedListId: listB.unifiedId,
-        })
-
-        expect(testLogic.state.listIdsShownAsTrees).toEqual([listA.unifiedId])
-
-        testLogic.processEvent('toggleListShownAsTree', {
-            unifiedListId: listB.unifiedId,
+            listRenderedId: generateRenderedListEntryId(listC),
         })
 
         expect(testLogic.state.listIdsShownAsTrees).toEqual([
             listA.unifiedId,
             listB.unifiedId,
+            listC.unifiedId,
         ])
 
+        // Nothing should happen as these case should never actually occur as the rendered IDs change format when the list enters tree-view. These are still the single ID based flat-view rendered IDs
         testLogic.processEvent('toggleListShownAsTree', {
-            unifiedListId: listA.unifiedId,
+            listRenderedId: generateRenderedListEntryId(listA),
         })
         testLogic.processEvent('toggleListShownAsTree', {
-            unifiedListId: listB.unifiedId,
+            listRenderedId: generateRenderedListEntryId(listB),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC),
         })
 
-        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
 
-        // C is a child of B, so toggling C then B should result in C in being removed (as it's the same tree)
+        // Again, nothing should happen as the only way to get back from tree-view to flat-view is to toggle on the root level list of the tree shown in tree view. These are not root level
         testLogic.processEvent('toggleListShownAsTree', {
-            unifiedListId: listC.unifiedId,
+            listRenderedId: generateRenderedListEntryId(listC, listC),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB, listC),
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
+
+        // Now these should work as they are the root level lists of the trees shown in tree-view
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listA, listA),
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB, listB),
         })
         expect(testLogic.state.listIdsShownAsTrees).toEqual([listC.unifiedId])
         testLogic.processEvent('toggleListShownAsTree', {
-            unifiedListId: listB.unifiedId,
+            listRenderedId: generateRenderedListEntryId(listC, listB),
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+
+        // Do it again for the parent-child lists, but in the opposite order
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC),
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
+
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC, listB),
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([listB.unifiedId])
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB, listB),
         })
         expect(testLogic.state.listIdsShownAsTrees).toEqual([])
     })

@@ -48,7 +48,7 @@ export type SpacePickerEvent = UIEvent<{
     setSpaceWriteError: { error: string }
     newEntryAllPress: { entry: string }
     pressEntry: { entry: Pick<UnifiedList, 'localId'> }
-    focusListEntry: { listRenderedId: UnifiedList['unifiedId'] | null }
+    focusListEntry: { listRenderedId: string | null }
     toggleEntryContextMenu: { listId: number }
     toggleEntryEditMenu: { listId: number }
     onOpenInTabGroupPress: { listId: number }
@@ -61,7 +61,7 @@ export type SpacePickerEvent = UIEvent<{
     keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
     focusInput: {}
     toggleListShownAsTree: {
-        unifiedListId: UnifiedList['unifiedId']
+        listRenderedId: string
         shouldShowNewChildInput?: boolean
     }
 }>
