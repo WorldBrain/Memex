@@ -37,8 +37,6 @@ export default class PromptTemplatesLogic extends UILogic<
             this.dependencies.browserAPIs,
         )
 
-        console.log('activatedPowerUps', activatedPowerUps)
-
         this.emitMutation({
             activatedPowerUps: { $set: activatedPowerUps },
             userEmail: { $set: userEmail },

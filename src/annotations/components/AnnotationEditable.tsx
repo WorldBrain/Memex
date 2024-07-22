@@ -1382,7 +1382,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             </HighlightActionsBox>
         ) : null
 
-        console.log('this.props.zIndex', this.displayLists.length)
         return (
             <ThemeProvider theme={this.theme}>
                 <AnnotationBox

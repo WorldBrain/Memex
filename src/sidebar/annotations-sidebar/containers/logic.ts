@@ -117,6 +117,7 @@ import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/comp
 
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat/utils'
+import { DEFAULT_AI_MODEL } from '@worldbrain/memex-common/lib/ai-chat/constants'
 import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 const md = new MarkdownIt()
 
@@ -370,7 +371,7 @@ export class SidebarContainerLogic extends UILogic<
             showChapters: false,
             chapterSummaries: [],
             chapterList: [],
-            AImodel: 'claude-3-haiku',
+            AImodel: DEFAULT_AI_MODEL,
             hasKey: false,
             highlightColors: null,
             suggestionsResults: [],
@@ -822,7 +823,7 @@ export class SidebarContainerLogic extends UILogic<
 
             this.emitMutation({
                 hasKey: { $set: hasAPIKey },
-                AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
+                AImodel: { $set: selectedModel ?? DEFAULT_AI_MODEL },
             })
 
             this.sidebar = document
@@ -1357,6 +1358,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             AImodel: { $set: event },
         })
+
         this.syncSettings.openAI.set('selectedModel', event)
     }
 
@@ -3209,6 +3211,8 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private ongoingRequests: Map<string, { cancel: () => void }> = new Map()
+
     queryAIService: EventHandler<'queryAIService'> = async ({
         event,
         previousState,
@@ -3217,28 +3221,60 @@ export class SidebarContainerLogic extends UILogic<
         this.isPageSummaryEmpty = true
         this.tokenBuffer = ''
         const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
+        const chatId: string = event.promptData.chatId
+        let promptData = event.promptData
+        let outputLocation = event.outputLocation ?? null
 
         this.emitMutation({
             loadState: {
-                $set: event.outputLocation !== 'editor' ? 'running' : 'success',
+                $set: outputLocation !== 'editor' ? 'running' : 'success',
             },
-            currentChatId: { $set: event.promptData.chatId },
+            currentChatId: { $set: chatId },
         })
 
-        let promptData = event.promptData
+        // Cancel any existing request for this messageId
+        if (this.ongoingRequests.has(chatId)) {
+            this.ongoingRequests.get(chatId).cancel()
+        }
+
+        // Create a new controller for the current request
+        let isCancelled = false
+        const cancel = () => {
+            isCancelled = true
+        }
+
+        // Store the cancel function in the map
+        this.ongoingRequests.set(chatId, { cancel })
 
         promptData.context.originalFullMessage = replaceImgSrcWithRemoteIdBrowser(
             promptData.context.originalFullMessage,
         )
 
-        const response = await this.options.summarizeBG.startPageSummaryStream({
-            promptData: event.promptData,
-            apiKey: openAIKey ? openAIKey : undefined,
-            outputLocation: event.outputLocation ?? null,
-            AImodel: previousState.AImodel,
-        })
+        try {
+            const response = await this.options.summarizeBG.startPageSummaryStream(
+                {
+                    promptData: event.promptData,
+                    apiKey: openAIKey ? openAIKey : undefined,
+                    outputLocation: event.outputLocation ?? null,
+                    AImodel: previousState.AImodel,
+                },
+            )
 
-        return response
+            // Only process the response if the request was not cancelled
+            if (!isCancelled) {
+                // Process the response here
+                return response
+            }
+        } catch (error) {
+            if (isCancelled) {
+                console.log('Request was cancelled')
+            } else {
+                throw error
+            }
+        } finally {
+            // Remove the request from the map
+            this.ongoingRequests.delete(chatId)
+        }
     }
 
     // removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
@@ -4868,7 +4904,7 @@ export class SidebarContainerLogic extends UILogic<
             userPrompt:
                 prompt +
                 '. Do not mention the prompt in any shape or form, just provide a concise answer',
-            model: previousState.AImodel ?? 'claude-3-haiku',
+            model: previousState.AImodel ?? DEFAULT_AI_MODEL,
         }
 
         await this.processUIEvent('queryAIService', {
