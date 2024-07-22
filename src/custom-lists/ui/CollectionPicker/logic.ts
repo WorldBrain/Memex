@@ -773,7 +773,9 @@ export default class SpacePickerLogic extends UILogic<
                 return matches
             }, true)
 
-        let lastSelectedId = state.focusedListRenderedId
+        let lastSelectedId = extractUnifiedIdsFromRenderedId(
+            state.focusedListRenderedId,
+        ).baseUnifiedId
         if (query.endsWith('/')) {
             const isBackspaced = query.length < state.query.length
             let lastSpaceName = null
@@ -787,10 +789,9 @@ export default class SpacePickerLogic extends UILogic<
                 const isMultiplePathAdditions =
                     newEntryObject[newEntryObject.length - 1]?.unifiedId ===
                     null
-
                 if (
                     (!isMultiplePathAdditions || newEntryObject.length === 0) &&
-                    state.query.includes('/')
+                    query.includes('/')
                 ) {
                     if (path.length > 0) {
                         newEntryObject = []
@@ -813,7 +814,7 @@ export default class SpacePickerLogic extends UILogic<
                         name: lastSpaceName,
                     })
                     updatedQuery += `${lastSpaceName}/`
-                } else if (!state.query.includes('/')) {
+                } else if (!query.includes('/')) {
                     newEntryObject.push({
                         unifiedId: lastSelectedId,
                         name: lastSpaceName,

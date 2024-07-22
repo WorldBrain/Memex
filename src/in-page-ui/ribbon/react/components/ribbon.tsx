@@ -398,6 +398,7 @@ export default class Ribbon extends Component<Props, State> {
                         : 0
                 }
                 closeComponent={this.hideListPicker}
+                instaClose
             >
                 <CollectionPicker
                     {...this.props.lists}
