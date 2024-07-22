@@ -545,7 +545,10 @@ class SpacePicker extends StatefulUIElement<
             }
 
             let pathText = pathElements.map((item, i) => (
-                <React.Fragment key={item.unifiedId}>
+                <PathElementBox
+                    shouldShorten={shouldShorten && pathElements.length > 1}
+                    key={item.unifiedId}
+                >
                     {i > 0 && (
                         <Icon
                             filePath="arrowRight"
@@ -554,10 +557,8 @@ class SpacePicker extends StatefulUIElement<
                             hoverOff
                         />
                     )}
-                    <BreadCrumbItem shouldShorten={shouldShorten}>
-                        {item.name}
-                    </BreadCrumbItem>
-                </React.Fragment>
+                    <BreadCrumbItem>{item.name}</BreadCrumbItem>
+                </PathElementBox>
             ))
 
             // Base case: flat view
@@ -1113,15 +1114,24 @@ const HighlightedTextSpan = styled.span`
     white-space: nowrap;
 `
 
+const PathElementBox = styled.div<{
+    shouldShorten: boolean
+}>`
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+`
+
 const BreadCrumbItem = styled.div<{
     shouldShorten: boolean
 }>`
     font-size: 12px;
     color: ${(props) => props.theme.colors.greyScale5};
+    max-width: ${(props) => (props.shouldShorten ? '50px' : '150px')};
     margin-right: 5px;
     cursor: pointer;
     white-space: nowrap;
-    max-width: ${(props) => (props.shouldShorten ? '50px' : 'fit-content')};
+    width: fit-content;
     text-overflow: ellipsis;
     overflow: hidden;
 `

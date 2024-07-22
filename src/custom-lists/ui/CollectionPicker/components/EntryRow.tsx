@@ -299,7 +299,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                 }}
                 isFocused={focused || this.state.showExtraMenu}
                 id={id}
-                title={resultItem['props'].children}
                 zIndex={10000 - this.props.index}
                 indentSteps={this.props.indentSteps ?? 0}
             >
@@ -312,6 +311,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                             tooltipText="Toggle Path"
                             placement="bottom"
                             getPortalRoot={this.props.getRootElement}
+                            width={''}
                         >
                             <PathBox onClick={this.props.onAncestryPathClick}>
                                 {this.props.ancestryPath}{' '}
@@ -337,7 +337,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                     </NameRow>
                 </NameWrapper>
                 <IconStyleWrapper
-                    shouldMoveBottomRight={this.props.ancestryPath?.length > 0}
                     mouseOverResult={focused || this.state.mouseOverItem}
                 >
                     {(((focused || this.state.mouseOverItem) &&
@@ -356,7 +355,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 <Icon
                                     containerRef={this.addSubSpaceIconRef}
                                     icon="plus"
-                                    heightAndWidth="20px"
+                                    heightAndWidth="18px"
                                     color="greyScale5"
                                     onClick={(event) => {
                                         event.stopPropagation()
@@ -377,7 +376,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 >
                                     <Icon
                                         filePath={icons.dots}
-                                        heightAndWidth="20px"
+                                        heightAndWidth="18px"
                                         onClick={() =>
                                             this.setState({
                                                 showExtraMenu: true,
@@ -400,7 +399,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 <ButtonContainer ref={contextMenuBtnRef}>
                                     <Icon
                                         filePath={icons.invite}
-                                        heightAndWidth="20px"
+                                        heightAndWidth="18px"
                                         onClick={this.handleContextMenuBtnPress}
                                     />
                                 </ButtonContainer>
@@ -516,36 +515,23 @@ const SelectionBox = styled.div<{ selected }>`
 `
 
 export const IconStyleWrapper = styled.div<{
-    shouldMoveBottomRight: boolean
     mouseOverResult: boolean
 }>`
     display: flex;
-    grid-gap: 15px;
+    grid-gap: 10px;
     align-items: center;
     justify-content: flex-end;
     height: fit-content;
     position: absolute;
     right: 5px;
-    padding: 5px 5px 5px 10px;
+    padding: 5px 5px 5px 5px;
+    box-sizing: border-box;
 
     ${(props) =>
         props.mouseOverResult &&
         css`
             border-radius: 6px;
             background: ${(props) => props.theme.colors.greyScale2};
-        `}
-
-    ${(props) =>
-        props.shouldMoveBottomRight &&
-        props.mouseOverResult &&
-        css`
-            background: ${(props) => props.theme.colors.greyScale2};
-            border-radius: 6px 0 6px 0;
-            bottom: 0px;
-            height: fit-content;
-            padding: 5px 10px;
-            right: 0px;
-            box-sizing: border-box;
         `}
 `
 
@@ -630,6 +616,8 @@ const PathBox = styled.div`
     border-radius: 5px;
     align-items: center;
     white-space: nowrap;
+    width: fit-content;
+    box-sizing: border-box;
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale2};
