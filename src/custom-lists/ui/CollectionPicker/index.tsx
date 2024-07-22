@@ -876,7 +876,9 @@ class SpacePicker extends StatefulUIElement<
                         onChange={this.handleSearchInputChanged}
                         onKeyDown={this.handleKeyPress}
                         value={this.state.query}
-                        autoFocus={true}
+                        autoFocus={
+                            this.state.listIdToShowNewChildInput ? false : true
+                        }
                         borderRadius="12px 12px 0 0"
                     />
                 </SearchContainer>

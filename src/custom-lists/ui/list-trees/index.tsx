@@ -161,6 +161,7 @@ let ChildListInputContainer = styled.div<{ indentSteps: number }>`
         props.indentSteps > 0
             ? (props.indentSteps - 1) * 20
             : props.indentSteps * 20}px;
+    width: 100%;
 `
 
 let ReorderLine = styled.div<{
