@@ -147,6 +147,7 @@ export default class SpacePickerLogic extends UILogic<
         renameListErrorMessage: null,
         contextMenuListId: null,
         listIdsShownAsTrees: [],
+        listIdToShowNewChildInput: null,
         addedToAllIds: [],
         editMenuListId: null,
     })
@@ -352,6 +353,14 @@ export default class SpacePickerLogic extends UILogic<
                 },
             })
         }
+
+        this.emitMutation({
+            listIdToShowNewChildInput: {
+                $set: event.shouldShowNewChildInput
+                    ? event.unifiedListId
+                    : null,
+            },
+        })
     }
 
     focusInput: EventHandler<'focusInput'> = () => {

@@ -65,7 +65,10 @@ export class ListTreesLogic extends UILogic<State, Events> {
 
                                 // This should only occur on initial render - re-renders should keep their state from `prevState`
                                 if (areChildrenShown == null) {
-                                    areChildrenShown = false
+                                    areChildrenShown =
+                                        this.deps
+                                            .initListToDisplayNewChildInput ===
+                                            list.unifiedId || false
                                     if (
                                         this.deps.initListsToDisplayUnfolded?.includes(
                                             list.unifiedId,
@@ -84,7 +87,10 @@ export class ListTreesLogic extends UILogic<State, Events> {
                                     wasListDropped: false,
                                     isNewChildInputShown:
                                         prevState?.isNewChildInputShown ??
-                                        false,
+                                        (this.deps
+                                            .initListToDisplayNewChildInput ===
+                                            list.unifiedId ||
+                                            false),
                                     newChildListCreateState:
                                         prevState?.newChildListCreateState ??
                                         'pristine',

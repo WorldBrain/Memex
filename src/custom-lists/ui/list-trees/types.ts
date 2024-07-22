@@ -42,6 +42,7 @@ export interface Dependencies {
     lists: UnifiedList[]
     /** Specify lists to have shown be default (all their ancestors will be toggled open). */
     initListsToDisplayUnfolded?: UnifiedList['unifiedId'][]
+    initListToDisplayNewChildInput?: UnifiedList['unifiedId']
     areListsBeingFiltered: boolean
     allowRootLevelReordering?: boolean
 

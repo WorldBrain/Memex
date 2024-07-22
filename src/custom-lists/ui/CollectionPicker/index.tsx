@@ -39,6 +39,7 @@ import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/compon
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ListTrees } from '../list-trees'
 import { ListTreeToggleArrow } from '../list-trees/components/tree-toggle-arrow'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
@@ -237,7 +238,8 @@ class SpacePicker extends StatefulUIElement<
 
     private renderListEntries() {
         let listEntries = getEntriesForCurrentPickerTab(this.props, this.state)
-        if (this.state.query.trim().length > 0) {
+        let areListsBeingFiltered = this.state.query.trim().length > 0
+        if (areListsBeingFiltered) {
             listEntries = listEntries.filter((list) =>
                 this.state.filteredListIds.includes(list.unifiedId),
             )
@@ -270,12 +272,9 @@ class SpacePicker extends StatefulUIElement<
             // If this entry is a root of a tree flagged to be shown in tree view, render it with all descendents in tree view
             if (this.state.listIdsShownAsTrees.includes(baseEntry.unifiedId)) {
                 let allTreeMembers = this.props.annotationsCache.getAllListsInTreeByRootId(
-                    baseEntry.pathUnifiedIds[0],
+                    baseEntry.pathUnifiedIds[0] ?? baseEntry.unifiedId,
                 )
 
-                let allTreeMembersIds = allTreeMembers.map((list) => {
-                    return list.unifiedId
-                })
                 return (
                     <ListTrees
                         key={baseEntry.unifiedId}
@@ -288,10 +287,11 @@ class SpacePicker extends StatefulUIElement<
                         cache={this.props.annotationsCache}
                         initListsToDisplayUnfolded={[
                             ...this.selectedCacheListIds,
-                            ...allTreeMembersIds,
+                            ...allTreeMembers.map((list) => list.unifiedId),
                         ]}
-                        areListsBeingFiltered={
-                            this.state.query.trim().length > 0
+                        areListsBeingFiltered={areListsBeingFiltered}
+                        initListToDisplayNewChildInput={
+                            this.state.listIdToShowNewChildInput ?? undefined
                         }
                     >
                         {(treeNodeEntry, treeState, actions, dndActions) => (
@@ -588,6 +588,30 @@ class SpacePicker extends StatefulUIElement<
                         }
                         getRootElement={this.props.getRootElement}
                         {...baseEntry}
+                        renderLeftSideIcon={() => (
+                            <TooltipBox
+                                tooltipText="Add Sub-Space"
+                                placement="right"
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    icon="plus"
+                                    color="greyScale3"
+                                    heightAndWidth="16px"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        this.processEvent(
+                                            'toggleListShownAsTree',
+                                            {
+                                                unifiedListId:
+                                                    baseEntry.unifiedId,
+                                                shouldShowNewChildInput: true,
+                                            },
+                                        )
+                                    }}
+                                />
+                            </TooltipBox>
+                        )}
                     />
                 </EntryRowContainer>
             )

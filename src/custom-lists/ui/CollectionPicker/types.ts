@@ -29,6 +29,7 @@ export interface SpacePickerState {
     listEntries: NormalizedState<UnifiedList<'user-list'>>
     pageLinkEntries: NormalizedState<UnifiedList<'page-link'>>
     listIdsShownAsTrees: UnifiedList['unifiedId'][]
+    listIdToShowNewChildInput: UnifiedList['unifiedId'] | null
     selectedListIds: number[]
     contextMenuListId: number | null
     editMenuListId: number | null
@@ -59,7 +60,10 @@ export type SpacePickerEvent = UIEvent<{
     switchTab: { tab: SpacePickerTab }
     keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
     focusInput: {}
-    toggleListShownAsTree: { unifiedListId: UnifiedList['unifiedId'] }
+    toggleListShownAsTree: {
+        unifiedListId: UnifiedList['unifiedId']
+        shouldShowNewChildInput?: boolean
+    }
 }>
 
 export interface SpacePickerDependencies {
