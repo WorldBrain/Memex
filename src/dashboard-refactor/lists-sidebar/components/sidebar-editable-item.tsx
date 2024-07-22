@@ -58,10 +58,10 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
         this.props.onConfirmClick(this.state.value)
     }
 
-    handleFocus = () => {
+    private handleFocus = () => {
         // weird hack to have 0 timeout
         setTimeout(() => {
-            this.props.scrollIntoView()
+            this.props.scrollIntoView?.()
         }, 0)
         // Do something when the input is focused
     }
