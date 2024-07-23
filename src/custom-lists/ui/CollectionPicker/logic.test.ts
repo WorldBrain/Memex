@@ -8,7 +8,6 @@ import * as DATA from './logic.test.data'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import {
     EMPTY_SPACE_NAME_ERR_MSG,
-    NON_UNIQ_SPACE_NAME_ERR_MSG,
     BAD_CHAR_SPACE_NAME_ERR_MSG,
 } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
@@ -590,17 +589,17 @@ describe('SpacePickerLogic', () => {
         expect(entryPickerLogic.validateSpaceName(' test []  ').valid).toBe(
             false,
         )
-        // expect(testLogic.state.renameListErrorMessage).toEqual(
-        //     BAD_CHAR_SPACE_NAME_ERR_MSG,
-        // )
-        // expect(
-        //     entryPickerLogic.validateSpaceName(
-        //         DATA.TEST_USER_LIST_SUGGESTIONS[0]?.name,
-        //     ).valid,
-        // ).toBe(false)
-        // expect(testLogic.state.renameListErrorMessage).toEqual(
-        //     NON_UNIQ_SPACE_NAME_ERR_MSG,
-        // )
+        expect(testLogic.state.renameListErrorMessage).toEqual(
+            BAD_CHAR_SPACE_NAME_ERR_MSG,
+        )
+
+        // Non-unique space names should still work
+        expect(
+            entryPickerLogic.validateSpaceName(
+                DATA.TEST_USER_LIST_SUGGESTIONS[0]?.name,
+            ).valid,
+        ).toBe(true)
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
     })
 
     it('should show default entries again after clearing the search query', async ({
@@ -694,7 +693,7 @@ describe('SpacePickerLogic', () => {
         )
         expect(testLogic.state.renameListErrorMessage).toEqual(null)
 
-        // Attempt to re-use another list name - should set error
+        // Attempt to re-use another list name - should _work_
         await testLogic.processEvent('renameList', {
             listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
             name: DATA.TEST_USER_LIST_SUGGESTIONS[0].name,
@@ -703,9 +702,7 @@ describe('SpacePickerLogic', () => {
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
             DATA.TEST_USER_LIST_SUGGESTIONS,
         )
-        expect(testLogic.state.renameListErrorMessage).toEqual(
-            NON_UNIQ_SPACE_NAME_ERR_MSG,
-        )
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
 
         // Attempt to use a list name with invalid characters - also should set error
         await testLogic.processEvent('renameList', {

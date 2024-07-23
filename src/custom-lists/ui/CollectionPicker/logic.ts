@@ -1110,6 +1110,10 @@ export default class SpacePickerLogic extends UILogic<
 
             for (let i = 0; i < entry.length; i++) {
                 const item = entry[i]
+                const { valid } = this.validateSpaceName(item.name)
+                if (!valid) {
+                    return
+                }
                 if (item.unifiedId == null) {
                     try {
                         parentLocalId = this.dependencies.annotationsCache.lists
