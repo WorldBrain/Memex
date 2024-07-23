@@ -353,19 +353,20 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
+    // NOTE: This should return an array of lists which _EXACTLY_ match the lists produced in the rendering logic
+    //  If not, KB nav based focus won't work.
     private deriveFlatListOfRenderedEntries(
         state: SpacePickerState,
     ): Array<UnifiedList & { renderedId: string }> {
         let listTreesRefs = this.dependencies.getListTreeRefs()
         let areListsBeingFiltered = state.query.trim().length > 0
-
         let baseEntries = getEntriesForCurrentPickerTab(
             this.dependencies,
             state,
         )
-        if (state.filteredListIds?.length > 0) {
-            baseEntries = baseEntries.filter((e) =>
-                state.filteredListIds.includes(e.unifiedId),
+        if (areListsBeingFiltered) {
+            baseEntries = baseEntries.filter(
+                (e) => state.filteredListIds?.includes(e.unifiedId) ?? true,
             )
         }
 
@@ -382,7 +383,7 @@ export default class SpacePickerLogic extends UILogic<
                 return []
             }
             let allTreeMembers = this.dependencies.annotationsCache.getAllListsInTreeByRootId(
-                baseEntry.pathUnifiedIds[0],
+                baseEntry.pathUnifiedIds[0] ?? baseEntry.unifiedId,
             )
             return getVisibleTreeNodesInOrder(allTreeMembers, listTreeState, {
                 areListsBeingFiltered,

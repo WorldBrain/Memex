@@ -237,15 +237,17 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private renderListEntries() {
-        let listEntries = getEntriesForCurrentPickerTab(this.props, this.state)
         let areListsBeingFiltered = this.state.query.trim().length > 0
+        let baseEntries = getEntriesForCurrentPickerTab(this.props, this.state)
         if (areListsBeingFiltered) {
-            listEntries = listEntries.filter((list) =>
-                this.state.filteredListIds.includes(list.unifiedId),
+            baseEntries = baseEntries.filter(
+                (list) =>
+                    this.state.filteredListIds?.includes(list.unifiedId) ??
+                    true,
             )
         }
 
-        if (!listEntries.length) {
+        if (!baseEntries.length) {
             return this.renderEmptyList()
         }
 
@@ -268,7 +270,7 @@ class SpacePicker extends StatefulUIElement<
             )
         }
 
-        return listEntries.map((baseEntry, index) => {
+        return baseEntries.map((baseEntry, index) => {
             // If this entry is a root of a tree flagged to be shown in tree view, render it with all descendents in tree view
             if (this.state.listIdsShownAsTrees.includes(baseEntry.unifiedId)) {
                 let allTreeMembers = this.props.annotationsCache.getAllListsInTreeByRootId(
