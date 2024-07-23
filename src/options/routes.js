@@ -42,10 +42,6 @@ export default [
         icon: 'block',
     },
     {
-        name: null,
-        icon: null,
-    },
-    {
         name: 'My Account',
         pathname: '/account',
         component: UserScreen,
