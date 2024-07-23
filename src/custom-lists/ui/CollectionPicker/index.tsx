@@ -40,6 +40,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { ListTrees } from '../list-trees'
 import { ListTreeToggleArrow } from '../list-trees/components/tree-toggle-arrow'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
@@ -107,29 +108,11 @@ class SpacePicker extends StatefulUIElement<
             return false
         }
 
-        if (
-            this.state.newEntryName?.length > 0 &&
-            this.state.newEntryName[this.state.newEntryName?.length - 1]
-                ?.unifiedId === null
-        ) {
-            return true
-        } else {
-            return false
-        }
+        const newName =
+            this.state.newEntryName?.[this.state.newEntryName.length - 1]
+                ?.name ?? ''
 
-        // const otherLists = normalizedStateToArray(this.state.listEntries).map(
-        //     (e) => ({
-        //         id: e.localId,
-        //         name: e.name,
-        //     }),
-        // )
-
-        // const newName =
-        //     this.state.newEntryName?.[this.state.newEntryName.length - 1]
-        //         ?.name ?? ''
-
-        // const validSpaceName = validateSpaceName(newName, otherLists).valid
-        // return validSpaceName
+        return validateSpaceName(newName, []).valid
     }
 
     private get selectedCacheListIds(): string[] {
