@@ -74,7 +74,7 @@ const analysePage: PageAnalyzer = async (options) => {
     }
 
     if (videoId) {
-        let transcriptJSON = await fetchYoutubeTranscript(videoId)
+        let transcriptJSON = await fetchYoutubeTranscript(videoId, 'en')
 
         if (transcriptJSON != null) {
             content.fullText =

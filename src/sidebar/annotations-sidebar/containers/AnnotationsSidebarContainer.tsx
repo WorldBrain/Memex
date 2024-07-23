@@ -1130,6 +1130,7 @@ export class AnnotationsSidebarContainer<
                             setAIModel={(AImodel) => {
                                 this.processEvent('setAIModel', AImodel)
                             }}
+                            AImodel={this.state.AImodel}
                             saveFeedSources={(feedSources) => {
                                 this.processEvent('saveFeedSources', {
                                     sources: feedSources,
