@@ -521,6 +521,11 @@ export default class SpacePickerLogic extends UILogic<
                 return
             }
             await this._pressEntry(localListId, state)
+        } else if (
+            state.newEntryName != null &&
+            state.focusedListRenderedId == null
+        ) {
+            await this._pressNewEntry(state)
         }
     }
 
@@ -737,16 +742,6 @@ export default class SpacePickerLogic extends UILogic<
             })
             return
         }
-        let isPathSearch = false
-        let pathSearchItems: string[] = []
-        if (query.includes('/')) {
-            isPathSearch = true
-        }
-        if (isPathSearch) {
-            pathSearchItems = query.split('/')
-        } else {
-            pathSearchItems = [query]
-        }
 
         const entireListEntryPool = [
             ...normalizedStateToArray(previousState.listEntries),
@@ -755,7 +750,7 @@ export default class SpacePickerLogic extends UILogic<
 
         let newEntryObject: { unifiedId: string; name: string }[] =
             previousState.newEntryName ?? []
-        let queryForNewSpaces = pathSearchItems[pathSearchItems.length - 1]
+        let queryForNewSpaces = query
 
         const distinctTerms = queryForNewSpaces.split(/\s+/).filter(Boolean)
         const doAllTermsMatch = (list: UnifiedList): boolean =>
@@ -769,46 +764,17 @@ export default class SpacePickerLogic extends UILogic<
                 return matches
             }, true)
 
-        let lastSelectedId = extractUnifiedIdsFromRenderedId(
-            previousState.focusedListRenderedId,
-        ).baseUnifiedId
-
-        this.emitMutation({ newEntryName: { $set: newEntryObject } })
+        let lastSelectedId = previousState.focusedListRenderedId
 
         let filteredEntries: UnifiedList[] = []
-        if (pathSearchItems.length === 1) {
-            filteredEntries = entireListEntryPool.filter(doAllTermsMatch)
-        } else {
-            const children = this.dependencies.annotationsCache.getListsByParentId(
-                lastSelectedId,
-            )
-            filteredEntries = children.filter(doAllTermsMatch)
-            if (
-                filteredEntries.length === 0 &&
-                queryForNewSpaces.length === 0
-            ) {
-                filteredEntries = children
-            }
-        }
+        filteredEntries = entireListEntryPool.filter(doAllTermsMatch)
 
         let matchingEntryIds = filteredEntries.flatMap((entry) => [
             entry.unifiedId,
             // ...entry.pathUnifiedIds,
         ])
+        lastSelectedId = matchingEntryIds[0]
 
-        if (pathSearchItems.length > 1 && filteredEntries.length === 0) {
-            const lastNonNullUnifiedIdEntry = newEntryObject
-                .slice()
-                .reverse()
-                .find((entry) => entry.unifiedId !== null)
-            lastSelectedId = lastNonNullUnifiedIdEntry?.unifiedId
-
-            const pathOfLastEntry = [lastSelectedId]
-            matchingEntryIds = pathOfLastEntry
-        }
-
-        lastSelectedId =
-            matchingEntryIds[0] ?? previousState.focusedListRenderedId
         const mutation: UIMutation<SpacePickerState> = {
             filteredListIds: { $set: matchingEntryIds },
             focusedListRenderedId: { $set: lastSelectedId },
@@ -819,18 +785,30 @@ export default class SpacePickerLogic extends UILogic<
         // added this to give the focus function a specific ID to focus on specific item id
         if (matchingEntryIds && matchingEntryIds.length > 0) {
             let listIdToFocusFirst = matchingEntryIds[0]
-            this.emitMutation({ newEntryName: { $set: newEntryObject } })
 
-            if (filteredEntries.length === 0 && queryForNewSpaces.length > 0) {
-                listIdToFocusFirst = '-1'
+            // Check for exact matches
+            const exactMatch = filteredEntries.some(
+                (entry) => entry.name.toLowerCase() === query.toLowerCase(),
+            )
+
+            if (exactMatch) {
+                this.emitMutation({ newEntryName: { $set: null } })
+            } else {
+                // Do Y if there is no exact match
+                if (
+                    filteredEntries.length === 0 &&
+                    queryForNewSpaces.length > 0
+                ) {
+                    listIdToFocusFirst = '-1'
+                }
+                newEntryObject = [{ unifiedId: null, name: query }]
+                this.emitMutation({ newEntryName: { $set: newEntryObject } })
             }
+
             this.calcNextFocusedEntry(nextState, null, listIdToFocusFirst)
         } else {
-            if (newEntryObject[newEntryObject.length - 1]?.unifiedId == null) {
-                newEntryObject.pop()
-            }
-            const queryParts = query.split('/').pop()
-            newEntryObject.push({ unifiedId: null, name: queryParts })
+            newEntryObject = [{ unifiedId: null, name: query }]
+            this.emitMutation({ newEntryName: { $set: newEntryObject } })
         }
 
         if (previousState.query.length > 0 && nextState.query.length === 0) {
@@ -843,7 +821,7 @@ export default class SpacePickerLogic extends UILogic<
 
             const userLists = normalizedStateToArray(listData)
             const sortPredicate = sortDisplayEntries(
-                this.selectedListIds,
+                this.selectedListIds.reverse(),
                 this.localListIdsMRU,
             )
 
