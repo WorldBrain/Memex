@@ -1134,12 +1134,10 @@ const PathElementBox = styled.div<{
     align-items: center;
 `
 
-const BreadCrumbItem = styled.div<{
-    shouldShorten: boolean
-}>`
+const BreadCrumbItem = styled.div<{}>`
     font-size: 12px;
     color: ${(props) => props.theme.colors.greyScale5};
-    max-width: ${(props) => (props.shouldShorten ? '50px' : '150px')};
+    max-width: fit-content;
     margin-right: 5px;
     cursor: pointer;
     white-space: nowrap;

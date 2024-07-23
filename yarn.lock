@@ -16776,7 +16776,7 @@ react-base16-styling@^0.5.1:
     lodash.flow "^3.3.0"
     pure-color "^1.2.0"
 
-"react-beautiful-dnd@github:Bonboarding/react-beautiful-dnd":
+"react-beautiful-dnd@github:Bonboarding/react-beautiful-dnd#0f088123fdbbc3305d33233503fbca3b942933b5":
   version "13.1.1"
   resolved "https://codeload.github.com/Bonboarding/react-beautiful-dnd/tar.gz/0f088123fdbbc3305d33233503fbca3b942933b5"
   dependencies:
