@@ -276,9 +276,11 @@ class SpacePicker extends StatefulUIElement<
                 )
 
                 return (
-                    <ListTreeContainer active={true}>
+                    <EntryOuterContainer
+                        active={true}
+                        key={baseEntry.unifiedId}
+                    >
                         <ListTrees
-                            key={baseEntry.unifiedId}
                             lists={allTreeMembers}
                             ref={(ref) =>
                                 (this.listTreesRefs[baseEntry.unifiedId] = ref)
@@ -488,7 +490,7 @@ class SpacePicker extends StatefulUIElement<
                                 </EntryRowContainer>
                             )}
                         </ListTrees>
-                    </ListTreeContainer>
+                    </EntryOuterContainer>
                 )
             }
 
@@ -544,7 +546,7 @@ class SpacePicker extends StatefulUIElement<
                 }
             }
 
-            let pathText = pathElements.map((item, i) => (
+            let ancestryPath = pathElements.map((item, i) => (
                 <PathElementBox
                     shouldShorten={shouldShorten && pathElements.length > 1}
                     key={item.unifiedId}
@@ -563,11 +565,11 @@ class SpacePicker extends StatefulUIElement<
 
             // Base case: flat view
             return (
-                <ListTreeContainer active={false}>
-                    <EntryRowContainer key={baseEntry.unifiedId}>
+                <EntryOuterContainer active={false} key={baseEntry.unifiedId}>
+                    <EntryRowContainer>
                         <EntryRow
                             blockMouseOver={this.state.blockMouseOver}
-                            ancestryPath={pathText}
+                            ancestryPath={ancestryPath}
                             onAncestryPathClick={(e) => {
                                 e.stopPropagation()
                                 this.processEvent('toggleListShownAsTree', {
@@ -728,7 +730,7 @@ class SpacePicker extends StatefulUIElement<
                             }}
                         />
                     </EntryRowContainer>
-                </ListTreeContainer>
+                </EntryOuterContainer>
             )
         })
     }
@@ -1136,7 +1138,7 @@ const BreadCrumbItem = styled.div<{
     overflow: hidden;
 `
 
-const ListTreeContainer = styled.div<{
+const EntryOuterContainer = styled.div<{
     active: boolean
 }>`
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
