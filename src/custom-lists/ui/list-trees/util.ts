@@ -6,7 +6,7 @@ import type { State, Dependencies } from './types'
 export function getVisibleTreeNodesInOrder(
     lists: UnifiedList[],
     { listTrees }: Pick<State, 'listTrees'>,
-    opts: Pick<Dependencies, 'sortChildrenByOrder' | 'areListsBeingFiltered'>,
+    opts: Pick<Dependencies, 'areListsBeingFiltered'>,
 ): UnifiedList[] {
     // Intermediary state used to omit nested lists if any of their ancestors are collapsed
     let listShowFlag = new Map<string, boolean>() // TODO: This is hard to understand. How do we improve it?
@@ -16,15 +16,10 @@ export function getVisibleTreeNodesInOrder(
         mapTreeTraverse({
             root,
             strategy: 'dfs',
-            getChildren: (list) => {
-                let children = lists.filter(
-                    (l) => l.parentUnifiedId === list.unifiedId,
-                )
-                if (opts.sortChildrenByOrder) {
-                    children.sort(defaultOrderableSorter)
-                }
-                return children.reverse()
-            },
+            getChildren: (list) =>
+                lists
+                    .filter((l) => l.parentUnifiedId === list.unifiedId)
+                    .reverse(),
             cb: (list) => {
                 let parentListTreeState = listTrees.byId[list.parentUnifiedId]
                 let currentListTreeState = listTrees.byId[list.unifiedId]

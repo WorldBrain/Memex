@@ -38,14 +38,13 @@ export interface Dependencies {
     listsBG: RemoteCollectionsInterface
     authBG: AuthRemoteFunctionsInterface
 
-    /** Order is delegated to called - pass down already sorted. */
+    /** Order is delegated to caller - pass down already sorted. */
     lists: UnifiedList[]
     /** Specify lists to have shown be default (all their ancestors will be toggled open). */
     initListsToDisplayUnfolded?: UnifiedList['unifiedId'][]
+    initListToDisplayNewChildInput?: UnifiedList['unifiedId']
     areListsBeingFiltered: boolean
     allowRootLevelReordering?: boolean
-    /** Set to reorder children lists amongst each other on every render by `order` field. Set if input lists are sorted by other predicates, but order is desired for children. */
-    sortChildrenByOrder?: boolean
 
     children: (
         list: UnifiedList,

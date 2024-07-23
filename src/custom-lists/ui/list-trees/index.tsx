@@ -92,6 +92,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
             this.state,
             this.props,
         )
+
         return orderedTreeNodes.map((list, index) => {
             let actions: ListTreeActions = {
                 createChildList: (name) =>
@@ -156,10 +157,7 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
 }
 
 let ChildListInputContainer = styled.div<{ indentSteps: number }>`
-    margin-left: ${(props) =>
-        props.indentSteps > 0
-            ? (props.indentSteps - 1) * 20
-            : props.indentSteps * 20}px;
+    width: 100%;
 `
 
 let ReorderLine = styled.div<{

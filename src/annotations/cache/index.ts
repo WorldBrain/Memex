@@ -153,6 +153,20 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         ].sort(defaultOrderableSorter)
     }
 
+    getAllListsInTreeByRootId: PageAnnotationsCacheInterface['getAllListsInTreeByRootId'] = (
+        rootUnifiedId,
+    ) => {
+        return [
+            ...normalizedStateToArray(this.lists).filter(
+                (list) =>
+                    list.type === 'user-list' &&
+                    (list.pathUnifiedIds.length === 0
+                        ? list.unifiedId === rootUnifiedId
+                        : list.pathUnifiedIds[0] === rootUnifiedId),
+            ),
+        ].sort(defaultOrderableSorter)
+    }
+
     private prepareListForCaching = (
         list: UnifiedListForCache,
         opts?: { skipAssociatingAnnotations?: boolean },
@@ -591,6 +605,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 nextList.parentUnifiedId =
                     this.getListByLocalId(nextList.parentLocalId)?.unifiedId ??
                     null
+                if (
+                    !nextList.pathUnifiedIds.includes(nextList.parentUnifiedId)
+                ) {
+                    nextList.pathUnifiedIds.push(nextList.parentUnifiedId)
+                }
+                if (!nextList.pathLocalIds.includes(nextList.parentLocalId)) {
+                    nextList.pathLocalIds.push(nextList.parentLocalId)
+                }
             } else {
                 nextList.parentUnifiedId = null
             }

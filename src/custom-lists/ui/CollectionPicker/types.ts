@@ -24,10 +24,12 @@ export interface SpacePickerState {
     }[]
     currentTab: SpacePickerTab
     currentUser: UserReference | null
-    focusedListId: UnifiedList['unifiedId'] | null
+    focusedListRenderedId: string | null
     filteredListIds: UnifiedList['unifiedId'][] | null
     listEntries: NormalizedState<UnifiedList<'user-list'>>
     pageLinkEntries: NormalizedState<UnifiedList<'page-link'>>
+    listIdsShownAsTrees: UnifiedList['unifiedId'][]
+    listIdToShowNewChildInput: UnifiedList['unifiedId'] | null
     selectedListIds: number[]
     contextMenuListId: number | null
     editMenuListId: number | null
@@ -37,6 +39,7 @@ export interface SpacePickerState {
     spaceWriteError: string | null
     renameListErrorMessage: string | null
     addedToAllIds: number[]
+    blockMouseOver: boolean
 }
 
 export type SpacePickerEvent = UIEvent<{
@@ -45,11 +48,8 @@ export type SpacePickerEvent = UIEvent<{
     resultEntryAllPress: { entry: UnifiedList }
     setSpaceWriteError: { error: string }
     newEntryAllPress: { entry: string }
-    resultEntryPress: {
-        entry: Pick<UnifiedList, 'localId'>
-        shouldRerender?: boolean
-    }
-    focusListEntry: { listId: UnifiedList['unifiedId'] | null }
+    pressEntry: { entry: Pick<UnifiedList, 'localId'> }
+    focusListEntry: { listRenderedId: string | null }
     toggleEntryContextMenu: { listId: number }
     toggleEntryEditMenu: { listId: number }
     onOpenInTabGroupPress: { listId: number }
@@ -57,11 +57,14 @@ export type SpacePickerEvent = UIEvent<{
     setListPrivacy: { listId: number; isPrivate: boolean }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
-    newEntryPress: { entry: SpacePickerState['newEntryName'] }
+    pressNewEntry: null
     switchTab: { tab: SpacePickerTab }
     keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
-    onKeyUp: { event: React.KeyboardEvent<HTMLInputElement> }
     focusInput: {}
+    toggleListShownAsTree: {
+        listRenderedId: string
+        shouldShowNewChildInput?: boolean
+    }
 }>
 
 export interface SpacePickerDependencies {

@@ -18,7 +18,6 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onEditMenuBtnPress?: () => void
     onOpenInTabGroupPress?: () => void
     index: number
-    indentSteps?: number
     shareState: 'private' | 'shared'
     id?: string
     actOnAllTooltipText?: string
@@ -34,11 +33,14 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onListFocus?: (listId: string) => void
     goToButtonRef?: React.RefObject<HTMLDivElement>
     bgScriptBG: RemoteBGScriptInterface<'caller'>
-    pathText?: string
+    onAncestryPathClick?: React.MouseEventHandler
+    ancestryPath?: React.ReactChild[]
     getRootElement?: () => HTMLElement
-    renderLeftSideIcon: () => JSX.Element
-    toggleShowNewChildInput: ListTreeActions['toggleShowNewChildInput']
-    dndActions: DragNDropActions
+    renderLeftSideIcon?: () => JSX.Element
+    toggleShowNewChildInput?: ListTreeActions['toggleShowNewChildInput']
+    dndActions?: DragNDropActions
+    indentSteps?: number
+    blockMouseOver?: boolean
 }
 
 interface State {
@@ -170,7 +172,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                         fullWidth
                         label="Go to Space"
                         innerRef={this.props.goToButtonRef}
-                        contentAlign={'flex-start'}
                         width="100%"
                     />
                     <PrimaryAction
@@ -181,7 +182,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                         fullWidth
                         label="Rename & Delete"
                         innerRef={this.props.editMenuBtnRef}
-                        contentAlign={'flex-start'}
                         width="100%"
                     />
                     <PrimaryAction
@@ -196,7 +196,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 : 'Open all pages in new window'
                         }
                         innerRef={this.props.openInTabGroupButtonRef}
-                        contentAlign={'flex-start'}
                         width="100%"
                     />
                     {this.props.addedToAllIds.includes(cleanID) ? (
@@ -218,7 +217,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 label="Added all tabs in window"
                                 innerRef={this.pressAllButtonRef}
                                 onClick={null}
-                                contentAlign={'flex-start'}
                                 width="100%"
                             />
                         </TooltipBox>
@@ -236,7 +234,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 label="Add all tabs in window"
                                 innerRef={this.pressAllButtonRef}
                                 onClick={this.handleActOnAllPress}
-                                contentAlign={'flex-start'}
                                 width="100%"
                             />
                         </TooltipBox>
@@ -273,21 +270,30 @@ class EntryRow extends React.PureComponent<Props, State> {
 
         return (
             <Row
-                onDragStart={dndActions.onDragStart}
-                onDragEnd={dndActions.onDragEnd}
+                onDragStart={dndActions?.onDragStart}
+                onDragEnd={dndActions?.onDragEnd}
                 draggable
                 onClick={this.handleResultPress}
                 ref={this.resultEntryRef}
+                onMouseOver={() => {
+                    if (!this.props.blockMouseOver) {
+                        this.setState({ mouseOverItem: true })
+                        this.props.onFocus()
+                    }
+                }}
                 onMouseEnter={() => {
-                    this.setState({ mouseOverItem: true })
-                    this.props.onFocus()
+                    if (!this.props.blockMouseOver) {
+                        this.setState({ mouseOverItem: true })
+                        this.props.onFocus()
+                    }
                 }}
                 onMouseLeave={() => {
-                    this.setState({ mouseOverItem: false })
+                    if (!this.props.blockMouseOver) {
+                        this.setState({ mouseOverItem: false })
+                    }
                 }}
                 isFocused={focused || this.state.showExtraMenu}
                 id={id}
-                title={resultItem['props'].children}
                 zIndex={10000 - this.props.index}
                 indentSteps={this.props.indentSteps ?? 0}
             >
@@ -295,16 +301,17 @@ class EntryRow extends React.PureComponent<Props, State> {
                     {this.props.renderLeftSideIcon?.()}
                 </LeftSideIconContainer>
                 <NameWrapper>
-                    {this.props.pathText?.length > 0 && (
-                        <PathBox>
-                            {this.props.pathText}{' '}
-                            <Icon
-                                filePath="arrowRight"
-                                heightAndWidth="14px"
-                                color="greyScale4"
-                                hoverOff
-                            />
-                        </PathBox>
+                    {this.props.ancestryPath?.length > 0 && (
+                        <TooltipBox
+                            tooltipText="Toggle Path"
+                            placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
+                            width={''}
+                        >
+                            <PathBox onClick={this.props.onAncestryPathClick}>
+                                {this.props.ancestryPath}{' '}
+                            </PathBox>
+                        </TooltipBox>
                     )}
                     <NameRow>
                         {resultItem}
@@ -324,13 +331,33 @@ class EntryRow extends React.PureComponent<Props, State> {
                         )}
                     </NameRow>
                 </NameWrapper>
-                <IconStyleWrapper>
-                    {((focused &&
-                        this.state.mouseOverItem &&
+                <IconStyleWrapper
+                    mouseOverResult={focused || this.state.mouseOverItem}
+                >
+                    {(((focused || this.state.mouseOverItem) &&
                         this.props.onContextMenuBtnPress != null) ||
                         this.state.showExtraMenu) && (
                         <>
                             {this.renderShowExtraMenu(cleanID)}
+                            <TooltipBox
+                                tooltipText="Add Sub-Space"
+                                placement="right"
+                                targetElementRef={
+                                    this.addSubSpaceIconRef.current
+                                }
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    containerRef={this.addSubSpaceIconRef}
+                                    icon="plus"
+                                    heightAndWidth="18px"
+                                    color="greyScale5"
+                                    onClick={(event) => {
+                                        event.stopPropagation()
+                                        this.props.toggleShowNewChildInput?.()
+                                    }}
+                                />
+                            </TooltipBox>
                             <TooltipBox
                                 tooltipText={'More Options'}
                                 placement="bottom"
@@ -344,7 +371,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 >
                                     <Icon
                                         filePath={icons.dots}
-                                        heightAndWidth="20px"
+                                        heightAndWidth="18px"
                                         onClick={() =>
                                             this.setState({
                                                 showExtraMenu: true,
@@ -359,25 +386,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 </ButtonContainer>
                             </TooltipBox>
                             <TooltipBox
-                                tooltipText="Add Sub-Space"
-                                placement="right"
-                                targetElementRef={
-                                    this.addSubSpaceIconRef.current
-                                }
-                                getPortalRoot={this.props.getRootElement}
-                            >
-                                <Icon
-                                    containerRef={this.addSubSpaceIconRef}
-                                    icon="plus"
-                                    heightAndWidth="16px"
-                                    color="greyScale4"
-                                    onClick={(event) => {
-                                        event.stopPropagation()
-                                        this.props.toggleShowNewChildInput()
-                                    }}
-                                />
-                            </TooltipBox>
-                            <TooltipBox
                                 tooltipText={'Share Space'}
                                 placement="bottom"
                                 targetElementRef={contextMenuBtnRef?.current}
@@ -386,7 +394,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 <ButtonContainer ref={contextMenuBtnRef}>
                                     <Icon
                                         filePath={icons.invite}
-                                        heightAndWidth="20px"
+                                        heightAndWidth="18px"
                                         onClick={this.handleContextMenuBtnPress}
                                     />
                                 </ButtonContainer>
@@ -501,12 +509,25 @@ const SelectionBox = styled.div<{ selected }>`
         `};
 `
 
-export const IconStyleWrapper = styled.div`
+export const IconStyleWrapper = styled.div<{
+    mouseOverResult: boolean
+}>`
     display: flex;
-    grid-gap: 15px;
+    grid-gap: 10px;
     align-items: center;
     justify-content: flex-end;
-    height: 100%;
+    height: fit-content;
+    position: absolute;
+    right: 5px;
+    padding: 5px 5px 5px 5px;
+    box-sizing: border-box;
+
+    ${(props) =>
+        props.mouseOverResult &&
+        css`
+            border-radius: 6px;
+            background: ${(props) => props.theme.colors.greyScale2};
+        `}
 `
 
 const Row = styled.div<{
@@ -519,12 +540,12 @@ const Row = styled.div<{
     justify-content: flex-start;
     transition: background 0.3s;
 
-    height: fit-content;
+    height: 60px;
     width: fill-available;
     cursor: pointer;
-    border-radius: 5px;
-    padding: 10px 9px 10px ${({ indentSteps }) => 9 + indentSteps * 15}px;
-    margin: 0 -5px;
+    padding: 0px 0px 0 ${({ indentSteps }) => 9 + indentSteps * 15}px;
+    box-sizing: border-box;
+    margin: 0 0px;
     overflow: visible;
     color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
     z-index: ${(props) =>
@@ -536,12 +557,12 @@ const Row = styled.div<{
     ${(props) =>
         props.isFocused &&
         css`
-            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+            outline: 1px solid ${(props) => props.theme.colors.greyScale4};
             background: transparent;
         `}
 
     &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
         background: transparent;
     }
 
@@ -571,7 +592,7 @@ const NameWrapper = styled.div`
     flex-direction: column;
     align-items: flex-start;
     padding-left: 10px;
-    grid-gap: 5px;
+    grid-gap: 2px;
     max-width: 80%;
     font-size: 14px;
     width: 100%;
@@ -585,7 +606,19 @@ const PathBox = styled.div`
     font-size: 12px;
     color: ${(props) => props.theme.colors.greyScale5};
     grid-gap: 0px;
+    padding: 0 3px;
+    margin: 0 -3px;
+    border-radius: 5px;
     align-items: center;
+    white-space: nowrap;
+    width: fit-content;
+    box-sizing: border-box;
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+        cursor: pointer;
+        color: ${(props) => props.theme.colors.greyScale7};
+    }
 `
 
 const NameRow = styled.div`
