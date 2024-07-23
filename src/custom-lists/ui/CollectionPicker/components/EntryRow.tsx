@@ -354,7 +354,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                                     color="greyScale5"
                                     onClick={(event) => {
                                         event.stopPropagation()
-                                        this.props.toggleShowNewChildInput()
+                                        this.props.toggleShowNewChildInput?.()
                                     }}
                                 />
                             </TooltipBox>

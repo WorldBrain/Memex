@@ -677,6 +677,14 @@ class SpacePicker extends StatefulUIElement<
                                     : 'shared'
                             }
                             getRootElement={this.props.getRootElement}
+                            toggleShowNewChildInput={() =>
+                                this.processEvent('toggleListShownAsTree', {
+                                    listRenderedId: generateRenderedListEntryId(
+                                        baseEntry,
+                                    ),
+                                    shouldShowNewChildInput: true,
+                                })
+                            }
                             {...baseEntry}
                             renderLeftSideIcon={() => {
                                 const hasChildren =
