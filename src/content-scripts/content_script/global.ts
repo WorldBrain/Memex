@@ -126,7 +126,10 @@ import * as anchoring from '@worldbrain/memex-common/lib/annotations'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import debounce from 'lodash/debounce'
 import { updateNudgesCounter } from 'src/util/nudges-utils'
-import { fetchYoutubeTranscript } from 'src/util/fetch-youtube-transcript'
+import {
+    fetchAvailableTranscriptLanguages,
+    fetchYoutubeTranscript,
+} from 'src/util/fetch-youtube-transcript'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -631,10 +634,6 @@ export async function main(
                 })
                 anchor = { quote, descriptor }
             }
-            if (quote?.length === 0 && !drawRectangle) {
-                highlightCreateState = 'success'
-                return
-            }
 
             if (
                 !(await pageActionAllowed(
@@ -649,6 +648,19 @@ export async function main(
                     limitReachedNotif: 'Bookmarks',
                 })
                 highlightCreateState = 'error'
+                return
+            }
+
+            if (
+                (quote?.length === 0 || !selection) &&
+                window.location.href.includes('youtube.com')
+            ) {
+                await inPageUI.showSidebar({
+                    action: 'youtube_timestamp',
+                })
+                return
+            } else if (quote?.length === 0 && !drawRectangle) {
+                highlightCreateState = 'success'
                 return
             }
 
@@ -990,8 +1002,12 @@ export async function main(
     }
 
     const transcriptFunctions = {
-        fetchTranscript: async (videoId: string) => {
-            return (await fetchYoutubeTranscript(videoId, true))?.transcriptText
+        fetchTranscript: async (videoId: string, language: string) => {
+            return (await fetchYoutubeTranscript(videoId, language, true))
+                ?.transcriptText
+        },
+        fetchAvailableTranscriptLanguages: async (videoId: string) => {
+            return await fetchAvailableTranscriptLanguages(videoId)
         },
     }
 
@@ -1637,7 +1653,7 @@ export async function main(
         if (email) {
             let hasSubscriptionUpdated = false
             let retries = 0
-            const maxRetries = 30
+            const maxRetries = 60
             while (!hasSubscriptionUpdated && retries < maxRetries) {
                 const subscriptionBefore = await browser.storage.local.get(
                     COUNTER_STORAGE_KEY,
@@ -1651,28 +1667,26 @@ export async function main(
                     DEFAULT_COUNTER_STORAGE_VALUE.pU
 
                 await sleepPromise(1000)
-                await runInBackground<
+                const status = await runInBackground<
                     InPageUIInterface<'caller'>
                 >().checkStripePlan(email)
-                const subscriptionAfter = await browser.storage.local.get(
-                    COUNTER_STORAGE_KEY,
-                )
 
-                const subscriptionDataAfter =
-                    subscriptionAfter[COUNTER_STORAGE_KEY]
+                let subscriptionHasChanged = false
 
-                const subscriptionsAfter =
-                    subscriptionDataAfter?.pU ??
-                    DEFAULT_COUNTER_STORAGE_VALUE.pU
+                const statusKeys = Object.keys(status)
 
-                let keyChanged = false
-                for (const key in subscriptionsBefore) {
-                    if (subscriptionsBefore[key] !== subscriptionsAfter[key]) {
-                        keyChanged = true
+                for (let key of statusKeys) {
+                    if (status[key] === subscriptionsBefore[key]) continue
+                    if (status[key] !== subscriptionsBefore[key]) {
+                        subscriptionHasChanged = true
                         break
                     }
+                    if (status[key] && !subscriptionsBefore[key]) {
+                        continue
+                    }
                 }
-                if (keyChanged) {
+
+                if (subscriptionHasChanged) {
                     hasSubscriptionUpdated = true
                     if (h2Element) {
                         h2Element.textContent =
@@ -1688,6 +1702,31 @@ export async function main(
                 }
             }
         }
+    }
+
+    function deepEqual(obj1, obj2) {
+        if (obj1 === obj2) return true
+
+        if (
+            typeof obj1 !== 'object' ||
+            obj1 === null ||
+            typeof obj2 !== 'object' ||
+            obj2 === null
+        ) {
+            return false
+        }
+
+        const keys1 = Object.keys(obj1)
+
+        for (let key of keys1) {
+            if (obj1[key] === obj2[key]) continue
+            if (obj1[key] !== obj2[key]) return true
+            if (obj1[key] && !obj2[key]) {
+                continue
+            }
+        }
+
+        return false
     }
 
     // Function to track when to show the nudges

@@ -25,14 +25,16 @@ export interface PromptTemplatesState {
     componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
     powerUpType: PowerUpModalVersion
     activatedPowerUps?: Record<PremiumPlans, any>
+    confirmPowerups?: PremiumPlans
     authLoadState: UITaskState
     userEmail?: string
 }
 
 export type PromptTemplatesEvent = UIEvent<{
     changeModalType: PowerUpModalVersion
-    processCheckoutOpen: PremiumPlans
+    processCheckoutOpen: { plan: PremiumPlans }
     toggleBillingPeriod: 'monthly' | 'yearly'
+    setPowerUpConfirmation: { selected?: PremiumPlans }
 }>
 
 export type PowerUpModalVersion = 'Bookmarks' | 'AI' | 'AIownKey' | 'lifetime'

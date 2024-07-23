@@ -32,244 +32,6 @@ interface TemplateEditorProps {
     changeTemplateType: (templateType: 'originalPage' | 'examplePage') => void
 }
 
-const TemplateButtonOptions = [
-    {
-        buttonText: 'Page Title',
-        insertedText: `{{{PageTitle}}} `,
-        TooltipText: 'Adds the page title',
-    },
-    {
-        buttonText: 'Page Url',
-        insertedText: `{{{PageUrl}}} `,
-        TooltipText: 'Adds the page URL',
-    },
-    {
-        buttonText: 'Page Meta Title',
-        insertedText: `{{{PageMetaTitle}}} `,
-        TooltipText: 'Adds the meta title of the page',
-    },
-    {
-        buttonText: 'Page Annotation',
-        insertedText: `{{{PageAnnotation}}} `,
-        TooltipText: 'Adds the annotation of the page',
-    },
-    {
-        buttonText: 'Page Source Name',
-        insertedText: `{{{PageSourceName}}} `,
-        TooltipText: 'Adds the source name of the page',
-    },
-    {
-        buttonText: 'PDF Journal Name',
-        insertedText: `{{{PageJournalName}}} `,
-        TooltipText: 'Adds the journal name of the page',
-    },
-    {
-        buttonText: 'PDF DOI',
-        insertedText: `{{{PageDOI}}} `,
-        TooltipText: 'Adds the DOI of the page',
-    },
-    {
-        buttonText: 'PDF Journal Page',
-        insertedText: `{{{PageJournalPage}}} `,
-        TooltipText: 'Adds the journal page of the page',
-    },
-    {
-        buttonText: 'PDF Journal Issue',
-        insertedText: `{{{PageJournalIssue}}} `,
-        TooltipText: 'Adds the journal issue of the page',
-    },
-    {
-        buttonText: 'PDF Journal Volume',
-        insertedText: `{{{PageJournalVolume}}} `,
-        TooltipText: 'Adds the journal volume of the page',
-    },
-    {
-        buttonText: 'PDF Journal Release Date',
-        insertedText: `{{#PageReleaseDate}}YYYY-MM-DD{{/PageReleaseDate}} `,
-        TooltipText: 'Adds the release date of the page',
-    },
-    {
-        buttonText: 'Access Date',
-        insertedText: `{{#PageAccessDate}}YYYY-MM-DD{{/PageAccessDate}} `,
-        TooltipText: 'Adds the access date of the page',
-    },
-    {
-        buttonText: 'Authors List',
-        insertedText: `{{#PageEntities}}{{{.}}} {{/PageEntities}} `,
-        TooltipText:
-            'Loops through and adds all entities associated with the page',
-    },
-    {
-        buttonText: 'Author First Name',
-        insertedText: `{{{EntityAdditionalName}}} `,
-        TooltipText: 'The first name of the Author',
-    },
-    {
-        buttonText: 'Author First Name Short',
-        insertedText: `{{{EntityAdditionalNameShort}}} `,
-        TooltipText: 'The first name of the Author, abbreviated with a dot',
-    },
-    {
-        buttonText: 'Author Last Name',
-        insertedText: `{{{EntityName}}} `,
-        TooltipText: 'The first name of the Author',
-    },
-    {
-        buttonText: 'Author Last Name Short',
-        insertedText: `{{{EntityNameShort}}} `,
-        TooltipText: 'The first name of the Author, abbreviated with a dot',
-    },
-    {
-        buttonText: 'Add et al.',
-        insertedText: `{{#showEtAl}}, et al. {{/showEtAl}} `,
-        TooltipText:
-            'a string you can include that shows instead of secondary authors',
-    },
-    {
-        buttonText: 'Page Link',
-        insertedText: `{{{PageLink}}} `,
-        TooltipText: (
-            <span>
-                The last created shareable page link <br /> with annotations
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Page Spaces',
-        insertedText: `{{{PageSpaces}}} `,
-        TooltipText: (
-            <span>
-                Outputs your Spaces with tags and [[WikiLinks]]:
-                <br /> #Space1 [[Space 2]]
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Page Spaces (custom)',
-        insertedText: `{{#PageSpacesList}}{{{.}}} {{/PageSpacesList}} `,
-        TooltipText: (
-            <span>
-                The `{'{{{'}.{'}}}'}` represents a placeholder for every
-                asscociated space.
-                <br /> You can modify the text around this placeholder. <br />{' '}
-                Default output: space1 space2
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Page Notes',
-        insertedText: `{{#Notes}}
-{{{NoteHighlight}}} 
-{{{NoteText}}}
-{{/Notes}} `,
-        TooltipText: (
-            <span>
-                Needed to loop through notes. <br />
-                Always wrap this around your exported Notes.
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Page HAS Notes',
-        insertedText: `{{#HasNotes}} Text and/or {{{VariableName1}}} {{/HasNotes}} `,
-        TooltipText: (
-            <span>
-                Export text <br /> only there are notes on the page
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Notes Highlight',
-        insertedText: `{{{NoteHighlight}}} `,
-        TooltipText: <span>The Highlight Text of the note</span>,
-    },
-    {
-        buttonText: 'Notes Text',
-        insertedText: `{{{NoteText}}} `,
-        TooltipText: <span>The text of the note, not the highlight</span>,
-    },
-    {
-        buttonText: 'Note Link',
-        insertedText: `{{{NoteLink}}} `,
-        TooltipText: (
-            <span>
-                A sharable/referencable link <br /> to this annotations
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Note Spaces',
-        insertedText: `{{{NoteSpaces}}} `,
-        TooltipText: (
-            <span>
-                Outputs your Spaces with tags and [[WikiLinks]]:
-                <br /> #Space1 [[Space 2]]
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Note Spaces (custom)',
-        insertedText: `{{#NoteSpacesList}}{{{.}}} {{/NoteSpacesList}} `,
-        TooltipText: (
-            <span>
-                The `{'{{{'}.{'}}}'}` represents a placeholder for every
-                associated space.
-                <br /> You can modify the text around this placeholder. <br />{' '}
-                Default output: space1 space2
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Text Literal',
-        insertedText: `{{#literal}} {{/literal}} `,
-        TooltipText: (
-            <span>
-                The text between between elements <br /> will be shown as is
-            </span>
-        ),
-    },
-    {
-        buttonText: 'HAS variable X',
-        insertedText: `{{#ReplaceWithX}} {{/ReplaceWithX}} `,
-        TooltipText: (
-            <span>
-                The text between between elements will be shown
-                <br /> if the select variable is available
-            </span>
-        ),
-    },
-    {
-        buttonText: 'HAS NOT variable X',
-        insertedText: `{{^ReplaceWithX}} {{/ReplaceWithX}} `,
-        TooltipText: (
-            <span>
-                The text between between elements will be shown
-                <br /> if the select variable is NOT available
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Bold Text',
-        insertedText: `{{#b}} {{/b}} `,
-        TooltipText: (
-            <span>
-                The text between between will be bold. <br /> Only include 1
-                variable at a time. <br /> You can also use double underscore __
-            </span>
-        ),
-    },
-    {
-        buttonText: 'Italic Text',
-        insertedText: `{{#i}} {{/i}} `,
-        TooltipText: (
-            <span>
-                The text between between will be bold. <br /> Only include 1
-                variable at a time. <br /> You can also use single underscore _
-            </span>
-        ),
-    },
-]
-
 interface State {
     confirmDelete: boolean
     draggedButton: number | null
@@ -334,6 +96,8 @@ export default class TemplateEditor extends PureComponent<
                     closeComponent={() => {
                         this.setState({ showPremadeTemplatesModal: false })
                     }}
+                    strategy="fixed"
+                    blockedBackground
                 >
                     <TemplateInsertContainer>
                         {DEFAULT_TEMPLATES.map((template) => {
@@ -743,6 +507,244 @@ export default class TemplateEditor extends PureComponent<
         )
     }
 }
+
+const TemplateButtonOptions = [
+    {
+        buttonText: 'Page Title',
+        insertedText: `{{{PageTitle}}} `,
+        TooltipText: 'Adds the page title',
+    },
+    {
+        buttonText: 'Page Url',
+        insertedText: `{{{PageUrl}}} `,
+        TooltipText: 'Adds the page URL',
+    },
+    {
+        buttonText: 'Page Meta Title',
+        insertedText: `{{{PageMetaTitle}}} `,
+        TooltipText: 'Adds the meta title of the page',
+    },
+    {
+        buttonText: 'Page Annotation',
+        insertedText: `{{{PageAnnotation}}} `,
+        TooltipText: 'Adds the annotation of the page',
+    },
+    {
+        buttonText: 'Page Source Name',
+        insertedText: `{{{PageSourceName}}} `,
+        TooltipText: 'Adds the source name of the page',
+    },
+    {
+        buttonText: 'PDF Journal Name',
+        insertedText: `{{{PageJournalName}}} `,
+        TooltipText: 'Adds the journal name of the page',
+    },
+    {
+        buttonText: 'PDF DOI',
+        insertedText: `{{{PageDOI}}} `,
+        TooltipText: 'Adds the DOI of the page',
+    },
+    {
+        buttonText: 'PDF Journal Page',
+        insertedText: `{{{PageJournalPage}}} `,
+        TooltipText: 'Adds the journal page of the page',
+    },
+    {
+        buttonText: 'PDF Journal Issue',
+        insertedText: `{{{PageJournalIssue}}} `,
+        TooltipText: 'Adds the journal issue of the page',
+    },
+    {
+        buttonText: 'PDF Journal Volume',
+        insertedText: `{{{PageJournalVolume}}} `,
+        TooltipText: 'Adds the journal volume of the page',
+    },
+    {
+        buttonText: 'PDF Journal Release Date',
+        insertedText: `{{#PageReleaseDate}}YYYY-MM-DD{{/PageReleaseDate}} `,
+        TooltipText: 'Adds the release date of the page',
+    },
+    {
+        buttonText: 'Access Date',
+        insertedText: `{{#PageAccessDate}}YYYY-MM-DD{{/PageAccessDate}} `,
+        TooltipText: 'Adds the access date of the page',
+    },
+    {
+        buttonText: 'Authors List',
+        insertedText: `{{#PageEntities}}{{{.}}} {{/PageEntities}} `,
+        TooltipText:
+            'Loops through and adds all entities associated with the page',
+    },
+    {
+        buttonText: 'Author First Name',
+        insertedText: `{{{EntityAdditionalName}}} `,
+        TooltipText: 'The first name of the Author',
+    },
+    {
+        buttonText: 'Author First Name Short',
+        insertedText: `{{{EntityAdditionalNameShort}}} `,
+        TooltipText: 'The first name of the Author, abbreviated with a dot',
+    },
+    {
+        buttonText: 'Author Last Name',
+        insertedText: `{{{EntityName}}} `,
+        TooltipText: 'The first name of the Author',
+    },
+    {
+        buttonText: 'Author Last Name Short',
+        insertedText: `{{{EntityNameShort}}} `,
+        TooltipText: 'The first name of the Author, abbreviated with a dot',
+    },
+    {
+        buttonText: 'Add et al.',
+        insertedText: `{{#showEtAl}}, et al. {{/showEtAl}} `,
+        TooltipText:
+            'a string you can include that shows instead of secondary authors',
+    },
+    {
+        buttonText: 'Page Link',
+        insertedText: `{{{PageLink}}} `,
+        TooltipText: (
+            <span>
+                The last created shareable page link <br /> with annotations
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Page Spaces',
+        insertedText: `{{{PageSpaces}}} `,
+        TooltipText: (
+            <span>
+                Outputs your Spaces with tags and [[WikiLinks]]:
+                <br /> #Space1 [[Space 2]]
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Page Spaces (custom)',
+        insertedText: `{{#PageSpacesList}}{{{.}}} {{/PageSpacesList}} `,
+        TooltipText: (
+            <span>
+                The `{'{{{'}.{'}}}'}` represents a placeholder for every
+                asscociated space.
+                <br /> You can modify the text around this placeholder. <br />{' '}
+                Default output: space1 space2
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Page Notes',
+        insertedText: `{{#Notes}}
+{{{NoteHighlight}}} 
+{{{NoteText}}}
+{{/Notes}} `,
+        TooltipText: (
+            <span>
+                Needed to loop through notes. <br />
+                Always wrap this around your exported Notes.
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Page HAS Notes',
+        insertedText: `{{#HasNotes}} Text and/or {{{VariableName1}}} {{/HasNotes}} `,
+        TooltipText: (
+            <span>
+                Export text <br /> only there are notes on the page
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Notes Highlight',
+        insertedText: `{{{NoteHighlight}}} `,
+        TooltipText: <span>The Highlight Text of the note</span>,
+    },
+    {
+        buttonText: 'Notes Text',
+        insertedText: `{{{NoteText}}} `,
+        TooltipText: <span>The text of the note, not the highlight</span>,
+    },
+    {
+        buttonText: 'Note Link',
+        insertedText: `{{{NoteLink}}} `,
+        TooltipText: (
+            <span>
+                A sharable/referencable link <br /> to this annotations
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Note Spaces',
+        insertedText: `{{{NoteSpaces}}} `,
+        TooltipText: (
+            <span>
+                Outputs your Spaces with tags and [[WikiLinks]]:
+                <br /> #Space1 [[Space 2]]
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Note Spaces (custom)',
+        insertedText: `{{#NoteSpacesList}}{{{.}}} {{/NoteSpacesList}} `,
+        TooltipText: (
+            <span>
+                The `{'{{{'}.{'}}}'}` represents a placeholder for every
+                associated space.
+                <br /> You can modify the text around this placeholder. <br />{' '}
+                Default output: space1 space2
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Text Literal',
+        insertedText: `{{#literal}} {{/literal}} `,
+        TooltipText: (
+            <span>
+                The text between between elements <br /> will be shown as is
+            </span>
+        ),
+    },
+    {
+        buttonText: 'HAS variable X',
+        insertedText: `{{#ReplaceWithX}} {{/ReplaceWithX}} `,
+        TooltipText: (
+            <span>
+                The text between between elements will be shown
+                <br /> if the select variable is available
+            </span>
+        ),
+    },
+    {
+        buttonText: 'HAS NOT variable X',
+        insertedText: `{{^ReplaceWithX}} {{/ReplaceWithX}} `,
+        TooltipText: (
+            <span>
+                The text between between elements will be shown
+                <br /> if the select variable is NOT available
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Bold Text',
+        insertedText: `{{#b}} {{/b}} `,
+        TooltipText: (
+            <span>
+                The text between between will be bold. <br /> Only include 1
+                variable at a time. <br /> You can also use double underscore __
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Italic Text',
+        insertedText: `{{#i}} {{/i}} `,
+        TooltipText: (
+            <span>
+                The text between between will be bold. <br /> Only include 1
+                variable at a time. <br /> You can also use single underscore _
+            </span>
+        ),
+    },
+]
 
 const ConfirmText = styled.div`
     font-size: 14px;

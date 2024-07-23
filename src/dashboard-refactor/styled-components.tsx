@@ -83,7 +83,7 @@ export const Icon = (props: IconProps) => {
     )
 }
 
-export const LoadingContainer = ({ children }) => {
+export const LoadingContainer = ({ children, height = '100%' }) => {
     const Container = styled.div`
         width: 100%;
         display: flex;
@@ -93,7 +93,7 @@ export const LoadingContainer = ({ children }) => {
         grid-gap: 20px;
         color: ${(props) => props.theme.colors.greyScale6};
         font-size: 20px;
-        height: 100%;
+        height: ${height ?? '100%'};
     `
     return <Container>{children}</Container>
 }

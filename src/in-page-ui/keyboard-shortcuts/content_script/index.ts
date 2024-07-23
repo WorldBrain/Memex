@@ -131,16 +131,10 @@ function getShortcutHandlers({
             return
         },
         createHighlight: async () => {
-            const isYouTube = isUrlYTVideo(window.location.href)
-
-            if (isYouTube) {
-                await annotationFunctions.createYoutubeTimestamp()
-            } else {
-                await annotationFunctions.createHighlight(
-                    cloneSelectionAsPseudoObject(window.getSelection()),
-                    null,
-                )
-            }
+            await annotationFunctions.createHighlight(
+                cloneSelectionAsPseudoObject(window.getSelection()),
+                null,
+            )
 
             inPageUI.hideTooltip()
         },
@@ -176,11 +170,11 @@ function getShortcutHandlers({
             return
         },
         addToCollection: async () => {
-            const isToolTipEnabled = inPageUI.componentsShown.tooltip
-            if (!isToolTipEnabled) {
-                await inPageUI.toggleTooltip()
-            }
             if (userSelectedText()) {
+                const isToolTipEnabled = inPageUI.componentsShown.tooltip
+                if (!isToolTipEnabled) {
+                    await inPageUI.toggleTooltip()
+                }
                 let executed = false
                 while (!executed) {
                     try {

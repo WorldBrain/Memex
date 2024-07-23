@@ -233,6 +233,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             showDropArea: this.options.location.href.includes(
                 MISSING_PDF_QUERY_PARAM,
             ),
+            showAllNotes: true,
             themeVariant: null,
             bulkSelectedUrls: null,
             bulkDeleteLoadingState: 'pristine',
@@ -919,6 +920,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 result,
                 params,
                 this.options.annotationsCache,
+                previousState.showAllNotes,
             )
 
             const resultsList = results[-1].pages.byId
@@ -1239,6 +1241,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         result,
                         params,
                         this.options.annotationsCache,
+                        previousState.showAllNotes,
                     )
 
                     let noResultsType: NoResultsType = null
@@ -1583,11 +1586,15 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - search result event handlers */
     // TODO: Remove this event
-    setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
+    setPageSearchResult: EventHandler<'setPageSearchResult'> = ({
+        event,
+        previousState,
+    }) => {
         const state = utils.pageSearchResultToState(
             event.result,
             { skip: 0, limit: 10 },
             this.options.annotationsCache,
+            previousState.showAllNotes,
         )
         this.emitMutation({
             searchResults: {
@@ -2913,6 +2920,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
             }
             return results
+        }
+
+        if (previousState.showAllNotes) {
+            this.emitMutation({
+                showAllNotes: { $set: false },
+            })
+        } else {
+            this.emitMutation({
+                showAllNotes: { $set: true },
+            })
         }
 
         if (utils.areAllNotesShown(previousState.searchResults)) {

@@ -184,9 +184,14 @@ export class ReadwiseBackground {
                             return null
                         }
 
-                        return annotationToReadwise(annotation, {
-                            pageData,
-                        })
+                        const annotationForReadWise = await annotationToReadwise(
+                            annotation,
+                            {
+                                pageData,
+                            },
+                        )
+
+                        return annotationForReadWise
                     } catch (e) {
                         console.error(e)
                         Raven.captureException(e)
