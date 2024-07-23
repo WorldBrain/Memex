@@ -606,13 +606,13 @@ const Powerups = [
         powerUps: {
             basic: {
                 title: 'Basic',
-                subTitle: `${DEFAULT_POWERUP_LIMITS.AIpowerup} page sessions per day with Claude-3-Haiku and GPT-3.5-Turbo`,
+                subTitle: `${DEFAULT_POWERUP_LIMITS.AIpowerup} page sessions per day with GPT-4o-mini & Claude-3-Haiku`,
                 pricing: 'Free',
             },
             pro: {
                 title: 'Pro',
                 subTitle:
-                    'Unlimited sessions with Claude-3-Haiku and GPT-3.5-Turbo, and GPT-4 with own key',
+                    'Unlimited sessions with GPT-4o-mini & Claude-3-Haiku, and GPT-4 with own key',
                 pricing: {
                     monthly: '$6',
                     yearly: '$60',
@@ -625,7 +625,7 @@ const Powerups = [
             ownKey: {
                 title: 'Bring your own Key',
                 subTitle:
-                    'Unlimited sessions with GPT-3.5 and GPT-4, at your own cost of the OpenAI API.',
+                    'Unlimited sessions with GPT-4o-mini & Claude-3-Haiku, at your own cost of the OpenAI API.',
                 pricing: {
                     monthly: '$2.50',
                     yearly: '$25',
@@ -675,6 +675,7 @@ const OverlayContainer = styled.div`
     min-height: 470px;
     box-sizing: border-box;
     border-radius: 20px;
+    position: relative;
 `
 
 const PowerUpOptions = styled.div`

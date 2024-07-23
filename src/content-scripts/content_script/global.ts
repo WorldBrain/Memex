@@ -126,7 +126,10 @@ import * as anchoring from '@worldbrain/memex-common/lib/annotations'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import debounce from 'lodash/debounce'
 import { updateNudgesCounter } from 'src/util/nudges-utils'
-import { fetchYoutubeTranscript } from 'src/util/fetch-youtube-transcript'
+import {
+    fetchAvailableTranscriptLanguages,
+    fetchYoutubeTranscript,
+} from 'src/util/fetch-youtube-transcript'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -999,8 +1002,12 @@ export async function main(
     }
 
     const transcriptFunctions = {
-        fetchTranscript: async (videoId: string) => {
-            return (await fetchYoutubeTranscript(videoId, true))?.transcriptText
+        fetchTranscript: async (videoId: string, language: string) => {
+            return (await fetchYoutubeTranscript(videoId, language, true))
+                ?.transcriptText
+        },
+        fetchAvailableTranscriptLanguages: async (videoId: string) => {
+            return await fetchAvailableTranscriptLanguages(videoId)
         },
     }
 
