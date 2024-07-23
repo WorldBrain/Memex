@@ -172,7 +172,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                         fullWidth
                         label="Go to Space"
                         innerRef={this.props.goToButtonRef}
-                        contentAlign={'flex-start'}
                         width="100%"
                     />
                     <PrimaryAction
@@ -183,7 +182,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                         fullWidth
                         label="Rename & Delete"
                         innerRef={this.props.editMenuBtnRef}
-                        contentAlign={'flex-start'}
                         width="100%"
                     />
                     <PrimaryAction
@@ -198,7 +196,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 : 'Open all pages in new window'
                         }
                         innerRef={this.props.openInTabGroupButtonRef}
-                        contentAlign={'flex-start'}
                         width="100%"
                     />
                     {this.props.addedToAllIds.includes(cleanID) ? (
@@ -220,7 +217,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 label="Added all tabs in window"
                                 innerRef={this.pressAllButtonRef}
                                 onClick={null}
-                                contentAlign={'flex-start'}
                                 width="100%"
                             />
                         </TooltipBox>
@@ -238,7 +234,6 @@ class EntryRow extends React.PureComponent<Props, State> {
                                 label="Add all tabs in window"
                                 innerRef={this.pressAllButtonRef}
                                 onClick={this.handleActOnAllPress}
-                                contentAlign={'flex-start'}
                                 width="100%"
                             />
                         </TooltipBox>
