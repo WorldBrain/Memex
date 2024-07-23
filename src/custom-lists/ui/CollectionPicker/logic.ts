@@ -450,9 +450,9 @@ export default class SpacePickerLogic extends UILogic<
             treeNodeUnifiedId
         let isEventHappeningOnRootNode =
             listTreeRootNoteId === treeNodeUnifiedId
-        let isEventHappeningOnBaseEntry = treeNodeUnifiedId == null
+        let isEventHappeningOnFlatViewEntry = treeNodeUnifiedId == null
 
-        if (isEventHappeningOnBaseEntry) {
+        if (isEventHappeningOnFlatViewEntry) {
             if (key === 'ArrowRight') {
                 listTreeRootNoteId =
                     state.listEntries.byId[baseUnifiedId]?.pathUnifiedIds[0] ??
@@ -493,11 +493,7 @@ export default class SpacePickerLogic extends UILogic<
             await listTrees.processEvent('toggleShowChildren', {
                 listId: treeNodeUnifiedId,
             })
-        } else if (
-            key === 'ArrowLeft' &&
-            listTreeState?.areChildrenShown === true &&
-            isEventHappeningOnRootNode
-        ) {
+        } else if (key === 'ArrowLeft' && isEventHappeningOnRootNode) {
             this.emitMutation({
                 focusedListRenderedId: { $set: baseUnifiedId },
                 listIdsShownAsTrees: {
