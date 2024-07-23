@@ -170,11 +170,11 @@ function getShortcutHandlers({
             return
         },
         addToCollection: async () => {
-            const isToolTipEnabled = inPageUI.componentsShown.tooltip
-            if (!isToolTipEnabled) {
-                await inPageUI.toggleTooltip()
-            }
             if (userSelectedText()) {
+                const isToolTipEnabled = inPageUI.componentsShown.tooltip
+                if (!isToolTipEnabled) {
+                    await inPageUI.toggleTooltip()
+                }
                 let executed = false
                 while (!executed) {
                     try {
