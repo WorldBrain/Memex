@@ -728,12 +728,10 @@ export default class SpacePickerLogic extends UILogic<
             query: { $set: query },
         })
 
-        if (previousState.query !== query.trim()) {
-            this.querySpaces(query, previousState)
+        if (previousState.query.trim() === query.trim()) {
+            return
         }
-    }
 
-    private querySpaces = (query: string, state: SpacePickerState) => {
         if (query.trim().length === 0) {
             this.emitMutation({
                 newEntryName: { $set: null },
@@ -754,12 +752,12 @@ export default class SpacePickerLogic extends UILogic<
         }
 
         const entireListEntryPool = [
-            ...normalizedStateToArray(state.listEntries),
-            ...normalizedStateToArray(state.pageLinkEntries),
+            ...normalizedStateToArray(previousState.listEntries),
+            ...normalizedStateToArray(previousState.pageLinkEntries),
         ]
 
         let newEntryObject: { unifiedId: string; name: string }[] =
-            state.newEntryName ?? []
+            previousState.newEntryName ?? []
         let queryForNewSpaces = pathSearchItems[pathSearchItems.length - 1]
 
         const distinctTerms = queryForNewSpaces.split(/\s+/).filter(Boolean)
@@ -775,17 +773,19 @@ export default class SpacePickerLogic extends UILogic<
             }, true)
 
         let lastSelectedId = extractUnifiedIdsFromRenderedId(
-            state.focusedListRenderedId,
+            previousState.focusedListRenderedId,
         ).baseUnifiedId
         if (query.endsWith('/')) {
-            const isBackspaced = query.length < state.query.length
+            const isBackspaced = query.length < previousState.query.length
             let lastSpaceName = null
             let updatedQuery = query
 
             if (!isBackspaced) {
                 let path =
-                    state.listEntries?.byId[lastSelectedId]?.pathUnifiedIds
-                lastSpaceName = state.listEntries?.byId[lastSelectedId]?.name
+                    previousState.listEntries?.byId[lastSelectedId]
+                        ?.pathUnifiedIds
+                lastSpaceName =
+                    previousState.listEntries?.byId[lastSelectedId]?.name
                 // checks if the last item in teh path is a null on the unifiedId to detect if the next item should be appended appended without clearning the object list
                 const isMultiplePathAdditions =
                     newEntryObject[newEntryObject.length - 1]?.unifiedId ===
@@ -890,14 +890,15 @@ export default class SpacePickerLogic extends UILogic<
             matchingEntryIds = pathOfLastEntry
         }
 
-        lastSelectedId = matchingEntryIds[0] ?? state.focusedListRenderedId
+        lastSelectedId =
+            matchingEntryIds[0] ?? previousState.focusedListRenderedId
         const mutation: UIMutation<SpacePickerState> = {
             filteredListIds: { $set: matchingEntryIds },
             focusedListRenderedId: { $set: lastSelectedId },
         }
 
         this.emitMutation(mutation)
-        const nextState = this.withMutation(state, mutation)
+        const nextState = this.withMutation(previousState, mutation)
         // added this to give the focus function a specific ID to focus on specific item id
         if (matchingEntryIds && matchingEntryIds.length > 0) {
             let listIdToFocusFirst = matchingEntryIds[0]
@@ -915,7 +916,7 @@ export default class SpacePickerLogic extends UILogic<
             newEntryObject.push({ unifiedId: null, name: queryParts })
         }
 
-        if (state.query.length > 0 && nextState.query.length === 0) {
+        if (previousState.query.length > 0 && nextState.query.length === 0) {
             this.emitMutation({
                 newEntryName: { $set: null },
                 query: { $set: '' },
@@ -948,7 +949,7 @@ export default class SpacePickerLogic extends UILogic<
             this.emitMutation(mutation)
 
             const listIdToFocusFirst = toSet.byId[0].unifiedId
-            const nextState = this.withMutation(state, mutation)
+            const nextState = this.withMutation(previousState, mutation)
             this.calcNextFocusedEntry(nextState, null, listIdToFocusFirst)
         }
     }
