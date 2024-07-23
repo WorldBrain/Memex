@@ -454,7 +454,8 @@ export default class SpacePickerLogic extends UILogic<
         if (isEventHappeningOnBaseEntry) {
             if (key === 'ArrowRight') {
                 listTreeRootNoteId =
-                    state.listEntries.byId[baseUnifiedId]?.pathUnifiedIds[0]
+                    state.listEntries.byId[baseUnifiedId]?.pathUnifiedIds[0] ??
+                    baseUnifiedId
                 // Should only be able to unfold trees for nested lists
                 if (listTreeRootNoteId == null) {
                     return
@@ -561,7 +562,7 @@ export default class SpacePickerLogic extends UILogic<
 
         if (
             (event.key === 'ArrowRight' || event.key === 'ArrowLeft') &&
-            previousState.focusedListRenderedId
+            previousState.focusedListRenderedId != null
         ) {
             await this.handleLeftRightArrowKeyPress(previousState, event.key)
             return
