@@ -88,7 +88,6 @@ export default class TemplateEditor extends PureComponent<
 
     renderPremadeTemplatesList() {
         if (this.state.showPremadeTemplatesModal) {
-            console.log('render')
             return (
                 <PopoutBox
                     getPortalRoot={this.props.getRootElement}

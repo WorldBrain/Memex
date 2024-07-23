@@ -10,6 +10,7 @@ import {
 } from './types'
 import { UIEventHandler, UILogic } from 'ui-logic-core'
 import { AI_PROMPT_DEFAULTS } from 'src/sidebar/annotations-sidebar/constants'
+import { marked } from 'marked'
 
 type EventHandler<
     EventName extends keyof PromptTemplatesEvent
@@ -94,7 +95,7 @@ export default class PromptTemplatesLogic extends UILogic<
         const currentTemplates = previousState.promptTemplatesArray
 
         this.dependencies.onTemplateSelect(
-            currentTemplates[selectedTemplate].text,
+            marked.parse(currentTemplates[selectedTemplate].text),
         )
     }
     setTemplateEdit: EventHandler<'setTemplateEdit'> = async ({
@@ -105,17 +106,18 @@ export default class PromptTemplatesLogic extends UILogic<
         const currentTemplates = previousState.promptTemplatesArray
         const editValue =
             event.value || currentTemplates[selectedTemplate]?.text
-        const updatedTemplates = currentTemplates?.map((template, index) => {
-            if (index === selectedTemplate) {
-                return { ...template, isEditing: editValue }
-            }
-            return template
-        })
 
-        this.emitMutation({
-            promptTemplatesArray: { $set: updatedTemplates },
-            editValue: { $set: editValue },
-        })
+        if (currentTemplates[selectedTemplate]) {
+            currentTemplates[selectedTemplate] = {
+                ...currentTemplates[selectedTemplate],
+                isEditing: editValue,
+            }
+
+            this.emitMutation({
+                promptTemplatesArray: { $set: currentTemplates },
+                editValue: { $set: editValue },
+            })
+        }
     }
 
     saveEditTemplate: EventHandler<'saveEditTemplate'> = async ({

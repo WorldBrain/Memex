@@ -13,7 +13,7 @@ import {
     Draggable,
     Droppable,
     OnDragEndResponder,
-} from '@hello-pangea/dnd'
+} from 'react-beautiful-dnd'
 import ReactDOM from 'react-dom'
 import {
     defaultOrderableSorter,
