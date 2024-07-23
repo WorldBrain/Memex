@@ -237,20 +237,18 @@ class SpacePicker extends StatefulUIElement<
         // Function to highlight matching text
         const highlightText = (text: string, query: string) => {
             if (!query) return text
-            const segments = query.split('/')
-            const lastQuery = segments.length > 0 ? segments.pop() : query
 
-            const parts = text.split(new RegExp(`(${lastQuery})`, 'gi'))
-            return parts.map((part, index) =>
-                part.toLowerCase() === lastQuery.toLowerCase() &&
-                lastQuery.length > 0 ? (
-                    <HighlightedTextSpan key={index}>
-                        {part}
-                    </HighlightedTextSpan>
-                ) : (
-                    part
-                ),
-            )
+            const parts = text.split(query)
+            return parts.map((part, index) => (
+                <>
+                    {part}
+                    {index < parts.length - 1 && (
+                        <HighlightedTextSpan key={index}>
+                            {query}
+                        </HighlightedTextSpan>
+                    )}
+                </>
+            ))
         }
 
         return baseEntries.map((baseEntry, index) => {
