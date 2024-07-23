@@ -157,10 +157,6 @@ export class ListTrees extends StatefulUIElement<Props, State, Events> {
 }
 
 let ChildListInputContainer = styled.div<{ indentSteps: number }>`
-    margin-left: ${(props) =>
-        props.indentSteps > 0
-            ? (props.indentSteps - 1) * 20
-            : props.indentSteps * 20}px;
     width: 100%;
 `
 
