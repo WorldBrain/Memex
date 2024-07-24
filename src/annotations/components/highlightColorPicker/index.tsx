@@ -23,6 +23,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import { color } from 'html2canvas/dist/types/css/types/color'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
 
 export interface Props {
     annotationId: string
@@ -406,7 +407,6 @@ export default class HighlightColorPicker extends React.Component<
                     }}
                 />
             </ColorEditBox>
-            // </PopoutBox>
         )
     }
 
@@ -428,11 +428,7 @@ export default class HighlightColorPicker extends React.Component<
             this.state.highlightColorSettingLoadState == null ||
             this.state.highlightColorSettingLoadState === 'running'
         ) {
-            return (
-                <LoadingBox>
-                    <LoadingIndicator size={30} />
-                </LoadingBox>
-            )
+            return <LoadingBlock size={22} width={'230px'} height={'208px'} />
         } else {
             try {
                 const settings = this.state.highlightColorSettingState
@@ -685,6 +681,14 @@ const LoadingBox = styled.div`
     align-items: center;
     height: 100%;
     width: 100%;
+`
+
+const TopSection = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+    color: ${(props) => props.theme.colors.white};
 `
 
 export const GlobalStyle = createGlobalStyle`
