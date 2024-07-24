@@ -240,14 +240,12 @@ class SpacePicker extends StatefulUIElement<
 
             const parts = text.split(query)
             return parts.map((part, index) => (
-                <>
+                <React.Fragment key={index}>
                     {part}
                     {index < parts.length - 1 && (
-                        <HighlightedTextSpan key={index}>
-                            {query}
-                        </HighlightedTextSpan>
+                        <HighlightedTextSpan>{query}</HighlightedTextSpan>
                     )}
-                </>
+                </React.Fragment>
             ))
         }
 
