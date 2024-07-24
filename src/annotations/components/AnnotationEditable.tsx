@@ -745,6 +745,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     }
                     placement="bottom"
                     getPortalRoot={this.props.getRootElement}
+                    dontCloseOnClick
                 >
                     <Icon
                         heightAndWidth="26px"
@@ -761,6 +762,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             }
                         }}
                         padding={'2px'}
+                        hoverStyle="background"
                     />
                 </TooltipBox>
             </AutoAddedIndicator>
@@ -772,7 +774,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             return (
                 <DeleteScreenContainer>
                     <DeleteScreenTitle>
-                        Deletion is not reversible. <br /> Are you sure?
+                        Deletion is not reversible.
                     </DeleteScreenTitle>
                     <DeleteScreenButtons>
                         <PrimaryAction
@@ -1537,8 +1539,10 @@ const DeleteScreenContainer = styled.div`
     justify-content: center;
     flex-direction: column;
     height: fill-available;
+    min-height: fit-content;
     width: fill-available;
     background: ${(props) => props.theme.colors.black}95;
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
     backdrop-filter: blur(5px);
     animation: increaseBlur 0.3s forwards;
     position: absolute;
@@ -1576,7 +1580,7 @@ const DeleteScreenTitle = styled.div`
     background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     padding: 0 20px;
     line-height: 30px;
     font-weight: 600;
