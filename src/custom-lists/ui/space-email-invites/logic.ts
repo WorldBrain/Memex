@@ -114,7 +114,7 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                 emailInvites: {
                     $set: initNormalizedState({
                         seedData: emailInvites.data,
-                        getId: (invite) => invite.sharedListKey.toString(),
+                        getId: (invite) => invite.email,
                     }),
                 },
                 emailInvitesLoadState: { $set: 'success' },

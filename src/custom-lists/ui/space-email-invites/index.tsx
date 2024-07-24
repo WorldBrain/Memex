@@ -219,7 +219,8 @@ export default class SpaceEmailInvites extends StatefulUIElement<
                                                         this.processEvent(
                                                             'deleteEmailInvite',
                                                             {
-                                                                key: invite?.sharedListKey.toString(),
+                                                                key:
+                                                                    invite?.email,
                                                             },
                                                         )
                                                     }
