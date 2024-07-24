@@ -680,13 +680,11 @@ class SpacePicker extends StatefulUIElement<
                                                 ? 'Show Sub-Spaces'
                                                 : 'Add Subspace'
                                         }
-                                        placement="right"
+                                        placement="bottom"
                                         getPortalRoot={
                                             this.props.getRootElement
                                         }
-                                        hideTooltip={
-                                            baseEntry.pathUnifiedIds.length > 0
-                                        }
+                                        hideTooltip={hasChildren}
                                     >
                                         <Icon
                                             icon={
@@ -849,7 +847,6 @@ class SpacePicker extends StatefulUIElement<
                 </>
             )
         }
-
         return (
             <PickerContainer>
                 <SearchContainer>
@@ -869,7 +866,10 @@ class SpacePicker extends StatefulUIElement<
                         onKeyDown={this.handleKeyPress}
                         value={this.state.query}
                         autoFocus={
-                            this.state.listIdToShowNewChildInput ? false : true
+                            this.state.listIdToShowNewChildInput ||
+                            this.state.listIdsShownAsTrees.length > 0
+                                ? false
+                                : true
                         }
                         borderRadius="12px 12px 0 0"
                     />

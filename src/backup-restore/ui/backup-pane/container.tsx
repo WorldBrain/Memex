@@ -7,7 +7,7 @@ import { default as RunningBackup } from './panes/running-backup'
 import { default as OnboardingWhere } from './panes/setup-location'
 import OnboardingHow from './panes/setup-manual-or-automatic'
 import { default as OnboardingSize } from './panes/setup-size'
-import LoadingBlocker from '../../../common-ui/components/loading-blocker'
+import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import RestoreWhere from 'src/backup-restore/ui/backup-pane/panes/restore-where'
 import RestoreRunning from 'src/backup-restore/ui/backup-pane/panes/restore-running'
@@ -103,7 +103,7 @@ export default class BackupSettingsContainer extends Component<Props> {
     renderScreen() {
         const { screen } = this.state
         if (!screen) {
-            return <LoadingBlocker />
+            return <LoadingBlock />
         }
 
         const screenConfig = SCREENS[screen]

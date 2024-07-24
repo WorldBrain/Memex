@@ -510,6 +510,11 @@ export default class SpacePickerLogic extends UILogic<
     ) {
         if (state.newEntryName != null && isCmdKey) {
             await this._pressNewEntry(state)
+        } else if (
+            state.newEntryName != null &&
+            state.focusedListRenderedId == null
+        ) {
+            await this._pressNewEntry(state)
         } else if (state.focusedListRenderedId != null) {
             let {
                 baseUnifiedId,
@@ -521,11 +526,6 @@ export default class SpacePickerLogic extends UILogic<
                 return
             }
             await this._pressEntry(localListId, state)
-        } else if (
-            state.newEntryName != null &&
-            state.focusedListRenderedId == null
-        ) {
-            await this._pressNewEntry(state)
         }
     }
 

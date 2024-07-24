@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import classNames from 'classnames'
 import browser from 'webextension-polyfill'
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
-import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
+import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
 import RestoreConfirmation from '../components/restore-confirmation'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { WhiteSpacer10 } from 'src/common-ui/components/design-library/typography'
@@ -267,7 +267,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
 
     render() {
         if (!this.state.backupTimes) {
-            return <LoadingBlocker />
+            return <LoadingBlock />
         }
 
         return (

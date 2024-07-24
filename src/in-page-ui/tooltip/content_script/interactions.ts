@@ -105,6 +105,9 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             },
             onTooltipHide: () => params.inPageUI.hideTooltip(),
             onTooltipClose: () => params.inPageUI.removeTooltip(),
+            toggleTooltipState: async (state: boolean) => {
+                params.toggleTooltipState
+            },
             onExternalDestroy: (destroyTooltip) => {
                 const handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (
                     event,
@@ -199,6 +202,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             syncSettingsBG: params.syncSettingsBG,
             createHighlight: params.createHighlight,
             getWindow: () => window,
+            toggleTooltipState: params.toggleTooltipState,
         },
     )
 

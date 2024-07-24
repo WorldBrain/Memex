@@ -25,4 +25,5 @@ export interface TooltipDependencies extends AnnotationFunctions {
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     localStorageAPI: Storage.LocalStorageArea
     syncSettingsBG: RemoteSyncSettingsInterface
+    toggleTooltipState: (state: boolean) => Promise<void>
 }
