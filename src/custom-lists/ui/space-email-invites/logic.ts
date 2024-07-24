@@ -161,6 +161,13 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
             .split(',')
             .map((email) => email.trim())
             .filter((email) => !isValidEmail(email)) // Filter out invalid emails
+            .filter(
+                (email) =>
+                    !event.state.emailInvites.allIds.some(
+                        (id) =>
+                            event.state.emailInvites.byId[id].email === email,
+                    ),
+            ) // Filter out emails already on the list
         const roleID = event.state.emailInviteInputRole
 
         let prevInviteCount = event.state.emailInvites.allIds.length
