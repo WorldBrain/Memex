@@ -50,6 +50,7 @@ interface TooltipRootProps {
     mount: InPageUIRootMount
     params: Omit<Props, 'onTooltipInit'>
     onTooltipInit: (showTooltip: () => void) => void
+    toggleTooltipState: (state: boolean) => Promise<void>
     analyticsBG: AnalyticsCoreInterface
     annotationsBG: AnnotationInterface<'caller'>
     annotationsCache: PageAnnotationsCache
@@ -531,6 +532,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                             this.renderHighlightColorPicker
                         }
                         showColorPicker={this.state.showColorPicker}
+                        toggleTooltipState={props.toggleTooltipState}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -563,6 +565,7 @@ export function setupUIContainer(
                 syncSettingsBG={props.syncSettingsBG}
                 createHighlight={params.createHighlight}
                 getWindow={params.getWindow}
+                toggleTooltipState={props.toggleTooltipState}
             />,
             mount.rootElement,
         )

@@ -24,6 +24,7 @@ export interface InPageUIContentScriptRemoteInterface {
     // Tooltip
     showContentTooltip(): Promise<void>
     insertTooltip(): Promise<void>
+    toggleTooltipState(state: boolean): Promise<void>
     removeTooltip(): Promise<void>
     insertOrRemoveTooltip(): Promise<void>
 

@@ -1202,6 +1202,9 @@ export async function main(
                 pageActivityIndicatorBG,
                 localStorageAPI: browser.storage.local,
                 syncSettingsBG: syncSettingsBG,
+                toggleTooltipState: async (state: boolean) => {
+                    tooltipUtils.setTooltipState(state)
+                },
             })
             components.tooltip?.resolve()
         },
@@ -1315,6 +1318,9 @@ export async function main(
         updateRibbon: async () => inPageUI.updateRibbon(),
         showContentTooltip: async () => inPageUI.showTooltip(),
         insertTooltip: async () => inPageUI.showTooltip(),
+        toggleTooltipState: async (state: boolean) => {
+            this.dependencies.tooltip.setState(state)
+        },
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
         goToHighlight: async (annotationCacheId) => {
