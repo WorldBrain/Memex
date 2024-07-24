@@ -13,6 +13,7 @@ import {
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
 
 export interface Dependencies {
     listData: UnifiedList
@@ -159,7 +160,7 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
         const emails = event.state.emailInviteInputValue
             .split(',')
             .map((email) => email.trim())
-            .filter((email) => email !== '') // Remove any empty strings
+            .filter((email) => !isValidEmail(email)) // Filter out invalid emails
         const roleID = event.state.emailInviteInputRole
 
         let prevInviteCount = event.state.emailInvites.allIds.length
