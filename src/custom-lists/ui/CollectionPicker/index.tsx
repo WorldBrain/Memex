@@ -849,7 +849,6 @@ class SpacePicker extends StatefulUIElement<
                 </>
             )
         }
-
         return (
             <PickerContainer>
                 <SearchContainer>
@@ -869,7 +868,10 @@ class SpacePicker extends StatefulUIElement<
                         onKeyDown={this.handleKeyPress}
                         value={this.state.query}
                         autoFocus={
-                            this.state.listIdToShowNewChildInput ? false : true
+                            this.state.listIdToShowNewChildInput ||
+                            this.state.listIdsShownAsTrees.length > 0
+                                ? false
+                                : true
                         }
                         borderRadius="12px 12px 0 0"
                     />
