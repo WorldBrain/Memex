@@ -398,6 +398,7 @@ export default class Ribbon extends Component<Props, State> {
                         : 0
                 }
                 closeComponent={this.hideListPicker}
+                instaClose
             >
                 <CollectionPicker
                     {...this.props.lists}
@@ -415,7 +416,6 @@ export default class Ribbon extends Component<Props, State> {
                     }
                     onSpaceCreate={this.props.lists.onSpaceCreate}
                     closePicker={this.hideListPicker}
-                    onListShare={this.props.onListShare}
                     onListFocus={(listId: UnifiedList['localId']) => {
                         this.props.sidebar.handleSidebarOpenInFocusMode(listId)
                     }}

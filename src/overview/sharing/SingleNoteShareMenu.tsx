@@ -697,7 +697,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 'unselect',
                             )}
                             width={'300px'}
-                            autoFocus={true}
                             getRootElement={this.props.getRootElement}
                         />
                     </SpacepickerContainer>

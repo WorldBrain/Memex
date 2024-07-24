@@ -58,10 +58,10 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
         this.props.onConfirmClick(this.state.value)
     }
 
-    handleFocus = () => {
+    private handleFocus = () => {
         // weird hack to have 0 timeout
         setTimeout(() => {
-            this.props.scrollIntoView()
+            this.props.scrollIntoView?.()
         }, 0)
         // Do something when the input is focused
     }
@@ -84,13 +84,13 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                     <ActionButtonBox right="5px">
                         <Icon
                             filePath={icons.removeX}
-                            heightAndWidth="14px"
+                            heightAndWidth="18px"
                             onClick={this.handleCancel}
                             padding={'5px'}
                         />
                         <Icon
                             filePath={icons.check}
-                            heightAndWidth="16px"
+                            heightAndWidth="18px"
                             onClick={this.handleConfirm}
                             color={'prime1'}
                             padding={'4px'}
@@ -112,7 +112,6 @@ const EditableListTitle = styled.input`
     background: white;
     flex: 0 1 100%;
     display: flex;
-    width: 70%;
     margin: 5px 0 5px 5px;
     font-size: 14px;
     height: 30px;
@@ -134,6 +133,9 @@ const ActionButtonBox = styled(Margin)`
     grid-gap: 5px;
     justify-content: flex-start;
     grid-auto-flow: column;
+    width: fit-content;
+    padding: 0 5px;
+    box-sizing: border-box;
 `
 
 const ErrMsg = styled.div`

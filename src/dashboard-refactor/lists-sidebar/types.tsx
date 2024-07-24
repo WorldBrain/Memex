@@ -23,6 +23,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     dragOverListId?: string
     editingListId?: string
     selectedListId: string | null
+    focusedListId: UnifiedList['unifiedId'] | null
     showMoreMenuListId?: string
     editMenuListId?: string
     isSidebarToggleHovered?: boolean
@@ -46,6 +47,8 @@ export type Events = UIEvent<{
     setSidebarPeeking: { isPeeking: boolean }
     setSidebarToggleHovered: { isHovered: boolean }
     setListQueryValue: { query: string }
+    handleListQueryKeyPress: { key: string }
+    setFocusedListId: { listId: UnifiedList['unifiedId'] | null }
 
     setAddListInputShown: { isShown: boolean }
     cancelListCreate: null

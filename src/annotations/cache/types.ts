@@ -107,6 +107,10 @@ export interface PageAnnotationsCacheInterface {
     getListsByParentId: (
         unifiedId: UnifiedList['unifiedId'] | null,
     ) => UnifiedList[]
+    /** Gets all members of the tree, sorted by their order. */
+    getAllListsInTreeByRootId: (
+        unifiedId: UnifiedList['unifiedId'] | null,
+    ) => UnifiedList[]
 
     readonly isEmpty: boolean
     readonly events: TypedEventEmitter<PageAnnotationsCacheEvents>

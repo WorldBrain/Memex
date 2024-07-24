@@ -10,6 +10,8 @@ import type {
 } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { deriveListOwnershipStatus } from 'src/annotations/cache/utils'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export const updatePickerValues = (event: {
     added?: string
@@ -139,4 +141,15 @@ export const stateToSearchParams = (
         omitPagesWithoutAnnotations: searchResults.searchType === 'notes',
         ...termsSearchOpts,
     }
+}
+
+export function getOwnLists(allLists: UnifiedList[], user?: AuthenticatedUser) {
+    return allLists.filter(
+        (list) =>
+            list.type === 'user-list' &&
+            deriveListOwnershipStatus(
+                list,
+                user ? { type: 'user-reference', id: user.id } : undefined,
+            ) === 'Creator',
+    )
 }

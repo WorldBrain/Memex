@@ -9,13 +9,13 @@ const search = browser.runtime.getURL('/img/search.svg')
 interface Props {
     onChange: (value: string) => void
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void // Adjusted type here
-    onKeyUp: (e: React.KeyboardEvent<HTMLInputElement>) => void // Adjusted type here
     searchInputPlaceholder: string
     value: string
     searchInputRef?: React.RefObject<HTMLInputElement>
     showPlaceholder?: boolean
     loading?: boolean
     autoFocus?: boolean
+    borderRadius?: string
 }
 
 interface State {
@@ -55,10 +55,6 @@ export class PickerSearchInput extends React.Component<Props, State> {
                     this.props.onKeyDown(e)
                     e.stopPropagation()
                 }}
-                onKeyUp={(e) => {
-                    this.props.onKeyUp(e)
-                    e.stopPropagation()
-                }}
                 type={'input'}
                 componentRef={this.props.searchInputRef}
                 icon="searchIcon"
@@ -66,6 +62,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
                     this.props.autoFocus != null ? this.props.autoFocus : true
                 }
                 id={'pickerSearchBox'}
+                borderRadius={this.props.borderRadius}
             />
         )
     }
@@ -74,7 +71,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
 const SearchBox = styled.div<{ isFocused: boolean }>`
     align-items: center;
     background-color: ${(props) => props.theme.colors.greyScale2};
-    border-radius: 3px;
+
     color: ${(props) => props.theme.colors.white};
     display: flex;
     flex-wrap: wrap;

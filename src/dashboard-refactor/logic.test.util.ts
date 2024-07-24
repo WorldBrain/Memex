@@ -18,6 +18,7 @@ import {
 } from 'src/content-sharing/background/types'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -209,6 +210,7 @@ export async function setupTest(
             device.backgroundModules.bgScript.remoteFunctions,
         ) as any,
         browserAPIs: device.browserAPIs,
+        getListTreesRef: () => undefined,
     })
 
     if (args.overrideSearchTrigger) {

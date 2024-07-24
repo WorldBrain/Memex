@@ -30,6 +30,7 @@ import type {
     DragNDropActions,
     Dependencies as ListTreesDeps,
 } from 'src/custom-lists/ui/list-trees/types'
+import { ListTreeToggleArrow } from 'src/custom-lists/ui/list-trees/components/tree-toggle-arrow'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -43,6 +44,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onConfirmAddList: (value: string) => void
     setSidebarPeekState: (isPeeking: boolean) => () => void
     initDNDActions: (listId: string) => DragNDropActions
+    setFocusedListId: (listId: UnifiedList['unifiedId'] | null) => void
     initContextMenuBtnProps: (
         listId: string,
     ) => Omit<
@@ -69,12 +71,12 @@ export interface ListsSidebarProps extends ListsSidebarState {
     spaceSidebarWidth: string
     getRootElement: () => HTMLElement
     isInPageMode: boolean
-    listTreesDeps: Omit<ListTreesDeps, 'renderListItem'>
+    listTreesDeps: Omit<ListTreesDeps, 'children'> & {
+        ref: React.RefObject<ListTrees>
+    }
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
-    private spaceToggleButtonRef = React.createRef<HTMLDivElement>()
-    private nestedInputBoxRef = React.createRef<HTMLDivElement>()
     private sidebarItemRefs: React.RefObject<HTMLDivElement>[]
 
     constructor(props: ListsSidebarProps) {
@@ -211,14 +213,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 errorMessage={this.props.addListErrorMessage}
                             />
                         )}
-                        <ListTrees
-                            {...this.props.listTreesDeps}
-                            renderListItem={(
-                                list,
-                                treeState,
-                                actions,
-                                dndActions,
-                            ) => (
+                        <ListTrees {...this.props.listTreesDeps}>
+                            {(list, treeState, actions, dndActions) => (
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
                                         this.setSidebarItemRefs(
@@ -232,6 +228,15 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     key={list.unifiedId}
                                     indentSteps={list.pathUnifiedIds.length}
                                     name={`${list.name}`}
+                                    isFocused={
+                                        this.props.focusedListId ===
+                                        list.unifiedId
+                                    }
+                                    setFocused={(isFocused) =>
+                                        this.props.setFocusedListId(
+                                            isFocused ? list.unifiedId : null,
+                                        )
+                                    }
                                     isSelected={
                                         this.props.selectedListId ===
                                         list.unifiedId
@@ -246,7 +251,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 .current,
                                         )
                                     }}
-                                    hasChildren={treeState.hasChildren}
+                                    alwaysShowLeftSideIcon={
+                                        treeState.hasChildren
+                                    }
                                     dragNDropActions={{
                                         ...dndActions,
                                         onDrop: (e) => {
@@ -270,56 +277,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             list.unifiedId
                                     }
                                     renderLeftSideIcon={() => (
-                                        <TooltipBox
-                                            tooltipText={
-                                                !treeState.hasChildren
-                                                    ? 'Add Sub-Space'
-                                                    : treeState.areChildrenShown
-                                                    ? 'Hide Sub Spaces'
-                                                    : 'Show Sub Spaces'
-                                            }
-                                            placement="right"
-                                            targetElementRef={
-                                                this.spaceToggleButtonRef
-                                                    .current
-                                            }
-                                            getPortalRoot={
+                                        <ListTreeToggleArrow
+                                            getRootElement={
                                                 this.props.getRootElement
                                             }
-                                        >
-                                            <Icon
-                                                containerRef={
-                                                    this.spaceToggleButtonRef
-                                                }
-                                                icon={
-                                                    !treeState.hasChildren
-                                                        ? 'plus'
-                                                        : treeState.areChildrenShown
-                                                        ? 'arrowDown'
-                                                        : 'arrowRight'
-                                                }
-                                                heightAndWidth="16px"
-                                                color={
-                                                    treeState.hasChildren
-                                                        ? 'greyScale5'
-                                                        : 'greyScale3'
-                                                }
-                                                onClick={(event) => {
-                                                    if (treeState.hasChildren) {
-                                                        actions.toggleShowChildren()
-                                                    } else {
-                                                        actions.toggleShowNewChildInput()
-                                                    }
-                                                    this.moveItemIntoHorizontalView(
-                                                        this.sidebarItemRefs[
-                                                            list.unifiedId
-                                                        ].current,
-                                                    )
-
-                                                    event.stopPropagation()
-                                                }}
-                                            />
-                                        </TooltipBox>
+                                            treeState={treeState}
+                                            actions={actions}
+                                        />
                                     )}
                                     renderRightSideIcon={() => {
                                         return (
@@ -403,7 +367,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     }}
                                 />
                             )}
-                        />
+                        </ListTrees>
                     </ListsSidebarGroup>
                     <ListsSidebarGroup
                         {...this.props.followedListsGroup}

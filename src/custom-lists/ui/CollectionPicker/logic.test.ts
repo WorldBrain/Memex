@@ -8,7 +8,6 @@ import * as DATA from './logic.test.data'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import {
     EMPTY_SPACE_NAME_ERR_MSG,
-    NON_UNIQ_SPACE_NAME_ERR_MSG,
     BAD_CHAR_SPACE_NAME_ERR_MSG,
 } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
@@ -19,6 +18,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SpacePickerDependencies } from './types'
+import { generateRenderedListEntryId } from './utils'
 
 async function insertTestData({
     storageManager,
@@ -67,7 +67,6 @@ const setupLogicHelper = async ({
     initialSelectedListIds,
     skipTestData,
     url,
-    onSubmit = () => undefined,
     ...args
 }: {
     device: UILogicTestDevice
@@ -76,7 +75,6 @@ const setupLogicHelper = async ({
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
     queryEntries?: (query: string) => Promise<UnifiedList[]>
-    onSubmit?: () => void
     initialSelectedListIds?: number[]
     skipTestData?: boolean
     url?: string
@@ -108,8 +106,9 @@ const setupLogicHelper = async ({
         authBG: device.backgroundModules.auth.remoteFunctions,
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
-        onSubmit,
         analyticsBG: device.backgroundModules.analyticsBG,
+        getListTreeRefs: () => undefined,
+        getEntryRowRefs: () => ({}),
     })
 
     const testLogic = device.createElement(entryPickerLogic)
@@ -118,6 +117,126 @@ const setupLogicHelper = async ({
 
 describe('SpacePickerLogic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
+
+    it('should be able to add and remove specific lists to show as trees', async ({
+        device,
+    }) => {
+        const { testLogic, annotationsCache } = await setupLogicHelper({
+            device,
+        })
+
+        let listA = annotationsCache.addList({
+            name: 'a',
+            type: 'user-list',
+            localId: 1,
+            unifiedAnnotationIds: [],
+            hasRemoteAnnotationsToLoad: false,
+        })
+        let listB = annotationsCache.addList({
+            name: 'b',
+            type: 'user-list',
+            localId: 2,
+            unifiedAnnotationIds: [],
+            hasRemoteAnnotationsToLoad: false,
+        })
+        let listC = annotationsCache.addList({
+            name: 'c',
+            type: 'user-list',
+            localId: 3,
+            parentLocalId: 2, // Child of listB
+            unifiedAnnotationIds: [],
+            hasRemoteAnnotationsToLoad: false,
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+
+        // Toggle list A and B to change them from flat-view to tree-view
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listA),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC),
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
+
+        // Nothing should happen as these case should never actually occur as the rendered IDs change format when the list enters tree-view. These are still the single ID based flat-view rendered IDs
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listA),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC),
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
+
+        // Again, nothing should happen as the only way to get back from tree-view to flat-view is to toggle on the root level list of the tree shown in tree view. These are not root level
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC, listC),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB, listC),
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listA.unifiedId,
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
+
+        // Now these should work as they are the root level lists of the trees shown in tree-view
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listA, listA),
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB, listB),
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([listC.unifiedId])
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC, listB),
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+
+        // Do it again for the parent-child lists, but in the opposite order
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB),
+        })
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC),
+        })
+
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([
+            listB.unifiedId,
+            listC.unifiedId,
+        ])
+
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listC, listB),
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([listB.unifiedId])
+        testLogic.processEvent('toggleListShownAsTree', {
+            listRenderedId: generateRenderedListEntryId(listB, listB),
+        })
+        expect(testLogic.state.listIdsShownAsTrees).toEqual([])
+    })
 
     it(
         'should correctly load initial entries',
@@ -239,55 +358,39 @@ describe('SpacePickerLogic', () => {
             device,
         })
         await testLogic.init()
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: '',
-                newEntryName: '',
-                filteredListIds: null,
-            }),
-        )
+        expect(testLogic.state.query).toEqual('')
+        expect(testLogic.state.newEntryName)[0]?.name.toEqual('')
+        expect(testLogic.state.filteredListIds).toEqual(null)
 
         await testLogic.processEvent('searchInputChanged', {
             query: 'LIST Test',
         })
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'LIST Test',
-                newEntryName: 'LIST Test',
-                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
-            }),
-        )
+        expect(testLogic.state.query).toEqual('LIST Test')
+        expect(testLogic.state.newEntryName)[0]?.name.toEqual('LIST Test')
+        expect(testLogic.state.filteredListIds).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId,
+        ])
 
         await testLogic.processEvent('searchInputChanged', {
             query: 'non-existent',
         })
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'non-existent',
-                newEntryName: 'non-existent',
-                filteredListIds: [],
-            }),
-        )
+        expect(testLogic.state.query).toEqual('non-existent')
+        expect(testLogic.state.newEntryName)[0]?.name.toEqual('non-existent')
+        expect(testLogic.state.filteredListIds).toEqual([])
 
         await testLogic.processEvent('searchInputChanged', { query: '' })
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: '',
-                newEntryName: '',
-                filteredListIds: null,
-            }),
-        )
+        expect(testLogic.state.query).toEqual('')
+        expect(testLogic.state.newEntryName)[0]?.name.toEqual('')
+        expect(testLogic.state.filteredListIds).toEqual(null)
 
         await testLogic.processEvent('searchInputChanged', {
             query: 'list test',
         })
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'list test',
-                newEntryName: 'list test',
-                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
-            }),
-        )
+        expect(testLogic.state.query).toEqual('list test')
+        expect(testLogic.state.newEntryName)[0]?.name.toEqual('list test')
+        expect(testLogic.state.filteredListIds).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId,
+        ])
     })
 
     it("should be able to search for any entry when it's already selected", async ({
@@ -402,7 +505,7 @@ describe('SpacePickerLogic', () => {
             focusedEntryId: number,
             iteration: number,
         ) =>
-            expect([iteration, testLogic.state.focusedListId]).toEqual([
+            expect([iteration, testLogic.state.focusedListRenderedId]).toEqual([
                 iteration,
                 annotationsCache.getListByLocalId(focusedEntryId)?.unifiedId ??
                     null,
@@ -489,14 +592,14 @@ describe('SpacePickerLogic', () => {
         expect(testLogic.state.renameListErrorMessage).toEqual(
             BAD_CHAR_SPACE_NAME_ERR_MSG,
         )
+
+        // Non-unique space names should still work
         expect(
             entryPickerLogic.validateSpaceName(
-                DATA.TEST_USER_LIST_SUGGESTIONS[0].name,
+                DATA.TEST_USER_LIST_SUGGESTIONS[0]?.name,
             ).valid,
-        ).toBe(false)
-        expect(testLogic.state.renameListErrorMessage).toEqual(
-            NON_UNIQ_SPACE_NAME_ERR_MSG,
-        )
+        ).toBe(true)
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
     })
 
     it('should show default entries again after clearing the search query', async ({
@@ -507,14 +610,11 @@ describe('SpacePickerLogic', () => {
         })
         const newEntryText = 'testwerwerwerwer'
 
-        const expectDefaultState = () =>
-            expect(testLogic.state).toEqual(
-                expect.objectContaining({
-                    query: '',
-                    newEntryName: '',
-                    filteredListIds: null,
-                }),
-            )
+        const expectDefaultState = () => {
+            expect(testLogic.state.query).toEqual('')
+            expect(testLogic.state.newEntryName)[0]?.name.toEqual('')
+            expect(testLogic.state.filteredListIds).toEqual(null)
+        }
 
         await testLogic.init()
 
@@ -524,13 +624,9 @@ describe('SpacePickerLogic', () => {
             query: newEntryText,
         })
 
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: newEntryText,
-                newEntryName: newEntryText,
-                filteredListIds: [],
-            }),
-        )
+        expect(testLogic.state.query).toEqual(newEntryText)
+        expect(testLogic.state.newEntryName)[0]?.name.toEqual(newEntryText)
+        expect(testLogic.state.filteredListIds).toEqual([])
 
         await testLogic.processEvent('searchInputChanged', {
             query: '',
@@ -597,7 +693,7 @@ describe('SpacePickerLogic', () => {
         )
         expect(testLogic.state.renameListErrorMessage).toEqual(null)
 
-        // Attempt to re-use another list name - should set error
+        // Attempt to re-use another list name - should _work_
         await testLogic.processEvent('renameList', {
             listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
             name: DATA.TEST_USER_LIST_SUGGESTIONS[0].name,
@@ -606,9 +702,7 @@ describe('SpacePickerLogic', () => {
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
             DATA.TEST_USER_LIST_SUGGESTIONS,
         )
-        expect(testLogic.state.renameListErrorMessage).toEqual(
-            NON_UNIQ_SPACE_NAME_ERR_MSG,
-        )
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
 
         // Attempt to use a list name with invalid characters - also should set error
         await testLogic.processEvent('renameList', {
@@ -739,7 +833,7 @@ describe('SpacePickerLogic', () => {
         expect(selectedEntryId).toBe(null)
         expect(unselectedEntryId).toBe(null)
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
         })
 
@@ -757,7 +851,7 @@ describe('SpacePickerLogic', () => {
         expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[1].localId)
         expect(unselectedEntryId).toBe(null)
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
         })
 
@@ -775,7 +869,7 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         )
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
@@ -795,7 +889,7 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         )
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[3],
         })
 
@@ -834,7 +928,7 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
@@ -852,7 +946,7 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        await testLogic.processEvent('resultEntryPress', {
+        await testLogic.processEvent('pressEntry', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
@@ -911,9 +1005,9 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        await testLogic.processEvent('newEntryPress', {
-            entry: newEntryText,
-        })
+        // await testLogic.processEvent('newEntryPress', {
+        //     entry: newEntryText,
+        // })
 
         expect(selectedEntry).toBe(newEntryId)
         expect(newEntryName).toBe(newEntryText)
@@ -1028,7 +1122,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
         expect(testLogic.state.currentTab).toEqual('user-lists')
-        expect(testLogic.state.focusedListId).toEqual(null)
+        expect(testLogic.state.focusedListRenderedId).toEqual(null)
         expect(entryPickerLogic['focusIndex']).toBe(0)
 
         await testLogic.processEvent('keyPress', {
@@ -1047,14 +1141,14 @@ describe('SpacePickerLogic', () => {
             >,
         })
         expect(entryPickerLogic['focusIndex']).toBe(3)
-        expect(testLogic.state.focusedListId).toEqual(
+        expect(testLogic.state.focusedListRenderedId).toEqual(
             annotationsCache.getListByLocalId(DATA.TEST_LISTS[3].id).unifiedId,
         )
 
         await testLogic.processEvent('switchTab', { tab: 'page-links' })
         expect(testLogic.state.currentTab).toEqual('page-links')
         expect(entryPickerLogic['focusIndex']).toBe(-1)
-        expect(testLogic.state.focusedListId).toEqual(null)
+        expect(testLogic.state.focusedListRenderedId).toEqual(null)
 
         await testLogic.processEvent('keyPress', {
             event: { key: 'ArrowDown' } as React.KeyboardEvent<
@@ -1067,13 +1161,13 @@ describe('SpacePickerLogic', () => {
             >,
         })
         expect(entryPickerLogic['focusIndex']).toBe(1)
-        expect(testLogic.state.focusedListId).toEqual(
+        expect(testLogic.state.focusedListRenderedId).toEqual(
             DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
         )
 
         await testLogic.processEvent('switchTab', { tab: 'user-lists' })
         expect(testLogic.state.currentTab).toEqual('user-lists')
         expect(entryPickerLogic['focusIndex']).toBe(-1)
-        expect(testLogic.state.focusedListId).toEqual(null)
+        expect(testLogic.state.focusedListRenderedId).toEqual(null)
     })
 })

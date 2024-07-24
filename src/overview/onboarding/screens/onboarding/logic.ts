@@ -12,6 +12,8 @@ import {
     getRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 
+const MEMEX_ONBOARDING_URL = 'https://links.memex.garden/onboarding/new-user'
+
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
     Event,
@@ -205,9 +207,8 @@ export default class Logic extends UILogic<State, Event> {
                 await this.openLinkIfAvailable()
                 window.close()
             } else {
-                this.emitMutation({
-                    welcomeStep: { $set: 'basicIntro' },
-                })
+                window.open(MEMEX_ONBOARDING_URL, '_blank')
+                window.close()
                 // // check if user has been coming from Google or Twitter login & if they account creation was in the last 10s
                 // if (!newSignUp) {
 
@@ -299,11 +300,8 @@ export default class Logic extends UILogic<State, Event> {
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
         this.emitMutation({
-            welcomeStep: { $set: 'basicIntro' },
+            loadState: { $set: 'running' },
         })
-        // this.emitMutation({
-        //     loadState: { $set: 'running' },
-        // })
         await this.checkIfAutoOpenLinkAvailable()
         await this._onUserLogIn(!!event.newSignUp)
     }

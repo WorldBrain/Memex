@@ -211,7 +211,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 <SpacePicker
                     {...this.props.spacePickerFilterProps}
                     searchInputPlaceholder="Add Space filters"
-                    removeTooltipText="Remove Space filter"
                     filterMode
                     closePicker={this.props.toggleSpaceFilter}
                 />

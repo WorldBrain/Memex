@@ -9,8 +9,8 @@ export interface Props {
     isPrivate?: boolean
     isShared?: boolean
     indentSteps?: number
+    alwaysShowLeftSideIcon?: boolean
     alwaysShowRightSideIcon?: boolean
-    hasChildren?: boolean
     dragNDropActions?: DragNDropActions & {
         wasPageDropped?: boolean
     }
@@ -23,23 +23,39 @@ export interface Props {
     spaceSidebarWidth: string
     sidebarItemRef?: (el: any) => void
     isMenuDisplayed?: boolean
+
+    /** This overrides `state.isHovering` if set. If setting you must also set `props.setFocused` to control it. */
+    isFocused?: boolean
+    setFocused?: (isFocused: boolean) => void
 }
 
 export interface State {
-    isHovering: boolean
-    canDisableHover: boolean
+    /** Don't access this directly. Use `isFocused` calculated getter. */
+    _isFocused: boolean
 }
 
 export default class ListsSidebarItem extends React.PureComponent<
     Props,
     State
 > {
-    state: State = { isHovering: false, canDisableHover: false }
+    state: State = { _isFocused: false }
+
+    private setFocused = (isFocused: boolean) => {
+        if (this.props.setFocused) {
+            this.props.setFocused(isFocused)
+        } else {
+            this.setState({ _isFocused: isFocused })
+        }
+    }
+
+    private get isFocused(): boolean {
+        return this.props.isFocused ?? this.state._isFocused
+    }
 
     private get shouldShowRightSideIcon(): boolean {
         return (
+            this.isFocused ||
             this.props.isShared ||
-            this.state.isHovering ||
             this.props.dragNDropActions?.isDraggedOver ||
             this.props.dragNDropActions?.wasPageDropped ||
             this.props.forceRightSidePermanentDisplay
@@ -47,24 +63,14 @@ export default class ListsSidebarItem extends React.PureComponent<
     }
 
     render() {
-        if (!this.props.areAnyMenusDisplayed && this.state.canDisableHover) {
-            this.setState({ isHovering: false, canDisableHover: false })
-        }
-
         return (
             <Container
-                onMouseEnter={() => this.setState({ isHovering: true })}
-                isHovering={this.state.isHovering}
+                isHovering={this.isFocused}
+                onMouseEnter={() => this.setFocused(true)}
                 onMouseLeave={() => {
                     if (!this.props.areAnyMenusDisplayed) {
-                        this.setState({
-                            isHovering: false,
-                            canDisableHover: true,
-                        })
+                        this.setFocused(false)
                     }
-                    this.setState({
-                        canDisableHover: true,
-                    })
                 }}
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
                 onDragEnter={this.props.dragNDropActions?.onDragEnter}
@@ -83,14 +89,15 @@ export default class ListsSidebarItem extends React.PureComponent<
                     isSelected={this.props.isSelected}
                     dragNDropActions={this.props.dragNDropActions}
                     name={this.props.name} // Add this line
+                    isFocused={this.isFocused}
                 >
                     <LeftSideIconContainer
                         alwaysShowRightSideIcon={
                             this.props.alwaysShowRightSideIcon
                         }
                     >
-                        {(this.state.isHovering ||
-                            this.props.hasChildren ||
+                        {(this.isFocused ||
+                            this.props.alwaysShowLeftSideIcon ||
                             this.props.alwaysShowRightSideIcon) &&
                             this.props.renderLeftSideIcon?.()}
                     </LeftSideIconContainer>
@@ -102,6 +109,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                                 this.props.dragNDropActions?.onDragStart
                             }
                             onDragEnd={this.props.dragNDropActions?.onDragEnd}
+                            isFocused={this.isFocused}
                             draggable
                         >
                             <ListTitle>
@@ -115,7 +123,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                                 this.props.alwaysShowRightSideIcon
                             }
                         >
-                            <IconBox {...this.props} {...this.state}>
+                            <IconBox {...this.props} isFocused={this.isFocused}>
                                 {this.props.renderEditIcon?.()}
                             </IconBox>
                             {this.shouldShowRightSideIcon &&
@@ -197,6 +205,7 @@ const Name = styled.div`
 
 const TitleBox = styled.div<{
     draggable: boolean
+    isFocused: boolean
 }>`
     display: flex;
     flex: 0 1 100%;
@@ -204,6 +213,7 @@ const TitleBox = styled.div<{
     height: 100%;
     align-items: center;
     color: ${(props) => props.theme.colors.greyScale5};
+    ${(props) => (props.isFocused ? 'width: 30%;' : '')}
 `
 
 const SidebarItem = styled.div<Props>`
@@ -211,7 +221,7 @@ const SidebarItem = styled.div<Props>`
     /* margin: 0px 12px; */
     position: relative;
     scroll-margin: 20px;
-    padding-left: ${({ indentSteps }: Props) => indentSteps * 15}px;
+    padding-left: ${({ indentSteps }) => indentSteps * 15}px;
     display: flex;
     width: fill-available;
     width: -moz-available;
@@ -227,11 +237,7 @@ const SidebarItem = styled.div<Props>`
             : 'transparent'};
 
 
-    &:hover ${TitleBox} {
-        width: 30%;
-    }
-
-    ${({ isSelected }: Props) =>
+    ${({ isSelected }) =>
         isSelected &&
         css`
             color: ${(props) => props.theme.colors.darkText};
@@ -241,20 +247,17 @@ const SidebarItem = styled.div<Props>`
 
     cursor: 'pointer';
 
-    &:hover {
-        background: ${(props) => props.theme.colors.greyScale1_5};
+    ${(props) =>
+        props.isFocused &&
+        `
+        background: ${props.theme.colors.greyScale1_5};
 
-        ${({ isSelected }: Props) =>
-            isSelected &&
-            css`
-                background: ${(props) => props.theme.colors.greyScale2};
-            `}
-        ${(props) =>
+        ${props.isSelected && `background: ${props.theme.colors.greyScale2};`}}
+        ${
             props.theme.variant === 'light' &&
-            css`
-                background: ${(props) => props.theme.colors.greyScale3};
-            `};
-    }
+            `background: ${props.theme.colors.greyScale3};`
+        }
+    `}
 
     ${(props) =>
         props.dragNDropActions?.isDraggedOver &&
@@ -282,7 +285,7 @@ const ListTitle = styled.span`
     pointer-events: none;
 `
 
-const IconBox = styled.div<Props & State>`
+const IconBox = styled.div<Props>`
     display: none;
     height: 100%;
     align-items: center;
@@ -294,7 +297,7 @@ const IconBox = styled.div<Props & State>`
     // List all states in which to display
     ${(props) =>
         (props.alwaysShowRightSideIcon ||
-            props.isHovering ||
+            props.isFocused ||
             props.dragNDropActions?.isDraggedOver ||
             props.dragNDropActions?.wasPageDropped ||
             props.isMenuDisplayed) &&
