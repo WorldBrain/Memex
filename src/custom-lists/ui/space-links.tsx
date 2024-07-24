@@ -11,6 +11,7 @@ import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
+import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
 
 export interface Props {
     isPageLink: boolean
@@ -83,11 +84,7 @@ export default class SpaceLinks extends React.PureComponent<Props> {
 
     render() {
         if (this.props.loadState === 'running') {
-            return (
-                <ShareSectionContainer>
-                    <LoadingIndicator size={20} />
-                </ShareSectionContainer>
-            )
+            return <LoadingBlock height={'90px'} size={20} />
         }
         return (
             <ShareSectionContainer>
@@ -227,7 +224,7 @@ const ShareSectionContainer = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 90px;
+    height: 80px;
 `
 
 const LinkAndRoleBox = styled.div<{
@@ -242,7 +239,7 @@ const LinkAndRoleBox = styled.div<{
     // z-index: ${(props) => props['zIndex']};
     height: 40px;
     margin: 0 -5px 5px -10px;
-    padding: 0px 0px 0 5px;
+    padding: 0px 0px 0 5px; 
 
 
     ${(props) =>

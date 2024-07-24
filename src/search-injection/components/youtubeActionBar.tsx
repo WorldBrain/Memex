@@ -924,7 +924,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                         hoverOff
                                     />
                                     <YTPMenuItemLabel>
-                                        Timestamped Note
+                                        Add Note
                                     </YTPMenuItemLabel>
                                 </YTPMenuItem>
                             </TooltipBox>
@@ -932,20 +932,33 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
                                     <span>
-                                        Instant note with timestamp and summary
-                                        <br /> of the selected video range
+                                        Instant summary + note of selected
+                                        range.
+                                        <TooltipSubTitle>
+                                            <KeyboardShortcuts
+                                                size={'small'}
+                                                keys={['Shift']}
+                                                getRootElement={
+                                                    this.props.getRootElement
+                                                }
+                                            />
+                                            - Click for custom prompt
+                                        </TooltipSubTitle>
                                     </span>
                                 }
                                 placement="bottom"
                             >
                                 <YTPMenuItem
-                                    onMouseDown={() =>
-                                        this.setState({
-                                            showAINoteTooltip: true,
-                                        })
-                                    }
-                                    onMouseUp={() => {
-                                        if (!this.state.showAINoteTooltip) {
+                                    onMouseDown={(event) => {
+                                        if (event.shiftKey) {
+                                            this.setState({
+                                                showAINoteTooltip: true,
+                                            })
+                                        } else if (
+                                            this.state.showAINoteTooltip
+                                        ) {
+                                            this.handleAItimeStampButtonClick()
+                                        } else {
                                             this.handleAItimeStampButtonClick()
                                         }
                                     }}
@@ -998,7 +1011,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                         hoverOff
                                     />
                                     <YTPMenuItemLabel>
-                                        Summarize Video
+                                        Summarize
                                     </YTPMenuItemLabel>
                                     {/* {this.state.showSummarizeTooltip
                                         ? this.renderPromptTooltip(
@@ -1406,4 +1419,21 @@ const LanguageSearchBox = styled.div`
     align-items: center;
     justify-content: center;
     padding: 10px;
+`
+
+const ToolTipTextBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
+    flex-direction: column;
+`
+
+const TooltipSubTitle = styled.div`
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
 `

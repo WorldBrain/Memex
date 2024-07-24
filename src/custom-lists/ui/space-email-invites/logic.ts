@@ -152,83 +152,99 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
         event,
         previousState,
     }) => {
+        this.emitMutation({
+            emailInvitesLoadState: { $set: 'running' },
+        })
         const now = Date.now()
-        const email = event.state.emailInviteInputValue.trim()
+        const emails = event.state.emailInviteInputValue
+            .split(',')
+            .map((email) => email.trim())
+            .filter((email) => email !== '') // Remove any empty strings
         const roleID = event.state.emailInviteInputRole
 
-        const prevInviteCount = event.state.emailInvites.allIds.length
-        const tmpId = `tmp-invite-id-${prevInviteCount}`
-        this.emitMutation({
-            emailInviteInputValue: { $set: '' },
-            emailInvites: {
-                allIds: { $push: [tmpId] },
-                byId: {
-                    [tmpId]: {
-                        $set: {
-                            email,
-                            roleID,
-                            id: tmpId,
-                            createdWhen: now,
-                            sharedListKey: null,
-                        },
-                    },
-                },
-            },
-        })
-        await executeUITask(this, 'emailInvitesCreateState', async () => {
-            let remoteId = this.dependencies.listData?.remoteId ?? null
+        let prevInviteCount = event.state.emailInvites.allIds.length
 
-            while (remoteId == null) {
-                remoteId = await this.dependencies.contentSharingBG.getRemoteListId(
-                    {
-                        localListId: this.dependencies.listData.localId,
-                    },
-                )
-            }
+        for (const email of emails) {
+            const tmpId = `tmp-invite-id-${prevInviteCount}`
 
-            const result = await this.dependencies.contentSharingBG.createListEmailInvite(
-                {
-                    now,
-                    email,
-                    roleID,
-                    listId: remoteId,
-                },
-            )
-            if (result.status === 'success') {
-                // Replace temp emailInvites state with the full one
-                this.emitMutation({
-                    emailInvites: {
-                        allIds: {
-                            [prevInviteCount]: { $set: result.keyString },
-                        },
-                        byId: {
-                            $unset: [tmpId],
-                            [result.keyString]: {
-                                $set: {
-                                    email,
-                                    roleID,
-                                    createdWhen: now,
-                                    id: result.keyString,
-                                    sharedListKey: result.keyString,
-                                },
+            this.emitMutation({
+                emailInvites: {
+                    allIds: { $push: [tmpId] },
+                    byId: {
+                        [tmpId]: {
+                            $set: {
+                                email,
+                                roleID,
+                                id: tmpId,
+                                createdWhen: now,
+                                sharedListKey: null,
                             },
                         },
                     },
-                    emailInvitesLoadState: { $set: 'success' },
-                })
-            } else if (result.status === 'permission-denied') {
-                this.emitMutation({
-                    emailInvites: {
-                        byId: { $unset: [tmpId] },
-                        allIds: {
-                            $apply: (prev) =>
-                                prev.filter((ids) => ids !== tmpId),
+                },
+            })
+
+            await executeUITask(this, 'emailInvitesCreateState', async () => {
+                let remoteId = this.dependencies.listData?.remoteId ?? null
+
+                while (remoteId == null) {
+                    remoteId = await this.dependencies.contentSharingBG.getRemoteListId(
+                        {
+                            localListId: this.dependencies.listData.localId,
                         },
+                    )
+                }
+
+                const result = await this.dependencies.contentSharingBG.createListEmailInvite(
+                    {
+                        now,
+                        email,
+                        roleID,
+                        listId: remoteId,
                     },
-                    emailInvitesLoadState: { $set: 'pristine' },
-                })
-                throw new Error('Email invite encountered an error')
-            }
+                )
+                if (result.status === 'success') {
+                    this.emitMutation({
+                        emailInvites: {
+                            allIds: {
+                                [prevInviteCount]: { $set: result.keyString },
+                            },
+                            byId: {
+                                $unset: [tmpId],
+                                [result.keyString]: {
+                                    $set: {
+                                        email,
+                                        roleID,
+                                        createdWhen: now,
+                                        id: result.keyString,
+                                        sharedListKey: result.keyString,
+                                    },
+                                },
+                            },
+                        },
+                    })
+                } else if (result.status === 'permission-denied') {
+                    this.emitMutation({
+                        emailInvites: {
+                            byId: { $unset: [tmpId] },
+                            allIds: {
+                                $apply: (prev) =>
+                                    prev.filter((ids) => ids !== tmpId),
+                            },
+                        },
+                    })
+                    throw new Error(
+                        `Email invite for ${email} encountered an error`,
+                    )
+                }
+            })
+
+            prevInviteCount++
+        }
+
+        this.emitMutation({
+            emailInviteInputValue: { $set: '' },
+            emailInvitesLoadState: { $set: 'success' },
         })
     }
 

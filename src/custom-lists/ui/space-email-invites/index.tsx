@@ -7,16 +7,18 @@ import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validatio
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
 import { __wrapClick } from '../utils'
 import { TaskState } from 'ui-logic-core/lib/types'
+import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
     pageLinkLoadingState: TaskState
 }
+
+const SpaceEmailHeight = '50px'
 
 export default class SpaceEmailInvites extends StatefulUIElement<
     Props,
@@ -40,21 +42,15 @@ export default class SpaceEmailInvites extends StatefulUIElement<
     }
 
     private get shouldShowInviteBtn(): boolean {
-        const inputValue = this.state.emailInviteInputValue.trim()
-        if (!inputValue.length) {
+        const inputValues = this.state.emailInviteInputValue
+            .split(',')
+            .map((email) => email.trim())
+            .filter((email) => email.length > 0)
+        if (inputValues.length === 0) {
             return false
         }
-        if (!isValidEmail(inputValue)) {
-            return false
-        }
-        let alreadyInvited = false
-        for (const invite of normalizedStateToArray(this.state.emailInvites)) {
-            if (invite.email === inputValue) {
-                alreadyInvited = true
-                break
-            }
-        }
-        return !alreadyInvited
+
+        return true
     }
 
     private handleInviteInputChange: React.ChangeEventHandler<
@@ -85,16 +81,17 @@ export default class SpaceEmailInvites extends StatefulUIElement<
     render() {
         return (
             <>
-                <SectionTitle>
-                    Invite via Email{' '}
-                    {this.state.emailInvitesLoadState === 'running' && (
-                        <LoadingIndicator size={16} />
-                    )}
-                </SectionTitle>
+                <SectionTitle>Invite via Email </SectionTitle>
                 {this.props.pageLinkLoadingState === 'running' ? (
                     <WaitingDescription>
-                        Available once links are finished loading
+                        Available once links loaded
                     </WaitingDescription>
+                ) : this.state.emailInvitesLoadState === 'running' ? (
+                    <LoadingBlock
+                        height={SpaceEmailHeight}
+                        width="100%"
+                        size={20}
+                    />
                 ) : (
                     <Container
                         onClick={(e) => {
@@ -110,7 +107,7 @@ export default class SpaceEmailInvites extends StatefulUIElement<
                             value={this.state.emailInviteInputValue}
                             onChange={this.handleInviteInputChange}
                             disabled={this.props.disableWriteOps}
-                            placeholder="Add email address"
+                            placeholder="Add address(es) with , separator"
                             icon="mail"
                             onKeyDown={this.handleAddInviteInputKeyDown}
                         />
@@ -166,8 +163,7 @@ export default class SpaceEmailInvites extends StatefulUIElement<
                             </>
                         )}
 
-                        {(this.state.emailInvitesLoadState === 'success' ||
-                            this.state.emailInvitesLoadState === 'pristine') &&
+                        {this.state.emailInvitesLoadState === 'success' &&
                             !this.shouldShowInviteBtn &&
                             normalizedStateToArray(this.state.emailInvites)
                                 .length > 0 && (
@@ -307,10 +303,12 @@ const WaitingDescription = styled.div`
     width: fill-available;
     width: -moz-available;
     padding: 20px;
+    box-sizing: border-box;
     display: flex;
     border-radius: 8px;
     justify-content: center;
     align-items: center;
+    height: ${SpaceEmailHeight};
 `
 
 const EditableTextField = styled(TextField)`
@@ -336,4 +334,5 @@ const Container = styled.div`
     align-items: flex-start;
     background-color: transparent;
     grid-gap: 2px;
+    min-height: ${SpaceEmailHeight};
 `
