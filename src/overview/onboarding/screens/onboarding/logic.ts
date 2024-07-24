@@ -197,6 +197,7 @@ export default class Logic extends UILogic<State, Event> {
             newSignUp: { $set: newSignUp },
             loadState: { $set: 'running' },
         })
+        const _window = this.dependencies.getWindow()
 
         if ((await this.dependencies.authBG.getCurrentUser()) != null) {
             this.syncPromise = executeUITask(this, 'syncState', async () =>
@@ -205,10 +206,10 @@ export default class Logic extends UILogic<State, Event> {
 
             if (this.hasLinkToOpen) {
                 await this.openLinkIfAvailable()
-                window.close()
+                _window.close()
             } else {
-                window.open(MEMEX_ONBOARDING_URL, '_blank')
-                window.close()
+                _window.open(MEMEX_ONBOARDING_URL, '_blank')
+                _window.close()
                 // // check if user has been coming from Google or Twitter login & if they account creation was in the last 10s
                 // if (!newSignUp) {
 

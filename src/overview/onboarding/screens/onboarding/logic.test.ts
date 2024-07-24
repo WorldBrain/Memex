@@ -28,6 +28,11 @@ async function setupTest(
         ) as any,
         browserAPIs: null,
         getRootElement: () => null,
+        getWindow: () =>
+            ({
+                open: () => {},
+                close: () => {},
+            } as any),
     })
 
     const logic = createElement(_logic)

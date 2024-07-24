@@ -18,6 +18,7 @@ export interface Dependencies {
     bgScriptsBG: RemoteBGScriptInterface<'caller'>
     browserAPIs: Browser
     getRootElement: () => HTMLElement
+    getWindow: () => Window
 }
 
 export interface State {
