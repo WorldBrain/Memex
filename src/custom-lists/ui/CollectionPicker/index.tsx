@@ -680,13 +680,11 @@ class SpacePicker extends StatefulUIElement<
                                                 ? 'Show Sub-Spaces'
                                                 : 'Add Subspace'
                                         }
-                                        placement="right"
+                                        placement="bottom"
                                         getPortalRoot={
                                             this.props.getRootElement
                                         }
-                                        hideTooltip={
-                                            baseEntry.pathUnifiedIds.length > 0
-                                        }
+                                        hideTooltip={hasChildren}
                                     >
                                         <Icon
                                             icon={

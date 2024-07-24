@@ -23,7 +23,7 @@ export class ListTreeToggleArrow extends React.Component<Props> {
                         ? 'Hide Sub-Spaces'
                         : 'Show Sub-Spaces'
                 }
-                placement="right"
+                placement="bottom"
                 targetElementRef={this.toggleBtnRef.current}
                 getPortalRoot={this.props.getRootElement}
                 hideTooltip={treeState.hasChildren}
