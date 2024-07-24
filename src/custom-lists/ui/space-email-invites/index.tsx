@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic, { Dependencies, State, Event } from './logic'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu'
-import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
@@ -12,6 +11,7 @@ import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-s
 import { __wrapClick } from '../utils'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -81,17 +81,16 @@ export default class SpaceEmailInvites extends StatefulUIElement<
     render() {
         return (
             <>
-                <SectionTitle>Invite via Email </SectionTitle>
+                <SectionTitle>
+                    Invite via Email{' '}
+                    {this.state.emailInvitesLoadState === 'running' && (
+                        <LoadingIndicator size={18} />
+                    )}
+                </SectionTitle>
                 {this.props.pageLinkLoadingState === 'running' ? (
                     <WaitingDescription>
                         Available once links loaded
                     </WaitingDescription>
-                ) : this.state.emailInvitesLoadState === 'running' ? (
-                    <LoadingBlock
-                        height={SpaceEmailHeight}
-                        width="100%"
-                        size={20}
-                    />
                 ) : (
                     <Container
                         onClick={(e) => {
@@ -106,130 +105,148 @@ export default class SpaceEmailInvites extends StatefulUIElement<
                             }}
                             value={this.state.emailInviteInputValue}
                             onChange={this.handleInviteInputChange}
-                            disabled={this.props.disableWriteOps}
-                            placeholder="Add address(es) with , separator"
-                            icon="mail"
+                            disabled={
+                                this.props.disableWriteOps ||
+                                this.state.emailInvitesCreateState === 'running'
+                            }
+                            placeholder={
+                                this.state.emailInvitesCreateState === 'running'
+                                    ? 'Adding new emails...'
+                                    : 'Add address(es) with comma'
+                            }
+                            element={
+                                this.state.emailInvitesCreateState ===
+                                'running' ? (
+                                    <LoadingIndicator size={18} />
+                                ) : null
+                            }
+                            icon={
+                                this.state.emailInvitesCreateState !== 'running'
+                                    ? 'mail'
+                                    : null
+                            }
                             onKeyDown={this.handleAddInviteInputKeyDown}
                         />
-
-                        {this.shouldShowInviteBtn && (
-                            <>
-                                <DropdownMenuBtn
-                                    elementHeight="40px"
-                                    backgroundColor={'greyScale1_5'}
-                                    menuItems={[
-                                        {
-                                            id: SharedListRoleID.Commenter,
-                                            name: sharedListRoleIDToString(
-                                                SharedListRoleID.Commenter,
-                                            ),
-                                        },
-                                        {
-                                            id: SharedListRoleID.ReadWrite,
-                                            name: sharedListRoleIDToString(
-                                                SharedListRoleID.ReadWrite,
-                                            ),
-                                        },
-                                    ]}
-                                    onMenuItemClick={(item) =>
-                                        this.processEvent(
-                                            'updateEmailInviteInputRole',
+                        {this.shouldShowInviteBtn &&
+                            this.state.emailInvitesCreateState !== 'running' &&
+                            this.state.emailInvitesLoadState !== 'running' && (
+                                <>
+                                    <DropdownMenuBtn
+                                        elementHeight="40px"
+                                        backgroundColor={'greyScale1_5'}
+                                        menuItems={[
                                             {
-                                                role: item.id as SharedListRoleID,
+                                                id: SharedListRoleID.Commenter,
+                                                name: sharedListRoleIDToString(
+                                                    SharedListRoleID.Commenter,
+                                                ),
                                             },
-                                        )
-                                    }
-                                    initSelectedIndex={
-                                        this.state.emailInviteInputRole ===
-                                        SharedListRoleID.Commenter
-                                            ? 0
-                                            : 1
-                                    }
-                                    keepSelectedState
-                                />
-                                <PrimaryAction
-                                    onClick={() =>
-                                        this.processEvent('inviteViaEmail', {
-                                            state: this.state,
-                                            remoteId: this.props.listData
-                                                .remoteId,
-                                        })
-                                    }
-                                    label="Invite"
-                                    type="secondary"
-                                    size="medium"
-                                    fullWidth
-                                />
-                            </>
-                        )}
-
-                        {this.state.emailInvitesLoadState === 'success' &&
-                            !this.shouldShowInviteBtn &&
-                            normalizedStateToArray(this.state.emailInvites)
-                                .length > 0 && (
-                                <EmailListContainer>
-                                    {normalizedStateToArray(
-                                        this.state.emailInvites,
-                                    )
-                                        .slice()
-                                        .reverse()
-                                        .map((invite) => (
-                                            <InviteItemContainer
-                                                onMouseEnter={() => {
-                                                    this.processEvent(
-                                                        'setEmailInvitesHoverState',
-                                                        { id: invite.id },
-                                                    )
-                                                }}
-                                                onMouseLeave={() => {
-                                                    this.processEvent(
-                                                        'setEmailInvitesHoverState',
-                                                        { id: null },
-                                                    )
-                                                }}
-                                                key={invite.id}
-                                            >
-                                                <InvitedBox>
-                                                    <InvitedEmail>
-                                                        {invite.email}
-                                                    </InvitedEmail>
-                                                </InvitedBox>
-                                                {this.state
-                                                    .emailInvitesHoverState ===
-                                                invite.id ? (
-                                                    <PrimaryAction
-                                                        onClick={() =>
-                                                            this.processEvent(
-                                                                'deleteEmailInvite',
-                                                                {
-                                                                    key: invite.sharedListKey.toString(),
-                                                                },
-                                                            )
-                                                        }
-                                                        /* sharedListKey will be missing between when the user creates an invite and when the server-side write actually completes. */
-                                                        disabled={
-                                                            invite.sharedListKey ==
-                                                            null
-                                                        }
-                                                        type="tertiary"
-                                                        label="Remove"
-                                                        icon={'removeX'}
-                                                        fontSize="12px"
-                                                        iconSize="16px"
-                                                        iconColor="greyScale5"
-                                                        padding="0px 5px 0px 0px"
-                                                    />
-                                                ) : (
-                                                    <InvitedPermission>
-                                                        {sharedListRoleIDToString(
-                                                            invite.roleID,
-                                                        )}
-                                                    </InvitedPermission>
-                                                )}
-                                            </InviteItemContainer>
-                                        ))}
-                                </EmailListContainer>
+                                            {
+                                                id: SharedListRoleID.ReadWrite,
+                                                name: sharedListRoleIDToString(
+                                                    SharedListRoleID.ReadWrite,
+                                                ),
+                                            },
+                                        ]}
+                                        onMenuItemClick={(item) =>
+                                            this.processEvent(
+                                                'updateEmailInviteInputRole',
+                                                {
+                                                    role: item?.id as SharedListRoleID,
+                                                },
+                                            )
+                                        }
+                                        initSelectedIndex={
+                                            this.state.emailInviteInputRole ===
+                                            SharedListRoleID.Commenter
+                                                ? 0
+                                                : 1
+                                        }
+                                        keepSelectedState
+                                    />
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'inviteViaEmail',
+                                                {
+                                                    state: this.state,
+                                                    remoteId: this.props
+                                                        .listData.remoteId,
+                                                },
+                                            )
+                                        }
+                                        label="Invite"
+                                        type="secondary"
+                                        size="medium"
+                                        fullWidth
+                                    />
+                                </>
                             )}
+                        {normalizedStateToArray(this.state.emailInvites)
+                            ?.length > 0 && (
+                            <EmailListContainer>
+                                {normalizedStateToArray(this.state.emailInvites)
+                                    .slice()
+                                    .reverse()
+                                    .map((invite) => (
+                                        <InviteItemContainer
+                                            onMouseEnter={() => {
+                                                this.processEvent(
+                                                    'setEmailInvitesHoverState',
+                                                    { id: invite?.email },
+                                                )
+                                            }}
+                                            onMouseLeave={() => {
+                                                this.processEvent(
+                                                    'setEmailInvitesHoverState',
+                                                    { id: null },
+                                                )
+                                            }}
+                                            key={invite?.email}
+                                        >
+                                            <InvitedBox>
+                                                <InvitedEmail>
+                                                    {invite?.email}
+                                                </InvitedEmail>
+                                            </InvitedBox>
+                                            {invite?.sharedListKey == null ? (
+                                                <LoadingIndicator size={14} />
+                                            ) : this.state
+                                                  .emailInvitesHoverState ===
+                                              invite?.email ? (
+                                                <PrimaryAction
+                                                    onClick={() =>
+                                                        this.processEvent(
+                                                            'deleteEmailInvite',
+                                                            {
+                                                                key: invite?.sharedListKey.toString(),
+                                                            },
+                                                        )
+                                                    }
+                                                    /* sharedListKey will be missing between when the user creates an invite and when the server-side write actually completes. */
+                                                    disabled={
+                                                        invite?.sharedListKey ==
+                                                        null
+                                                    }
+                                                    type="tertiary"
+                                                    label="Remove"
+                                                    icon={'removeX'}
+                                                    fontSize="12px"
+                                                    iconSize="16px"
+                                                    iconColor="greyScale5"
+                                                    padding="0px 5px 0px 0px"
+                                                />
+                                            ) : (
+                                                <InvitedPermission>
+                                                    {sharedListRoleIDToString(
+                                                        invite.roleID,
+                                                    )}
+                                                </InvitedPermission>
+                                            )}
+                                        </InviteItemContainer>
+                                    ))}
+                            </EmailListContainer>
+                        )}
                     </Container>
                 )}
             </>
@@ -335,4 +352,5 @@ const Container = styled.div`
     background-color: transparent;
     grid-gap: 2px;
     min-height: ${SpaceEmailHeight};
+    height: fit-content;
 `

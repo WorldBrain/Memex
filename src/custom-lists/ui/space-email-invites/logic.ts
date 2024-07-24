@@ -117,7 +117,9 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                         getId: (invite) => invite.sharedListKey.toString(),
                     }),
                 },
+                emailInvitesLoadState: { $set: 'success' },
             })
+            return
         })
     }
 
@@ -154,13 +156,17 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
         previousState,
     }) => {
         this.emitMutation({
-            emailInvitesLoadState: { $set: 'running' },
+            emailInvitesCreateState: { $set: 'running' },
+            emailInviteInputValue: { $set: '' },
         })
         const now = Date.now()
-        const emails = event.state.emailInviteInputValue
-            .split(',')
+        let emails = event.state.emailInviteInputValue.split(',')
+        emails = emails
             .map((email) => email.trim())
-            .filter((email) => !isValidEmail(email)) // Filter out invalid emails
+            .filter((email) => {
+                const isValid = isValidEmail(email)
+                return isValid
+            })
             .filter(
                 (email) =>
                     !event.state.emailInvites.allIds.some(
@@ -169,30 +175,26 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                     ),
             ) // Filter out emails already on the list
         const roleID = event.state.emailInviteInputRole
-
-        let prevInviteCount = event.state.emailInvites.allIds.length
+        let prevInviteCount = 0
 
         for (const email of emails) {
-            const tmpId = `tmp-invite-id-${prevInviteCount}`
-
-            this.emitMutation({
-                emailInvites: {
-                    allIds: { $push: [tmpId] },
-                    byId: {
-                        [tmpId]: {
-                            $set: {
-                                email,
-                                roleID,
-                                id: tmpId,
-                                createdWhen: now,
-                                sharedListKey: null,
+            executeUITask(this, 'emailInvitesCreateState', async () => {
+                this.emitMutation({
+                    emailInvites: {
+                        allIds: { $push: [email] },
+                        byId: {
+                            [email]: {
+                                $set: {
+                                    email,
+                                    roleID,
+                                    id: email,
+                                    createdWhen: now,
+                                    sharedListKey: null,
+                                },
                             },
                         },
                     },
-                },
-            })
-
-            await executeUITask(this, 'emailInvitesCreateState', async () => {
+                })
                 let remoteId = this.dependencies.listData?.remoteId ?? null
 
                 while (remoteId == null) {
@@ -215,11 +217,10 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                     this.emitMutation({
                         emailInvites: {
                             allIds: {
-                                [prevInviteCount]: { $set: result.keyString },
+                                [email]: { $set: result.keyString },
                             },
                             byId: {
-                                $unset: [tmpId],
-                                [result.keyString]: {
+                                [email]: {
                                     $set: {
                                         email,
                                         roleID,
@@ -234,10 +235,10 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                 } else if (result.status === 'permission-denied') {
                     this.emitMutation({
                         emailInvites: {
-                            byId: { $unset: [tmpId] },
+                            byId: { $unset: [email] },
                             allIds: {
                                 $apply: (prev) =>
-                                    prev.filter((ids) => ids !== tmpId),
+                                    prev.filter((ids) => ids !== email),
                             },
                         },
                     })
@@ -245,14 +246,13 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                         `Email invite for ${email} encountered an error`,
                     )
                 }
+                prevInviteCount++
             })
-
-            prevInviteCount++
         }
 
         this.emitMutation({
             emailInviteInputValue: { $set: '' },
-            emailInvitesLoadState: { $set: 'success' },
+            emailInvitesCreateState: { $set: 'success' },
         })
     }
 
