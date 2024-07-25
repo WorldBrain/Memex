@@ -267,6 +267,10 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     }
 
     async showTooltip(options?: ToolTipActionOptions) {
+        if (this.componentsSetUp.tooltip) {
+            await this.options.loadComponent('tooltip')
+        }
+
         const maybeEmitAction = () => {
             if (options) {
                 this._emitAction({
@@ -275,12 +279,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
                 })
             }
         }
-
-        if (this.componentsShown.tooltip) {
-            maybeEmitAction()
-            return
-        }
-
         await this._setState('tooltip', true)
         maybeEmitAction()
         return
@@ -320,7 +318,10 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     }
 
     private async _setState(component: InPageUIComponent, visible: boolean) {
-        if (this.componentsShown[component] === visible) {
+        if (
+            this.componentsShown[component] === visible &&
+            component !== 'tooltip'
+        ) {
             return
         }
 

@@ -48,7 +48,7 @@ import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annot
 
 interface TooltipRootProps {
     mount: InPageUIRootMount
-    params: Omit<Props, 'onTooltipInit'>
+    params: Props
     onTooltipInit: (showTooltip: () => void) => void
     toggleTooltipState: (state: boolean) => Promise<void>
     analyticsBG: AnalyticsCoreInterface
@@ -72,6 +72,11 @@ interface TooltipRootProps {
         preventHideTooltip?: boolean,
     ): Promise<any | null>
     getWindow: () => Window
+    tooltip: {
+        getState: () => void
+        setState: (tooltipValue: boolean) => void
+    }
+    shouldInitTooltip: boolean
 }
 
 interface TooltipRootState {
@@ -533,6 +538,8 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         }
                         showColorPicker={this.state.showColorPicker}
                         toggleTooltipState={props.toggleTooltipState}
+                        tooltip={props.params.tooltip}
+                        shouldInitTooltip={props.shouldInitTooltip}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -566,6 +573,8 @@ export function setupUIContainer(
                 createHighlight={params.createHighlight}
                 getWindow={params.getWindow}
                 toggleTooltipState={props.toggleTooltipState}
+                tooltip={params.tooltip}
+                shouldInitTooltip={params.shouldInitTooltip}
             />,
             mount.rootElement,
         )

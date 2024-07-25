@@ -57,6 +57,12 @@ let manualOverride = false
 
 let removeTooltipStateChangeListener: () => void
 
+let shouldInitTooltip = true // You can set this based on your conditions
+
+export const setShouldInitTooltip = (value: boolean) => {
+    shouldInitTooltip = value
+}
+
 interface TooltipInsertDependencies extends TooltipDependencies {
     mount: InPageUIRootMount
 }
@@ -103,6 +109,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                     askAI: shortcutToKeyStrs(state.askAI),
                 }
             },
+
             onTooltipHide: () => params.inPageUI.hideTooltip(),
             onTooltipClose: () => params.inPageUI.removeTooltip(),
             toggleTooltipState: async (state: boolean) => {
@@ -154,7 +161,13 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                 params.inPageUI.events.on(
                     'tooltipAction',
                     (event, callback) => {
-                        handleExternalAction(event, callback)
+                        if (event.annotationCacheId || event.openForSpaces) {
+                            handleExternalAction(event, callback)
+                            callback(true)
+                        } else {
+                            setShouldInitTooltip(true)
+                        }
+
                         callback(true)
                     },
                 )
@@ -186,6 +199,11 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                 // Placeholder function, replace with actual implementation
             },
             openImageInPreview: async (src: string) => null,
+            tooltip: {
+                getState: params.tooltip.getState,
+                setState: params.tooltip.setState,
+            },
+            shouldInitTooltip: shouldInitTooltip,
         },
         {
             annotationsBG: params.annotationsBG,
@@ -203,9 +221,13 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             createHighlight: params.createHighlight,
             getWindow: () => window,
             toggleTooltipState: params.toggleTooltipState,
+            tooltip: {
+                getState: params.tooltip.getState,
+                setState: params.tooltip.setState,
+            },
+            shouldInitTooltip: shouldInitTooltip,
         },
     )
-
     setupTooltipTrigger(() => {
         params.inPageUI.showTooltip()
     }, null)
@@ -279,16 +301,35 @@ export const removeTooltip = (options?: { override?: boolean }) => {
 // }
 
 export const showContentTooltip = async (params: TooltipInsertDependencies) => {
-    if (!showTooltip) {
+    if (showTooltip == null) {
         await insertTooltip(params)
     }
 
-    if (userSelectedText()) {
-        const position = calculateTooltipPostion()
-        showTooltip(position)
-    }
-}
+    // There seems to be a race condition with the tooltip setup function to get the "showtooltip" function
+    // This is a temporary fix to keep trying to get the showtooltip function until it is available
 
+    let attempts = 0
+    const maxAttempts = 20 // 5 seconds total
+    const baseDelay = 50
+
+    while (showTooltip == null && attempts < maxAttempts) {
+        await new Promise((resolve) =>
+            setTimeout(resolve, baseDelay * Math.pow(1.5, attempts)),
+        )
+
+        attempts++
+    }
+
+    if (showTooltip == null) {
+        console.error(
+            'Failed to initialize showTooltip after multiple attempts',
+        )
+        return
+    }
+
+    const position = calculateTooltipPosition()
+    showTooltip(position)
+}
 /**
  * Checks for certain conditions before triggering the tooltip.
  * i) Whether the selection made by the user is just text.
@@ -325,7 +366,7 @@ export const conditionallyTriggerTooltip = delayed(
         // } else if (positioning === 'mouse' && event) {
         //     position = calculateTooltipPostion()
         // }
-        position = calculateTooltipPostion()
+        position = calculateTooltipPosition()
         analytics.trackEvent({
             category: 'InPageTooltip',
             action: 'showTooltip',
@@ -340,17 +381,22 @@ export const conditionallyTriggerTooltip = delayed(
     10,
 )
 
-export function calculateTooltipPostion(): TooltipPosition {
-    const range = document.getSelection().getRangeAt(0)
-    const boundingRect = range.getBoundingClientRect()
-    // x = position of element from the left + half of it's width
-    const x = boundingRect.left + boundingRect.width / 2
-    // y = scroll height from top + pixels from top + height of element - offset
-    const y = window.pageYOffset + boundingRect.top + boundingRect.height
-    return {
-        x,
-        y,
+export function calculateTooltipPosition(): TooltipPosition {
+    const selection = document.getSelection()
+    if (!selection || selection.rangeCount === 0) {
+        // Return a default position if there's no selection
+        return { x: window.innerWidth / 2, y: window.innerHeight / 2 }
     }
+
+    const range = selection.getRangeAt(0)
+    const boundingRect = range.getBoundingClientRect()
+
+    // x = position of element from the left + half of its width
+    const x = boundingRect.left + boundingRect.width / 2
+    // y = scroll height from top + pixels from top + height of element
+    const y = window.pageYOffset + boundingRect.top + boundingRect.height
+
+    return { x, y }
 }
 
 function isAnchorOrContentEditable(selected) {

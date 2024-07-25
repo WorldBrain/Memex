@@ -1063,15 +1063,13 @@ export class RibbonContainerLogic extends UILogic<
 
         setState(!currentSetting)
         try {
+            await this.dependencies.tooltip.setState(!currentSetting)
             if (currentSetting === true) {
                 await this.dependencies.inPageUI.removeTooltip()
             } else {
-                await this.dependencies.tooltip.setState(!currentSetting)
                 await this.dependencies.inPageUI.toggleTooltip()
-
                 await this.dependencies.inPageUI.showTooltip()
             }
-            await this.dependencies.tooltip.setState(!currentSetting)
         } catch (err) {
             setState(!currentSetting)
             throw err
