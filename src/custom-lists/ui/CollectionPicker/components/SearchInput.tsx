@@ -52,8 +52,11 @@ export class PickerSearchInput extends React.Component<Props, State> {
                 value={this.props.value}
                 onChange={this.onChange}
                 onKeyDown={(e) => {
-                    this.props.onKeyDown(e)
                     e.stopPropagation()
+                    this.props.onKeyDown(e)
+                }}
+                onKeyUp={(event) => {
+                    event.stopPropagation()
                 }}
                 type={'input'}
                 componentRef={this.props.searchInputRef}

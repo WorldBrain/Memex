@@ -147,6 +147,9 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
                                         onKeyDown={
                                             this.handleNameEditInputKeyDown
                                         }
+                                        onKeyUp={(event) => {
+                                            event.stopPropagation()
+                                        }}
                                         autoFocus
                                     />
                                 </Container>
