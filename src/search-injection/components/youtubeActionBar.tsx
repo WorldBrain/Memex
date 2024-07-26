@@ -1110,6 +1110,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                             )
                                         }}
                                         videoDuration={this.state.videoDuration}
+                                        calculateRangeInSeconds={
+                                            this.calculateRangeInSeconds
+                                        }
                                     />
                                 </BottomArea>
                             )}
