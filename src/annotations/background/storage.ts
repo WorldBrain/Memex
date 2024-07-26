@@ -18,10 +18,8 @@ import { STORAGE_VERSIONS } from 'src/storage/constants'
 import type { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
-import {
-    isPkmSyncEnabled,
-    shareAnnotationWithPKM,
-} from 'src/pkm-integrations/background/backend/utils'
+import { shareAnnotationWithPKM } from 'src/pkm-integrations/background/backend/utils'
+import { isPkmSyncEnabled } from 'src/pkm-integrations/utils'
 import type { Storage } from 'webextension-polyfill'
 
 export default class AnnotationStorage extends StorageModule {

@@ -1,4 +1,4 @@
-import { getPkmSyncKey } from './utils'
+import { getPkmSyncKey } from 'src/pkm-integrations/utils'
 import type { Storage } from 'webextension-polyfill'
 import type { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 

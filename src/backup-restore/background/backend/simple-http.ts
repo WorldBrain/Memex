@@ -9,7 +9,7 @@ import {
     separateDataFromImageChanges,
     shouldWriteImages,
 } from 'src/backup-restore/background/backend/utils'
-import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
+import { getPkmSyncKey } from 'src/pkm-integrations/utils'
 import type { Storage } from 'webextension-polyfill'
 
 export class MemexLocalBackend extends BackupBackend {

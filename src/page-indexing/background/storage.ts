@@ -23,10 +23,8 @@ import {
     ContentFingerprint,
     LocationSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import {
-    isPkmSyncEnabled,
-    sharePageWithPKM,
-} from 'src/pkm-integrations/background/backend/utils'
+import { isPkmSyncEnabled } from 'src/pkm-integrations/utils'
+import { sharePageWithPKM } from 'src/pkm-integrations/background/backend/utils'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import type {
     Bookmark,

@@ -7,7 +7,7 @@ import { ProviderList } from 'src/backup-restore/ui/backup-pane/components/provi
 import { DownloadOverlay } from '../components/overlays'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { getFolder } from 'src/pkm-integrations/background/backend/utils'
+import { getFolder } from 'src/pkm-integrations/utils'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const STYLES = require('../../styles.css')

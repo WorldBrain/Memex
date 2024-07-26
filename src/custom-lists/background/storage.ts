@@ -31,10 +31,8 @@ import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
-import {
-    isPkmSyncEnabled,
-    sharePageWithPKM,
-} from 'src/pkm-integrations/background/backend/utils'
+import { sharePageWithPKM } from 'src/pkm-integrations/background/backend/utils'
+import { isPkmSyncEnabled } from 'src/pkm-integrations/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     buildMaterializedPath,

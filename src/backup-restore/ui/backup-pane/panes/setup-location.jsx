@@ -9,7 +9,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import ButtonBar from 'src/options/imports/components/ButtonBar'
-import { getFolder } from 'src/pkm-integrations/background/backend/utils'
+import { getFolder } from 'src/pkm-integrations/utils'
 
 export default class SetupLocation extends React.Component {
     state = {
