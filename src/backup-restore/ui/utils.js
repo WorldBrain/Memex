@@ -1,6 +1,6 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { LOCAL_SERVER_ENDPOINTS } from './backup-pane/constants'
-import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
+import { getPkmSyncKey } from 'src/pkm-integrations/utils'
 export async function redirectToGDriveLogin() {
     window.location.href = await remoteFunction('getBackupProviderLoginLink')({
         returnUrl: 'http://memex.cloud/backup/auth-redirect/google-drive',

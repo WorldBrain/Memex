@@ -8,10 +8,10 @@ import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-
 import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
-    isPkmSyncEnabled,
     shareAnnotationWithPKM,
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
+import { isPkmSyncEnabled } from 'src/pkm-integrations/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { ImageSupportBackground } from 'src/image-support/background'
 import type { Browser } from 'webextension-polyfill'
