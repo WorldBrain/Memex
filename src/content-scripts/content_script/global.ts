@@ -1456,6 +1456,7 @@ export async function main(
             getState: tooltipUtils.getTooltipState,
             setState: tooltipUtils.setTooltipState,
         },
+        shouldInitTooltip: areHighlightsEnabled,
     })
 
     // 9. Check for page activity status

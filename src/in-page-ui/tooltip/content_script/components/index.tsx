@@ -374,12 +374,23 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
     saveAnnotation = async (
         commentState: string,
         color?: HighlightColor['id'],
+        unifiedId?: string,
+        dontUpdateState?: boolean,
     ) => {
-        const currentAnnotation = this.state.currentAnnotation
+        let currentAnnotation = undefined
+        let comment = commentState
+
+        if (unifiedId) {
+            currentAnnotation = this.props.annotationsCache.annotations.byId[
+                unifiedId
+            ]
+        } else {
+            currentAnnotation = this.state.currentAnnotation
+        }
+
         const existingHighlight = this.props.annotationsCache.annotations.byId[
             currentAnnotation.unifiedId
         ]
-        const comment = commentState
 
         this.props.annotationsCache.updateAnnotation(
             {
@@ -412,6 +423,10 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
             // },
         } catch (err) {
             console.log(err)
+        }
+
+        if (dontUpdateState) {
+            return
         }
         this.setState({
             currentAnnotation: {
