@@ -1191,6 +1191,10 @@ export async function main(
                 deleteAnnotation: async (annotationId) => {
                     await annotationsFunctions.deleteAnnotation(annotationId)
                 },
+                tooltip: {
+                    getState: tooltipUtils.getTooltipState,
+                    setState: tooltipUtils.setTooltipState,
+                },
                 annotationsBG,
                 annotationsCache,
                 contentSharingBG,
@@ -1448,6 +1452,11 @@ export async function main(
         }),
         askAI: annotationsFunctions.askAI(),
         createYoutubeTimestamp: annotationsFunctions.createYoutubeTimestamp,
+        tooltip: {
+            getState: tooltipUtils.getTooltipState,
+            setState: tooltipUtils.setTooltipState,
+        },
+        shouldInitTooltip: areHighlightsEnabled,
     })
 
     // 9. Check for page activity status

@@ -126,6 +126,9 @@ export default class SpaceEmailInvites extends StatefulUIElement<
                                     : null
                             }
                             onKeyDown={this.handleAddInviteInputKeyDown}
+                            onKeyUp={(event) => {
+                                event.stopPropagation()
+                            }}
                         />
                         {this.shouldShowInviteBtn &&
                             this.state.emailInvitesCreateState !== 'running' &&

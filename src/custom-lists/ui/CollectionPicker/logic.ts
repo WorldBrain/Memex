@@ -538,6 +538,7 @@ export default class SpacePickerLogic extends UILogic<
         event: { event },
         previousState,
     }) => {
+        event.stopPropagation()
         if (event.key === 'Enter') {
             const isCmdKey = event.metaKey || event.ctrlKey
             await this.handleEnterKeyPress(previousState, isCmdKey)
@@ -574,8 +575,6 @@ export default class SpacePickerLogic extends UILogic<
             this.dependencies.closePicker(event)
             return
         }
-
-        event.stopPropagation()
     }
 
     openListInWebUI: EventHandler<'openListInWebUI'> = async ({ event }) => {

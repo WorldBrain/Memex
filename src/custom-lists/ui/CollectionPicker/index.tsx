@@ -140,6 +140,7 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        event.stopPropagation()
         this.processEvent('keyPress', { event })
     }
 
@@ -863,7 +864,9 @@ class SpacePicker extends StatefulUIElement<
                             this.state.selectedListIds.length === 0
                         }
                         onChange={this.handleSearchInputChanged}
-                        onKeyDown={this.handleKeyPress}
+                        onKeyDown={(event) => {
+                            this.handleKeyPress(event)
+                        }}
                         value={this.state.query}
                         autoFocus={
                             this.state.listIdToShowNewChildInput ||
