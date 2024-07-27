@@ -1966,8 +1966,9 @@ export default class Ribbon extends Component<Props, State> {
             <TooltipBox
                 tooltipText={
                     <span>
-                        One Click: More Options
-                        <br /> Double Click: Instant remove action bar
+                        Close Action Bar
+                        <br /> Shift+Click to disable <br />
+                        or block on page
                     </span>
                 }
                 placement={
