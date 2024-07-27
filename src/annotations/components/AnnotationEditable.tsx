@@ -531,17 +531,17 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             comment={this.props.body}
                             onCommentChange={
                                 this.props.annotationEditDependencies
-                                    .onBodyChange
+                                    ?.onBodyChange
                             }
                             slimEditorActions={true}
                             isEditMode={this.props.isEditingHighlight}
                             onEditCancel={
                                 this.props.annotationEditDependencies
-                                    .onEditCancel
+                                    ?.onEditCancel
                             }
                             setEditing={
                                 this.props.annotationFooterDependencies
-                                    .onEditHighlightIconClick
+                                    ?.onEditHighlightIconClick
                             }
                             updateSpacesSearchSuggestions={
                                 this.props.updateSpacesSearchSuggestions

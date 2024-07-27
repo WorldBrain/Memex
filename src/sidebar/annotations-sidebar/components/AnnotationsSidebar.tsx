@@ -102,6 +102,7 @@ import AIChatComponent from '@worldbrain/memex-common/lib/ai-chat/index'
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 import {
+    AImodels,
     ChatHistoryItem,
     PromptData,
 } from '@worldbrain/memex-common/lib/summarization/types'
@@ -330,7 +331,10 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         unifiedAnnotationId: string,
     ) => void
 
-    queryAIservice: (promptData: PromptData) => Promise<void>
+    queryAIservice: (
+        promptData: PromptData,
+        selectedModel: AImodels,
+    ) => Promise<void>
     updateAIChatHistoryState: (newState: ChatHistoryItem[]) => void
     updateAIChatEditorState: (AIChatEditorState: string) => void
     addedKey?: () => void
@@ -1992,8 +1996,11 @@ export class AnnotationsSidebar extends React.Component<
 
     renderQaASection() {
         return (
-            <AISidebarContainer>
+            <AISidebarContainer
+                isAiChatActive={this.props.activeTab === 'summary'}
+            >
                 <AIChatComponent
+                    context="extension"
                     getRootElement={this.props.getRootElement}
                     imageSupport={this.props.imageSupport}
                     queryAIservice={this.props.queryAIservice}
@@ -2001,38 +2008,17 @@ export class AnnotationsSidebar extends React.Component<
                     renderAICounter={this.props.renderAICounter}
                     isTrial={this.props.isTrial}
                     getLocalContent={() => this.getLocalContent()}
-                    updateAIChatHistoryState={
-                        this.props.updateAIChatHistoryState
-                    }
                     analyticsBG={this.props.analyticsBG}
-                    updateEditorContentState={
-                        this.props.updateAIChatEditorState
-                    }
                     createNewNoteFromAISummary={
                         this.props.createNewNoteFromAISummary
                     }
                     openImageInPreview={this.props.openImageInPreview}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
-                    aiChatStateExternal={{
-                        loadState: this.props.loadState,
-                        selectedModel: this.props.AImodel,
-                        fetchLocalSetting: this.props.fetchLocalHTML,
-                        editorContent: this.props.aiQueryEditorState,
-                        chatHistory: this.props.AIChatHistoryState,
-                        currentChatId: this.props.currentChatId,
-                        currentAIresponse: this.props.pageSummary,
-                    }}
-                    signupDate={this.props.signupDate}
-                    hasKey={this.props.hasKey}
-                    syncSettingsBG={this.props.syncSettingsBG}
                     browserAPIs={this.props.browserAPIs}
                     isKeyValid={this.props.isKeyValid}
-                    checkIfKeyValid={this.props.checkIfKeyValid}
                     renderOptionsContainer={() => this.renderOptionsContainer()}
                     counterStorageKey={COUNTER_STORAGE_KEY}
-                    setAIModel={this.props.setAIModel}
-                    createCheckOutLink={this.props.createCheckOutLink}
                     authBG={this.props.authBG}
                     renderPromptTemplates={() => {
                         return (
@@ -2240,27 +2226,6 @@ export class AnnotationsSidebar extends React.Component<
 
         if (this.props.activeTab === 'feed') {
             return this.renderFeed()
-        }
-
-        // if (
-        //     (this.props.isDataLoading ||
-        //         this.props.foreignSelectedListLoadState === 'running') &&
-        //     this.props.activeTab !== 'summary'
-        // ) {
-        //     return this.renderLoader()
-        // }
-        if (this.props.activeTab === 'summary') {
-            if (
-                this.props.prompt?.length > 0 &&
-                this.props.suggestionsResults?.length > 0 &&
-                this.props.pageSummary?.length > 0 &&
-                this.props.activeAITab !== 'ThisPage'
-            ) {
-                return (
-                    <ResultsBodyBox>{this.renderQaASection()}</ResultsBodyBox>
-                )
-            }
-            return this.renderQaASection()
         }
 
         if (
@@ -2778,7 +2743,6 @@ export class AnnotationsSidebar extends React.Component<
                             icon={'stars'}
                         />
                     </TopBarButtonContainer>
-
                     <TopBarButtonContainer>
                         <PrimaryAction
                             label={'Cite'}
@@ -2815,27 +2779,6 @@ export class AnnotationsSidebar extends React.Component<
                             </LoadingBox2>
                         )}
                     </TopBarButtonContainer>
-
-                    {this.props.sidebarContext === 'in-page' &&
-                        this.props.rabbitHoleBetaFeatureAccess ===
-                            'onboarded' && (
-                            <TopBarButtonContainer>
-                                <PrimaryAction
-                                    onClick={() => {
-                                        this.props.setActiveTab('rabbitHole')
-                                    }}
-                                    label={'RabbitHole'}
-                                    active={
-                                        this.props.activeTab === 'rabbitHole'
-                                    }
-                                    type={'tertiary'}
-                                    size={'medium'}
-                                    iconPosition={'right'}
-                                    padding={'3px 6px'}
-                                    height={'30px'}
-                                />
-                            </TopBarButtonContainer>
-                        )}
                 </TopBarTabsContainer>
                 {this.renderPageLinkMenu()}
             </TopBarContainer>
@@ -3472,6 +3415,7 @@ export class AnnotationsSidebar extends React.Component<
                     {/* {this.renderSharePageButton()} */}
                     {/* {this.props.sidebarActions()} */}
                 </TopBar>
+                {this.props.isAiChatVisible && this.renderQaASection()}
                 {this.renderResultsBody(this.state.themeVariant)}
                 {this.renderPageShareModal()}
             </ResultBodyContainer>
@@ -3632,22 +3576,6 @@ const ExistingSourcesListItemUrl = styled.div`
     color: ${(props) => props.theme.colors.greyScale6};
     font-weight: 400;
     font-size: 14px;
-`
-
-const ResultsBodyBox = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    position: relative;
-    justify-content: flex-start;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    scrollbar-width: none;
 `
 
 const OnboardingContainer = styled.div`
@@ -4147,21 +4075,36 @@ const QueryContainer = styled.div<{
         `}
 `
 
-const AISidebarContainer = styled.div`
+const AISidebarContainer = styled.div<{
+    isAiChatActive: boolean
+}>`
     display: flex;
-    position: relative;
-    height: fill-available;
-    /* overflow: scroll; */
-    display: flex;
+    position: absolute;
+    padding-top: 30px;
+    box-sizing: border-box;
+    left: 0;
     flex-direction: column;
+    width: 100%;
     height: 100%;
-    overflow: hidden;
+    max-height: 100%;
     flex: 1;
+    overflow: auto;
+    justify-content: flex-start;
 
     &::-webkit-scrollbar {
         display: none;
     }
+
     scrollbar-width: none;
+    z-index: -1;
+    opacity: 0;
+
+    ${(props) =>
+        props.isAiChatActive &&
+        css`
+            z-index: 1000;
+            opacity: 1;
+        `}
 `
 
 const SelectedAITextBox = styled.div`
@@ -5004,6 +4947,7 @@ const ResultBodyContainer = styled.div<{
     height: fill-available;
     width: fill-available;
     display: flex;
+    position: relative;
     flex-direction: column;
     height: 100vh;
 

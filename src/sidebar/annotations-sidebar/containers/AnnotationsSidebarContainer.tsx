@@ -63,6 +63,7 @@ import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
 import PageCitations from 'src/citations/PageCitations'
 import {
+    AImodels,
     ChatHistoryItem,
     PromptData,
 } from '@worldbrain/memex-common/lib/summarization/types'
@@ -1842,10 +1843,14 @@ export class AnnotationsSidebarContainer<
                                     annotationIds: annotationIds,
                                 })
                             }}
-                            queryAIservice={(promptData: PromptData) =>
+                            queryAIservice={(
+                                promptData: PromptData,
+                                selectedModel: AImodels,
+                            ) =>
                                 this.processEvent('queryAIService', {
                                     promptData: promptData,
                                     outputLocation: null,
+                                    selectedModel: selectedModel,
                                 })
                             }
                             updateAIChatHistoryState={(

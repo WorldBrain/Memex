@@ -170,6 +170,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     suggestionsResults: SuggestionCard[]
     suggestionsResultsLoadState: TaskState
     activeTab: SidebarTab
+    isAiChatVisible: boolean
     activeAITab: SidebarAITab
     summaryModeActiveTab: 'Answer' | 'References'
     isAutoAddEnabled: boolean
@@ -362,6 +363,7 @@ interface SidebarEvents {
     queryAIService: {
         promptData: PromptData
         outputLocation: 'editor' | 'summaryContainer' | 'chapterSummary' | null
+        selectedModel: AImodels
     }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }

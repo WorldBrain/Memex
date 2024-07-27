@@ -264,6 +264,7 @@ export class SidebarContainerLogic extends UILogic<
             ...annotationConversationInitialState(),
 
             activeTab: 'annotations',
+            isAiChatVisible: false,
 
             cacheLoadState: this.options.shouldHydrateCacheOnInit
                 ? 'pristine'
@@ -3217,6 +3218,12 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        if (previousState.AImodel !== event.selectedModel) {
+            this.emitMutation({
+                AImodel: { $set: event.selectedModel },
+            })
+        }
+
         // resetting the buffers
         this.isPageSummaryEmpty = true
         this.tokenBuffer = ''
@@ -3256,7 +3263,7 @@ export class SidebarContainerLogic extends UILogic<
                     promptData: event.promptData,
                     apiKey: openAIKey ? openAIKey : undefined,
                     outputLocation: event.outputLocation ?? null,
-                    AImodel: previousState.AImodel,
+                    AImodel: event.selectedModel ?? previousState.AImodel,
                 },
             )
 
@@ -3830,11 +3837,12 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
             )
             this.renderOwnHighlights(previousState)
-        } else if (
-            event.tab === 'summary' &&
-            ((event.prompt && event.prompt?.length > 0) ||
-                event.textToProcess?.length > 0)
-        ) {
+        } else if (event.tab === 'summary') {
+            if (!previousState.isAiChatVisible) {
+                this.emitMutation({
+                    isAiChatVisible: { $set: true },
+                })
+            }
             this.options.events?.emit('setActiveSidebarTab', {
                 activeTab: 'askAI',
             })
@@ -4908,7 +4916,11 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         await this.processUIEvent('queryAIService', {
-            event: { promptData: promptData, outputLocation: 'editor' },
+            event: {
+                promptData: promptData,
+                outputLocation: 'editor',
+                selectedModel: promptData.model,
+            },
             previousState,
         })
 
