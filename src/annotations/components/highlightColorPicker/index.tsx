@@ -118,14 +118,14 @@ export default class HighlightColorPicker extends React.Component<
     }
 
     componentWillUnmount(): void {
-        if (this.state.highlightColorStateChanged) {
-            this.saveHighlightColorSettings()
-        }
+        // if (this.state.highlightColorStateChanged) {
+        //     this.saveHighlightColorSettings()
+        // }
     }
 
-    getHighlightColorSettings = async () => {
+    getHighlightColorSettings = async (forceUpdate?) => {
         let highlightColors = this.state.highlightColorSettingState
-        if (!highlightColors) {
+        if (!highlightColors || forceUpdate) {
             highlightColors = await this.syncSettings.highlightColors.get(
                 'highlightColors',
             )
@@ -176,6 +176,9 @@ export default class HighlightColorPicker extends React.Component<
                 modifyDomHighlightColor(highlight, colorItem)
             }
         }
+        this.setState({
+            highlightColorSettingState: this.state.highlightColorSettingState,
+        })
 
         await this.syncSettings.highlightColors.set(
             'highlightColors',
@@ -195,11 +198,12 @@ export default class HighlightColorPicker extends React.Component<
                 onClick={(event) => {
                     event.stopPropagation()
                 }}
+                key={'ColorEditBox' + index}
             >
                 <TopBarBox>
                     <PrimaryAction
                         label={'Cancel'}
-                        onClick={(event) => {
+                        onClick={async (event) => {
                             let highlights: NodeListOf<Element> = document.querySelectorAll(
                                 '.' + DEF_HIGHLIGHT_CSS_CLASS,
                             )
@@ -225,11 +229,10 @@ export default class HighlightColorPicker extends React.Component<
                             const newShowEditColor = [
                                 ...this.state.showEditColor,
                             ]
+
+                            this.getHighlightColorSettings(true)
                             newShowEditColor[index] = false
                             this.setState({
-                                highlightColorSettingState: [
-                                    ...this.state.highlightColorSettingState,
-                                ],
                                 showColorEditorPanel: false,
                                 showEditColor: newShowEditColor,
                             })
@@ -465,6 +468,7 @@ export default class HighlightColorPicker extends React.Component<
                                         }}
                                         active={this.state.showEditColor[i]}
                                         selected={this.state.selectedRow === i}
+                                        key={colorId}
                                     >
                                         <ColorPickerCircle
                                             backgroundColor={RGBAobjectToString(
