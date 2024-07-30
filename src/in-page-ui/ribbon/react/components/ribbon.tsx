@@ -1986,12 +1986,9 @@ export default class Ribbon extends Component<Props, State> {
                 {!this.props.sidebar.isSidebarOpen && (
                     <CloseIconContainer
                         onMouseDown={(event) => {
-                            if (!this.props.showRemoveMenu) {
+                            if (event.shiftKey) {
                                 this.props.toggleRemoveMenu()
-                            }
-                        }}
-                        onMouseUp={(event) => {
-                            if (!this.props.showRemoveMenu) {
+                            } else {
                                 this.props.handleRemoveRibbon()
                             }
                         }}
