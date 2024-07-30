@@ -119,6 +119,7 @@ import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/
 import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat/utils'
 import { DEFAULT_AI_MODEL } from '@worldbrain/memex-common/lib/ai-chat/constants'
 import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import { PromptTemplate } from 'src/common-ui/components/prompt-templates/types'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -3576,14 +3577,24 @@ export class SidebarContainerLogic extends UILogic<
         let prompt = event.prompt
 
         if (event.prompt == null) {
-            const syncsettings =
-                (await this.syncSettings.openAI?.get('promptSuggestions')) ??
-                AI_PROMPT_DEFAULTS.map((text) => ({
+            let savedPrompts = await this.syncSettings.openAI?.get(
+                'promptSuggestions',
+            )
+            if (!savedPrompts) {
+                savedPrompts = AI_PROMPT_DEFAULTS.map((text) => ({
                     text,
                     isEditing: null,
                     isFocused: false,
                 }))
-            prompt = marked.parse(syncsettings[0].text)
+            } else if (typeof savedPrompts[0] === 'string') {
+                savedPrompts = ((savedPrompts as unknown) as string[]).map(
+                    (text) => ({
+                        text: text,
+                    }),
+                )
+                this.syncSettings.openAI?.set('promptSuggestions', savedPrompts)
+            }
+            prompt = marked.parse(savedPrompts[0].text)
         }
 
         if (event.textToProcess) {
@@ -3609,21 +3620,6 @@ export class SidebarContainerLogic extends UILogic<
         }
         if (!event.textToProcess) {
             let executed = false
-            let prompt = event.prompt
-
-            if (event.prompt == null) {
-                const syncsettings =
-                    (await this.syncSettings.openAI?.get(
-                        'promptSuggestions',
-                    )) ??
-                    AI_PROMPT_DEFAULTS.map((text) => ({
-                        text,
-                        isEditing: null,
-                        isFocused: false,
-                    }))
-                prompt = marked.parse(syncsettings[0].text)
-            }
-
             let retries = 0
             const maxRetries = 100
             while (!executed && retries < maxRetries) {
@@ -3663,7 +3659,7 @@ export class SidebarContainerLogic extends UILogic<
                     isEditing: null,
                     isFocused: false,
                 }))
-            prompt = syncsettings[0].text
+            prompt = syncsettings[0]?.text
         }
 
         if (previousState.activeTab === 'summary') {
