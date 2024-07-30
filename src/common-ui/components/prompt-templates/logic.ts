@@ -95,7 +95,7 @@ export default class PromptTemplatesLogic extends UILogic<
         const currentTemplates = previousState.promptTemplatesArray
 
         this.dependencies.onTemplateSelect(
-            marked.parse(currentTemplates[selectedTemplate].text),
+            marked.parse(currentTemplates[selectedTemplate]?.text),
         )
     }
     setTemplateEdit: EventHandler<'setTemplateEdit'> = async ({

@@ -1986,31 +1986,14 @@ export default class Ribbon extends Component<Props, State> {
                 {!this.props.sidebar.isSidebarOpen && (
                     <CloseIconContainer
                         onMouseDown={(event) => {
-                            if (!this.props.showRemoveMenu) {
+                            if (event.shiftKey) {
                                 this.props.toggleRemoveMenu()
-                            }
-                        }}
-                        onMouseUp={(event) => {
-                            if (!this.props.showRemoveMenu) {
+                            } else {
                                 this.props.handleRemoveRibbon()
                             }
                         }}
                     >
                         <Icon
-                            // onClick={(event) => {
-                            //     if (this.props.showRemoveMenu) {
-                            //         this.props.handleRemoveRibbon()
-                            //     } else {
-                            //         this.props.toggleRemoveMenu()
-                            //     }
-                            // }}
-                            // onClick={(event) => {
-                            //     if (event.shiftKey && this.props.isRibbonEnabled) {
-                            //         this.props.handleHover()
-                            //     } else {
-                            //         this.props.handleRemoveRibbon()
-                            //     }
-                            // }}
                             color={'greyScale5'}
                             heightAndWidth="24px"
                             padding="4px"

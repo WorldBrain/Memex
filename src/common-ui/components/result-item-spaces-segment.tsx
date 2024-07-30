@@ -92,9 +92,12 @@ export default function ListsSegment({
                         return (
                             <ListSpaceContainer
                                 key={space.id}
-                                onClick={(e) => {
-                                    e.stopPropagation()
+                                onMouseDown={(event: React.MouseEvent) => {
+                                    event.stopPropagation()
                                     onListClick(space.id)
+                                }}
+                                onMouseUp={(event: React.MouseEvent) => {
+                                    event.stopPropagation()
                                 }}
                                 isLoading={space.name == null && space != null}
                                 title={
@@ -189,7 +192,6 @@ const loading = keyframes`
 `
 
 const ListSpaceContainer = styled.div<{
-    onClick: React.MouseEventHandler
     isLoading: boolean
     spaceId: number
 }>`
