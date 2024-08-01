@@ -27,7 +27,7 @@ export const SEARCH_ENGINES: {
     duckduckgo: {
         regex: /(http[s]?:\/\/)?(www.)?duckduckgo[.\w]+\/.*?[?&]q=.*/,
         container: {
-            above: 'results--main',
+            above: 'js-react-sidebar',
             side: 'js-react-sidebar',
         },
         containerType: 'class',
@@ -35,18 +35,18 @@ export const SEARCH_ENGINES: {
     brave: {
         regex: /(http[s]?:\/\/)?(www.)?brave[.\w]+\/search\?.*/,
         container: {
-            above: 'results',
-            side: 'side-right',
-            sideAlternative: 'rcnt',
+            above: 'sidebar',
+            side: 'sidebar',
+            sideAlternative: 'sidebar',
         },
         containerType: 'id',
     },
     bing: {
         regex: /(http[s]?:\/\/)?(www.)?bing[.\w]+\/search\?.*/,
         container: {
-            above: 'b_results',
+            above: 'b_context',
             side: 'b_context',
-            sideAlternative: 'rcnt',
+            sideAlternative: 'b_context',
         },
         containerType: 'id',
     },
