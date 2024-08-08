@@ -138,7 +138,13 @@ class Container extends React.Component<Props, State> {
             constants.REACT_ROOTS.searchEngineInjection,
         )
 
-        if (isSticky) {
+        if (
+            isSticky &&
+            !(
+                this.props.searchEngine === 'brave' ||
+                this.props.searchEngine === 'duckduckgo'
+            )
+        ) {
             target.style.position = 'sticky'
             target.style.top = '100px'
             target.style.zIndex = '100'
@@ -424,7 +430,12 @@ class Container extends React.Component<Props, State> {
                     renderResultItems={this.renderResultItems}
                     renderNotification={this.renderNotification()}
                     getRootElement={this.props.getRootElement}
-                    isSticky={this.state.isStickyContainer}
+                    isSticky={
+                        !(
+                            this.props.searchEngine === 'brave' ||
+                            this.props.searchEngine === 'duckduckgo'
+                        ) && this.state.isStickyContainer
+                    }
                     toggleStickyContainer={this.toggleStickyContainer}
                     updateQuery={this.props.updateQuery}
                     query={this.props.query}

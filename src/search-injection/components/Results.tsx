@@ -111,32 +111,37 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                     onClick={props.seeMoreResults}
                                 />
                             </TooltipBox>
-                            <TooltipBox
-                                placement={'bottom'}
-                                tooltipText={'Pin Search Results'}
-                                getPortalRoot={this.props.getRootElement}
-                            >
-                                <Icon
-                                    filePath={'pin'}
-                                    heightAndWidth="18px"
-                                    padding="5px"
-                                    color={
-                                        this.props.isSticky
-                                            ? 'prime1'
-                                            : 'greyScale6'
-                                    }
-                                    onClick={() =>
-                                        props.toggleStickyContainer(
-                                            !this.props.isSticky,
-                                        )
-                                    }
-                                    background={
-                                        this.props.isSticky
-                                            ? 'greyScale3'
-                                            : null
-                                    }
-                                />
-                            </TooltipBox>
+                            {!(
+                                this.props.searchEngine === 'brave' ||
+                                this.props.searchEngine === 'duckduckgo'
+                            ) && (
+                                <TooltipBox
+                                    placement={'bottom'}
+                                    tooltipText={'Pin Search Results'}
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <Icon
+                                        filePath={'pin'}
+                                        heightAndWidth="18px"
+                                        padding="5px"
+                                        color={
+                                            this.props.isSticky
+                                                ? 'prime1'
+                                                : 'greyScale6'
+                                        }
+                                        onClick={() =>
+                                            props.toggleStickyContainer(
+                                                !this.props.isSticky,
+                                            )
+                                        }
+                                        background={
+                                            this.props.isSticky
+                                                ? 'greyScale3'
+                                                : null
+                                        }
+                                    />
+                                </TooltipBox>
+                            )}
                             <TooltipBox
                                 placement={'bottom'}
                                 tooltipText={

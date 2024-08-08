@@ -257,12 +257,12 @@ export const handleRenderSearchInjection = async (
         }
 
         if (searchEngine === 'brave') {
-            const suggestionsContainer = document.getElementById(
+            const suggestionsContainer = document.getElementsByClassName(
                 searchEngineObj.container.side,
-            )
-            const containerWithSuggestions = document.getElementById(
+            )[0] as HTMLElement
+            const containerWithSuggestions = document.getElementsByClassName(
                 searchEngineObj.container.sideAlternative,
-            )
+            )[0] as HTMLElement
 
             if (position === 'side') {
                 if (!suggestionsContainer) {
@@ -284,9 +284,9 @@ export const handleRenderSearchInjection = async (
                     )
                 }
             } else {
-                const containerAbove = document.getElementById(
+                const containerAbove = document.getElementsByClassName(
                     searchEngineObj.container.above,
-                )
+                )[0] as HTMLElement
                 containerAbove.insertBefore(root, containerAbove.firstChild)
             }
         }
@@ -410,9 +410,19 @@ export const handleRenderSearchInjection = async (
         }
     })
 
-    const targetNode = document.getElementById(
-        constants.SEARCH_ENGINES[searchEngine].container.sideAlternative,
-    )
+    let targetNode = null
+
+    if (searchEngine === 'brave' || searchEngine === 'duckduckgo') {
+        targetNode = document.getElementsByClassName(
+            constants.SEARCH_ENGINES[searchEngine].container.sideAlternative,
+        )[0] as HTMLElement
+        targetNode.style.overflow = 'visible'
+    } else {
+        targetNode = document.getElementById(
+            constants.SEARCH_ENGINES[searchEngine].container.sideAlternative,
+        )
+    }
+
     const existingInjection = document.getElementById(
         '__MEMEX-SEARCH-INJECTION-ROOT',
     )

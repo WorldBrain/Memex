@@ -6,6 +6,7 @@ import type TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { fetchYoutubeTranscript } from 'src/util/fetch-youtube-transcript'
+import { extractIdFromUrl } from '@worldbrain/memex-common/lib/utils/youtube-url'
 
 export interface PageAnalysis extends Partial<ExtractedPDFData> {
     content: PageContent
@@ -38,8 +39,9 @@ const analysePage: PageAnalyzer = async (options) => {
         return
     }
 
-    const ytVideoUrlPattern = /^.*(?:(?:youtu.be\/)|(?:v\/)|(?:\/u\/\w\/)|(?:embed\/)|(?:watch\?))\??(?:v=)?([^#&?]*).*/
-    const [, videoId] = options.url.match(ytVideoUrlPattern) ?? []
+    const videoId = extractIdFromUrl(options.url)
+
+    console.log('videoId', videoId)
 
     const rawContent = await options.tabManagement.extractRawPageContent(
         options.tabId,
