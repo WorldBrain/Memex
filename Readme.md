@@ -35,8 +35,8 @@ Add bookmarks, tags or sort websites into lists on the fly.
 
 ## Mobile Apps for iOS & Android + Encrypted Sync
 
-With [Memex Go](https://getmemex.com) you can save & organise content on the go.
-Sync is end2end encrypted with [TweetNaCl](https://github.com/dchest/tweetnacl-js)
+With [Memex Go](https://getmemex.com)you can save and organize content on the go. 
+Sync is end-to-end encrypted with [TweetNaCl](https://github.com/dchest/tweetnacl-js)
 
 <img width="1025" alt="mobileSync" src="https://user-images.githubusercontent.com/7870039/75159422-07ca1980-5710-11ea-845e-25f5157bcfd0.png">
 
@@ -80,7 +80,7 @@ Drop by in our [team chat](https://join.slack.com/t/worldbrain/shared_invite/enQ
 
 ## Bugs & Feature Requests
 
-Head over to our [community forums](https://community.worldbrain.io) to post your requests.
+Please visit to our [community forums](https://community.worldbrain.io) to post your suggestions.
 
 ## Getting started as a developer
 
