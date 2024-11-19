@@ -1077,6 +1077,7 @@ export default class SpacePickerLogic extends UILogic<
         const nextState = this.withMutation(previousState, mutation)
 
         this.calcNextFocusedEntry(nextState)
+        this.dependencies.selectEntry(localListId)
 
         return localListId
     }

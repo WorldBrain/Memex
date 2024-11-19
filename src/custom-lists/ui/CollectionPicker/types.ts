@@ -18,6 +18,7 @@ type SpacePickerTab = 'user-lists' | 'page-links'
 
 export interface SpacePickerState {
     query: string
+    // TODO: Why is this an array? Needs renaming
     newEntryName: {
         unifiedId: UnifiedList['unifiedId']
         name: UnifiedList['name']
