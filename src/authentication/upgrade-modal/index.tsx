@@ -6,14 +6,68 @@ import {
     PromptTemplatesState,
     PowerUpModalVersion,
 } from './types'
-import styled, { css } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 import { OverlayModals } from '../../../external/@worldbrain/memex-common/ts/common-ui/components/overlay-modals'
 import { UIElement } from 'ui-logic-react'
-import Icon from '../../../external/@worldbrain/memex-common/ts/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { DEFAULT_POWERUP_LIMITS } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+
+const powerUps = [
+    {
+        id: 'bookmarksPowerUp',
+        icon: 'heartEmpty',
+        title: 'Research Assistant',
+        subTitle: 'Bookmarking, Annotating, Organising, Sharing',
+        pricing: {
+            monthly: '$4',
+            yearly: '$40',
+        },
+        pricingDiscounted: {
+            monthly: '$3.20',
+            yearly: '$32',
+        },
+    },
+    {
+        id: 'AIpowerup',
+        icon: 'feed',
+        title: 'AI Co-pilot',
+        subTitle: 'Summarize & chat with YouTube, Web, PDF and Images',
+        pricing: {
+            monthly: '$6',
+            yearly: '$60',
+        },
+        pricingDiscounted: {
+            monthly: '$4.80',
+            yearly: '$48',
+        },
+    },
+    {
+        id: 'lifetime',
+        icon: 'clock',
+        title: 'Lifetime All-Access',
+        subTitle:
+            'A transferrable lifetime plan with up to $25 in subscription value per month',
+        pricing: {
+            oneTime: '$450',
+        },
+        pricingDiscounted: {
+            oneTime: '$360',
+        },
+    },
+]
+
+// Define the keyframes for the entrance animation
+const fadeInUp = keyframes`
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+`
 
 export default class UpgradeModal extends UIElement<
     PromptTemplatesDependencies,
@@ -32,51 +86,22 @@ export default class UpgradeModal extends UIElement<
 
     async componentWillUnmount(): Promise<void> {}
 
-    renderConfirmUpgradeOverlay = (powerup: PremiumPlans) => {
-        let confirmTitle = 'Confirm Upgrade'
-        let confirmSubTitle = 'with obligation to pay'
-
-        if (
-            this.state.confirmPowerups === 'AIpowerupBasic' ||
-            this.state.confirmPowerups === 'bookmarksPowerUpBasic'
-        ) {
-            confirmTitle = 'Confirm Downgrade'
-            confirmSubTitle = 'Ends at the current billig period'
-        }
-
+    renderLifeTimePlanNote = () => {
         return (
-            <ConfirmOverlay>
-                <ConfirmContainer>
-                    <ConfirmText>{confirmTitle}</ConfirmText>
-                    <ConfirmSubText>{confirmSubTitle}</ConfirmSubText>
-                </ConfirmContainer>
-                <ButtonBox>
-                    <PrimaryAction
-                        label="Confirm"
-                        type="primary"
-                        size="medium"
-                        onClick={() => {
-                            this.processEvent('processCheckoutOpen', {
-                                plan: powerup,
-                            })
-                        }}
-                    />
-                    <PrimaryAction
-                        label="Go Back"
-                        type="tertiary"
-                        size="medium"
-                        onClick={() => {
-                            this.processEvent('setPowerUpConfirmation', {
-                                selected: null,
-                            })
-                        }}
-                    />
-                </ButtonBox>
-            </ConfirmOverlay>
+            <LifetimeContainer>
+                <UpgradeOverlayTextContainer>
+                    <UpgradeOverlayText>
+                        You're on the lifetime plan
+                    </UpgradeOverlayText>
+                    <UpgradeOverlaySubText>
+                        You can use all features of Memex.
+                    </UpgradeOverlaySubText>
+                </UpgradeOverlayTextContainer>
+            </LifetimeContainer>
         )
     }
 
-    renderAIPowerUpsOptionsList = () => {
+    renderPowerUpsList = (powerUpType: PowerUpModalVersion) => {
         if (
             this.state.checkoutLoading === 'running' ||
             this.state.authLoadState === 'running'
@@ -90,470 +115,265 @@ export default class UpgradeModal extends UIElement<
             )
         }
 
-        const powerUp = Powerups.find((powerUp) => powerUp.id === 'AI')
+        console.log('powerUpType', powerUpType)
 
-        return (
-            <PowerUpOptions>
-                {this.props.limitReachedNotif === 'AI' && (
-                    <UpgradeOverlayTextContainer>
-                        <UpgradeOverlayText>
-                            You reached the daily limit of{' '}
-                            {DEFAULT_POWERUP_LIMITS.AIpowerup} AI sessions
-                        </UpgradeOverlayText>
-                        <UpgradeOverlaySubText>
-                            Add the AI powerup to continue using the AI features
-                        </UpgradeOverlaySubText>
-                    </UpgradeOverlayTextContainer>
-                )}
-                {this.props.limitReachedNotif === 'AIownKey' && (
-                    <UpgradeOverlayTextContainer>
-                        <UpgradeOverlayText>
-                            Upgrade to use GPT-4 and your own key
-                        </UpgradeOverlayText>
-                        <UpgradeOverlaySubText>
-                            Add "Bring your own key"- or the "Pro"-powerup to
-                            continue
-                        </UpgradeOverlaySubText>
-                    </UpgradeOverlayTextContainer>
-                )}
-                <PricingSwitcher>
-                    <LeftSide
-                        selected={this.state.billingPeriod === 'monthly'}
-                        onClick={() =>
-                            this.processEvent('toggleBillingPeriod', 'monthly')
-                        }
-                    >
-                        Monthly
-                    </LeftSide>
-                    <RightSide
-                        selected={this.state.billingPeriod === 'yearly'}
-                        onClick={() =>
-                            this.processEvent('toggleBillingPeriod', 'yearly')
-                        }
-                    >
-                        Yearly
-                    </RightSide>
-                </PricingSwitcher>
-                <PowerUpItem
-                    onClick={() => {
-                        if (
-                            this.state.activatedPowerUps['AIpowerup'] ===
-                                true ||
-                            this.state.activatedPowerUps['AIpowerupOwnKey'] ===
-                                true
-                        ) {
-                            this.processEvent('processCheckoutOpen', {
-                                plan: 'AIpowerupBasic',
-                            })
-                        }
-                    }}
-                    activated={
-                        this.state.activatedPowerUps &&
-                        this.state.activatedPowerUps['AIpowerup'] === false &&
-                        this.state.activatedPowerUps['AIpowerupOwnKey'] ===
-                            false
-                    }
-                >
-                    <PowerUpTitleBox>
-                        <PowerUpTitle>
-                            {powerUp.powerUps.basic.title}
-                        </PowerUpTitle>
-                        <PowerUpSubTitle>
-                            {powerUp.powerUps.basic.subTitle}
-                        </PowerUpSubTitle>
-                    </PowerUpTitleBox>
-                    <PowerUpPricing>
-                        {powerUp.powerUps.basic.pricing}
-                    </PowerUpPricing>
-                </PowerUpItem>
-                <PowerUpItem
-                    onClick={() => {
-                        if (
-                            this.state.activatedPowerUps &&
-                            this.state.activatedPowerUps['AIpowerup'] === false
-                        ) {
-                            this.processEvent('processCheckoutOpen', {
-                                plan: 'AIpowerup',
-                            })
-                        }
-                    }}
-                    activated={
-                        this.state.activatedPowerUps &&
-                        this.state.activatedPowerUps['AIpowerup'] === true
-                    }
-                >
-                    <PowerUpTitleBox>
-                        <PowerUpTitle>
-                            {' '}
-                            {powerUp.powerUps.pro.title}
-                        </PowerUpTitle>
-                        <PowerUpSubTitle>
-                            {powerUp.powerUps.pro.subTitle}
-                        </PowerUpSubTitle>
-                    </PowerUpTitleBox>
-                    <PowerUpPricingBox>
-                        <PowerUpPricing
-                            componentVariant={this.props.componentVariant}
-                        >
-                            {this.state.billingPeriod === 'monthly'
-                                ? powerUp.powerUps.pro.pricing['monthly']
-                                : powerUp.powerUps.pro.pricing['yearly']}
-                        </PowerUpPricing>
-                        {this.props.componentVariant === 'OnboardingStep' && (
-                            <AlternativePricing>
-                                {this.state.billingPeriod === 'monthly'
-                                    ? powerUp.powerUps.pro.pricingDiscounted[
-                                          'monthly'
-                                      ]
-                                    : powerUp.powerUps.pro.pricingDiscounted[
-                                          'yearly'
-                                      ]}
-                            </AlternativePricing>
-                        )}
-                    </PowerUpPricingBox>
-                </PowerUpItem>
-                <PowerUpItem
-                    onClick={() => {
-                        if (
-                            this.state.activatedPowerUps &&
-                            this.state.activatedPowerUps['AIpowerupOwnKey'] ===
-                                false
-                        ) {
-                            this.processEvent('processCheckoutOpen', {
-                                plan: 'AIpowerupOwnKey',
-                            })
-                        }
-                    }}
-                    activated={
-                        this.state.activatedPowerUps &&
-                        this.state.activatedPowerUps['AIpowerupOwnKey'] === true
-                    }
-                    disabled={
-                        this.state.activatedPowerUps &&
-                        this.state.activatedPowerUps['AIpowerup'] === true
-                    }
-                >
-                    <PowerUpTitleBox>
-                        <PowerUpTitle>
-                            {powerUp.powerUps.ownKey.title}
-                            <DiscountPill>60% off</DiscountPill>
-                        </PowerUpTitle>
-                        <PowerUpSubTitle>
-                            {powerUp.powerUps.ownKey.subTitle}
-                        </PowerUpSubTitle>
-                    </PowerUpTitleBox>
-                    <PowerUpPricingBox>
-                        <PowerUpPricing
-                            componentVariant={this.props.componentVariant}
-                        >
-                            {this.state.billingPeriod === 'monthly'
-                                ? powerUp.powerUps.ownKey.pricing['monthly']
-                                : powerUp.powerUps.ownKey.pricing['yearly']}
-                        </PowerUpPricing>
-                        {this.props.componentVariant === 'OnboardingStep' && (
-                            <AlternativePricing>
-                                {this.state.billingPeriod === 'monthly'
-                                    ? powerUp.powerUps.ownKey.pricingDiscounted[
-                                          'monthly'
-                                      ]
-                                    : powerUp.powerUps.ownKey.pricingDiscounted[
-                                          'yearly'
-                                      ]}
-                            </AlternativePricing>
-                        )}
-                    </PowerUpPricingBox>
-                </PowerUpItem>
-            </PowerUpOptions>
-        )
-    }
-    renderBookmarkPowerUpsOptionsList = () => {
-        if (
-            this.state.checkoutLoading === 'running' ||
-            this.state.authLoadState === 'running'
-        ) {
-            return (
-                <LoadingBlocker>
-                    <LoadingIndicator size={40} />
-                    {this.state.checkoutLoading === 'running' &&
-                        'Updating Subscription...'}
-                </LoadingBlocker>
-            )
+        let featureString = null
+        if (powerUpType === 'AI') {
+            featureString = 'AI'
+        } else if (powerUpType === 'Bookmarks') {
+            featureString = 'Bookmarking'
         }
 
-        const powerUp = Powerups.find((powerUp) => powerUp.id === 'Bookmarks')
-
-        return (
-            <PowerUpOptions>
-                {this.props.limitReachedNotif === 'Bookmarks' && (
-                    <UpgradeOverlayTextContainer>
-                        <UpgradeOverlayText>
-                            You reached the daily limit of{' '}
-                            {DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} saved
-                            pages
-                        </UpgradeOverlayText>
-                        <UpgradeOverlaySubText>
-                            Add the bookmarking powerup to continue saving,
-                            annotating and organising
-                        </UpgradeOverlaySubText>
-                    </UpgradeOverlayTextContainer>
-                )}
-                <PricingSwitcher>
-                    <LeftSide
-                        selected={this.state.billingPeriod === 'monthly'}
-                        onClick={() =>
-                            this.processEvent('toggleBillingPeriod', 'monthly')
-                        }
-                    >
-                        Monthly
-                    </LeftSide>
-                    <RightSide
-                        selected={this.state.billingPeriod === 'yearly'}
-                        onClick={() =>
-                            this.processEvent('toggleBillingPeriod', 'yearly')
-                        }
-                    >
-                        Yearly
-                    </RightSide>
-                </PricingSwitcher>
-                <PowerUpItem
-                    onClick={() => {
-                        if (
-                            this.state.activatedPowerUps &&
-                            this.state.activatedPowerUps.bookmarksPowerUp ===
-                                true
-                        ) {
-                            this.processEvent('processCheckoutOpen', {
-                                plan: 'bookmarksPowerUpBasic',
-                            })
-                        }
-                    }}
-                    activated={
-                        this.state.activatedPowerUps &&
-                        this.state.activatedPowerUps.bookmarksPowerUp === false
-                    }
-                >
-                    <>
-                        <PowerUpTitleBox>
-                            <PowerUpTitle>
-                                {' '}
-                                {powerUp.powerUps.basic.title}
-                            </PowerUpTitle>
-                            <PowerUpSubTitle>
-                                {powerUp.powerUps.basic.subTitle}
-                            </PowerUpSubTitle>
-                        </PowerUpTitleBox>
-                        <PowerUpPricing>
-                            {' '}
-                            {powerUp.powerUps.basic.pricing}
-                        </PowerUpPricing>
-                    </>
-                </PowerUpItem>
-                <PowerUpItem
-                    onClick={() => {
-                        if (
-                            this.state.activatedPowerUps &&
-                            this.state.activatedPowerUps.bookmarksPowerUp ===
-                                false
-                        ) {
-                            this.processEvent('processCheckoutOpen', {
-                                plan: 'bookmarksPowerUp',
-                            })
-                        }
-                    }}
-                    activated={
-                        this.state.activatedPowerUps &&
-                        this.state.activatedPowerUps.bookmarksPowerUp === true
-                    }
-                >
-                    <PowerUpTitleBox>
-                        <PowerUpTitle>
-                            {' '}
-                            {powerUp.powerUps.pro.title}
-                        </PowerUpTitle>
-                        <PowerUpSubTitle>
-                            {powerUp.powerUps.pro.subTitle}
-                        </PowerUpSubTitle>
-                    </PowerUpTitleBox>
-                    <PowerUpPricingBox>
-                        <PowerUpPricing
-                            componentVariant={this.props.componentVariant}
-                        >
-                            {this.state.billingPeriod === 'monthly'
-                                ? powerUp.powerUps.pro.pricing['monthly']
-                                : powerUp.powerUps.pro.pricing['yearly']}
-                        </PowerUpPricing>
-                        {this.props.componentVariant === 'OnboardingStep' && (
-                            <AlternativePricing>
-                                {this.state.billingPeriod === 'monthly'
-                                    ? powerUp.powerUps.pro.pricingDiscounted[
-                                          'monthly'
-                                      ]
-                                    : powerUp.powerUps.pro.pricingDiscounted[
-                                          'yearly'
-                                      ]}
-                            </AlternativePricing>
-                        )}
-                    </PowerUpPricingBox>
-                </PowerUpItem>
-            </PowerUpOptions>
-        )
-    }
-
-    renderLifetimePlan = () => {
         return (
             <PowerUpOptions>
                 <UpgradeOverlayTextContainer>
-                    <UpgradeOverlayText>
-                        A transferrable lifetime plan
-                    </UpgradeOverlayText>
-                    <LifetimePlanTermsList>
-                        <LifetimePlanTermsListItem>
-                            <Icon
-                                icon="feed"
-                                heightAndWidth="20px"
-                                color="prime1"
-                            />
-                            Includes up to $50 in subscription value per month
-                        </LifetimePlanTermsListItem>
-                        <LifetimePlanTermsListItem>
-                            <Icon
-                                icon="reload"
-                                heightAndWidth="20px"
-                                color="prime1"
-                            />
-                            Can be gifted or sold to others
-                        </LifetimePlanTermsListItem>
-                        <LifetimePlanTermsListItem>
-                            <Icon
-                                icon="clock"
-                                heightAndWidth="20px"
-                                color="prime1"
-                            />
-                            Valid until you die or up to 50 years if transferred
-                        </LifetimePlanTermsListItem>
-                    </LifetimePlanTermsList>
+                    {this.state.remainingTrialDays <= 0 ? (
+                        <UpgradeOverlayText>
+                            You've reached the end of your free trial
+                        </UpgradeOverlayText>
+                    ) : (
+                        <UpgradeOverlayText>
+                            PowerUps for using Memex after the trial
+                        </UpgradeOverlayText>
+                    )}
+                    <UpgradeOverlaySubText>
+                        Add the powerup to continue using the {featureString}{' '}
+                        features.
+                    </UpgradeOverlaySubText>
                 </UpgradeOverlayTextContainer>
-                <PowerUpItem
-                    onClick={() => {
-                        this.processEvent('processCheckoutOpen', {
-                            plan: 'lifetime',
-                        })
-                    }}
-                    activated={
-                        this.state.activatedPowerUps &&
-                        this.state.activatedPowerUps.lifetime === true
-                    }
-                >
-                    <PowerUpTitleBox>
-                        <PowerUpTitle>Upgrade to lifetime</PowerUpTitle>
-                        <PowerUpSubTitle>
-                            Upgrade now and never pay for Memex again
-                        </PowerUpSubTitle>
-                    </PowerUpTitleBox>
-                    <PowerUpPricingBox>
-                        <PowerUpPricing
-                            componentVariant={this.props.componentVariant}
+                <PricingSwitcherContainer>
+                    <PricingSwitcher>
+                        <LeftSide
+                            selected={this.state.billingPeriod === 'monthly'}
+                            onClick={() =>
+                                this.processEvent(
+                                    'toggleBillingPeriod',
+                                    'monthly',
+                                )
+                            }
                         >
-                            $450
-                        </PowerUpPricing>
-                        {this.props.componentVariant === 'OnboardingStep' && (
-                            <AlternativePricing>$400</AlternativePricing>
-                        )}
-                    </PowerUpPricingBox>
-                </PowerUpItem>
+                            Monthly
+                        </LeftSide>
+                        <RightSide
+                            selected={this.state.billingPeriod === 'yearly'}
+                            onClick={() =>
+                                this.processEvent(
+                                    'toggleBillingPeriod',
+                                    'yearly',
+                                )
+                            }
+                        >
+                            Yearly
+                        </RightSide>
+                    </PricingSwitcher>
+                    {this.renderManageSubscription()}
+                </PricingSwitcherContainer>
+                {powerUps.map((powerUp) => {
+                    let activatedStatus = false
+                    if (
+                        this.state.activatedPowerUps?.has(
+                            powerUp.id as PremiumPlans,
+                        )
+                    ) {
+                        activatedStatus = true
+                    }
+
+                    let selectedStatus = false
+                    if (
+                        this.state.selectedPowerUps?.has(
+                            powerUp.id as PremiumPlans,
+                        )
+                    ) {
+                        selectedStatus = true
+                    }
+
+                    let removedStatus = false
+                    if (
+                        this.state.removedPowerUps?.has(
+                            powerUp.id as PremiumPlans,
+                        )
+                    ) {
+                        removedStatus = true
+                    }
+
+                    const isTrial = this.state.remainingTrialDays !== -1
+
+                    console.log('istrial', isTrial)
+
+                    let powerUpPricing = null
+                    let originalPricing = null
+                    if (this.state.billingPeriod === 'monthly') {
+                        powerUpPricing = powerUp.pricing['monthly']
+                        originalPricing = powerUp.pricing['monthly']
+                        if (isTrial) {
+                            powerUpPricing =
+                                powerUp.pricingDiscounted['monthly']
+                        }
+                    }
+                    if (this.state.billingPeriod === 'yearly') {
+                        powerUpPricing = powerUp.pricing['yearly']
+                        originalPricing = powerUp.pricing['yearly']
+                        if (isTrial) {
+                            powerUpPricing = powerUp.pricingDiscounted['yearly']
+                        }
+                    }
+                    if (powerUp.id === 'lifetime') {
+                        powerUpPricing = powerUp.pricing['oneTime']
+                        originalPricing = powerUp.pricing['oneTime']
+                        if (isTrial) {
+                            powerUpPricing =
+                                powerUp.pricingDiscounted['oneTime']
+                        }
+                    }
+                    if (this.state.remainingTrialDays <= 0) {
+                        originalPricing = null
+                    }
+
+                    return (
+                        <PowerUpItem
+                            onClick={() => {
+                                if (selectedStatus) {
+                                    this.processEvent('unSelectPowerUps', {
+                                        plan: powerUp.id as PremiumPlans,
+                                    })
+                                } else {
+                                    this.processEvent('selectPowerUps', {
+                                        plan: powerUp.id as PremiumPlans,
+                                    })
+                                }
+                            }}
+                            activated={activatedStatus}
+                            selected={selectedStatus}
+                            unselected={removedStatus}
+                        >
+                            <PowerUpTitleBox>
+                                <PowerUpTitleContainer>
+                                    <PowerUpTitle>{powerUp.title}</PowerUpTitle>
+                                    {powerUp.id === 'lifetime' && (
+                                        <LifetimeTag>One-Time</LifetimeTag>
+                                    )}
+                                </PowerUpTitleContainer>
+                                <PowerUpSubTitle>
+                                    {powerUp.subTitle}
+                                </PowerUpSubTitle>
+                            </PowerUpTitleBox>
+                            {activatedStatus &&
+                            !(activatedStatus && !selectedStatus) ? (
+                                <PrimaryAction
+                                    label="Downgrade"
+                                    type="tertiary"
+                                    size="small"
+                                    onClick={() => {
+                                        null
+                                    }}
+                                />
+                            ) : (
+                                <PowerUpPricingBox>
+                                    {originalPricing && (
+                                        <OriginalPrice>
+                                            {originalPricing}
+                                        </OriginalPrice>
+                                    )}
+                                    <PowerUpPricing>
+                                        {powerUpPricing}
+                                    </PowerUpPricing>
+                                </PowerUpPricingBox>
+                            )}
+                        </PowerUpItem>
+                    )
+                })}
             </PowerUpOptions>
         )
     }
 
-    render() {
-        let modalToShow = null
-
-        if (this.state.powerUpType === 'Bookmarks') {
-            modalToShow = this.renderBookmarkPowerUpsOptionsList()
-        } else if (
-            this.state.powerUpType === 'AI' ||
-            this.state.powerUpType === 'AIownKey'
+    renderCheckoutFooter = () => {
+        const selectedPowerUps = this.state.selectedPowerUps
+        const activatedPowerUps = this.state.activatedPowerUps
+        console.log('selectedPowerUps', selectedPowerUps)
+        console.log('activatedPowerUps', activatedPowerUps)
+        if (selectedPowerUps?.size === 0 && activatedPowerUps?.size === 0) {
+            return null
+        }
+        if (
+            selectedPowerUps?.size > 0 &&
+            activatedPowerUps?.size > 0 &&
+            selectedPowerUps.size === activatedPowerUps.size &&
+            [...selectedPowerUps].every((item) => activatedPowerUps.has(item))
         ) {
-            modalToShow = this.renderAIPowerUpsOptionsList()
-        } else if (this.state.powerUpType === 'lifetime') {
-            modalToShow = this.renderLifetimePlan()
+            return null
         }
 
-        const upgradeContent = (
-            <OverlayContainer>
-                {this.state.confirmPowerups ? (
-                    this.renderConfirmUpgradeOverlay(this.state.confirmPowerups)
-                ) : (
-                    <>
-                        <SideBar>
-                            <SidebarTitle>Powerups</SidebarTitle>
-                            {Powerups.map((powerUp) => (
-                                <SidebarItem
-                                    onClick={() => {
-                                        this.processEvent(
-                                            'changeModalType',
-                                            powerUp.id as PowerUpModalVersion,
-                                        )
-                                    }}
-                                    selected={
-                                        powerUp.id === this.state.powerUpType
-                                    }
-                                >
-                                    <Icon
-                                        icon={powerUp.icon}
-                                        heightAndWidth="18px"
-                                        color="greyScale6"
-                                        hoverOff
-                                    />
-                                    {powerUp.title}
-                                </SidebarItem>
-                            ))}
-                            <SidebarBottomArea>
-                                {this.state.authLoadState === 'running' ? (
-                                    <LoadingIndicator size={20} />
-                                ) : (
-                                    this.state.activatedPowerUps != null && (
-                                        <PrimaryAction
-                                            label="Manage Subscription"
-                                            type="naked"
-                                            size="medium"
-                                            onClick={() => {
-                                                const isStaging =
-                                                    process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
-                                                        'staging',
-                                                    ) ||
-                                                    process.env.NODE_ENV ===
-                                                        'development'
-                                                window.open(
-                                                    isStaging
-                                                        ? `https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU?prefilled_email=${this.state.userEmail}`
-                                                        : `https://billing.stripe.com/p/login/8wM015dIp6uPdb2288?prefilled_email=${this.state.userEmail}`,
-                                                    '_blank',
-                                                )
-                                            }}
-                                            width="100%"
-                                        />
-                                    )
-                                )}
-                            </SidebarBottomArea>
-                        </SideBar>
+        let type: 'update' | 'upgrade' = 'upgrade'
 
-                        <UpgradeContainer>
-                            {modalToShow}{' '}
-                            {this.props.componentVariant !== 'AccountPage' && (
-                                <MoneyBackContainer>
-                                    <Icon
-                                        filePath="reload"
-                                        heightAndWidth="20px"
-                                        color="greyScale7"
-                                        hoverOff
-                                    />
-                                    60-day money back guarantee
-                                </MoneyBackContainer>
-                            )}
-                        </UpgradeContainer>
-                    </>
-                )}
+        if (activatedPowerUps.size > 0) {
+            type = 'update'
+        }
+
+        return (
+            <CheckOutFooter componentVariant={this.state.componentVariant}>
+                <CheckoutFooterText>
+                    {type === 'update'
+                        ? 'Update Subscription'
+                        : 'Upgrade Selected Powerups'}
+                </CheckoutFooterText>
+                <PrimaryAction
+                    label={type === 'update' ? 'Update' : 'Upgrade'}
+                    type="primary"
+                    size="medium"
+                    onClick={() => {
+                        this.processEvent('processCheckoutOpen', null)
+                    }}
+                />
+            </CheckOutFooter>
+        )
+    }
+
+    renderManageSubscription = () => {
+        if (this.state.activatedPowerUps?.size > 0) {
+            return (
+                <ManageSubscriptionBox>
+                    <PrimaryAction
+                        label="Manage Subscription"
+                        type="naked"
+                        size="medium"
+                        onClick={() => {
+                            const isStaging =
+                                process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
+                                    'staging',
+                                ) || process.env.NODE_ENV === 'development'
+                            window.open(
+                                isStaging
+                                    ? `https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU?prefilled_email=${this.state.userEmail}`
+                                    : `https://billing.stripe.com/p/login/8wM015dIp6uPdb2288?prefilled_email=${this.state.userEmail}`,
+                                '_blank',
+                            )
+                        }}
+                        width="100%"
+                    />
+                </ManageSubscriptionBox>
+            )
+        }
+    }
+
+    render() {
+        const upgradeContent = this.state.activatedPowerUps.has('lifetime') ? (
+            this.renderLifeTimePlanNote()
+        ) : (
+            <OverlayContainer>
+                <UpgradeContainer>
+                    {this.state.remainingTrialDays &&
+                        this.state.remainingTrialDays !== -1 && (
+                            <TrialBanner
+                                componentVariant={this.state.componentVariant}
+                            >
+                                {this.state.remainingTrialDays} trial days left.
+                                Upgrade before for a 20% discount.
+                            </TrialBanner>
+                        )}
+                    {this.renderPowerUpsList(this.state.powerUpType)}
+                </UpgradeContainer>
+
+                {this.renderCheckoutFooter()}
             </OverlayContainer>
         )
 
@@ -574,81 +394,11 @@ export default class UpgradeModal extends UIElement<
     }
 }
 
-const Powerups = [
-    {
-        id: 'Bookmarks',
-        title: 'Bookmarking',
-        icon: 'heartEmpty',
-        powerUps: {
-            basic: {
-                title: 'Basic',
-                subTitle: `${DEFAULT_POWERUP_LIMITS.bookmarksPowerUp} uniquely new pages per day. Every page saved, annotated or added to a Space counts once, forever.`,
-                pricing: 'Free',
-            },
-            pro: {
-                title: 'Pro',
-                subTitle: 'Unlimited saved pages, annotations and images',
-                pricing: {
-                    monthly: '$4',
-                    yearly: '$40',
-                },
-                pricingDiscounted: {
-                    monthly: '$3.20',
-                    yearly: '$32',
-                },
-            },
-        },
-    },
-    {
-        id: 'AI',
-        title: 'AI Features',
-        icon: 'feed',
-        powerUps: {
-            basic: {
-                title: 'Basic',
-                subTitle: `${DEFAULT_POWERUP_LIMITS.AIpowerup} page sessions per day with GPT-4o-mini & Claude-3-Haiku`,
-                pricing: 'Free',
-            },
-            pro: {
-                title: 'Pro',
-                subTitle:
-                    'Unlimited sessions with GPT-4o-mini & Claude-3-Haiku, and GPT-4 with own key',
-                pricing: {
-                    monthly: '$6',
-                    yearly: '$60',
-                },
-                pricingDiscounted: {
-                    monthly: '$4.80',
-                    yearly: '$48',
-                },
-            },
-            ownKey: {
-                title: 'Bring your own Key',
-                subTitle:
-                    'Unlimited sessions with GPT-4o-mini & Claude-3-Haiku, at your own cost of the OpenAI API.',
-                pricing: {
-                    monthly: '$2.50',
-                    yearly: '$25',
-                },
-                pricingDiscounted: {
-                    monthly: '$2.00',
-                    yearly: '$20',
-                },
-            },
-        },
-    },
-    {
-        id: 'lifetime',
-        title: 'Lifetime Plan',
-        icon: 'clock',
-    },
-]
-
 const ModalContainer = styled.div`
     background: ${(props) => props.theme.colors.black};
     border-radius: 10px;
     box-shadow: ${(props) => props.theme.borderStyles.boxShadowHoverElements};
-    width: 860px;
+    width: 650px;
 `
 
 const LoadingBlocker = styled.div`
@@ -667,7 +417,7 @@ const LoadingBlocker = styled.div`
 
 const OverlayContainer = styled.div`
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
     width: 100%;
@@ -681,18 +431,18 @@ const OverlayContainer = styled.div`
 const PowerUpOptions = styled.div`
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    grid-gap: 2px;
+    grid-gap: 10px;
     padding: 20px;
-    max-width: 650px;
     width: 100%;
     box-sizing: border-box;
 `
 
 const PowerUpItem = styled.div<{
     activated?: boolean
-    disabled?: boolean
+    selected?: boolean
+    unselected?: boolean
 }>`
     display: flex;
     align-items: center;
@@ -702,11 +452,34 @@ const PowerUpItem = styled.div<{
     box-sizing: border-box;
     grid-gap: 10px;
     border-radius: 8px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     &:hover {
         background-color: ${(props) => props.theme.colors.greyScale3};
         cursor: pointer;
     }
+
+    ${(props) =>
+        props.selected &&
+        css`
+            border: 1px solid ${(props) => props.theme.colors.prime2};
+            position: relative;
+            &::after {
+                content: 'selected';
+                background-color: ${(props) => props.theme.colors.prime2};
+                border-radius: 0 5px 0 5px;
+                position: absolute;
+                top: 0px;
+                right: 0px;
+                height: 20px;
+                font-size: 12px;
+                padding: 0 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        `}
+
     ${(props) =>
         props.activated &&
         css`
@@ -727,15 +500,16 @@ const PowerUpItem = styled.div<{
                 justify-content: center;
             }
         `}
+
+  
     ${(props) =>
-        props.disabled &&
+        props.unselected &&
         css`
-            border: initial;
+            border: 1px solid ${(props) => props.theme.colors.warning};
             position: relative;
-            opacity: 0.8;
             &::after {
-                content: 'Included in Pro';
-                background-color: ${(props) => props.theme.colors.prime1};
+                content: 'Downgrading';
+                background-color: ${(props) => props.theme.colors.warning};
                 border-radius: 0 5px 0 5px;
                 position: absolute;
                 top: 0px;
@@ -746,9 +520,6 @@ const PowerUpItem = styled.div<{
                 display: flex;
                 align-items: center;
                 justify-content: center;
-            }
-            &:hover {
-                background: unset;
             }
         `}
 `
@@ -766,7 +537,6 @@ const PowerUpTitle = styled.div`
     font-weight: 500;
     text-align: left;
     font-size: 16px;
-    width: 100%;
     display: flex;
     align-items: center;
 `
@@ -780,7 +550,7 @@ const PowerUpSubTitle = styled.div`
 
 const PowerUpPricingBox = styled.div`
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     grid-gap: 3px;
     align-items: flex-end;
@@ -813,6 +583,16 @@ const AlternativePricing = styled.div<{
     text-align: right;
 `
 
+const PricingSwitcherContainer = styled.div`
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+`
+
 const PricingSwitcher = styled.div`
     display: flex;
     align-items: center;
@@ -821,7 +601,7 @@ const PricingSwitcher = styled.div`
     overflow: hidden;
     border: 1px solid ${(props) => props.theme.colors.greyScale3};
     margin-bottom: 10px;
-    margin-top: 20px;
+    margin-top: 10px;
 `
 
 const LeftSide = styled.div<{ selected: boolean }>`
@@ -868,15 +648,6 @@ const UpgradeContainer = styled.div`
     min-height: inherit;
 `
 
-const DiscountPill = styled.div`
-    border-radius: 100px;
-    padding: 3px 8px;
-    background: ${(props) => props.theme.colors.prime1};
-    color: ${(props) => props.theme.colors.black};
-    font-size: 14px;
-    margin-left: 10px;
-`
-
 const UpgradeOverlayText = styled.div`
     background: ${(props) => props.theme.colors.headerGradient};
     -webkit-background-clip: text;
@@ -905,151 +676,104 @@ const UpgradeOverlaySubText = styled.div`
     justify-content: center;
 `
 
-const MoneyBackContainer = styled.div`
-    width: 100%;
-    padding: 20px 40px;
-    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
-    color: ${(props) => props.theme.colors.greyScale7};
-    font-size: 16px;
-    justify-content: center;
+const TrialBanner = styled.div<{
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
+}>`
+    background: ${(props) => props.theme.colors.warning}40;
+    padding: 10px;
+    width: fill-available;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     align-items: center;
-    box-sizing: border-box;
+    justify-content: center;
+
+    ${(props) =>
+        (props.componentVariant === 'OnboardingStep' ||
+            props.componentVariant === 'AccountPage') &&
+        css`
+            border-radius: 10px;
+        `}
 `
 
-const SideBar = styled.div`
+const PowerUpTitleContainer = styled.div`
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     justify-content: flex-start;
-    padding: revert !important;
-    padding: 40px 20px 30px 20px !important;
-    grid-gap: 5px;
-    min-width: 210px;
-    height: 100%;
-    box-sizing: border-box;
-    border-right: 1px solid ${(props) => props.theme.colors.greyScale3};
-    overflow-y: scroll;
-    min-height: inherit;
-    position: relative;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    scrollbar-width: none;
+    width: 100%;
+    gap: 15px;
 `
-const SidebarTitle = styled.div`
+
+const LifetimeTag = styled.div`
+    background: ${(props) => props.theme.colors.prime2};
+    padding: 2px 8px;
+    border-radius: 5px;
+    color: ${(props) => props.theme.colors.black};
+    font-size: 13px;
+`
+
+const CheckOutFooter = styled.div<{
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
+}>`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: fill-available;
+    width: -moz-available;
+    transform: translateY(-20px);
+    transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+    animation: ${fadeInUp} 0.2s ease-in-out forwards;
+    padding: 20px 30px;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
+    box-sizing: border-box;
+    background-color: ${(props) => props.theme.colors.greyScale3};
+
+    ${(props) =>
+        (props.componentVariant === 'OnboardingStep' ||
+            props.componentVariant === 'AccountPage') &&
+        css`
+            border-radius: 15px;
+            margin: 0px 20px 20px 20px;
+        `}
+`
+const CheckoutFooterText = styled.div`
+    font-size: 16px;
     background: ${(props) => props.theme.colors.headerGradient};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-size: 20px;
-    font-weight: 700;
-    margin-left: 12px;
-    margin-bottom: 5px;
 `
 
-const SidebarItem = styled.div<{
-    selected?: boolean
-}>`
-    display: flex;
-
+const OriginalPrice = styled.div`
+    color: ${(props) => props.theme.colors.greyScale7};
     font-size: 16px;
     font-weight: 400;
-    color: ${(props) => props.theme.colors.greyScale6};
-    width: fill-available;
-    text-align: left;
-    grid-gap: 10px;
-    min-height: 30px;
-    height: fit-content;
-    align-items: center;
-    justify-content: flex-start;
-    padding: revert !important;
-    padding: 5px 10px !important;
-    cursor: pointer;
-
-    &:hover {
-        cursor: pointer;
-        background: ${(props) => props.theme.colors.greyScale3};
-        border-radius: 5px;
-    }
-
-    ${(props) =>
-        props.selected &&
-        css`
-            background: ${(props) => props.theme.colors.greyScale3};
-            border-radius: 5px;
-        `}
+    text-decoration: line-through;
 `
 
-const SidebarBottomArea = styled.div`
-    position: absolute;
-    bottom: 20px;
-`
-
-const LifetimePlanTermsList = styled.div`
+const LifetimeContainer = styled.div`
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
     flex-direction: column;
-    grid-gap: 10px;
-    margin-bottom: 30px;
-    margin-top: 10px;
-    background: ${(props) => props.theme.colors.greyScale3};
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 300px;
+    background: ${(props) => props.theme.colors.greyScale2};
     border-radius: 10px;
     padding: 20px;
-    width: 100%;
     box-sizing: border-box;
 `
 
-const LifetimePlanTermsListItem = styled.div`
+const ManageSubscriptionBox = styled.div`
     display: flex;
-    grid-gap: 15px;
+    flex-direction: column;
     align-items: center;
-    color: ${(props) => props.theme.colors.greyScale6};
-`
-
-const ConfirmOverlay = styled.div`
+    justify-content: center;
+    box-sizing: border-box;
     position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;
-    background: ${(props) => props.theme.colors.greyScale1};
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    grid-gap: 30px;
-    border-radius: inherit;
-`
-
-const ConfirmText = styled.div`
-    color: ${(props) => props.theme.colors.greyScale7};
-    font-size: 20px;
-    font-weight: 700;
-    text-align: center;
-    justify-content: center;
-`
-const ConfirmSubText = styled.div`
-    color: ${(props) => props.theme.colors.greyScale6};
-    font-size: 18px;
-    font-weight: 400;
-    text-align: center;
-    justify-content: center;
-`
-
-const ButtonBox = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    grid-gap: 10px;
-`
-
-const ConfirmContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    grid-gap: 10px;
+    right: 0;
 `

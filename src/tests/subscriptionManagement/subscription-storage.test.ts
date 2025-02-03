@@ -19,7 +19,7 @@ import {
 import { AI_PROMPT_DEFAULTS } from 'src/sidebar/annotations-sidebar/constants'
 import {
     AIActionAllowed,
-    enforceTrialPeriod30Days,
+    enforceTrialPeriod,
 } from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 describe('Ribbon logic', () => {
@@ -69,12 +69,10 @@ describe('Ribbon logic', () => {
                 [SIGNUP_TIMESTAMP_STORAGE_KEY]: trialStartDate,
             })
 
-            const result = await enforceTrialPeriod30Days(
-                browserAPIs,
-                trialStartDate,
-            )
+            const result = await enforceTrialPeriod(browserAPIs, trialStartDate)
+            const isTrial = result !== -1
 
-            expect(result).toBe(true)
+            expect(isTrial).toBe(true)
         })
         it('should allow action if page is already saved', async ({
             device,
@@ -94,7 +92,6 @@ describe('Ribbon logic', () => {
                 analytics,
                 collectionsBG,
                 'http://example.com',
-                false,
             )
             expect(result).toBe(true)
         })
@@ -122,7 +119,6 @@ describe('Ribbon logic', () => {
                 analytics,
                 collectionsBG,
                 null,
-                false,
             )
 
             expect(result).toBe(true)
@@ -148,7 +144,6 @@ describe('Ribbon logic', () => {
                 analytics,
                 collectionsBG,
                 null,
-                false,
             )
 
             expect(result).toBe(true)
@@ -177,7 +172,6 @@ describe('Ribbon logic', () => {
                     analytics,
                     collectionsBG,
                     null,
-                    false,
                 )
 
                 expect(result).toBe(false)
@@ -210,7 +204,6 @@ describe('Ribbon logic', () => {
                     browserAPIs,
                     analytics,
                     false,
-                    false,
                     'gpt-3',
                 )
 
@@ -237,7 +230,6 @@ describe('Ribbon logic', () => {
             const result = await AIActionAllowed(
                 browserAPIs,
                 analytics,
-                false,
                 false,
                 'gpt-3',
             )
@@ -271,7 +263,6 @@ describe('Ribbon logic', () => {
                 browserAPIs,
                 analytics,
                 true,
-                false,
                 'claude-3-haiku',
             )
 
@@ -300,7 +291,6 @@ describe('Ribbon logic', () => {
                 browserAPIs,
                 analytics,
                 true,
-                false,
                 'gpt-3',
             )
 
@@ -329,7 +319,6 @@ describe('Ribbon logic', () => {
             const result = await AIActionAllowed(
                 browserAPIs,
                 analytics,
-                false,
                 false,
                 'gpt-3',
             )
@@ -363,7 +352,6 @@ describe('Ribbon logic', () => {
                 browserAPIs,
                 analytics,
                 false,
-                false,
                 'gpt-3',
             )
 
@@ -394,7 +382,6 @@ describe('Ribbon logic', () => {
                 browserAPIs,
                 analytics,
                 true,
-                false,
                 'gpt-3',
             )
 
@@ -428,7 +415,6 @@ describe('Ribbon logic', () => {
             const result = await AIActionAllowed(
                 browserAPIs,
                 analytics,
-                false,
                 false,
                 'gpt-3',
             )

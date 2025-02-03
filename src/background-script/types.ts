@@ -39,6 +39,7 @@ export interface RemoteBGScriptInterface<Role extends RemoteFunctionRole> {
             billingPeriod: 'monthly' | 'yearly'
             selectedPremiumPlans: PremiumPlans[]
             doNotOpen: boolean
+            removedPremiumPlans?: PremiumPlans[]
         },
         'error' | 'success'
     >

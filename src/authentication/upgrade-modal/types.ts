@@ -24,19 +24,24 @@ export interface PromptTemplatesState {
     checkoutLoading: UITaskState
     componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
     powerUpType: PowerUpModalVersion
-    activatedPowerUps?: Record<PremiumPlans, any>
+    activatedPowerUps?: Set<PremiumPlans>
+    selectedPowerUps?: Set<PremiumPlans>
+    removedPowerUps?: Set<PremiumPlans>
     confirmPowerups?: PremiumPlans
     authLoadState: UITaskState
     userEmail?: string
+    remainingTrialDays: number
 }
 
 export type PromptTemplatesEvent = UIEvent<{
     changeModalType: PowerUpModalVersion
-    processCheckoutOpen: { plan: PremiumPlans }
+    processCheckoutOpen: void
+    selectPowerUps: { plan: PremiumPlans }
+    unSelectPowerUps: { plan: PremiumPlans }
     toggleBillingPeriod: 'monthly' | 'yearly'
     setPowerUpConfirmation: { selected?: PremiumPlans }
 }>
 
-export type PowerUpModalVersion = 'Bookmarks' | 'AI' | 'AIownKey' | 'lifetime'
+export type PowerUpModalVersion = 'Bookmarks' | 'AI'
 
 export type PromptTemplatesSignal = UISignal<{ type: 'nothing-yet' }>

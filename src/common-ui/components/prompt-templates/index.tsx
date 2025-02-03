@@ -484,18 +484,16 @@ const Title = styled.div`
 
 const ContentBlock = styled.div`
     padding: 0 5px 5px 5px;
-    overflow: scroll;
     width: 100%;
     box-sizing: border-box;
-    overflow: scroll;
     display: flex;
     flex-direction: column;
-
+    /* 
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
         display: none;
-    }
+    } */
 `
 
 const SectionCircle = styled.div`

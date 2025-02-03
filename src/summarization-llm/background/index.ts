@@ -92,7 +92,6 @@ export default class SummarizeBackground {
                 this.options.browserAPIs,
                 this.options.analyticsBG,
                 hasKey,
-                true,
                 AImodel,
             )
         }

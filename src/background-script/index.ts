@@ -456,6 +456,7 @@ class BackgroundScript {
         billingPeriod,
         selectedPremiumPlans,
         doNotOpen,
+        removedPremiumPlans,
     }) => {
         const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
         const creationTime = currentUser?.creationTime
@@ -474,16 +475,19 @@ class BackgroundScript {
         const baseLink = CLOUDFLARE_WORKER_URLS[process.env.NODE_ENV]
 
         let selectedPremiumPlansString = ''
+        let removedPremiumPlansString = ''
         let checkoutLink = ''
 
         if (selectedPremiumPlans.includes('lifetime')) {
             selectedPremiumPlansString = 'lifetime'
-            checkoutLink = `${baseLink}/create-checkout?billingPeriod=lifetime&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
+            removedPremiumPlansString = removedPremiumPlans.join(',')
+            checkoutLink = `${baseLink}/create-checkout?billingPeriod=lifetime&powerUps=${selectedPremiumPlansString}&removedPowerUps=${removedPremiumPlansString}&prefilled_email=${encodeURIComponent(
                 currentUserEmail,
             )}&uwt=${upgradeWithinTrial}`
         } else {
             selectedPremiumPlansString = selectedPremiumPlans.join(',')
-            checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
+            removedPremiumPlansString = removedPremiumPlans.join(',')
+            checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&removedPowerUps=${removedPremiumPlansString}&prefilled_email=${encodeURIComponent(
                 currentUserEmail,
             )}&uwt=${upgradeWithinTrial}`
         }

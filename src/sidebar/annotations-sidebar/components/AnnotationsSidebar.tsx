@@ -156,7 +156,6 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         [instanceId: string]: AnnotationInstanceRefs
     }
     activeShareMenuNoteId: string
-    renderAICounter: () => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (id: string) => JSX.Element
@@ -428,27 +427,6 @@ export class AnnotationsSidebar extends React.Component<
         showSpacePickerForBulkEdit: false,
         showAutoAddBulkSelection: false,
     }
-
-    // async addYoutubeTimestampToEditor(commentText) {
-    //     let annotationCreateRef = this.annotationCreateRef.current
-
-    //     if (annotationCreateRef) {
-    //         this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
-    //             commentText,
-    //         )
-    //     }
-    //     // fix race condition of annotationCreateRef not being available yet, hacky but works
-    //     while (!annotationCreateRef) {
-    //         await sleepPromise(25)
-    //         annotationCreateRef = this.annotationCreateRef.current
-    //         if (annotationCreateRef) {
-    //             this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
-    //                 commentText,
-    //             )
-    //         }
-    //         await sleepPromise(25)
-    //     }
-    // }
 
     private maybeCreateContextBtnRef({
         unifiedId,
@@ -1993,13 +1971,27 @@ export class AnnotationsSidebar extends React.Component<
     renderQaASection() {
         return (
             <AISidebarContainer>
+                {!this.props.hasAIpowerup && (
+                    <TrialBanner
+                        componentVariant={'OnboardingStep'}
+                        onClick={() =>
+                            this.props.events.emit('showPowerUpModal', {
+                                limitReachedNotif: 'AI',
+                            })
+                        }
+                    >
+                        {this.props.remainingTrialDays === -1
+                            ? 'Your trial is over. Upgrade to use the AI features'
+                            : `${this.props.remainingTrialDays} trial days
+                                    left. Upgrade before for a 20% discount.`}
+                    </TrialBanner>
+                )}
                 <AIChatComponent
                     getRootElement={this.props.getRootElement}
                     imageSupport={this.props.imageSupport}
                     queryAIservice={this.props.queryAIservice}
                     currentAIResponse={this.props.pageSummary}
-                    renderAICounter={this.props.renderAICounter}
-                    isTrial={this.props.isTrial}
+                    isTrial={this.props.remainingTrialDays > 0}
                     getLocalContent={() => this.getLocalContent()}
                     updateAIChatHistoryState={
                         this.props.updateAIChatHistoryState
@@ -2030,7 +2022,6 @@ export class AnnotationsSidebar extends React.Component<
                     isKeyValid={this.props.isKeyValid}
                     checkIfKeyValid={this.props.checkIfKeyValid}
                     renderOptionsContainer={() => this.renderOptionsContainer()}
-                    counterStorageKey={COUNTER_STORAGE_KEY}
                     setAIModel={this.props.setAIModel}
                     createCheckOutLink={this.props.createCheckOutLink}
                     authBG={this.props.authBG}
@@ -2192,7 +2183,6 @@ export class AnnotationsSidebar extends React.Component<
                             initSelectedItem={this.props.AImodel ?? 'gpt-3'}
                             keepSelectedState
                             getRootElement={this.props.getRootElement}
-                            renderAICounter={this.props.renderAICounter}
                         />
                     </SummaryActionsButton>
                 </SummaryActionButtonBox>
@@ -4148,20 +4138,11 @@ const QueryContainer = styled.div<{
 `
 
 const AISidebarContainer = styled.div`
-    display: flex;
     position: relative;
-    height: fill-available;
-    /* overflow: scroll; */
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+    height: 50%;
     flex: 1;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-    scrollbar-width: none;
 `
 
 const SelectedAITextBox = styled.div`
@@ -5295,4 +5276,31 @@ const PageNotSavedText = styled.div`
     padding: 0 5px;
     width: 100%;
     box-sizing: border-box;
+`
+
+const TrialBanner = styled.div<{
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage' | 'OnboardingStep'
+}>`
+    background: ${(props) => props.theme.colors.warning}40;
+    padding: 10px;
+    width: fill-available;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 10px;
+
+    ${(props) =>
+        (props.componentVariant === 'OnboardingStep' ||
+            props.componentVariant === 'AccountPage') &&
+        css`
+            border-radius: 10px;
+        `}
+    &:hover {
+        cursor: pointer;
+        background: ${(props) => props.theme.colors.warning}20;
+    }
 `

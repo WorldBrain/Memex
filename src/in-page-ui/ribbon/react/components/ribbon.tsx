@@ -1,6 +1,6 @@
 import React, { Component, createRef, KeyboardEventHandler } from 'react'
 import styled, { createGlobalStyle, css, keyframes } from 'styled-components'
-import browser from 'webextension-polyfill'
+import browser, { Browser } from 'webextension-polyfill'
 
 import moment from 'moment'
 import {
@@ -30,7 +30,7 @@ import { HexColorPicker, RgbaColorPicker } from 'react-colorful'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
+import { TrialStatusIndicator } from 'src/util/subscriptions/trialStatusIndicator'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
@@ -88,6 +88,7 @@ export interface Props extends RibbonSubcomponentProps {
     getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface<'caller'>
     setWriteError: (error: string) => void
+    browserAPIs: Browser
     showRabbitHoleButton: boolean
     tutorialIdToOpen: string
     setTutorialIdToOpen: (tutorialId: string) => void
@@ -2112,8 +2113,9 @@ export default class Ribbon extends Component<Props, State> {
                                             this.props.ribbonPosition
                                         }
                                     >
-                                        {this.renderFeedButton()}
-                                        <BlockCounterIndicator
+                                        {/* {this.renderFeedButton()} */}
+                                        <TrialStatusIndicator
+                                            browserAPIs={this.props.browserAPIs}
                                             ribbonPosition={
                                                 this.props.ribbonPosition
                                             }
@@ -2325,10 +2327,10 @@ export default class Ribbon extends Component<Props, State> {
                                 sidebarOpen={this.props.sidebar.isSidebarOpen}
                                 ribbonPosition={this.props.ribbonPosition}
                             >
-                                {this.renderFeedButton()}
+                                {/* {this.renderFeedButton()} */}
                                 {this.renderDarkLightModeToggle()}
                                 {this.renderTutorialButton()}
-                                <BlockCounterIndicator
+                                <TrialStatusIndicator
                                     ribbonPosition={this.props.ribbonPosition}
                                     isSidebarOpen={
                                         this.props.sidebar.isSidebarOpen
@@ -2338,6 +2340,7 @@ export default class Ribbon extends Component<Props, State> {
                                     getRootElement={this.props.getRootElement}
                                     events={this.props.events}
                                     forceRibbonShow={this.props.forceRibbonShow}
+                                    browserAPIs={this.props.browserAPIs}
                                 />
                                 {this.renderCloseRibbonButton()}
                             </BottomSection>

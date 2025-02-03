@@ -154,7 +154,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     selectedTextAIPreview: string
     imageSourceForPreview: string
     queryMode: string
-    isTrial: boolean
+    remainingTrialDays: number | null
+    hasAIpowerup: boolean | null
     signupDate: number
     showState: 'visible' | 'hidden'
     isLocked: boolean

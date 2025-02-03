@@ -156,6 +156,7 @@ export default class RibbonContainer extends StatefulUIElement<
                         error: null,
                     })
                 }
+                browserAPIs={this.props.browserAPIs}
                 isTrial={this.state.isTrial}
                 showRabbitHoleButton={this.state.showRabbitHoleButton}
                 signupDate={this.state.signupDate}
@@ -321,7 +322,6 @@ export default class RibbonContainer extends StatefulUIElement<
                             null,
                             this.props.customLists,
                             this.state.fullPageUrl,
-                            true,
                         )
 
                         if (!isAllowed) {
@@ -350,7 +350,6 @@ export default class RibbonContainer extends StatefulUIElement<
                             null,
                             this.props.customLists,
                             this.state.fullPageUrl,
-                            true,
                         )
 
                         if (!isAllowed) {

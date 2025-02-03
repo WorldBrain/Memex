@@ -88,7 +88,7 @@ import {
     convertMemexURLintoTelegramURL,
     getTelegramUserDisplayName,
 } from '@worldbrain/memex-common/lib/telegram/utils'
-import { enforceTrialPeriod30Days } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { enforceTrialPeriod } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import {
     SpacePickerDependencies,
     SpacePickerEvent,
@@ -120,6 +120,7 @@ import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat/u
 import { DEFAULT_AI_MODEL } from '@worldbrain/memex-common/lib/ai-chat/constants'
 import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { PromptTemplate } from 'src/common-ui/components/prompt-templates/types'
+import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/lib/subscriptions/constants'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -383,6 +384,8 @@ export class SidebarContainerLogic extends UILogic<
             localFoldersList: [],
             bulkSelectionState: [],
             imageSourceForPreview: null,
+            hasAIpowerup: false,
+            remainingTrialDays: null,
         }
     }
 
@@ -495,15 +498,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    // const linkRegex = /\[(.*?)\]\((.*?)\)/g // Regex to find markdown links
-
-    // let match
-    // while ((match = linkRegex.exec(buffer)) !== null) {
-    //     buffer = buffer.replace(
-    //         match[0],
-    //         `<a href="${match[2]}">${match[1]}</a>`,
-    //     )
-    // }
     bracketsAreBalanced = (buffer: string) => {
         let stack = []
 
@@ -802,14 +796,23 @@ export class SidebarContainerLogic extends UILogic<
                     currentUserId: { $set: currentUser.id ?? null },
                 })
                 const signupDate = new Date(currentUser?.creationTime).getTime()
+
+                const isTrialResponse = await enforceTrialPeriod(
+                    this.options.browserAPIs,
+                    signupDate,
+                )
+
+                const premiumPlansData = await this.options.storageAPI.local.get(
+                    COUNTER_STORAGE_KEY,
+                )
+                const premiumPlans =
+                    premiumPlansData[COUNTER_STORAGE_KEY].pU ?? {}
+                const hasAIpowerup = premiumPlans.AIpowerup ?? false
+
                 this.emitMutation({
                     signupDate: { $set: signupDate },
-                    isTrial: {
-                        $set: await enforceTrialPeriod30Days(
-                            this.options.browserAPIs,
-                            signupDate,
-                        ),
-                    },
+                    remainingTrialDays: { $set: isTrialResponse },
+                    hasAIpowerup: { $set: hasAIpowerup },
                 })
             }
 

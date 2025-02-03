@@ -48,7 +48,6 @@ import type {
     UnifiedList,
 } from 'src/annotations/cache/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { generateAnnotationCardInstanceId } from './utils'
 import type { AnnotationCardInstanceLocation } from '../types'
@@ -56,7 +55,6 @@ import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtu
 import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import ImagePreviewModal from '@worldbrain/memex-common/lib/common-ui/image-preview-modal'
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
@@ -876,72 +874,8 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderAICounter = () => (
-        <AICounterIndicator
-            syncSettingsBG={this.props.syncSettingsBG}
-            isTrial={this.state.isTrial}
-            signupDate={this.state.signupDate}
-            addedKey={() => this.processEvent('addedKey', null)}
-            getRootElement={this.props.getRootElement}
-            checkIfKeyValid={(apiKey) =>
-                this.processEvent('checkIfKeyValid', { apiKey: apiKey })
-            }
-            isKeyValid={this.state.isKeyValid}
-            createCheckOutLink={async ({
-                billingPeriod,
-                selectedPremiumPlans,
-            }) => {
-                this.processEvent('createCheckOutLink', {
-                    billingPeriod,
-                    selectedPremiumPlans,
-                    doNotOpen: false,
-                })
-                return 'success'
-            }}
-            authBG={this.props.authBG}
-            browserAPIs={this.props.browserAPIs}
-        />
-    )
-
     protected renderTopBanner() {
         return null
-    }
-
-    private renderTopSideBar() {
-        if (this.props.skipTopBarRender) {
-            return null
-        }
-
-        return (
-            <TopBarActionBtns
-                width={this.state.sidebarWidth}
-                sidebarContext={this.props.sidebarContext}
-            >
-                <TooltipBox
-                    tooltipText={
-                        <TooltipContent>
-                            Close{' '}
-                            <KeyboardShortcuts
-                                getRootElement={this.props.getRootElement}
-                                size="small"
-                                keys={['Esc']}
-                            />
-                        </TooltipContent>
-                    }
-                    getPortalRoot={this.props.getRootElement}
-                    placement="left"
-                >
-                    <IconBoundary>
-                        <Icon
-                            filePath={icons.arrowRight}
-                            height="20px"
-                            width="16px"
-                            onClick={() => this.hideSidebar()}
-                        />
-                    </IconBoundary>
-                </TooltipBox>
-            </TopBarActionBtns>
-        )
     }
 
     renderTopBar() {
@@ -1598,7 +1532,6 @@ export class AnnotationsSidebarContainer<
                                 this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
-                            renderAICounter={() => this.renderAICounter()}
                             renderCopyPasterForAnnotation={
                                 this.renderCopyPasterManagerForAnnotation
                             }
@@ -1860,8 +1793,7 @@ export class AnnotationsSidebarContainer<
                                     AIChatEditorState: newState,
                                 })
                             }}
-                            isTrial={this.state.isTrial}
-                            signupDate={this.state.signupDate}
+                            hasAIpowerup={this.state.hasAIpowerup}
                             addedKey={() => this.processEvent('addedKey', null)}
                             checkIfKeyValid={(apiKey) =>
                                 this.processEvent('checkIfKeyValid', {

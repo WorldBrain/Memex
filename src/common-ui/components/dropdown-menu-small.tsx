@@ -35,7 +35,6 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     elementHeight?: string
     hideDescriptionInPreview: boolean
     getRootElement: () => HTMLElement
-    renderAICounter?: () => JSX.Element
 }
 
 interface State {
@@ -151,7 +150,6 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         </MenuItemName>
                     </MenuItem>
                 ))}
-                {this.props.renderAICounter()}
             </MenuItemContainerUnfolded>
         )
     }

@@ -4,13 +4,14 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import React from 'react'
 import styled, { css } from 'styled-components'
-import browser from 'webextension-polyfill'
+import browser, { Browser } from 'webextension-polyfill'
 import {
     COUNTER_STORAGE_KEY,
     DEFAULT_POWERUP_LIMITS,
 } from '@worldbrain/memex-common/lib/subscriptions/constants'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 import { DEFAULT_TRIAL_PERIOD } from '@worldbrain/memex-common/lib/subscriptions/constants'
+import { enforceTrialPeriod } from '@worldbrain/memex-common/lib/subscriptions/storage'
 
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
@@ -20,12 +21,12 @@ interface Props {
     getRootElement: () => HTMLElement
     events: AnnotationsSidebarInPageEventEmitter
     forceRibbonShow: (force: boolean) => void
+    browserAPIs: Browser
 }
 
-export class BlockCounterIndicator extends React.Component<Props> {
+export class TrialStatusIndicator extends React.Component<Props> {
     state = {
-        currentCount: undefined,
-        totalCount: undefined,
+        trialDaysLeft: 0,
         shouldShow: false,
         showTooltip: false,
     }
@@ -33,23 +34,21 @@ export class BlockCounterIndicator extends React.Component<Props> {
     private tooltipButtonRef = React.createRef<HTMLDivElement>()
 
     async componentDidMount() {
+        const trialDaysLeft = await enforceTrialPeriod(
+            this.props.browserAPIs,
+            this.props.signupDate,
+        )
         const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
         if (!result[COUNTER_STORAGE_KEY]?.pU?.bookmarksPowerUp) {
             this.setState({
                 shouldShow: true,
-                totalCount: DEFAULT_POWERUP_LIMITS.bookmarksPowerUp,
-                currentCount: result[COUNTER_STORAGE_KEY].c,
+                trialDaysLeft: trialDaysLeft,
             })
-            browser.storage.onChanged.addListener(
-                this.counterStorageListenerExecution,
-            )
-        }
-    }
-    async componentWillUnmount() {
-        if (this.state.shouldShow) {
-            browser.storage.onChanged.removeListener((changes) =>
-                this.counterStorageListenerExecution(changes),
-            )
+        } else {
+            this.setState({
+                shouldShow: false,
+                trialDaysLeft: 0,
+            })
         }
     }
 
@@ -88,25 +87,6 @@ export class BlockCounterIndicator extends React.Component<Props> {
         return Math.ceil(differenceInDays)
     }
 
-    daysRemainingToComplete30() {
-        const MILLISECONDS_IN_A_DAY = 24 * 60 * 60 * 1000
-
-        const currentDate = Date.now()
-
-        // Calculate the difference in milliseconds between the current date and the initial timestamp
-        const elapsedMilliseconds = currentDate - this.props.signupDate
-
-        // Convert the elapsed time to days
-        const elapsedDays = Math.floor(
-            elapsedMilliseconds / MILLISECONDS_IN_A_DAY,
-        )
-
-        // Calculate the days remaining to complete 30 days
-        const remainingDays = DEFAULT_TRIAL_PERIOD - elapsedDays
-
-        return remainingDays
-    }
-
     renderTooltip = (leftOverBlocks) => {
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
@@ -127,15 +107,16 @@ export class BlockCounterIndicator extends React.Component<Props> {
                 <InfoTooltipContainer>
                     <InfoTooltipTitleArea>
                         <TitleAreaContainer>
-                            {this.props.isTrial ? (
+                            {this.state.trialDaysLeft <= 0 &&
+                                this.state.shouldShow && (
+                                    <InfoTooltipTitle>
+                                        You reached the end of your free trial.
+                                    </InfoTooltipTitle>
+                                )}
+                            {this.state.shouldShow && (
                                 <InfoTooltipTitle>
-                                    <strong>Trial</strong> ends in{' '}
-                                    {this.daysRemainingToComplete30()} days.
-                                </InfoTooltipTitle>
-                            ) : (
-                                <InfoTooltipTitle>
-                                    <strong>{leftOverBlocks}</strong> pages left
-                                    today
+                                    {this.state.trialDaysLeft} days left in your
+                                    trial
                                 </InfoTooltipTitle>
                             )}
                             <PrimaryAction
@@ -153,37 +134,18 @@ export class BlockCounterIndicator extends React.Component<Props> {
                             />
                         </TitleAreaContainer>
                         <InfoTooltipSubTitleBox>
-                            {leftOverBlocks === 0 && (
+                            {this.state.trialDaysLeft <= 0 &&
+                                this.state.shouldShow && (
+                                    <InfoTooltipSubTitle>
+                                        You can still annotate & organise pages
+                                        you have already saved.
+                                    </InfoTooltipSubTitle>
+                                )}
+                            {this.state.shouldShow && (
                                 <InfoTooltipSubTitle>
-                                    You can't save, annotate or organise any NEW
-                                    pages.
-                                    <br /> You can still annotate and organise
-                                    pages you have already saved.
-                                    <br />
-                                    <br />
-                                    Resets at midnight.
-                                </InfoTooltipSubTitle>
-                            )}
-                            {leftOverBlocks > 0 && !this.props.isTrial && (
-                                <InfoTooltipSubTitle>
-                                    Pages you save, annotate or add to Spaces.{' '}
-                                    <br />
-                                    Counts only once per page - forever!
-                                    <br /> <br /> Resets at midnight.
-                                </InfoTooltipSubTitle>
-                            )}
-                            {this.props.isTrial && (
-                                <InfoTooltipSubTitle>
-                                    Use everything as much as you want.
-                                    <br />
-                                    <br />
-                                    After the trial: 60 days
-                                    money-back-guarantee and a free tier with 25
-                                    saved pages & $
-                                    {DEFAULT_POWERUP_LIMITS.AIpowerup} AI page
-                                    sessions per month.
-                                    <br />
-                                    Each saved page counts only once - forever.
+                                    After that you'll have to upgrade the
+                                    powerups for annotating AND/OR using the AI
+                                    copilot
                                 </InfoTooltipSubTitle>
                             )}
                         </InfoTooltipSubTitleBox>
@@ -195,16 +157,12 @@ export class BlockCounterIndicator extends React.Component<Props> {
 
     render() {
         const progressPercentNumber =
-            (100 -
-                (this.state.currentCount / parseInt(this.state.totalCount)) *
-                    100) *
+            (100 - (this.state.trialDaysLeft / DEFAULT_TRIAL_PERIOD) * 100) *
             3.6
-        const leftOverBlocks = Math.max(
-            0,
-            this.state.totalCount - this.state.currentCount,
-        )
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        console.log('trialDaysLeft', this.state.trialDaysLeft)
 
         if (!this.state.shouldShow) {
             return null
@@ -212,7 +170,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
             return (
                 <>
                     {this.state.showTooltip &&
-                        this.renderTooltip(leftOverBlocks)}
+                        this.renderTooltip(this.state.trialDaysLeft)}
                     <TooltipBox
                         placement={
                             this.props.isSidebarOpen
@@ -226,22 +184,20 @@ export class BlockCounterIndicator extends React.Component<Props> {
                         offsetX={15}
                         tooltipText={
                             <TooltipTextContainer>
-                                {this.props.isTrial ? (
-                                    <TooltipTextTop>
-                                        <strong>Trial</strong> ends in{' '}
-                                        {this.daysRemainingToComplete30()} days.
-                                    </TooltipTextTop>
-                                ) : (
-                                    <TooltipTextTop>
-                                        You have{' '}
-                                        <strong>{leftOverBlocks}</strong> pages
-                                        left today
-                                    </TooltipTextTop>
+                                {this.state.trialDaysLeft <= 0 &&
+                                    this.state.shouldShow && (
+                                        <InfoTooltipSubTitle>
+                                            You reached the end
+                                            <br />
+                                            of your free trial.
+                                        </InfoTooltipSubTitle>
+                                    )}
+                                {this.state.shouldShow && (
+                                    <InfoTooltipSubTitle>
+                                        {this.state.trialDaysLeft} left in your
+                                        trial
+                                    </InfoTooltipSubTitle>
                                 )}
-
-                                <TooltipTextBottom>
-                                    Click for more info
-                                </TooltipTextBottom>
                             </TooltipTextContainer>
                         }
                         getPortalRoot={this.props.getRootElement}
@@ -255,10 +211,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                             }}
                         >
                             <InnerContainer>
-                                {' '}
-                                {this.props.isTrial
-                                    ? this.daysRemainingToComplete30()
-                                    : leftOverBlocks}
+                                {this.state.trialDaysLeft}
                             </InnerContainer>
                         </CounterContainer>
                     </TooltipBox>

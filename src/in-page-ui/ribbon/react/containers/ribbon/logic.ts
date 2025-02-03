@@ -15,7 +15,7 @@ import type { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser, { Browser, Storage } from 'webextension-polyfill'
 import {
-    enforceTrialPeriod30Days,
+    enforceTrialPeriod,
     pageActionAllowed,
 } from '@worldbrain/memex-common/lib/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
@@ -231,11 +231,13 @@ export class RibbonContainerLogic extends UILogic<
             const currentUser = await this.dependencies.authBG.getCurrentUser()
             if (currentUser) {
                 const signupDate = new Date(currentUser?.creationTime).getTime()
-                const isTrial =
-                    (await enforceTrialPeriod30Days(
+                const isTrialResponse =
+                    (await enforceTrialPeriod(
                         this.dependencies.browserAPIs,
                         signupDate,
                     )) ?? null
+
+                const isTrial = isTrialResponse !== -1
 
                 if (isTrial) {
                     this.emitMutation({
@@ -690,7 +692,6 @@ export class RibbonContainerLogic extends UILogic<
             this.dependencies.analyticsBG,
             this.dependencies.customLists,
             previousState.fullPageUrl,
-            true,
         )
 
         if (!isAllowed) {

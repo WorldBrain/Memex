@@ -113,7 +113,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                         <SettingSection
                             icon="feed"
                             title={'Add PowerUps'}
-                            description="60 days money-back guarantee."
+                            description="30 days money-back guarantee."
                         >
                             <UpgradeModal
                                 getRootElement={this.props.getRootElement}
