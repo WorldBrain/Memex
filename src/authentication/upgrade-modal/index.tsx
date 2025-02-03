@@ -198,8 +198,6 @@ export default class UpgradeModal extends UIElement<
 
                     const isTrial = this.state.remainingTrialDays !== -1
 
-                    console.log('istrial', isTrial)
-
                     let powerUpPricing = null
                     let originalPricing = null
                     if (this.state.billingPeriod === 'monthly') {

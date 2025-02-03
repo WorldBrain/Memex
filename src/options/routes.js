@@ -78,19 +78,4 @@ export default [
         component: UserScreen,
         hideFromSidebar: true,
     },
-    {
-        name: 'User Account',
-        pathname: '/account-subscriptions',
-        icon: 'setting',
-        component: (props) => (
-            <UserScreen
-                {...props}
-                initiallyShowSubscriptionModal
-                refreshUser
-                bgScriptBG={this.props.bgScriptBG}
-                browserAPIs={browser}
-            />
-        ),
-        hideFromSidebar: true,
-    },
 ]

@@ -157,7 +157,6 @@ export default class RibbonContainer extends StatefulUIElement<
                     })
                 }
                 browserAPIs={this.props.browserAPIs}
-                isTrial={this.state.isTrial}
                 showRabbitHoleButton={this.state.showRabbitHoleButton}
                 signupDate={this.state.signupDate}
                 pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}

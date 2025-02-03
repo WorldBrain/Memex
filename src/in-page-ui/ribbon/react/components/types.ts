@@ -51,7 +51,6 @@ export interface RibbonSidebarProps {
     setShowSidebarCommentBox: (value: boolean) => void
     toggleReadingView: () => void
     isWidthLocked: boolean
-    isTrial?: boolean
     signupDate?: number
 }
 

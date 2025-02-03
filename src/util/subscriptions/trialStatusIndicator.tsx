@@ -16,7 +16,6 @@ import { enforceTrialPeriod } from '@worldbrain/memex-common/lib/subscriptions/s
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     isSidebarOpen: boolean
-    isTrial?: boolean
     signupDate?: number
     getRootElement: () => HTMLElement
     events: AnnotationsSidebarInPageEventEmitter
@@ -26,7 +25,7 @@ interface Props {
 
 export class TrialStatusIndicator extends React.Component<Props> {
     state = {
-        trialDaysLeft: 0,
+        trialDaysLeft: null,
         shouldShow: false,
         showTooltip: false,
     }
@@ -47,7 +46,7 @@ export class TrialStatusIndicator extends React.Component<Props> {
         } else {
             this.setState({
                 shouldShow: false,
-                trialDaysLeft: 0,
+                trialDaysLeft: null,
             })
         }
     }

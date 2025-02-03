@@ -69,8 +69,6 @@ export default class PromptTemplatesLogic extends UILogic<
             }
         }
 
-        console.log('isTrial', isTrial)
-
         this.emitMutation({
             remainingTrialDays: { $set: isTrial },
             activatedPowerUps: { $set: activePowerUps },

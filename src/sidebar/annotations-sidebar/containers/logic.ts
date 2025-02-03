@@ -363,7 +363,6 @@ export class SidebarContainerLogic extends UILogic<
             showAISuggestionsDropDown: false,
             showAICounter: false,
             AIsuggestions: [],
-            isTrial: false,
             signupDate: null,
             firstTimeSharingPageLink: false,
             renameListErrorMessage: null,

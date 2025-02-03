@@ -82,7 +82,6 @@ export interface Props extends RibbonSubcomponentProps {
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
     analyticsBG: AnalyticsCoreInterface
-    isTrial: boolean
     signupDate?: number
     toggleTheme: () => void
     getRootElement: () => HTMLElement
@@ -2113,7 +2112,6 @@ export default class Ribbon extends Component<Props, State> {
                                             this.props.ribbonPosition
                                         }
                                     >
-                                        {/* {this.renderFeedButton()} */}
                                         <TrialStatusIndicator
                                             browserAPIs={this.props.browserAPIs}
                                             ribbonPosition={
@@ -2122,7 +2120,6 @@ export default class Ribbon extends Component<Props, State> {
                                             isSidebarOpen={
                                                 this.props.sidebar.isSidebarOpen
                                             }
-                                            isTrial={this.props.isTrial}
                                             signupDate={this.props.signupDate}
                                             getRootElement={
                                                 this.props.getRootElement
@@ -2335,7 +2332,6 @@ export default class Ribbon extends Component<Props, State> {
                                     isSidebarOpen={
                                         this.props.sidebar.isSidebarOpen
                                     }
-                                    isTrial={this.props.isTrial}
                                     signupDate={this.props.signupDate}
                                     getRootElement={this.props.getRootElement}
                                     events={this.props.events}

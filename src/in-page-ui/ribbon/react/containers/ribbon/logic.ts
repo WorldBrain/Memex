@@ -70,7 +70,6 @@ export interface RibbonContainerState {
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
     showBookmarksNudge: boolean
     hasFeedActivity: boolean
-    isTrial: boolean
     signupDate: number
     themeVariant: MemexThemeVariant
     showRabbitHoleButton: boolean
@@ -196,7 +195,6 @@ export class RibbonContainerLogic extends UILogic<
                 isPaused: false,
             },
             hasFeedActivity: false,
-            isTrial: false,
             signupDate: null,
             themeVariant: null,
             showRabbitHoleButton: false,
@@ -231,21 +229,11 @@ export class RibbonContainerLogic extends UILogic<
             const currentUser = await this.dependencies.authBG.getCurrentUser()
             if (currentUser) {
                 const signupDate = new Date(currentUser?.creationTime).getTime()
-                const isTrialResponse =
-                    (await enforceTrialPeriod(
-                        this.dependencies.browserAPIs,
-                        signupDate,
-                    )) ?? null
 
-                const isTrial = isTrialResponse !== -1
-
-                if (isTrial) {
-                    this.emitMutation({
-                        isTrial: { $set: isTrial },
-                        signupDate: { $set: signupDate },
-                        currentUser: { $set: currentUser },
-                    })
-                }
+                this.emitMutation({
+                    signupDate: { $set: signupDate },
+                    currentUser: { $set: currentUser },
+                })
             }
         } catch (error) {
             console.error('error in updatePageCounter', error)
