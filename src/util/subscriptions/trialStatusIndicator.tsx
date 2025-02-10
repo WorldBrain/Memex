@@ -38,7 +38,12 @@ export class TrialStatusIndicator extends React.Component<Props> {
             this.props.signupDate,
         )
         const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
-        if (!result[COUNTER_STORAGE_KEY]?.pU?.bookmarksPowerUp) {
+        console.log(result[COUNTER_STORAGE_KEY]?.pU?.bookmarksPowerUp)
+        console.log(result[COUNTER_STORAGE_KEY]?.pU?.AIpowerup)
+        if (
+            !result[COUNTER_STORAGE_KEY]?.pU?.bookmarksPowerUp &&
+            !result[COUNTER_STORAGE_KEY]?.pU?.AIpowerup
+        ) {
             this.setState({
                 shouldShow: true,
                 trialDaysLeft: trialDaysLeft,
@@ -106,16 +111,13 @@ export class TrialStatusIndicator extends React.Component<Props> {
                 <InfoTooltipContainer>
                     <InfoTooltipTitleArea>
                         <TitleAreaContainer>
-                            {this.state.trialDaysLeft <= 0 &&
-                                this.state.shouldShow && (
-                                    <InfoTooltipTitle>
-                                        You reached the end of your free trial.
-                                    </InfoTooltipTitle>
-                                )}
-                            {this.state.shouldShow && (
+                            {this.state.trialDaysLeft >= 0 ? (
                                 <InfoTooltipTitle>
-                                    {this.state.trialDaysLeft} days left in your
-                                    trial
+                                    {this.state.trialDaysLeft} trial days left
+                                </InfoTooltipTitle>
+                            ) : (
+                                <InfoTooltipTitle>
+                                    You're at the end of your free trial.
                                 </InfoTooltipTitle>
                             )}
                             <PrimaryAction
@@ -133,18 +135,16 @@ export class TrialStatusIndicator extends React.Component<Props> {
                             />
                         </TitleAreaContainer>
                         <InfoTooltipSubTitleBox>
-                            {this.state.trialDaysLeft <= 0 &&
-                                this.state.shouldShow && (
-                                    <InfoTooltipSubTitle>
-                                        You can still annotate & organise pages
-                                        you have already saved.
-                                    </InfoTooltipSubTitle>
-                                )}
-                            {this.state.shouldShow && (
+                            {this.state.trialDaysLeft >= 0 ? (
                                 <InfoTooltipSubTitle>
                                     After that you'll have to upgrade the
                                     powerups for annotating AND/OR using the AI
                                     copilot
+                                </InfoTooltipSubTitle>
+                            ) : (
+                                <InfoTooltipSubTitle>
+                                    You can still annotate & organise pages you
+                                    have already saved.
                                 </InfoTooltipSubTitle>
                             )}
                         </InfoTooltipSubTitleBox>
@@ -160,8 +160,6 @@ export class TrialStatusIndicator extends React.Component<Props> {
             3.6
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
-
-        console.log('trialDaysLeft', this.state.trialDaysLeft)
 
         if (!this.state.shouldShow) {
             return null
@@ -183,36 +181,49 @@ export class TrialStatusIndicator extends React.Component<Props> {
                         offsetX={15}
                         tooltipText={
                             <TooltipTextContainer>
-                                {this.state.trialDaysLeft <= 0 &&
-                                    this.state.shouldShow && (
+                                {this.state.shouldShow &&
+                                    (this.state.trialDaysLeft >= 0 ? (
+                                        <InfoTooltipSubTitle>
+                                            {this.state.trialDaysLeft} left in
+                                            your trial
+                                        </InfoTooltipSubTitle>
+                                    ) : (
                                         <InfoTooltipSubTitle>
                                             You reached the end
                                             <br />
                                             of your free trial.
                                         </InfoTooltipSubTitle>
-                                    )}
-                                {this.state.shouldShow && (
-                                    <InfoTooltipSubTitle>
-                                        {this.state.trialDaysLeft} left in your
-                                        trial
-                                    </InfoTooltipSubTitle>
-                                )}
+                                    ))}
                             </TooltipTextContainer>
                         }
                         getPortalRoot={this.props.getRootElement}
                     >
-                        <CounterContainer
-                            progress={progressPercentNumber}
-                            ref={this.tooltipButtonRef}
-                            onClick={() => {
-                                this.props.forceRibbonShow(true)
-                                this.setState({ showTooltip: true })
-                            }}
-                        >
-                            <InnerContainer>
-                                {this.state.trialDaysLeft}
-                            </InnerContainer>
-                        </CounterContainer>
+                        {this.state.trialDaysLeft > 0 ? (
+                            <CounterContainer
+                                progress={progressPercentNumber}
+                                ref={this.tooltipButtonRef}
+                                onClick={() => {
+                                    this.props.forceRibbonShow(true)
+                                    this.setState({ showTooltip: true })
+                                }}
+                            >
+                                <InnerContainer>
+                                    {this.state.trialDaysLeft}
+                                </InnerContainer>
+                            </CounterContainer>
+                        ) : (
+                            <Icon
+                                icon="warning"
+                                color="warning"
+                                heightAndWidth="28px"
+                                hoverOff={true}
+                                containerRef={this.tooltipButtonRef}
+                                onClick={() => {
+                                    this.props.forceRibbonShow(true)
+                                    this.setState({ showTooltip: true })
+                                }}
+                            />
+                        )}
                     </TooltipBox>
                 </>
             )
@@ -324,7 +335,7 @@ const InfoTooltipTitleArea = styled.div`
 `
 
 const InfoTooltipTitle = styled.div`
-    font-size: 24px;
+    font-size: 18px;
     background: ${(props) => props.theme.colors.headerGradient};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

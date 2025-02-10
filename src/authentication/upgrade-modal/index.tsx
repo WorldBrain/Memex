@@ -360,7 +360,7 @@ export default class UpgradeModal extends UIElement<
             <OverlayContainer>
                 <UpgradeContainer>
                     {this.state.remainingTrialDays &&
-                        this.state.remainingTrialDays !== -1 && (
+                        this.state.remainingTrialDays >= 0 && (
                             <TrialBanner
                                 componentVariant={this.state.componentVariant}
                             >

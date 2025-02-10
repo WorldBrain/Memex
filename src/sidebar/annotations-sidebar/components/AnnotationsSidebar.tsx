@@ -1980,10 +1980,10 @@ export class AnnotationsSidebar extends React.Component<
                             })
                         }
                     >
-                        {this.props.remainingTrialDays === -1
-                            ? 'Your trial is over. Upgrade to use the AI features'
-                            : `${this.props.remainingTrialDays} trial days
-                                    left. Upgrade before for a 20% discount.`}
+                        {this.props.remainingTrialDays >= 0
+                            ? `${this.props.remainingTrialDays} trial days
+                                    left. Upgrade before for a 20% discount.`
+                            : 'Your trial is over. Upgrade to use the AI features'}
                     </TrialBanner>
                 )}
                 <AIChatComponent
@@ -5291,7 +5291,7 @@ const TrialBanner = styled.div<{
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 10px;
+    margin: 0 10px 10px 10px;
 
     ${(props) =>
         (props.componentVariant === 'OnboardingStep' ||

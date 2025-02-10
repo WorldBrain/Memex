@@ -307,7 +307,7 @@ export class SidebarContainerLogic extends UILogic<
             spaceTitleEditValue: '',
             activeListContextMenuId: null,
             activeListEditMenuId: null,
-            fetchLocalHTML: false,
+            fetchLocalHTML: true,
             rabbitHoleBetaFeatureAccess: null,
 
             commentBox: { ...INIT_FORM_STATE },
