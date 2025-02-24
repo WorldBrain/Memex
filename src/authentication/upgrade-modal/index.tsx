@@ -43,6 +43,20 @@ const powerUps = [
         },
     },
     {
+        id: 'AIpowerupOwnKey',
+        icon: 'feed',
+        title: 'AI Co-pilot (Bring your own key)',
+        subTitle: 'The AI powerup with your own API key',
+        pricing: {
+            monthly: '$2.50',
+            yearly: '$25',
+        },
+        pricingDiscounted: {
+            monthly: '$2.00',
+            yearly: '$20',
+        },
+    },
+    {
         id: 'lifetime',
         icon: 'clock',
         title: 'Lifetime All-Access',
@@ -114,8 +128,6 @@ export default class UpgradeModal extends UIElement<
                 </LoadingBlocker>
             )
         }
-
-        console.log('powerUpType', powerUpType)
 
         let featureString = null
         if (powerUpType === 'AI') {
@@ -287,8 +299,6 @@ export default class UpgradeModal extends UIElement<
     renderCheckoutFooter = () => {
         const selectedPowerUps = this.state.selectedPowerUps
         const activatedPowerUps = this.state.activatedPowerUps
-        console.log('selectedPowerUps', selectedPowerUps)
-        console.log('activatedPowerUps', activatedPowerUps)
         if (selectedPowerUps?.size === 0 && activatedPowerUps?.size === 0) {
             return null
         }

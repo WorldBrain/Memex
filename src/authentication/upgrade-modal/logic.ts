@@ -102,9 +102,10 @@ export default class PromptTemplatesLogic extends UILogic<
         if (event.plan === 'lifetime') {
             currentlySelected = new Set(['lifetime'])
         } else if (
-            event.plan === 'AIpowerup' ||
-            (event.plan === 'bookmarksPowerUp' &&
-                currentlySelected?.has('lifetime'))
+            (event.plan === 'AIpowerup' ||
+                event.plan === 'bookmarksPowerUp' ||
+                event.plan === 'AIpowerupOwnKey') &&
+            currentlySelected?.has('lifetime')
         ) {
             currentlySelected?.delete('lifetime')
         }

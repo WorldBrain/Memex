@@ -113,6 +113,7 @@ import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { AIKeyEntry } from 'src/util/subscriptions/aiKeyEntry'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -333,13 +334,13 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     updateAIChatHistoryState: (newState: ChatHistoryItem[]) => void
     updateAIChatEditorState: (AIChatEditorState: string) => void
     addedKey?: () => void
-    checkIfKeyValid?: (apiKey: string) => void
+    checkIfKeyValid?: (apiKey: string) => Promise<void>
     signupDate: number
     createCheckOutLink: (
         billingPeriod: 'monthly' | 'yearly',
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
-    ) => void
+    ) => Promise<'success' | 'error'>
     bookmarkPage: () => void
     openSpacePickerInRibbon: () => void
 }
@@ -2004,6 +2005,17 @@ export class AnnotationsSidebar extends React.Component<
                         this.props.createNewNoteFromAISummary
                     }
                     openImageInPreview={this.props.openImageInPreview}
+                    renderAIKeyEntry={() => (
+                        <AIKeyEntry
+                            addedKey={this.props.addedKey}
+                            getRootElement={this.props.getRootElement}
+                            syncSettingsBG={this.props.syncSettingsBG}
+                            isKeyValid={this.props.isKeyValid}
+                            checkIfKeyValid={this.props.checkIfKeyValid}
+                            authBG={this.props.authBG}
+                            browserAPIs={this.props.browserAPIs}
+                        />
+                    )}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
                     aiChatStateExternal={{
