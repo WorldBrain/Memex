@@ -340,7 +340,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         billingPeriod: 'monthly' | 'yearly',
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
-    ) => Promise<'success' | 'error'>
+    ) => void
     bookmarkPage: () => void
     openSpacePickerInRibbon: () => void
 }
