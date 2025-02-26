@@ -25,8 +25,6 @@ import {
     SharedListTree,
     SharedPageInfo,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
-import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.tests'
 import { createPageLinkListTitle } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type {
@@ -41,10 +39,8 @@ import {
     FingerprintSchemeType,
     LocationSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { getSinglePageShareUrl } from '../utils'
+import { getPageLinkUrl } from '../utils'
 import { buildBaseLocatorUrl } from '@worldbrain/memex-common/lib/page-indexing/utils'
-import type { OpenGraphSiteLookupResponse } from '@worldbrain/memex-common/lib/opengraph/types'
-import { LIST_EMAIL_INVITE_VALIDITY_MS } from '@worldbrain/memex-common/lib/content-sharing/constants'
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher/lib/index'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { RETRIEVE_PDF_ROUTE } from '@worldbrain/memex-common/lib/pdf/uploads/constants'
@@ -3128,9 +3124,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 const pageLinkParamsA = await contentSharing.options.backend.createPageLink(
                                     { now, fullPageUrl },
                                 )
-                                const linkA = getSinglePageShareUrl(
-                                    pageLinkParamsA,
-                                )
+                                const linkA = getPageLinkUrl(pageLinkParamsA)
 
                                 // Shared cloud DB data
                                 const sharedListDataA: Array<
@@ -3156,7 +3150,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 // prettier-ignore
                                 {
-                                expect(linkA).toEqual(getSinglePageShareUrl({
+                                expect(linkA).toEqual(getPageLinkUrl({
                                     remoteListId: sharedListDataA[0].id,
                                     remoteListEntryId: sharedListEntryDataA[0].id,
                                }))
@@ -3579,9 +3573,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         now: now + 10,
                                     },
                                 )
-                                const linkB = getSinglePageShareUrl(
-                                    pageLinkParamsB,
-                                )
+                                const linkB = getPageLinkUrl(pageLinkParamsB)
 
                                 // Shared cloud DB data
                                 const sharedListDataB: Array<
@@ -3621,7 +3613,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     .findAllObjects({})
 
                                 expect(linkB).toEqual(
-                                    getSinglePageShareUrl({
+                                    getPageLinkUrl({
                                         remoteListId: sharedListDataB[1].id,
                                         remoteListEntryId:
                                             sharedListEntryDataB[1].id,

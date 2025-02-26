@@ -79,7 +79,7 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import {
     getFeedUrl,
     getListShareUrl,
-    getSinglePageShareUrl,
+    getPageLinkUrl,
 } from 'src/content-sharing/utils'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
@@ -2959,7 +2959,7 @@ export class AnnotationsSidebar extends React.Component<
                                 heightAndWidth="20px"
                                 onClick={() => {
                                     let webUIUrl = isPageLink
-                                        ? getSinglePageShareUrl({
+                                        ? getPageLinkUrl({
                                               remoteListId:
                                                   selectedList.remoteId,
                                               remoteListEntryId:

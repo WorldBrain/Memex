@@ -27,10 +27,7 @@ import type {
     SpacePickerEvent,
     SpacePickerDependencies,
 } from './types'
-import {
-    getListShareUrl,
-    getSinglePageShareUrl,
-} from 'src/content-sharing/utils'
+import { getListShareUrl, getPageLinkUrl } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { ListTrees } from '../list-trees'
 import { getVisibleTreeNodesInOrder } from '../list-trees/util'
@@ -588,7 +585,7 @@ export default class SpacePickerLogic extends UILogic<
         }
         const url =
             listData.type === 'page-link'
-                ? getSinglePageShareUrl({
+                ? getPageLinkUrl({
                       remoteListId: listData.remoteId,
                       remoteListEntryId: listData.sharedListEntryId,
                   })

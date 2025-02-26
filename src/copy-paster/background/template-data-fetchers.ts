@@ -1,8 +1,5 @@
 import type Storex from '@worldbrain/storex'
-import {
-    getNoteShareUrl,
-    getSinglePageShareUrl,
-} from 'src/content-sharing/utils'
+import { getNoteShareUrl, getPageLinkUrl } from 'src/content-sharing/utils'
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { TemplateDataFetchers, UrlMappedData } from '../types'
 import fromPairs from 'lodash/fromPairs'
@@ -215,7 +212,7 @@ export function getTemplateDataFetchers({
                 return fromPairs(
                     normalizedPageUrls.map((url) => [
                         url,
-                        getSinglePageShareUrl({
+                        getPageLinkUrl({
                             remoteListId: 'XX',
                             remoteListEntryId: 'YY',
                         }),
@@ -317,7 +314,7 @@ export function getTemplateDataFetchers({
                     }
                     return [
                         normalizedPageUrl,
-                        getSinglePageShareUrl({
+                        getPageLinkUrl({
                             remoteListId: linkParams.followedList,
                             remoteListEntryId: linkParams.sharedListEntry,
                         }),

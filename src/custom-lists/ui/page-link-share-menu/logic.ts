@@ -12,13 +12,13 @@ import type {
     UnifiedList,
     UnifiedListForCache,
 } from 'src/annotations/cache/types'
-import { getSinglePageShareUrl } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { getPageLinkUrl } from 'src/content-sharing/utils'
 
 export interface Dependencies {
     fullPageUrl: string
@@ -210,7 +210,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
 
         const createListLink = (collaborationKey?: string): string =>
             listData.type === 'page-link' &&
-            getSinglePageShareUrl({
+            getPageLinkUrl({
                 collaborationKey,
                 remoteListId: listData.remoteId,
                 remoteListEntryId: listData.sharedListEntryId,

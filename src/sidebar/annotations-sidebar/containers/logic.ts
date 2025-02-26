@@ -79,10 +79,7 @@ import {
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import { downloadMemexDesktop } from '@worldbrain/memex-common/lib/subscriptions/storage'
-import {
-    getListShareUrl,
-    getSinglePageShareUrl,
-} from 'src/content-sharing/utils'
+import { getListShareUrl, getPageLinkUrl } from 'src/content-sharing/utils'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import {
     convertMemexURLintoTelegramURL,
@@ -1522,7 +1519,7 @@ export class SidebarContainerLogic extends UILogic<
 
         let webUIUrl =
             listData.type === 'page-link'
-                ? getSinglePageShareUrl({
+                ? getPageLinkUrl({
                       remoteListId: listData.remoteId,
                       remoteListEntryId: listData.sharedListEntryId,
                   })

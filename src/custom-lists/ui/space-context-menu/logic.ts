@@ -5,10 +5,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
-import {
-    getListShareUrl,
-    getSinglePageShareUrl,
-} from 'src/content-sharing/utils'
+import { getListShareUrl, getPageLinkUrl } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface Dependencies {
@@ -81,7 +78,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
         const createListLink = (collaborationKey?: string): string =>
             listData.type === 'page-link'
-                ? getSinglePageShareUrl({
+                ? getPageLinkUrl({
                       collaborationKey,
                       remoteListId: listData.remoteId,
                       remoteListEntryId: listData.sharedListEntryId,

@@ -6,14 +6,9 @@ import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import {
-    getListShareUrl,
-    getSinglePageShareUrl,
-} from 'src/content-sharing/utils'
-import {
     SharedListEmailInvite,
     SharedListRoleID,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import {
