@@ -25,6 +25,7 @@ import SlackStorage from '@worldbrain/memex-common/lib/slack/storage'
 import { SlackRetroSyncStorage } from '@worldbrain/memex-common/lib/slack/storage/retro-sync'
 import { PublicApiStorage } from '@worldbrain/memex-common/lib/public-api/storage'
 import { UploadsStorage } from '@worldbrain/memex-common/lib/uploads/storage'
+import { BlueskyStorage } from '@worldbrain/memex-common/lib/bsky/storage'
 
 let shouldLogOperations = false
 
@@ -118,6 +119,10 @@ export async function createServerStorage(
         storageManager,
         operationExecuter: operationExecuter('uploads'),
     })
+    const bluesky = new BlueskyStorage({
+        storageManager,
+        operationExecuter: operationExecuter('bluesky'),
+    })
     const serverStorage: ServerStorage = {
         manager: storageManager,
         modules: {
@@ -129,6 +134,7 @@ export async function createServerStorage(
             activityFollows,
             contentConversations,
             personalCloud,
+            bluesky,
             discordRetroSync,
             discord,
             slackRetroSync,
