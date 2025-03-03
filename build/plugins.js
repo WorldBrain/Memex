@@ -36,7 +36,7 @@ export default function ({
     isCI = false,
     runSentry = false,
     notifsEnabled = false,
-    shouldPackage = false,
+    shouldPackage = true,
     shouldAnalyze = false,
     packagePath = '../dist',
     extPackageName = 'extension.zip',
