@@ -499,8 +499,8 @@ const TitleSection = styled.div`
 `
 const Title = styled.div`
     font-size: 16px;
-    color: ${(props) => props.theme.colors.greyScale7};
-    font-weight: 400;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-weight: 600;
     width: 100%;
     display: flex;
     justify-content: center;

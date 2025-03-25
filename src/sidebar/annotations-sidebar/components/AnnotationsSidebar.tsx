@@ -2031,7 +2031,6 @@ export class AnnotationsSidebar extends React.Component<
                     renderOptionsContainer={() => this.renderOptionsContainer()}
                     setAIModel={this.props.setAIModel}
                     createCheckOutLink={this.props.createCheckOutLink}
-                    authBG={this.props.authBG}
                     renderPromptTemplates={() => {
                         return (
                             <PromptTemplatesComponent
