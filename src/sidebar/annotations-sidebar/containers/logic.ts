@@ -803,7 +803,9 @@ export class SidebarContainerLogic extends UILogic<
                 )
                 const premiumPlans =
                     premiumPlansData[COUNTER_STORAGE_KEY].pU ?? {}
-                const hasAIpowerup = premiumPlans.AIpowerup ?? false
+                const hasAIpowerup =
+                    (premiumPlans.AIpowerup || premiumPlans.AIpowerupOwnKey) ??
+                    false
 
                 this.emitMutation({
                     signupDate: { $set: signupDate },

@@ -1053,11 +1053,6 @@ export default class PageResultView extends PureComponent<Props> {
                                     />
                                 ) : null
                             }}
-                            renderSpacePicker={() => {
-                                if (this.displayLists.length < 3) {
-                                    return this.renderListsSegment()
-                                }
-                            }}
                             memexIcon={MemexIcon}
                             getRootElement={this.props.getRootElement}
                             onEditTitleChange={(changedTitle) => {
@@ -1075,7 +1070,7 @@ export default class PageResultView extends PureComponent<Props> {
                             editTitleState={this.props.editTitleState}
                         />
                     </PageContentBox>
-                    {this.displayLists.length >= 3 && (
+                    {this.displayLists.length > 0 && (
                         <ListSegmentContainer>
                             {this.renderListsSegment()}
                         </ListSegmentContainer>

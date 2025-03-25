@@ -635,6 +635,10 @@ export async function main(
                 anchor = { quote, descriptor }
             }
 
+            if (selection.toString().trim() === '') {
+                return { annotationId: null, createPromise: Promise.resolve() }
+            }
+
             if (
                 !(await pageActionAllowed(
                     browser,

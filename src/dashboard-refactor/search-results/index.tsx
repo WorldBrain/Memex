@@ -1209,7 +1209,7 @@ export default class SearchResultsContainer extends React.Component<
     render() {
         return (
             <ResultsContainer>
-                <ResultsBox>
+                <ResultsBox inPageMode={this.props.inPageMode}>
                     {this.props.selectedListId != null && (
                         <ListDetails
                             {...this.props.listDetailsProps}
@@ -1668,7 +1668,7 @@ const Loader = styled.div`
     height: 300px;
 `
 
-const ResultsBox = styled.div`
+const ResultsBox = styled.div<{ inPageMode?: boolean }>`
     display: flex;
     margin-top: 2px;
     flex-direction: column;
@@ -1677,6 +1677,12 @@ const ResultsBox = styled.div`
     grid-gap: 1px;
     /* overflow: hidden; */
     align-items: center;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            height: 300px;
+        `}
 `
 
 const ResultsContainer = styled.div`
