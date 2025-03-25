@@ -1074,12 +1074,6 @@ export class AnnotationsSidebar extends React.Component<
                             comment={annotation.comment}
                             lastEdited={annotation.lastEdited}
                             createdWhen={annotation.createdWhen}
-                            creatorDependencies={
-                                annotation.localId != null ||
-                                annotation.creator == null
-                                    ? null
-                                    : this.props.users[annotation.creator.id]
-                            }
                             isActive={
                                 this.props.activeAnnotationId ===
                                 annotation.unifiedId
@@ -1186,6 +1180,7 @@ export class AnnotationsSidebar extends React.Component<
                                     )}
                                     imageSupport={this.props.imageSupport}
                                     getRootElement={this.props.getRootElement}
+                                    users={this.props.users}
                                 />
                             )}
                     </AnnotationBox>

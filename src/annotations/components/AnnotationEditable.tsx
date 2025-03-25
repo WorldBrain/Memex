@@ -1529,7 +1529,7 @@ const DateAndSpaces = styled.div<{
     box-sizing: border-box;
     flex-direction: column-reverse;
     align-items: flex-start;
-    padding: 10px 15px 10px 15px;
+    padding: 0px 15px 3px 15px;
     grid-gap: 10px;
 `
 

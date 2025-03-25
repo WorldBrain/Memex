@@ -165,6 +165,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                             handleExternalAction(event, callback)
                             callback(true)
                         } else {
+                            handleExternalAction(event, callback)
                             setShouldInitTooltip(true)
                         }
 

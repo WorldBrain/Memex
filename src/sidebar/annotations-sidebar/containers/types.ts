@@ -51,6 +51,7 @@ import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/comp
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import { CreationInfoProps } from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
 
 export type WindowAPISubset = Pick<
     Window,
@@ -222,12 +223,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     /** TODO: Properly set up logic to use this state instead of querying for user each time. */
     currentUserId: string | null
-    users: {
-        [userId: string]: {
-            name: string
-            profileImgSrc?: string
-        }
-    }
+    users: { [id: string]: CreationInfoProps['creatorInfo'] }
 
     activeAnnotationId: UnifiedAnnotation['unifiedId'] | null
     activeListContextMenuId: UnifiedList['unifiedId'] | null

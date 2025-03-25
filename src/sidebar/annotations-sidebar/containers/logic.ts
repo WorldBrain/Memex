@@ -4369,8 +4369,10 @@ export class SidebarContainerLogic extends UILogic<
                     for (const annot of sharedAnnotations) {
                         if (annot.creator?.user.displayName != null) {
                             usersData[annot.creatorReference.id] = {
-                                name: annot.creator.user.displayName,
-                                profileImgSrc: annot.creator.profile?.avatarURL,
+                                displayName: annot.creator.user.displayName,
+                                profileImageUrl:
+                                    annot.creator.profile?.avatarURL,
+                                platforms: [],
                             }
                         }
 
