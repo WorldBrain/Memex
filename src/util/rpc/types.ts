@@ -39,7 +39,7 @@ export type RpcSideName =
     | 'content-script-global'
     | 'content-script-popup'
     | 'extension-page-options'
-
+    | 'sidebar-sidepanel'
 export interface RPCRequest<T = any> {
     headers: RPCRequestHeaders
     payload: T

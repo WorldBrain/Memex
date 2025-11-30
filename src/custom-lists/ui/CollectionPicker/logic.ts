@@ -41,36 +41,20 @@ type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
 
 // TODO: Simplify this sorting logic if possible.
 //  Was struggling to wrap my head around this during implemention, though got it working but feel it could be simpler
-const sortDisplayEntries = (
-    selectedEntryIds: number[],
-    localListIdsMRU: number[],
-) => (a: UnifiedList, b: UnifiedList): number => {
-    const aSelectedScore = selectedEntryIds.indexOf(a.localId) + 1
-    const bSelectedScore = selectedEntryIds.indexOf(b.localId) + 1
+const sortDisplayEntries =
+    (localListIdsMRU: number[]) =>
+    (a: UnifiedList, b: UnifiedList): number => {
+        const aMRUScore = localListIdsMRU.indexOf(a.localId) + 1
+        const bMRUScore = localListIdsMRU.indexOf(b.localId) + 1
 
-    // First sorting prio is whether a list is selected or not
-    if (aSelectedScore || bSelectedScore) {
-        if (aSelectedScore && !bSelectedScore) {
+        if (aMRUScore && !bMRUScore) {
             return -1
         }
-        if (!aSelectedScore && bSelectedScore) {
+        if (!aMRUScore && bMRUScore) {
             return 1
         }
-        return aSelectedScore - bSelectedScore
+        return aMRUScore - bMRUScore
     }
-
-    // Second sorting prio is MRU
-    const aMRUScore = localListIdsMRU.indexOf(a.localId) + 1
-    const bMRUScore = localListIdsMRU.indexOf(b.localId) + 1
-
-    if (aMRUScore && !bMRUScore) {
-        return -1
-    }
-    if (!aMRUScore && bMRUScore) {
-        return 1
-    }
-    return aMRUScore - bMRUScore
-}
 
 /**
  * This exists as a temporary way to resolve local list IDs -> cache state data, delaying a lot of
@@ -152,46 +136,46 @@ export default class SpacePickerLogic extends UILogic<
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']
 
-    private cacheAnnotationUpdatedSubscription: PageAnnotationsCacheEvents['updatedAnnotation'] = (
-        updatedAnnot,
-    ) => {}
+    private cacheAnnotationUpdatedSubscription: PageAnnotationsCacheEvents['updatedAnnotation'] =
+        (updatedAnnot) => {}
 
-    private initCacheListsSubscription = (
-        currentUser?: UserReference,
-    ): PageAnnotationsCacheEvents['newListsState'] => (nextLists) => {
-        const { myLists, joinedLists, pageLinkLists } = siftListsIntoCategories(
-            normalizedStateToArray(nextLists),
-            currentUser,
-        )
-
-        const sortPredicate = sortDisplayEntries(
-            this.selectedListIds,
-            this.localListIdsMRU,
-        )
-
-        const toSet = initNormalizedState({
-            getId: (list) => list.unifiedId,
-            seedData: [...myLists, ...joinedLists]
-                .filter(
-                    (list) => list.type === 'user-list' && list.localId != null,
+    private initCacheListsSubscription =
+        (
+            currentUser?: UserReference,
+        ): PageAnnotationsCacheEvents['newListsState'] =>
+        (nextLists) => {
+            const { myLists, joinedLists, pageLinkLists } =
+                siftListsIntoCategories(
+                    normalizedStateToArray(nextLists),
+                    currentUser,
                 )
-                .sort(sortPredicate) as UnifiedList<'user-list'>[],
-        })
 
-        this.emitMutation({
-            listEntries: {
-                $set: toSet,
-            },
-            pageLinkEntries: {
-                $set: initNormalizedState({
-                    getId: (list) => list.unifiedId,
-                    seedData: pageLinkLists
-                        .filter((list) => list.localId != null)
-                        .sort(sortPredicate),
-                }),
-            },
-        })
-    }
+            const sortPredicate = sortDisplayEntries(this.localListIdsMRU)
+
+            const toSet = initNormalizedState({
+                getId: (list) => list.unifiedId,
+                seedData: [...myLists, ...joinedLists]
+                    .filter(
+                        (list) =>
+                            list.type === 'user-list' && list.localId != null,
+                    )
+                    .sort(sortPredicate) as UnifiedList<'user-list'>[],
+            })
+
+            this.emitMutation({
+                listEntries: {
+                    $set: toSet,
+                },
+                pageLinkEntries: {
+                    $set: initNormalizedState({
+                        getId: (list) => list.unifiedId,
+                        seedData: pageLinkLists
+                            .filter((list) => list.localId != null)
+                            .sort(sortPredicate),
+                    }),
+                },
+            })
+        }
 
     init: EventHandler<'init'> = async () => {
         await loadInitial(this, async () => {
@@ -216,9 +200,8 @@ export default class SpacePickerLogic extends UILogic<
                 })
             }
 
-            this.cacheListsSubscription = this.initCacheListsSubscription(
-                currentUser,
-            )
+            this.cacheListsSubscription =
+                this.initCacheListsSubscription(currentUser)
 
             this.dependencies.annotationsCache.events.addListener(
                 'newListsState',
@@ -237,8 +220,8 @@ export default class SpacePickerLogic extends UILogic<
                         bgScript: this.dependencies.bgScriptBG,
                         customLists: this.dependencies.spacesBG,
                         contentSharing: this.dependencies.contentSharingBG,
-                        pageActivityIndicator: this.dependencies
-                            .pageActivityIndicatorBG,
+                        pageActivityIndicator:
+                            this.dependencies.pageActivityIndicatorBG,
                     },
                 })
             } else {
@@ -294,10 +277,8 @@ export default class SpacePickerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        let {
-            baseUnifiedId,
-            treeNodeUnifiedId,
-        } = extractUnifiedIdsFromRenderedId(event.listRenderedId)
+        let { baseUnifiedId, treeNodeUnifiedId } =
+            extractUnifiedIdsFromRenderedId(event.listRenderedId)
 
         // Toggling a flat-view entry (i.e., no tree node part in the rendered ID) can only mean we're changing it to be a tree-view entry
         if (!treeNodeUnifiedId) {
@@ -315,9 +296,8 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        let cachedList = this.dependencies.annotationsCache.lists.byId[
-            treeNodeUnifiedId
-        ]
+        let cachedList =
+            this.dependencies.annotationsCache.lists.byId[treeNodeUnifiedId]
         if (!cachedList) {
             throw new Error(
                 'Attempted to toggle tree view for list ID that does not exist in cache',
@@ -379,9 +359,10 @@ export default class SpacePickerLogic extends UILogic<
             if (!listTreeState) {
                 return []
             }
-            let allTreeMembers = this.dependencies.annotationsCache.getAllListsInTreeByRootId(
-                baseEntry.pathUnifiedIds[0] ?? baseEntry.unifiedId,
-            )
+            let allTreeMembers =
+                this.dependencies.annotationsCache.getAllListsInTreeByRootId(
+                    baseEntry.pathUnifiedIds[0] ?? baseEntry.unifiedId,
+                )
             return getVisibleTreeNodesInOrder(allTreeMembers, listTreeState, {
                 areListsBeingFiltered,
             }).map((listNodeEntry) => ({
@@ -437,10 +418,8 @@ export default class SpacePickerLogic extends UILogic<
         state: SpacePickerState,
         key: 'ArrowLeft' | 'ArrowRight',
     ) {
-        let {
-            baseUnifiedId,
-            treeNodeUnifiedId,
-        } = extractUnifiedIdsFromRenderedId(state.focusedListRenderedId)
+        let { baseUnifiedId, treeNodeUnifiedId } =
+            extractUnifiedIdsFromRenderedId(state.focusedListRenderedId)
 
         let listTreeRootNoteId =
             state.listEntries.byId[treeNodeUnifiedId]?.pathUnifiedIds[0] ??
@@ -513,10 +492,8 @@ export default class SpacePickerLogic extends UILogic<
         ) {
             await this._pressNewEntry(state)
         } else if (state.focusedListRenderedId != null) {
-            let {
-                baseUnifiedId,
-                treeNodeUnifiedId,
-            } = extractUnifiedIdsFromRenderedId(state.focusedListRenderedId)
+            let { baseUnifiedId, treeNodeUnifiedId } =
+                extractUnifiedIdsFromRenderedId(state.focusedListRenderedId)
             let unifiedId = treeNodeUnifiedId ?? baseUnifiedId
             let localListId = state.listEntries.byId[unifiedId]?.localId
             if (localListId == null) {
@@ -575,9 +552,8 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     openListInWebUI: EventHandler<'openListInWebUI'> = async ({ event }) => {
-        const listData = this.dependencies.annotationsCache.lists.byId[
-            event.unifiedListId
-        ]
+        const listData =
+            this.dependencies.annotationsCache.lists.byId[event.unifiedListId]
         if (!listData?.remoteId) {
             throw new Error(
                 'Cannot open Space in web UI - not tracked in UI state OR not shared',
@@ -646,8 +622,9 @@ export default class SpacePickerLogic extends UILogic<
 
     setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.dependencies
-        const unifiedId = annotationsCache.getListByLocalId(event.listId)
-            ?.unifiedId
+        const unifiedId = annotationsCache.getListByLocalId(
+            event.listId,
+        )?.unifiedId
         if (unifiedId == null) {
             throw new Error('Tried to set privacy for non-cached list')
         }
@@ -812,14 +789,11 @@ export default class SpacePickerLogic extends UILogic<
                 newEntryName: { $set: null },
                 query: { $set: '' },
             })
-            const listData: NormalizedState<UnifiedList> = this.dependencies
-                .annotationsCache.lists
+            const listData: NormalizedState<UnifiedList> =
+                this.dependencies.annotationsCache.lists
 
             const userLists = normalizedStateToArray(listData)
-            const sortPredicate = sortDisplayEntries(
-                this.selectedListIds.reverse(),
-                this.localListIdsMRU,
-            )
+            const sortPredicate = sortDisplayEntries(this.localListIdsMRU)
 
             const toSet = initNormalizedState({
                 getId: (list) => list.unifiedId,
@@ -906,14 +880,10 @@ export default class SpacePickerLogic extends UILogic<
                         (id) => id !== localListId,
                     )
 
-                    entrySelectPromise = this.dependencies.unselectEntry(
-                        localListId,
-                    )
+                    entrySelectPromise =
+                        this.dependencies.unselectEntry(localListId)
                 } else {
                     // If we're going to select it
-                    this.localListIdsMRU = Array.from(
-                        new Set([listData.localId, ...this.localListIdsMRU]),
-                    )
                     this.selectedListIds = Array.from(
                         new Set([
                             listData.localId,
@@ -921,9 +891,8 @@ export default class SpacePickerLogic extends UILogic<
                         ]),
                     )
 
-                    entrySelectPromise = this.dependencies.selectEntry(
-                        localListId,
-                    )
+                    entrySelectPromise =
+                        this.dependencies.selectEntry(localListId)
                 }
 
                 nextState = this.applyAndEmitMutation(previousState, {
@@ -1005,18 +974,16 @@ export default class SpacePickerLogic extends UILogic<
         }
         let parentPath = null
         if (parentList != null) {
-            parentPath = this.dependencies.annotationsCache.getListByLocalId(
-                parentList,
-            )?.pathLocalIds
+            parentPath =
+                this.dependencies.annotationsCache.getListByLocalId(
+                    parentList,
+                )?.pathLocalIds
         }
-        const {
-            collabKey,
-            localListId,
-            remoteListId,
-        } = await this.dependencies.spacesBG.createCustomList({
-            name,
-            parentListId: parentList,
-        })
+        const { collabKey, localListId, remoteListId } =
+            await this.dependencies.spacesBG.createCustomList({
+                name,
+                parentListId: parentList,
+            })
         this.dependencies.annotationsCache.addList({
             name,
             collabKey,
@@ -1045,10 +1012,7 @@ export default class SpacePickerLogic extends UILogic<
         const listData = this.dependencies.annotationsCache.lists
 
         const userLists = normalizedStateToArray(listData)
-        const sortPredicate = sortDisplayEntries(
-            this.selectedListIds,
-            this.localListIdsMRU,
-        )
+        const sortPredicate = sortDisplayEntries(this.localListIdsMRU)
 
         const toSet = initNormalizedState({
             getId: (list) => list.unifiedId,
@@ -1113,8 +1077,10 @@ export default class SpacePickerLogic extends UILogic<
                 }
                 if (item.unifiedId == null) {
                     try {
-                        parentLocalId = this.dependencies.annotationsCache.lists
-                            .byId[entry[i - 1]?.unifiedId]?.localId
+                        parentLocalId =
+                            this.dependencies.annotationsCache.lists.byId[
+                                entry[i - 1]?.unifiedId
+                            ]?.localId
                         const listId = await this.createAndDisplayNewList(
                             item.name,
                             previousState,
@@ -1122,9 +1088,10 @@ export default class SpacePickerLogic extends UILogic<
                             i === entry.length - 1 ? false : true,
                         )
 
-                        const newListUnifiedId = this.dependencies.annotationsCache.getListByLocalId(
-                            listId,
-                        )?.unifiedId
+                        const newListUnifiedId =
+                            this.dependencies.annotationsCache.getListByLocalId(
+                                listId,
+                            )?.unifiedId
 
                         let listTreesRef = this.dependencies.getListTreeRefs()
 
@@ -1170,9 +1137,8 @@ export default class SpacePickerLogic extends UILogic<
         }
 
         await executeUITask(this, 'spaceAddRemoveState', async () => {
-            this.processingUpstreamOperation = this.dependencies.actOnAllTabs(
-                newSpaceId,
-            )
+            this.processingUpstreamOperation =
+                this.dependencies.actOnAllTabs(newSpaceId)
             try {
                 await this.processingUpstreamOperation
             } catch (e) {

@@ -45,9 +45,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     setSidebarPeekState: (isPeeking: boolean) => () => void
     initDNDActions: (listId: string) => DragNDropActions
     setFocusedListId: (listId: UnifiedList['unifiedId'] | null) => void
-    initContextMenuBtnProps: (
-        listId: string,
-    ) => Omit<
+    initContextMenuBtnProps: (listId: string) => Omit<
         SpaceContextMenuBtnProps,
         | 'isMenuDisplayed'
         | 'errorMessage'
@@ -264,9 +262,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 .initDNDActions(list.unifiedId)
                                                 .onDrop(e)
                                         },
-                                        wasPageDropped: this.props.lists.byId[
-                                            list.unifiedId
-                                        ]?.wasPageDropped,
+                                        wasPageDropped:
+                                            this.props.lists.byId[
+                                                list.unifiedId
+                                            ]?.wasPageDropped,
                                     }}
                                     isPrivate={list.isPrivate}
                                     isShared={!list.isPrivate}
@@ -315,7 +314,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     renderEditIcon={() => {
                                         return (
                                             <RightSideIconBox>
-                                                <TooltipBox
+                                                {/* <TooltipBox
                                                     placement={'bottom'}
                                                     tooltipText={
                                                         'Add Sub-Space'
@@ -333,7 +332,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                             actions.toggleShowNewChildInput()
                                                         }}
                                                     />
-                                                </TooltipBox>
+                                                </TooltipBox> */}
                                                 <SpaceEditMenuBtn
                                                     {...this.props.initContextMenuBtnProps(
                                                         list.unifiedId,
@@ -369,7 +368,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             )}
                         </ListTrees>
                     </ListsSidebarGroup>
-                    <ListsSidebarGroup
+                    {/* <ListsSidebarGroup
                         {...this.props.followedListsGroup}
                         listsCount={
                             this.props.followedListsGroup.listData.length
@@ -410,7 +409,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 spaceSidebarWidth={this.props.spaceSidebarWidth}
                             />
                         ))}
-                    </ListsSidebarGroup>
+                    </ListsSidebarGroup> */}
                 </SidebarInnerContent>
             </Container>
         )

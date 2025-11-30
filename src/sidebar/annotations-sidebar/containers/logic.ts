@@ -135,9 +135,8 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     highlighter: HighlightRendererInterface
 }
 
-type EventHandler<
-    EventName extends keyof SidebarContainerEvents
-> = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
+type EventHandler<EventName extends keyof SidebarContainerEvents> =
+    UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
 // TODO trace
 export const INIT_FORM_STATE: EditForm = {
@@ -213,9 +212,10 @@ export class SidebarContainerLogic extends UILogic<
                         }
                     },
                     selectAnnotationData: (state, reference) => {
-                        const annotation = options.annotationsCache.getAnnotationByRemoteId(
-                            reference.id.toString(),
-                        )
+                        const annotation =
+                            options.annotationsCache.getAnnotationByRemoteId(
+                                reference.id.toString(),
+                            )
                         if (!annotation) {
                             return null
                         }
@@ -630,43 +630,42 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    updateSpacesSearchSuggestions: EventHandler<
-        'updateSpacesSearchSuggestions'
-    > = async ({ event, previousState }) => {
-        const lists = this.options.annotationsCache.lists.allIds
-            .filter(
-                (listId) =>
-                    this.options.annotationsCache.lists.byId[listId].name
-                        .toLowerCase()
-                        .includes(event.searchQuery.toLowerCase()) &&
-                    this.options.annotationsCache.lists.byId[listId].type !==
-                        'page-link',
-            )
-            .map((listId) => ({
-                id: this.options.annotationsCache.lists.byId[listId].localId,
-                name: this.options.annotationsCache.lists.byId[listId].name,
-            }))
+    updateSpacesSearchSuggestions: EventHandler<'updateSpacesSearchSuggestions'> =
+        async ({ event, previousState }) => {
+            const lists = this.options.annotationsCache.lists.allIds
+                .filter(
+                    (listId) =>
+                        this.options.annotationsCache.lists.byId[listId].name
+                            .toLowerCase()
+                            .includes(event.searchQuery.toLowerCase()) &&
+                        this.options.annotationsCache.lists.byId[listId]
+                            .type !== 'page-link',
+                )
+                .map((listId) => ({
+                    id: this.options.annotationsCache.lists.byId[listId]
+                        .localId,
+                    name: this.options.annotationsCache.lists.byId[listId].name,
+                }))
 
-        this.emitMutation({
-            spaceSearchSuggestions: { $set: lists },
-        })
-    }
-
-    getHighlightColorSettings: EventHandler<
-        'getHighlightColorSettings'
-    > = async ({ event, previousState }) => {
-        let highlightColors: HighlightColor[]
-        if (previousState.highlightColors) {
-            highlightColors = previousState.highlightColors
-        } else {
-            highlightColors = await this.fetchHighlightColors()
-            if (!highlightColors) {
-                highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
-            }
+            this.emitMutation({
+                spaceSearchSuggestions: { $set: lists },
+            })
         }
 
-        this.emitMutation({ highlightColors: { $set: highlightColors } })
-    }
+    getHighlightColorSettings: EventHandler<'getHighlightColorSettings'> =
+        async ({ event, previousState }) => {
+            let highlightColors: HighlightColor[]
+            if (previousState.highlightColors) {
+                highlightColors = previousState.highlightColors
+            } else {
+                highlightColors = await this.fetchHighlightColors()
+                if (!highlightColors) {
+                    highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
+                }
+            }
+
+            this.emitMutation({ highlightColors: { $set: highlightColors } })
+        }
 
     private async fetchHighlightColors() {
         let highlightColors = await this.syncSettings.highlightColors.get(
@@ -741,9 +740,8 @@ export class SidebarContainerLogic extends UILogic<
 
     private async setPageActivityState(fullPageUrl: string): Promise<void> {
         const { annotationsCache, pageActivityIndicatorBG } = this.options
-        const pageActivity = await pageActivityIndicatorBG.getPageActivityStatus(
-            fullPageUrl,
-        )
+        const pageActivity =
+            await pageActivityIndicatorBG.getPageActivityStatus(fullPageUrl)
 
         // Sync page active lists states with sidebar state
         const pageActiveListIds: SidebarContainerState['pageActiveListIds'] = []
@@ -798,9 +796,8 @@ export class SidebarContainerLogic extends UILogic<
                     signupDate,
                 )
 
-                const premiumPlansData = await this.options.storageAPI.local.get(
-                    COUNTER_STORAGE_KEY,
-                )
+                const premiumPlansData =
+                    await this.options.storageAPI.local.get(COUNTER_STORAGE_KEY)
                 const premiumPlans =
                     premiumPlansData[COUNTER_STORAGE_KEY].pU ?? {}
                 const hasAIpowerup =
@@ -931,155 +928,158 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
-        nextLists,
-    ) => {
-        this.emitMutation({
-            lists: { $set: nextLists },
-            listInstances: {
-                $apply: (prev: SidebarContainerState['listInstances']) =>
-                    fromPairs(
-                        normalizedStateToArray(nextLists).map((list) => [
-                            list.unifiedId,
-                            prev[list.unifiedId] ?? initListInstance(list),
-                        ]),
-                    ),
-            },
-            // Ensure conversation states exist for any shared annotation in any shared list
-            conversations: {
-                $apply: (prev: SidebarContainerState['conversations']) => {
-                    return fromPairs(
-                        normalizedStateToArray(nextLists)
-                            .map((list) => {
-                                if (list.remoteId == null) {
-                                    return null
-                                }
-                                return list.unifiedAnnotationIds
-                                    .map((annotId) => {
-                                        const annotData = this.options
-                                            .annotationsCache.annotations.byId[
-                                            annotId
-                                        ]
-                                        if (annotData.remoteId == null) {
-                                            return null
-                                        }
-                                        const conversationId = generateAnnotationCardInstanceId(
-                                            list,
-                                            annotId,
-                                        )
-                                        return [
-                                            conversationId,
-                                            prev[conversationId] ??
-                                                getInitialAnnotationConversationState(),
-                                        ]
-                                    })
-                                    .filter((a) => a != null)
-                            })
-                            .filter((a) => a != null)
-                            .flat(),
-                    )
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] =
+        (nextLists) => {
+            this.emitMutation({
+                lists: { $set: nextLists },
+                listInstances: {
+                    $apply: (prev: SidebarContainerState['listInstances']) =>
+                        fromPairs(
+                            normalizedStateToArray(nextLists).map((list) => [
+                                list.unifiedId,
+                                prev[list.unifiedId] ?? initListInstance(list),
+                            ]),
+                        ),
                 },
-            },
-        })
-    }
-
-    private cachePageListsSubscription: PageAnnotationsCacheEvents['updatedPageData'] = (
-        normalizedPageUrl,
-        nextPageListIds,
-    ) => {
-        if (
-            this.fullPageUrl &&
-            normalizeUrl(this.fullPageUrl) === normalizedPageUrl
-        ) {
-            this.emitMutation({ pageListIds: { $set: nextPageListIds } })
-        }
-    }
-
-    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
-        nextAnnotations,
-    ) => {
-        this.emitMutation({
-            noteCreateState: { $set: 'success' },
-            annotations: { $set: nextAnnotations },
-            annotationCardInstances: {
-                $apply: (
-                    prev: SidebarContainerState['annotationCardInstances'],
-                ) =>
-                    fromPairs(
-                        normalizedStateToArray(nextAnnotations)
-                            .map((annot) => {
-                                const cardIdForMyAnnotsTab = generateAnnotationCardInstanceId(
-                                    annot,
-                                )
-
-                                return [
-                                    ...annot.unifiedListIds
-                                        // Don't create annot card instances for foreign lists (won't show up in spaces tab)
-                                        .filter(
-                                            (unifiedListId) =>
-                                                !this.options.annotationsCache
-                                                    .lists.byId[unifiedListId]
-                                                    ?.isForeignList,
-                                        )
-                                        .map((unifiedListId) => {
-                                            const cardIdForListInstance = generateAnnotationCardInstanceId(
-                                                annot,
-                                                unifiedListId,
-                                            )
-
+                // Ensure conversation states exist for any shared annotation in any shared list
+                conversations: {
+                    $apply: (prev: SidebarContainerState['conversations']) => {
+                        return fromPairs(
+                            normalizedStateToArray(nextLists)
+                                .map((list) => {
+                                    if (list.remoteId == null) {
+                                        return null
+                                    }
+                                    return list.unifiedAnnotationIds
+                                        .map((annotId) => {
+                                            const annotData =
+                                                this.options.annotationsCache
+                                                    .annotations.byId[annotId]
+                                            if (annotData.remoteId == null) {
+                                                return null
+                                            }
+                                            const conversationId =
+                                                generateAnnotationCardInstanceId(
+                                                    list,
+                                                    annotId,
+                                                )
                                             return [
-                                                cardIdForListInstance,
-                                                prev[cardIdForListInstance] ??
-                                                    initAnnotationCardInstance(
-                                                        annot,
-                                                    ),
+                                                conversationId,
+                                                prev[conversationId] ??
+                                                    getInitialAnnotationConversationState(),
                                             ]
-                                        }),
-                                    [
-                                        cardIdForMyAnnotsTab,
-                                        prev[cardIdForMyAnnotsTab] ??
-                                            initAnnotationCardInstance(annot),
-                                    ],
-                                ]
-                            })
-                            .flat(),
-                    ),
-            },
-            // Ensure conversation states exist for any shared annotation in any shared list
-            conversations: {
-                $apply: (prev: SidebarContainerState['conversations']) => {
-                    return fromPairs(
-                        normalizedStateToArray(nextAnnotations)
-                            .map((annot) => {
-                                if (annot.remoteId == null) {
-                                    return null
-                                }
-                                return annot.unifiedListIds
-                                    .map((listId) => {
-                                        const listData = this.options
-                                            .annotationsCache.lists.byId[listId]
-                                        if (listData.remoteId == null) {
-                                            return null
-                                        }
-                                        const conversationId = generateAnnotationCardInstanceId(
-                                            annot,
-                                            listId,
-                                        )
-                                        return [
-                                            conversationId,
-                                            prev[conversationId] ??
-                                                getInitialAnnotationConversationState(),
-                                        ]
-                                    })
-                                    .filter((a) => a != null)
-                            })
-                            .filter((a) => a != null)
-                            .flat(),
-                    )
+                                        })
+                                        .filter((a) => a != null)
+                                })
+                                .filter((a) => a != null)
+                                .flat(),
+                        )
+                    },
                 },
-            },
-        })
-    }
+            })
+        }
+
+    private cachePageListsSubscription: PageAnnotationsCacheEvents['updatedPageData'] =
+        (normalizedPageUrl, nextPageListIds) => {
+            if (
+                this.fullPageUrl &&
+                normalizeUrl(this.fullPageUrl) === normalizedPageUrl
+            ) {
+                this.emitMutation({ pageListIds: { $set: nextPageListIds } })
+            }
+        }
+
+    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] =
+        (nextAnnotations) => {
+            this.emitMutation({
+                noteCreateState: { $set: 'success' },
+                annotations: { $set: nextAnnotations },
+                annotationCardInstances: {
+                    $apply: (
+                        prev: SidebarContainerState['annotationCardInstances'],
+                    ) =>
+                        fromPairs(
+                            normalizedStateToArray(nextAnnotations)
+                                .map((annot) => {
+                                    const cardIdForMyAnnotsTab =
+                                        generateAnnotationCardInstanceId(annot)
+
+                                    return [
+                                        ...annot.unifiedListIds
+                                            // Don't create annot card instances for foreign lists (won't show up in spaces tab)
+                                            .filter(
+                                                (unifiedListId) =>
+                                                    !this.options
+                                                        .annotationsCache.lists
+                                                        .byId[unifiedListId]
+                                                        ?.isForeignList,
+                                            )
+                                            .map((unifiedListId) => {
+                                                const cardIdForListInstance =
+                                                    generateAnnotationCardInstanceId(
+                                                        annot,
+                                                        unifiedListId,
+                                                    )
+
+                                                return [
+                                                    cardIdForListInstance,
+                                                    prev[
+                                                        cardIdForListInstance
+                                                    ] ??
+                                                        initAnnotationCardInstance(
+                                                            annot,
+                                                        ),
+                                                ]
+                                            }),
+                                        [
+                                            cardIdForMyAnnotsTab,
+                                            prev[cardIdForMyAnnotsTab] ??
+                                                initAnnotationCardInstance(
+                                                    annot,
+                                                ),
+                                        ],
+                                    ]
+                                })
+                                .flat(),
+                        ),
+                },
+                // Ensure conversation states exist for any shared annotation in any shared list
+                conversations: {
+                    $apply: (prev: SidebarContainerState['conversations']) => {
+                        return fromPairs(
+                            normalizedStateToArray(nextAnnotations)
+                                .map((annot) => {
+                                    if (annot.remoteId == null) {
+                                        return null
+                                    }
+                                    return annot.unifiedListIds
+                                        .map((listId) => {
+                                            const listData =
+                                                this.options.annotationsCache
+                                                    .lists.byId[listId]
+                                            if (listData.remoteId == null) {
+                                                return null
+                                            }
+                                            const conversationId =
+                                                generateAnnotationCardInstanceId(
+                                                    annot,
+                                                    listId,
+                                                )
+                                            return [
+                                                conversationId,
+                                                prev[conversationId] ??
+                                                    getInitialAnnotationConversationState(),
+                                            ]
+                                        })
+                                        .filter((a) => a != null)
+                                })
+                                .filter((a) => a != null)
+                                .flat(),
+                        )
+                    },
+                },
+            })
+        }
 
     private readingViewStorageListener = async (enable: boolean) => {
         this.resizeObserver = new ResizeObserver(this.debounceReadingWidth)
@@ -1284,11 +1284,8 @@ export class SidebarContainerLogic extends UILogic<
     }) => this.options.annotationsCache.sortAnnotations(sortingFn)
 
     private async ensureLoggedIn(): Promise<boolean> {
-        const {
-            authBG,
-            setLoginModalShown,
-            setDisplayNameModalShown,
-        } = this.options
+        const { authBG, setLoginModalShown, setDisplayNameModalShown } =
+            this.options
 
         const user = await authBG.getCurrentUser()
         if (user != null) {
@@ -1327,21 +1324,20 @@ export class SidebarContainerLogic extends UILogic<
         // }
     }
 
-    adjustRighPositionBasedOnRibbonPosition: EventHandler<
-        'adjustRighPositionBasedOnRibbonPosition'
-    > = ({ event }) => {
-        this.emitMutation({
-            sidebarRightBorderPosition: { $set: event.position },
-        })
+    adjustRighPositionBasedOnRibbonPosition: EventHandler<'adjustRighPositionBasedOnRibbonPosition'> =
+        ({ event }) => {
+            this.emitMutation({
+                sidebarRightBorderPosition: { $set: event.position },
+            })
 
-        // if (event.isWidthLocked) {
-        //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
-        //     let windowWidth = this.options.windowAPI.innerWidth
-        //     let width = (windowWidth - sidebarWidth).toString()
-        //     width = width + 'px'
-        //     document.body.style.width = width
-        // }
-    }
+            // if (event.isWidthLocked) {
+            //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
+            //     let windowWidth = this.options.windowAPI.innerWidth
+            //     let width = (windowWidth - sidebarWidth).toString()
+            //     width = width + 'px'
+            //     document.body.style.width = width
+            // }
+        }
 
     openImageInPreview: EventHandler<'openImageInPreview'> = async ({
         event,
@@ -1492,22 +1488,20 @@ export class SidebarContainerLogic extends UILogic<
         await this.options.copyToClipboard(link)
     }
 
-    getAnnotationEditorIntoState: EventHandler<
-        'getAnnotationEditorIntoState'
-    > = (event) => {
-        const editorRef = event
+    getAnnotationEditorIntoState: EventHandler<'getAnnotationEditorIntoState'> =
+        (event) => {
+            const editorRef = event
 
-        this.emitMutation({
-            annotationCreateEditorRef: { $set: editorRef },
-        })
-    }
+            this.emitMutation({
+                annotationCreateEditorRef: { $set: editorRef },
+            })
+        }
 
     openWebUIPageForSpace: EventHandler<'openWebUIPageForSpace'> = async ({
         event,
     }) => {
-        const listData = this.options.annotationsCache.lists.byId[
-            event.unifiedListId
-        ]
+        const listData =
+            this.options.annotationsCache.lists.byId[event.unifiedListId]
         if (!listData) {
             throw new Error(
                 'Requested space to open in Web UI not found locally',
@@ -1574,24 +1568,21 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ activeListEditMenuId: { $set: nextActiveId } })
     }
 
-    openPageLinkShareMenu: EventHandler<
-        'openPageLinkShareMenu'
-    > = async ({}) => {
-        this.emitMutation({ showPageLinkShareMenu: { $set: true } })
-    }
+    openPageLinkShareMenu: EventHandler<'openPageLinkShareMenu'> =
+        async ({}) => {
+            this.emitMutation({ showPageLinkShareMenu: { $set: true } })
+        }
     openPageCitationMenu: EventHandler<'openPageCitationMenu'> = async ({}) => {
         this.emitMutation({
             showPageCitationMenu: { $set: true },
-            activeTab: { $set: 'citations' },
         })
     }
 
-    closePageLinkShareMenu: EventHandler<
-        'closePageLinkShareMenu'
-    > = async ({}) => {
-        this.emitMutation({ showPageLinkShareMenu: { $set: false } })
-        this.emitMutation({ showPageCitationMenu: { $set: false } })
-    }
+    closePageLinkShareMenu: EventHandler<'closePageLinkShareMenu'> =
+        async ({}) => {
+            this.emitMutation({ showPageLinkShareMenu: { $set: false } })
+            this.emitMutation({ showPageCitationMenu: { $set: false } })
+        }
 
     processFileImportFeeds: EventHandler<'processFileImportFeeds'> = async ({
         event,
@@ -1814,49 +1805,49 @@ export class SidebarContainerLogic extends UILogic<
         return listData
     }
 
-    setRabbitHoleBetaFeatureAccess: EventHandler<
-        'setRabbitHoleBetaFeatureAccess'
-    > = async ({ event }) => {
-        if (event.permission === 'onboarding') {
-            const url = await downloadMemexDesktop(
-                await this.options.pkmSyncBG.getSystemArchAndOS(),
-            )
-            this.emitMutation({
-                rabbitHoleBetaFeatureAccess: { $set: event.permission },
-            })
+    setRabbitHoleBetaFeatureAccess: EventHandler<'setRabbitHoleBetaFeatureAccess'> =
+        async ({ event }) => {
+            if (event.permission === 'onboarding') {
+                const url = await downloadMemexDesktop(
+                    await this.options.pkmSyncBG.getSystemArchAndOS(),
+                )
+                this.emitMutation({
+                    rabbitHoleBetaFeatureAccess: { $set: event.permission },
+                })
 
-            this.emitMutation({
-                desktopAppDownloadLink: { $set: url },
-            })
-        }
+                this.emitMutation({
+                    desktopAppDownloadLink: { $set: url },
+                })
+            }
 
-        if (event.permission === 'downloadStarted') {
-            this.emitMutation({
-                rabbitHoleBetaFeatureAccess: {
-                    $set: 'downloadStarted',
-                },
-            })
-            const desktopAppRunning = await this.checkIfDesktopAppIsRunning()
-            if (desktopAppRunning) {
+            if (event.permission === 'downloadStarted') {
                 this.emitMutation({
                     rabbitHoleBetaFeatureAccess: {
-                        $set: 'helperConnectionSuccess',
+                        $set: 'downloadStarted',
                     },
+                })
+                const desktopAppRunning =
+                    await this.checkIfDesktopAppIsRunning()
+                if (desktopAppRunning) {
+                    this.emitMutation({
+                        rabbitHoleBetaFeatureAccess: {
+                            $set: 'helperConnectionSuccess',
+                        },
+                    })
+                }
+            }
+
+            if (event.permission === 'onboarded') {
+                this.emitMutation({
+                    rabbitHoleBetaFeatureAccess: {
+                        $set: 'onboarded',
+                    },
+                })
+                await browser.storage.local.set({
+                    rabbitHoleBetaFeatureAccessOnboardingDone: true,
                 })
             }
         }
-
-        if (event.permission === 'onboarded') {
-            this.emitMutation({
-                rabbitHoleBetaFeatureAccess: {
-                    $set: 'onboarded',
-                },
-            })
-            await browser.storage.local.set({
-                rabbitHoleBetaFeatureAccessOnboardingDone: true,
-            })
-        }
-    }
 
     async checkIfDesktopAppIsRunning(onetimeCheck?: boolean) {
         let isConnected = false
@@ -2004,23 +1995,23 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    setAllNotesShareMenuShown: EventHandler<
-        'setAllNotesShareMenuShown'
-    > = async ({ previousState, event }) => {
-        this.emitMutation({
-            showAllNotesShareMenu: { $set: event.shown },
-        })
-    }
+    setAllNotesShareMenuShown: EventHandler<'setAllNotesShareMenuShown'> =
+        async ({ previousState, event }) => {
+            this.emitMutation({
+                showAllNotesShareMenu: { $set: event.shown },
+            })
+        }
 
     setLoginModalShown: EventHandler<'setLoginModalShown'> = ({ event }) => {
         this.emitMutation({ showLoginModal: { $set: event.shown } })
     }
 
-    setDisplayNameSetupModalShown: EventHandler<
-        'setDisplayNameSetupModalShown'
-    > = ({ event }) => {
-        this.emitMutation({ showDisplayNameSetupModal: { $set: event.shown } })
-    }
+    setDisplayNameSetupModalShown: EventHandler<'setDisplayNameSetupModalShown'> =
+        ({ event }) => {
+            this.emitMutation({
+                showDisplayNameSetupModal: { $set: event.shown },
+            })
+        }
 
     setAllNotesCopyPasterShown: EventHandler<'setAllNotesCopyPasterShown'> = ({
         event,
@@ -2090,8 +2081,10 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
-        const previousAnnotationComment = this.options.annotationsCache
-            .annotations.byId[event.unifiedAnnotationId].comment
+        const previousAnnotationComment =
+            this.options.annotationsCache.annotations.byId[
+                event.unifiedAnnotationId
+            ].comment
 
         this.emitMutation({
             annotationCardInstances: {
@@ -2111,10 +2104,14 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const previousAnnotationComment = this.options.annotationsCache
-            .annotations.byId[event.unifiedAnnotationId].comment
-        const previousAnnotationBody = this.options.annotationsCache.annotations
-            .byId[event.unifiedAnnotationId].body
+        const previousAnnotationComment =
+            this.options.annotationsCache.annotations.byId[
+                event.unifiedAnnotationId
+            ].comment
+        const previousAnnotationBody =
+            this.options.annotationsCache.annotations.byId[
+                event.unifiedAnnotationId
+            ].body
 
         this.emitMutation({
             annotationCardInstances: {
@@ -2128,22 +2125,21 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    updateListsForAnnotationS: EventHandler<
-        'updateListsForAnnotationS'
-    > = async ({ event, previousState }) => {
-        const annotationIds = previousState.bulkSelectionState
+    updateListsForAnnotationS: EventHandler<'updateListsForAnnotationS'> =
+        async ({ event, previousState }) => {
+            const annotationIds = previousState.bulkSelectionState
 
-        for (let annotationId of annotationIds) {
-            this.processUIEvent('updateListsForAnnotation', {
-                event: {
-                    added: event.added,
-                    deleted: event.deleted,
-                    unifiedAnnotationId: annotationId,
-                },
-                previousState,
-            })
+            for (let annotationId of annotationIds) {
+                this.processUIEvent('updateListsForAnnotation', {
+                    event: {
+                        added: event.added,
+                        deleted: event.deleted,
+                        unifiedAnnotationId: annotationId,
+                    },
+                    previousState,
+                })
+            }
         }
-    }
 
     toggleAutoAddBulk: EventHandler<'toggleAutoAddBulk'> = async ({
         event,
@@ -2202,39 +2198,37 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    setAnnotationEditCommentText: EventHandler<
-        'setAnnotationEditCommentText'
-    > = async ({ event }) => {
-        let annotation = event.annotation
+    setAnnotationEditCommentText: EventHandler<'setAnnotationEditCommentText'> =
+        async ({ event }) => {
+            let annotation = event.annotation
 
-        const newComment = processCommentForImageUpload(
-            event.comment,
-            annotation.normalizedPageUrl,
-            annotation.localId,
-            this.options.imageSupportBG,
-            true,
-        ).toString()
+            const newComment = processCommentForImageUpload(
+                event.comment,
+                annotation.normalizedPageUrl,
+                annotation.localId,
+                this.options.imageSupportBG,
+                true,
+            ).toString()
 
-        this.emitMutation({
-            annotationCardInstances: {
-                [getAnnotCardInstanceId(event)]: {
-                    comment: { $set: newComment },
+            this.emitMutation({
+                annotationCardInstances: {
+                    [getAnnotCardInstanceId(event)]: {
+                        comment: { $set: newComment },
+                    },
                 },
-            },
-        })
-    }
+            })
+        }
 
-    setAnnotationEditBodyText: EventHandler<
-        'setAnnotationEditBodyText'
-    > = async ({ event }) => {
-        this.emitMutation({
-            annotationCardInstances: {
-                [getAnnotCardInstanceId(event)]: {
-                    body: { $set: event.body },
+    setAnnotationEditBodyText: EventHandler<'setAnnotationEditBodyText'> =
+        async ({ event }) => {
+            this.emitMutation({
+                annotationCardInstances: {
+                    [getAnnotCardInstanceId(event)]: {
+                        body: { $set: event.body },
+                    },
                 },
-            },
-        })
-    }
+            })
+        }
 
     setAnnotationCommentMode: EventHandler<'setAnnotationCommentMode'> = ({
         event,
@@ -2447,29 +2441,26 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    setSpacePickerAnnotationInstance: EventHandler<
-        'setSpacePickerAnnotationInstance'
-    > = async ({ event }) => {
-        this.emitMutation({
-            spacePickerAnnotationInstance: { $set: event.state },
-        })
-    }
+    setSpacePickerAnnotationInstance: EventHandler<'setSpacePickerAnnotationInstance'> =
+        async ({ event }) => {
+            this.emitMutation({
+                spacePickerAnnotationInstance: { $set: event.state },
+            })
+        }
 
-    setCopyPasterAnnotationInstanceId: EventHandler<
-        'setCopyPasterAnnotationInstanceId'
-    > = async ({ event }) => {
-        this.emitMutation({
-            copyPasterAnnotationInstanceId: { $set: event.instanceId },
-        })
-    }
+    setCopyPasterAnnotationInstanceId: EventHandler<'setCopyPasterAnnotationInstanceId'> =
+        async ({ event }) => {
+            this.emitMutation({
+                copyPasterAnnotationInstanceId: { $set: event.instanceId },
+            })
+        }
 
-    setShareMenuAnnotationInstanceId: EventHandler<
-        'setShareMenuAnnotationInstanceId'
-    > = async ({ event }) => {
-        this.emitMutation({
-            shareMenuAnnotationInstanceId: { $set: event.instanceId },
-        })
-    }
+    setShareMenuAnnotationInstanceId: EventHandler<'setShareMenuAnnotationInstanceId'> =
+        async ({ event }) => {
+            this.emitMutation({
+                shareMenuAnnotationInstanceId: { $set: event.instanceId },
+            })
+        }
     /* -- END: Annotation card instance events -- */
 
     receiveSharingAccessChange: EventHandler<'receiveSharingAccessChange'> = ({
@@ -2485,18 +2476,17 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    createNewNoteFromAISummary: EventHandler<
-        'createNewNoteFromAISummary'
-    > = async ({ event }) => {
-        const comment = marked.parse(event.comment)
-        this.emitMutation({
-            activeTab: { $set: 'annotations' },
-            commentBox: {
-                commentText: { $set: comment },
-            },
-        })
-        this.options.focusCreateForm()
-    }
+    createNewNoteFromAISummary: EventHandler<'createNewNoteFromAISummary'> =
+        async ({ event }) => {
+            const comment = marked.parse(event.comment)
+            this.emitMutation({
+                activeTab: { $set: 'annotations' },
+                commentBox: {
+                    commentText: { $set: comment },
+                },
+            })
+            this.options.focusCreateForm()
+        }
 
     setNoteWriteError: EventHandler<'setNoteWriteError'> = async ({
         event,
@@ -2522,13 +2512,8 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const {
-            lists,
-            commentBox,
-            fullPageUrl,
-            selectedListId,
-            activeTab,
-        } = previousState
+        const { lists, commentBox, fullPageUrl, selectedListId, activeTab } =
+            previousState
 
         let originalCommentForCache = commentBox.commentText.trim()
         originalCommentForCache = sanitizeHTMLhelper(originalCommentForCache)
@@ -2659,8 +2644,8 @@ export class SidebarContainerLogic extends UILogic<
                 },
             })
 
-            const cachedAnnotation = this.options.annotationsCache.addAnnotation(
-                {
+            const cachedAnnotation =
+                this.options.annotationsCache.addAnnotation({
                     localId: annotationId,
                     remoteId: remoteAnnotationId ?? undefined,
                     normalizedPageUrl: normalizeUrl(fullPageUrl),
@@ -2672,8 +2657,7 @@ export class SidebarContainerLogic extends UILogic<
                     localListIds: [...commentBox.lists],
                     unifiedListIds, // These contain the context list (selected list or list instance)
                     comment: originalCommentForCache,
-                },
-            )
+                })
 
             if (remoteAnnotationId != null && remoteListIds.length > 0) {
                 this.emitMutation({
@@ -2709,184 +2693,178 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    updateListsForAnnotation: EventHandler<
-        'updateListsForAnnotation'
-    > = async ({ event }) => {
-        const { annotationsCache, contentSharingBG } = this.options
-        // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
+    updateListsForAnnotation: EventHandler<'updateListsForAnnotation'> =
+        async ({ event }) => {
+            const { annotationsCache, contentSharingBG } = this.options
+            // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
-        const existing =
-            annotationsCache.annotations.byId[event.unifiedAnnotationId]
-        if (!existing) {
-            console.warn(
-                "Attempted to update lists for annotation that isn't cached:",
-                event,
-                annotationsCache,
-            )
-            return
-        }
-        if (!existing.localId) {
-            console.warn(
-                `Attempted to update lists for annotation that isn't owned:`,
-                event,
-                annotationsCache,
-            )
-            return
-        }
-
-        const unifiedListIds = new Set(existing.unifiedListIds)
-        let bgPromise: Promise<{ sharingState: AnnotationSharingState }>
-        if (event.added != null) {
-            const cacheList = annotationsCache.getListByLocalId(event.added)
-            if (!cacheList) {
-                throw new Error(
-                    'Cannot find list to add to annotation in cache',
+            const existing =
+                annotationsCache.annotations.byId[event.unifiedAnnotationId]
+            if (!existing) {
+                console.warn(
+                    "Attempted to update lists for annotation that isn't cached:",
+                    event,
+                    annotationsCache,
                 )
+                return
             }
-
-            if (unifiedListIds.has(cacheList.unifiedId)) {
+            if (!existing.localId) {
+                console.warn(
+                    `Attempted to update lists for annotation that isn't owned:`,
+                    event,
+                    annotationsCache,
+                )
                 return
             }
 
-            unifiedListIds.add(cacheList.unifiedId)
-            bgPromise = contentSharingBG.shareAnnotationToSomeLists({
-                annotationUrl: existing.localId,
-                localListIds: [event.added],
-                protectAnnotation: true,
-            })
-        } else if (event.deleted != null) {
-            const cacheList = annotationsCache.getListByLocalId(event.deleted)
-            if (!cacheList) {
-                throw new Error(
-                    'Cannot find list to remove from annotation in cache',
+            const unifiedListIds = new Set(existing.unifiedListIds)
+            let bgPromise: Promise<{ sharingState: AnnotationSharingState }>
+            if (event.added != null) {
+                const cacheList = annotationsCache.getListByLocalId(event.added)
+                if (!cacheList) {
+                    throw new Error(
+                        'Cannot find list to add to annotation in cache',
+                    )
+                }
+
+                if (unifiedListIds.has(cacheList.unifiedId)) {
+                    return
+                }
+
+                unifiedListIds.add(cacheList.unifiedId)
+                bgPromise = contentSharingBG.shareAnnotationToSomeLists({
+                    annotationUrl: existing.localId,
+                    localListIds: [event.added],
+                    protectAnnotation: true,
+                })
+            } else if (event.deleted != null) {
+                const cacheList = annotationsCache.getListByLocalId(
+                    event.deleted,
                 )
+                if (!cacheList) {
+                    throw new Error(
+                        'Cannot find list to remove from annotation in cache',
+                    )
+                }
+
+                unifiedListIds.delete(cacheList.unifiedId)
+                bgPromise = contentSharingBG.unshareAnnotationFromList({
+                    annotationUrl: existing.localId,
+                    localListId: event.deleted,
+                })
             }
 
-            unifiedListIds.delete(cacheList.unifiedId)
-            bgPromise = contentSharingBG.unshareAnnotationFromList({
-                annotationUrl: existing.localId,
-                localListId: event.deleted,
-            })
-        }
-
-        annotationsCache.updateAnnotation(
-            {
-                comment: existing.comment,
-                body: existing.body,
-                remoteId: existing.remoteId,
-                unifiedListIds: [...unifiedListIds],
-                unifiedId: event.unifiedAnnotationId,
-                privacyLevel: existing.privacyLevel,
-            },
-            { keepListsIfUnsharing: event.options?.protectAnnotation },
-        )
-
-        try {
-            const { sharingState } = await bgPromise
-
-            // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
             annotationsCache.updateAnnotation(
                 {
                     comment: existing.comment,
                     body: existing.body,
-                    remoteId: sharingState?.remoteId
-                        ? sharingState.remoteId.toString()
-                        : existing.remoteId,
+                    remoteId: existing.remoteId,
+                    unifiedListIds: [...unifiedListIds],
                     unifiedId: event.unifiedAnnotationId,
-                    privacyLevel: sharingState.privacyLevel,
-                    unifiedListIds: [
-                        ...sharingState.privateListIds,
-                        ...sharingState.sharedListIds,
-                    ]
-                        .map(
-                            (localListId) =>
-                                annotationsCache.getListByLocalId(localListId)
-                                    ?.unifiedId,
-                        )
-                        .filter((id) => !!id),
+                    privacyLevel: existing.privacyLevel,
                 },
-                { forceListUpdate: true },
+                { keepListsIfUnsharing: event.options?.protectAnnotation },
             )
-        } catch (err) {
-            annotationsCache.updateAnnotation(existing)
-            throw err
+
+            try {
+                const { sharingState } = await bgPromise
+
+                // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
+                annotationsCache.updateAnnotation(
+                    {
+                        comment: existing.comment,
+                        body: existing.body,
+                        remoteId: sharingState?.remoteId
+                            ? sharingState.remoteId.toString()
+                            : existing.remoteId,
+                        unifiedId: event.unifiedAnnotationId,
+                        privacyLevel: sharingState.privacyLevel,
+                        unifiedListIds: [
+                            ...sharingState.privateListIds,
+                            ...sharingState.sharedListIds,
+                        ]
+                            .map(
+                                (localListId) =>
+                                    annotationsCache.getListByLocalId(
+                                        localListId,
+                                    )?.unifiedId,
+                            )
+                            .filter((id) => !!id),
+                    },
+                    { forceListUpdate: true },
+                )
+            } catch (err) {
+                annotationsCache.updateAnnotation(existing)
+                throw err
+            }
         }
-    }
 
-    addNewSpaceViaWikiLinksEditNote: EventHandler<
-        'addNewSpaceViaWikiLinksEditNote'
-    > = async ({ event, previousState }) => {
-        const {
-            localListId,
-            remoteListId,
-            collabKey,
-        } = await this.options.customListsBG.createCustomList({
-            name: event.spaceName,
-        })
+    addNewSpaceViaWikiLinksEditNote: EventHandler<'addNewSpaceViaWikiLinksEditNote'> =
+        async ({ event, previousState }) => {
+            const { localListId, remoteListId, collabKey } =
+                await this.options.customListsBG.createCustomList({
+                    name: event.spaceName,
+                })
 
-        const userReference = {
-            id: previousState.currentUserId,
-            type: 'user-reference',
-        } as UserReference
+            const userReference = {
+                id: previousState.currentUserId,
+                type: 'user-reference',
+            } as UserReference
 
-        this.options.annotationsCache.addList({
-            name: event.spaceName,
-            collabKey,
-            localId: localListId,
-            remoteId: remoteListId,
-            hasRemoteAnnotationsToLoad: false,
-            type: 'user-list',
-            unifiedAnnotationIds: [],
-            creator: userReference ?? undefined,
-            parentLocalId: null,
-            isPrivate: true,
-        })
+            this.options.annotationsCache.addList({
+                name: event.spaceName,
+                collabKey,
+                localId: localListId,
+                remoteId: remoteListId,
+                hasRemoteAnnotationsToLoad: false,
+                type: 'user-list',
+                unifiedAnnotationIds: [],
+                creator: userReference ?? undefined,
+                parentLocalId: null,
+                isPrivate: true,
+            })
 
-        this.processUIEvent('updateListsForAnnotation', {
-            event: {
-                added: localListId,
-                deleted: null,
-                unifiedAnnotationId: event.unifiedAnnotationId,
-            },
-            previousState,
-        })
-    }
+            this.processUIEvent('updateListsForAnnotation', {
+                event: {
+                    added: localListId,
+                    deleted: null,
+                    unifiedAnnotationId: event.unifiedAnnotationId,
+                },
+                previousState,
+            })
+        }
 
-    addNewSpaceViaWikiLinksNewNote: EventHandler<
-        'addNewSpaceViaWikiLinksNewNote'
-    > = async ({ event, previousState }) => {
-        const {
-            localListId,
-            remoteListId,
-            collabKey,
-        } = await this.options.customListsBG.createCustomList({
-            name: event.spaceName,
-        })
+    addNewSpaceViaWikiLinksNewNote: EventHandler<'addNewSpaceViaWikiLinksNewNote'> =
+        async ({ event, previousState }) => {
+            const { localListId, remoteListId, collabKey } =
+                await this.options.customListsBG.createCustomList({
+                    name: event.spaceName,
+                })
 
-        const userReference = {
-            id: previousState.currentUserId,
-            type: 'user-reference',
-        } as UserReference
+            const userReference = {
+                id: previousState.currentUserId,
+                type: 'user-reference',
+            } as UserReference
 
-        this.options.annotationsCache.addList({
-            name: event.spaceName,
-            collabKey,
-            localId: localListId,
-            remoteId: remoteListId,
-            hasRemoteAnnotationsToLoad: false,
-            type: 'user-list',
-            unifiedAnnotationIds: [],
-            creator: userReference ?? undefined,
-            parentLocalId: null,
-            isPrivate: true,
-        })
+            this.options.annotationsCache.addList({
+                name: event.spaceName,
+                collabKey,
+                localId: localListId,
+                remoteId: remoteListId,
+                hasRemoteAnnotationsToLoad: false,
+                type: 'user-list',
+                unifiedAnnotationIds: [],
+                creator: userReference ?? undefined,
+                parentLocalId: null,
+                isPrivate: true,
+            })
 
-        const listsToAdd = [...previousState.commentBox.lists, localListId]
+            const listsToAdd = [...previousState.commentBox.lists, localListId]
 
-        this.emitMutation({
-            commentBox: { lists: { $set: listsToAdd } },
-        })
-    }
+            this.emitMutation({
+                commentBox: { lists: { $set: listsToAdd } },
+            })
+        }
 
     setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({
         event,
@@ -2925,9 +2903,10 @@ export class SidebarContainerLogic extends UILogic<
             activeAnnotationId: { $set: event.unifiedAnnotationId },
         })
 
-        const annotation = this.options.annotationsCache.annotations.byId[
-            event.unifiedAnnotationId
-        ]
+        const annotation =
+            this.options.annotationsCache.annotations.byId[
+                event.unifiedAnnotationId
+            ]
 
         if (!annotation) {
             throw new Error(
@@ -2978,8 +2957,8 @@ export class SidebarContainerLogic extends UILogic<
                 this.options.annotationsCache.annotations.byId[id].localId ===
                     event.unifiedAnnotationId
             ) {
-                unifiedAnnotation = this.options.annotationsCache.annotations
-                    .byId[id]
+                unifiedAnnotation =
+                    this.options.annotationsCache.annotations.byId[id]
                 break
             }
         }
@@ -2990,9 +2969,8 @@ export class SidebarContainerLogic extends UILogic<
             activeAnnotationId: { $set: unifiedAnnotationId },
         })
 
-        const cachedAnnotation = this.options.annotationsCache.annotations.byId[
-            unifiedAnnotationId
-        ]
+        const cachedAnnotation =
+            this.options.annotationsCache.annotations.byId[unifiedAnnotationId]
         if (event.source === 'highlightCard') {
             if (cachedAnnotation?.selector != null) {
                 this.options.events?.emit('highlightAndScroll', {
@@ -3045,10 +3023,11 @@ export class SidebarContainerLogic extends UILogic<
                     'pristine', // Ensure it hasn't already been loaded
         )
 
-        const nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
-            state,
-            listsWithRemoteAnnots,
-        )
+        const nextState =
+            await this.loadRemoteAnnotationReferencesForSpecificLists(
+                state,
+                listsWithRemoteAnnots,
+            )
         this.renderOpenSpaceInstanceHighlights(nextState)
     }
 
@@ -3072,12 +3051,13 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             }),
             async () => {
-                const response = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
-                    {
-                        normalizedPageUrl: normalizeUrl(state.fullPageUrl),
-                        sharedListIds: lists.map((list) => list.remoteId!),
-                    },
-                )
+                const response =
+                    await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
+                        {
+                            normalizedPageUrl: normalizeUrl(state.fullPageUrl),
+                            sharedListIds: lists.map((list) => list.remoteId!),
+                        },
+                    )
 
                 const mutation: UIMutation<
                     SidebarContainerState['listInstances']
@@ -3193,18 +3173,17 @@ export class SidebarContainerLogic extends UILogic<
         // return response
     }
 
-    updateAIChatHistoryState: EventHandler<
-        'updateAIChatHistoryState'
-    > = async ({ event }) => {
-        this.emitMutation({
-            AIChatHistoryState: { $set: event.AIchatHistoryState },
-        })
-        if (event.AIchatHistoryState == null) {
+    updateAIChatHistoryState: EventHandler<'updateAIChatHistoryState'> =
+        async ({ event }) => {
             this.emitMutation({
-                pageSummary: { $set: '' },
+                AIChatHistoryState: { $set: event.AIchatHistoryState },
             })
+            if (event.AIchatHistoryState == null) {
+                this.emitMutation({
+                    pageSummary: { $set: '' },
+                })
+            }
         }
-    }
     updateAIChatEditorState: EventHandler<'updateAIChatEditorState'> = async ({
         event,
     }) => {
@@ -3248,19 +3227,19 @@ export class SidebarContainerLogic extends UILogic<
         // Store the cancel function in the map
         this.ongoingRequests.set(chatId, { cancel })
 
-        promptData.context.originalFullMessage = replaceImgSrcWithRemoteIdBrowser(
-            promptData.context.originalFullMessage,
-        )
+        promptData.context.originalFullMessage =
+            replaceImgSrcWithRemoteIdBrowser(
+                promptData.context.originalFullMessage,
+            )
 
         try {
-            const response = await this.options.summarizeBG.startPageSummaryStream(
-                {
+            const response =
+                await this.options.summarizeBG.startPageSummaryStream({
                     promptData: event.promptData,
                     apiKey: openAIKey ? openAIKey : undefined,
                     outputLocation: event.outputLocation ?? null,
                     AImodel: previousState.AImodel,
-                },
-            )
+                })
 
             // Only process the response if the request was not cancelled
             if (!isCancelled) {
@@ -3562,129 +3541,131 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    removeSelectedTextAIPreview: EventHandler<
-        'removeSelectedTextAIPreview'
-    > = async () => {
-        this.emitMutation({
-            selectedTextAIPreview: { $set: undefined },
-        })
-    }
+    removeSelectedTextAIPreview: EventHandler<'removeSelectedTextAIPreview'> =
+        async () => {
+            this.emitMutation({
+                selectedTextAIPreview: { $set: undefined },
+            })
+        }
 
-    askAIviaInPageInteractions: EventHandler<
-        'askAIviaInPageInteractions'
-    > = async ({ event, previousState }) => {
-        this.setActiveSidebarTabEvents('summary')
-        this.emitMutation({ activeTab: { $set: 'summary' } })
-        let prompt = event.prompt
+    askAIviaInPageInteractions: EventHandler<'askAIviaInPageInteractions'> =
+        async ({ event, previousState }) => {
+            this.setActiveSidebarTabEvents('summary')
+            this.emitMutation({ activeTab: { $set: 'summary' } })
+            let prompt = event.prompt
 
-        if (event.prompt == null) {
-            let savedPrompts = await this.syncSettings.openAI?.get(
-                'promptSuggestions',
-            )
-            if (!savedPrompts) {
-                savedPrompts = AI_PROMPT_DEFAULTS.map((text) => ({
-                    text,
-                    isEditing: null,
-                    isFocused: false,
-                }))
-            } else if (typeof savedPrompts[0] === 'string') {
-                savedPrompts = ((savedPrompts as unknown) as string[]).map(
-                    (text) => ({
-                        text: text,
-                    }),
+            if (event.prompt == null) {
+                let savedPrompts = await this.syncSettings.openAI?.get(
+                    'promptSuggestions',
                 )
-                this.syncSettings.openAI?.set('promptSuggestions', savedPrompts)
-            }
-            prompt = marked.parse(savedPrompts[0].text)
-        }
-
-        if (event.textToProcess) {
-            let executed = false
-            let retries = 0
-            const maxRetries = 100
-            while (!executed && retries < maxRetries) {
-                try {
-                    executed = this.options.events.emit(
-                        'addSelectedTextToAIquery',
-                        event.textToProcess,
-                        prompt,
-                        event.instaExecutePrompt,
-                        (success) => {
-                            executed = success
-                        },
+                if (!savedPrompts) {
+                    savedPrompts = AI_PROMPT_DEFAULTS.map((text) => ({
+                        text,
+                        isEditing: null,
+                        isFocused: false,
+                    }))
+                } else if (typeof savedPrompts[0] === 'string') {
+                    savedPrompts = (savedPrompts as unknown as string[]).map(
+                        (text) => ({
+                            text: text,
+                        }),
                     )
-                } catch (e) {}
-                retries++
-                await sleepPromise(20)
-            }
-            return
-        }
-        if (!event.textToProcess) {
-            let executed = false
-            let retries = 0
-            const maxRetries = 100
-            while (!executed && retries < maxRetries) {
-                try {
-                    executed = this.options.events.emit(
-                        'addPageUrlToEditor',
-                        event.url ?? this.options.windowAPI.location.href,
-                        prompt,
-                        event.instaExecutePrompt,
-                        (success) => {
-                            executed = success
-                        },
+                    this.syncSettings.openAI?.set(
+                        'promptSuggestions',
+                        savedPrompts,
                     )
-                } catch (e) {}
-                retries++
-                await sleepPromise(20)
+                }
+                prompt = marked.parse(savedPrompts[0].text)
             }
 
-            return
-        }
-    }
+            if (event.textToProcess) {
+                let executed = false
+                let retries = 0
+                const maxRetries = 100
+                while (!executed && retries < maxRetries) {
+                    try {
+                        executed = this.options.events.emit(
+                            'addSelectedTextToAIquery',
+                            event.textToProcess,
+                            prompt,
+                            event.instaExecutePrompt,
+                            (success) => {
+                                executed = success
+                            },
+                        )
+                    } catch (e) {}
+                    retries++
+                    await sleepPromise(20)
+                }
+                return
+            }
+            if (!event.textToProcess) {
+                let executed = false
+                let retries = 0
+                const maxRetries = 100
+                while (!executed && retries < maxRetries) {
+                    try {
+                        executed = this.options.events.emit(
+                            'addPageUrlToEditor',
+                            event.url ?? this.options.windowAPI.location.href,
+                            prompt,
+                            event.instaExecutePrompt,
+                            (success) => {
+                                executed = success
+                            },
+                        )
+                    } catch (e) {}
+                    retries++
+                    await sleepPromise(20)
+                }
 
-    AddMediaRangeToAIcontext: EventHandler<
-        'AddMediaRangeToAIcontext'
-    > = async ({ event, previousState }) => {
-        this.setActiveSidebarTabEvents('summary')
-
-        await sleepPromise(10)
-
-        let prompt
-
-        if (event.prompt == null) {
-            const syncsettings =
-                (await this.syncSettings.openAI?.get('promptSuggestions')) ??
-                AI_PROMPT_DEFAULTS.map((text) => ({
-                    text,
-                    isEditing: null,
-                    isFocused: false,
-                }))
-            prompt = syncsettings[0]?.text
-        }
-
-        if (previousState.activeTab === 'summary') {
-            let executed = false
-            let retries = 0
-            const maxRetries = 100
-            while (!executed && retries < maxRetries) {
-                try {
-                    executed = this.options.events.emit(
-                        'addMediaRangeToEditor',
-                        event.range.from,
-                        event.range.to,
-                        prompt,
-                        event.instaExecutePrompt,
-                        (success) => {
-                            executed = success
-                        },
-                    )
-                } catch (e) {}
-                retries++
-                await sleepPromise(20)
+                return
             }
         }
-    }
+
+    AddMediaRangeToAIcontext: EventHandler<'AddMediaRangeToAIcontext'> =
+        async ({ event, previousState }) => {
+            this.setActiveSidebarTabEvents('summary')
+
+            await sleepPromise(10)
+
+            let prompt
+
+            if (event.prompt == null) {
+                const syncsettings =
+                    (await this.syncSettings.openAI?.get(
+                        'promptSuggestions',
+                    )) ??
+                    AI_PROMPT_DEFAULTS.map((text) => ({
+                        text,
+                        isEditing: null,
+                        isFocused: false,
+                    }))
+                prompt = syncsettings[0]?.text
+            }
+
+            if (previousState.activeTab === 'summary') {
+                let executed = false
+                let retries = 0
+                const maxRetries = 100
+                while (!executed && retries < maxRetries) {
+                    try {
+                        executed = this.options.events.emit(
+                            'addMediaRangeToEditor',
+                            event.range.from,
+                            event.range.to,
+                            prompt,
+                            event.instaExecutePrompt,
+                            (success) => {
+                                executed = success
+                            },
+                        )
+                    } catch (e) {}
+                    retries++
+                    await sleepPromise(20)
+                }
+            }
+        }
     AddYTTimestampToEditor: EventHandler<'AddYTTimestampToEditor'> = async ({
         event,
         previousState,
@@ -3743,13 +3724,12 @@ export class SidebarContainerLogic extends UILogic<
             isAutoAddEnabled: { $set: !previousState.isAutoAddEnabled },
         })
     }
-    setExistingSourcesOptions: EventHandler<
-        'setExistingSourcesOptions'
-    > = async ({ event, previousState }) => {
-        this.emitMutation({
-            existingSourcesOption: { $set: event },
-        })
-    }
+    setExistingSourcesOptions: EventHandler<'setExistingSourcesOptions'> =
+        async ({ event, previousState }) => {
+            this.emitMutation({
+                existingSourcesOption: { $set: event },
+            })
+        }
     setFeedSourcesMenu: EventHandler<'setFeedSourcesMenu'> = async ({
         event,
         previousState,
@@ -3880,12 +3860,13 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 suggestionsResultsLoadState: { $set: 'running' },
             })
-            let results = await this.options.customListsBG.findSimilarBackground(
-                selectedText,
-                normalizeUrl(this.previousState.fullPageUrl, {
-                    skipProtocolTrim: true,
-                }),
-            )
+            let results =
+                await this.options.customListsBG.findSimilarBackground(
+                    selectedText,
+                    normalizeUrl(this.previousState.fullPageUrl, {
+                        skipProtocolTrim: true,
+                    }),
+                )
 
             results = results.reduce(
                 (acc: SuggestionCard[], curr: SuggestionCard) => {
@@ -4021,51 +4002,50 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    setCopyPasterDefaultNoteExecute: EventHandler<
-        'setCopyPasterDefaultNoteExecute'
-    > = async ({ event, previousState }) => {
-        this.emitMutation({
-            annotationCardInstances: {
-                [getAnnotCardInstanceId(event)]: {
-                    copyLoadingState: { $set: 'running' },
-                },
-            },
-        })
-
-        const annotationURL = this.options.annotationsCache.annotations.byId[
-            event.noteId
-        ]?.localId
-        const pageUrl = this.options.annotationsCache.annotations.byId[
-            event.noteId
-        ]?.normalizedPageUrl
-
-        let templateCopyResult
-
-        templateCopyResult = await this.handleDefaultTemplateCopy(
-            [annotationURL],
-            [pageUrl],
-        )
-
-        if (templateCopyResult) {
+    setCopyPasterDefaultNoteExecute: EventHandler<'setCopyPasterDefaultNoteExecute'> =
+        async ({ event, previousState }) => {
             this.emitMutation({
                 annotationCardInstances: {
                     [getAnnotCardInstanceId(event)]: {
-                        copyLoadingState: { $set: 'success' },
+                        copyLoadingState: { $set: 'running' },
                     },
                 },
             })
 
-            setTimeout(() => {
+            const annotationURL =
+                this.options.annotationsCache.annotations.byId[event.noteId]
+                    ?.localId
+            const pageUrl =
+                this.options.annotationsCache.annotations.byId[event.noteId]
+                    ?.normalizedPageUrl
+
+            let templateCopyResult
+
+            templateCopyResult = await this.handleDefaultTemplateCopy(
+                [annotationURL],
+                [pageUrl],
+            )
+
+            if (templateCopyResult) {
                 this.emitMutation({
                     annotationCardInstances: {
                         [getAnnotCardInstanceId(event)]: {
-                            copyLoadingState: { $set: 'pristine' },
+                            copyLoadingState: { $set: 'success' },
                         },
                     },
                 })
-            }, 3000)
+
+                setTimeout(() => {
+                    this.emitMutation({
+                        annotationCardInstances: {
+                            [getAnnotCardInstanceId(event)]: {
+                                copyLoadingState: { $set: 'pristine' },
+                            },
+                        },
+                    })
+                }, 3000)
+            }
         }
-    }
 
     async updateSuggestionResults(results: SuggestionCard[]) {
         const resultsArray: SuggestionCard[] = []
@@ -4094,9 +4074,10 @@ export class SidebarContainerLogic extends UILogic<
                     result.contentType === 'page'
                 ) {
                     const followedPageListData = []
-                    const spacesData = await this.options.pageActivityIndicatorBG.getPageFollowedLists(
-                        result.fullUrl,
-                    )
+                    const spacesData =
+                        await this.options.pageActivityIndicatorBG.getPageFollowedLists(
+                            result.fullUrl,
+                        )
 
                     for (let spaceItemKey in spacesData) {
                         let spaceItem = spacesData[spaceItemKey]
@@ -4126,20 +4107,23 @@ export class SidebarContainerLogic extends UILogic<
                         result.contentType === 'rss-feed-item'
                     ) {
                         const pageListData = []
-                        pageData = await this.options.customListsBG.findPageByUrl(
-                            normalizeUrl(result.fullUrl),
-                        )
+                        pageData =
+                            await this.options.customListsBG.findPageByUrl(
+                                normalizeUrl(result.fullUrl),
+                            )
 
                         if (pageData) {
-                            const pageLists = await this.options.customListsBG.fetchPageLists(
-                                { url: pageData?.fullUrl },
-                            )
+                            const pageLists =
+                                await this.options.customListsBG.fetchPageLists(
+                                    { url: pageData?.fullUrl },
+                                )
 
                             if (pageLists.length > 0) {
                                 for (let pageList of pageLists) {
-                                    const list = await this.options.annotationsCache.getListByLocalId(
-                                        pageList,
-                                    )
+                                    const list =
+                                        await this.options.annotationsCache.getListByLocalId(
+                                            pageList,
+                                        )
                                     space = {
                                         name: list.name,
                                         remoteId: list.remoteId,
@@ -4164,9 +4148,10 @@ export class SidebarContainerLogic extends UILogic<
                     } else if (result.contentType === 'pdf') {
                         const pageListData = []
 
-                        pageData = await this.options.customListsBG.findPageByUrl(
-                            normalizeUrl(result.fullUrl),
-                        )
+                        pageData =
+                            await this.options.customListsBG.findPageByUrl(
+                                normalizeUrl(result.fullUrl),
+                            )
 
                         if (pageData) {
                             pageToDisplay = {
@@ -4225,11 +4210,15 @@ export class SidebarContainerLogic extends UILogic<
                                 stripHash: false,
                             })
 
-                            let annotationRawData = await this.options.annotationsBG.getAnnotationByPk(
-                                {
-                                    url: result.fullUrl.replace('https://', ''),
-                                },
-                            )
+                            let annotationRawData =
+                                await this.options.annotationsBG.getAnnotationByPk(
+                                    {
+                                        url: result.fullUrl.replace(
+                                            'https://',
+                                            '',
+                                        ),
+                                    },
+                                )
 
                             // Convert the string to a Date object
                             let createdWhenDate = new Date(
@@ -4250,13 +4239,15 @@ export class SidebarContainerLogic extends UILogic<
                             )
                             annotationRawData.lists = []
 
-                            const annotationForCache = cacheUtils.reshapeAnnotationForCache(
-                                annotationRawData,
-                                annotationRawData.createdWhen,
-                            )
-                            const annotationsCacheVersion = await this.options.annotationsCache.addAnnotation(
-                                annotationForCache,
-                            )
+                            const annotationForCache =
+                                cacheUtils.reshapeAnnotationForCache(
+                                    annotationRawData,
+                                    annotationRawData.createdWhen,
+                                )
+                            const annotationsCacheVersion =
+                                await this.options.annotationsCache.addAnnotation(
+                                    annotationForCache,
+                                )
 
                             if (annotationsCacheVersion) {
                                 pageToDisplay = {
@@ -4357,13 +4348,12 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 }),
                 async () => {
-                    const sharedAnnotations = await annotationsBG.getSharedAnnotations(
-                        {
+                    const sharedAnnotations =
+                        await annotationsBG.getSharedAnnotations({
                             sharedAnnotationReferences:
                                 listInstance.sharedAnnotationReferences,
                             withCreatorData: true,
-                        },
-                    )
+                        })
 
                     const usersData: SidebarContainerState['users'] = {}
                     for (const annot of sharedAnnotations) {
@@ -4454,7 +4444,8 @@ export class SidebarContainerLogic extends UILogic<
                     }) =>
                         this.options.contentConversationsBG.getThreadsForSharedAnnotations(
                             {
-                                sharedAnnotationReferences: annotationReferences,
+                                sharedAnnotationReferences:
+                                    annotationReferences,
                                 sharedListReference,
                             },
                         ),
@@ -4542,10 +4533,11 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (list.remoteId != null) {
-            nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
-                nextState,
-                [list],
-            )
+            nextState =
+                await this.loadRemoteAnnotationReferencesForSpecificLists(
+                    nextState,
+                    [list],
+                )
 
             nextState = await this.maybeLoadListRemoteAnnotations(
                 nextState,
@@ -4555,37 +4547,36 @@ export class SidebarContainerLogic extends UILogic<
         return nextState
     }
 
-    createYoutubeTimestampWithScreenshot: EventHandler<
-        'createYoutubeTimestampWithScreenshot'
-    > = async ({ previousState, event }) => {
-        this.emitMutation({
-            loadState: { $set: 'success' },
-            activeTab: { $set: 'annotations' },
-        })
-        this.options.focusCreateForm()
+    createYoutubeTimestampWithScreenshot: EventHandler<'createYoutubeTimestampWithScreenshot'> =
+        async ({ previousState, event }) => {
+            this.emitMutation({
+                loadState: { $set: 'success' },
+                activeTab: { $set: 'annotations' },
+            })
+            this.options.focusCreateForm()
 
-        let executed = false
-        let retries = 0
-        const maxRetries = 100
-        while (!executed && retries < maxRetries) {
-            try {
-                executed = this.options.events.emit(
-                    'addVideoSnapshotToEditor',
-                    {
-                        imageData: event.imageData,
-                    },
-                    (success) => {
-                        executed = success
-                    },
-                )
-            } catch (e) {}
+            let executed = false
+            let retries = 0
+            const maxRetries = 100
+            while (!executed && retries < maxRetries) {
+                try {
+                    executed = this.options.events.emit(
+                        'addVideoSnapshotToEditor',
+                        {
+                            imageData: event.imageData,
+                        },
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
 
-            retries++
-            await sleepPromise(20)
+                retries++
+                await sleepPromise(20)
+            }
+
+            return
         }
-
-        return
-    }
     saveImageAsNewNote: EventHandler<'saveImageAsNewNote'> = async ({
         previousState,
         event,
@@ -4807,118 +4798,117 @@ export class SidebarContainerLogic extends UILogic<
         return `${minutes}:${seconds.toString().padStart(2, '0')}`
     }
 
-    createYoutubeTimestampWithAISummary: EventHandler<
-        'createYoutubeTimestampWithAISummary'
-    > = async ({ previousState, event }) => {
-        this.emitMutation({
-            loadState: { $set: 'success' },
-            activeTab: { $set: 'annotations' },
-        })
-        this.options.focusCreateForm()
-        this.emitMutation({
-            commentBox: {
-                commentText: { $set: '' },
-            },
-            pageSummary: { $set: '' },
-            prompt: { $set: null },
-        })
-        // is here bc for some reason else the timestamps will not be pushed, seems like a race condition
-
-        await sleepPromise(0)
-
-        const from = event.range.from
-        const to = event.range.to
-
-        const humanTimestampStart = this.createHumanTimestamp(from)
-        const videoURLWithTimeStart = constructVideoURLwithTimeStamp(
-            this.options.windowAPI.location.href,
-            from,
-        )
-        const humanTimestampEnd = this.createHumanTimestamp(to)
-
-        const videoURLWithTimeEnd = constructVideoURLwithTimeStamp(
-            this.options.windowAPI.location.href,
-            to,
-        )
-
-        // reset the editor state
-        this.isPageSummaryEmpty = true
-        this.tokenBufferEditor = ''
-
-        const initialText = `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `
-        this.tokenBufferEditor = initialText
-
-        let executed = false
-        let retries = 0
-        const maxRetries = 100
-
-        while (!executed && retries < maxRetries) {
-            executed = this.options.events.emit(
-                'triggerYoutubeTimestampSummary',
-                {
-                    text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
-                    showLoadingSpinner: true,
+    createYoutubeTimestampWithAISummary: EventHandler<'createYoutubeTimestampWithAISummary'> =
+        async ({ previousState, event }) => {
+            this.emitMutation({
+                loadState: { $set: 'success' },
+                activeTab: { $set: 'annotations' },
+            })
+            this.options.focusCreateForm()
+            this.emitMutation({
+                commentBox: {
+                    commentText: { $set: '' },
                 },
-                (success) => {
-                    executed = success
-                },
+                pageSummary: { $set: '' },
+                prompt: { $set: null },
+            })
+            // is here bc for some reason else the timestamps will not be pushed, seems like a race condition
+
+            await sleepPromise(0)
+
+            const from = event.range.from
+            const to = event.range.to
+
+            const humanTimestampStart = this.createHumanTimestamp(from)
+            const videoURLWithTimeStart = constructVideoURLwithTimeStamp(
+                this.options.windowAPI.location.href,
+                from,
             )
-            retries++
-            await sleepPromise(20)
-        }
+            const humanTimestampEnd = this.createHumanTimestamp(to)
 
-        // for (let i = 0; i < maxRetries; i++) {
-        //     if (
-        //         this.options.events.emit(
-        //             'triggerYoutubeTimestampSummary',
-        //             {
-        //                 text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
-        //                 showLoadingSpinner: true,
-        //             },
-        //             (success) => {
-        //                 handledSuccessfully = success
-        //             },
-        //         )
-        //     ) {
-        //         break
-        //     }
-        //     await sleepPromise(50) // wait for half a second before trying again
-        // }
+            const videoURLWithTimeEnd = constructVideoURLwithTimeStamp(
+                this.options.windowAPI.location.href,
+                to,
+            )
 
-        let prompt = event.prompt ?? 'Summarise this concisely and briefly'
+            // reset the editor state
+            this.isPageSummaryEmpty = true
+            this.tokenBufferEditor = ''
 
-        const promptData: PromptData = {
-            chatId: null,
-            context: {
-                mediaRanges: {
-                    url: this.options.windowAPI.location.href,
-                    ranges: [
-                        {
-                            from: from,
-                            to: to,
-                        },
-                    ],
+            const initialText = `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `
+            this.tokenBufferEditor = initialText
+
+            let executed = false
+            let retries = 0
+            const maxRetries = 100
+
+            while (!executed && retries < maxRetries) {
+                executed = this.options.events.emit(
+                    'triggerYoutubeTimestampSummary',
+                    {
+                        text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
+                        showLoadingSpinner: true,
+                    },
+                    (success) => {
+                        executed = success
+                    },
+                )
+                retries++
+                await sleepPromise(20)
+            }
+
+            // for (let i = 0; i < maxRetries; i++) {
+            //     if (
+            //         this.options.events.emit(
+            //             'triggerYoutubeTimestampSummary',
+            //             {
+            //                 text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
+            //                 showLoadingSpinner: true,
+            //             },
+            //             (success) => {
+            //                 handledSuccessfully = success
+            //             },
+            //         )
+            //     ) {
+            //         break
+            //     }
+            //     await sleepPromise(50) // wait for half a second before trying again
+            // }
+
+            let prompt = event.prompt ?? 'Summarise this concisely and briefly'
+
+            const promptData: PromptData = {
+                chatId: null,
+                context: {
+                    mediaRanges: {
+                        url: this.options.windowAPI.location.href,
+                        ranges: [
+                            {
+                                from: from,
+                                to: to,
+                            },
+                        ],
+                    },
                 },
-            },
-            userPrompt:
-                prompt +
-                '. Do not mention the prompt in any shape or form, just provide a concise answer',
-            model: previousState.AImodel ?? DEFAULT_AI_MODEL,
+                userPrompt:
+                    prompt +
+                    '. Do not mention the prompt in any shape or form, just provide a concise answer',
+                model: previousState.AImodel ?? DEFAULT_AI_MODEL,
+            }
+
+            await this.processUIEvent('queryAIService', {
+                event: { promptData: promptData, outputLocation: 'editor' },
+                previousState,
+            })
+
+            this.emitMutation({
+                pageSummary: { $set: '' },
+                prompt: { $set: null },
+                selectedTextAIPreview: {
+                    $set: '',
+                },
+            })
         }
-
-        await this.processUIEvent('queryAIService', {
-            event: { promptData: promptData, outputLocation: 'editor' },
-            previousState,
-        })
-
-        this.emitMutation({
-            pageSummary: { $set: '' },
-            prompt: { $set: null },
-            selectedTextAIPreview: {
-                $set: '',
-            },
-        })
-    }
 
     setSelectedList: EventHandler<'setSelectedList'> = async ({
         event,
@@ -4963,275 +4953,282 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ fetchLocalHTML: { $set: event.shouldFetch } })
     }
 
-    setSelectedListFromWebUI: EventHandler<
-        'setSelectedListFromWebUI'
-    > = async ({ event, previousState }) => {
-        let nextState = this.applyAndEmitMutation(previousState, {
-            activeTab: { $set: 'spaces' },
-            loadState: { $set: 'running' },
-        })
-        await this.options.storageAPI.local.set({
-            '@Sidebar-reading_view': true,
-        })
-
-        const {
-            annotationsCache,
-            customListsBG,
-            contentSharingBG,
-        } = this.options
-
-        const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
-        const cachedList = annotationsCache.getListByRemoteId(
-            event.sharedListId,
-        )
-
-        if (cachedList == null) {
-            const existingLocalListId = await this.options.contentSharingBG.fetchLocalListDataByRemoteId(
-                { remoteListId: event.sharedListId },
-            )
-
-            if (existingLocalListId != null) {
-                let listInCache = this.options.annotationsCache.getListByRemoteId(
-                    event.sharedListId,
-                )
-
-                listInCache.localId = existingLocalListId
-                this.options.annotationsCache.updateList(listInCache)
-            }
-        }
-
-        // If locally available, proceed as usual
-        if (cachedList) {
-            nextState = await this.setLocallyAvailableSelectedList(
-                nextState,
-                cachedList.unifiedId,
-            )
-            nextState = this.applyAndEmitMutation(nextState, {
-                loadState: { $set: 'success' },
+    setSelectedListFromWebUI: EventHandler<'setSelectedListFromWebUI'> =
+        async ({ event, previousState }) => {
+            let nextState = this.applyAndEmitMutation(previousState, {
+                activeTab: { $set: 'spaces' },
+                loadState: { $set: 'running' },
+            })
+            await this.options.storageAPI.local.set({
+                '@Sidebar-reading_view': true,
             })
 
-            // This covers the case where the associated followedListEntry hasn't been synced yet (via periodic sync, not cloud sync)
-            //  for a newly joined page link list
-            if (
-                event.manuallyPullLocalListData &&
-                cachedList.type === 'page-link' &&
-                !cachedList.sharedListEntryId
-            ) {
-                const localData = await customListsBG.fetchLocalDataForRemoteListEntryFromServer(
-                    {
-                        remoteListId: event.sharedListId,
-                        normalizedPageUrl,
-                        opts: { needAnnotsFlag: true },
-                    },
-                )
+            const { annotationsCache, customListsBG, contentSharingBG } =
+                this.options
 
-                if (localData == null) {
-                    return
+            const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
+            const cachedList = annotationsCache.getListByRemoteId(
+                event.sharedListId,
+            )
+
+            if (cachedList == null) {
+                const existingLocalListId =
+                    await this.options.contentSharingBG.fetchLocalListDataByRemoteId(
+                        { remoteListId: event.sharedListId },
+                    )
+
+                if (existingLocalListId != null) {
+                    let listInCache =
+                        this.options.annotationsCache.getListByRemoteId(
+                            event.sharedListId,
+                        )
+
+                    listInCache.localId = existingLocalListId
+                    this.options.annotationsCache.updateList(listInCache)
                 }
+            }
 
-                annotationsCache.updateList({
-                    normalizedPageUrl,
-                    unifiedId: cachedList.unifiedId,
-                    sharedListEntryId: localData.sharedListEntryId,
-                    hasRemoteAnnotationsToLoad:
-                        localData.hasAnnotationsFromOthers,
+            // If locally available, proceed as usual
+            if (cachedList) {
+                nextState = await this.setLocallyAvailableSelectedList(
+                    nextState,
+                    cachedList.unifiedId,
+                )
+                nextState = this.applyAndEmitMutation(nextState, {
+                    loadState: { $set: 'success' },
                 })
-                await this.maybeLoadListRemoteAnnotations(
-                    { ...nextState, lists: annotationsCache.lists },
-                    cachedList.unifiedId,
-                )
-            }
 
-            this.options.events?.emit('renderHighlights', {
-                highlights: cacheUtils.getListHighlightsArray(
-                    annotationsCache,
-                    cachedList.unifiedId,
-                ),
-                removeExisting: true,
-            })
-            return
-        }
+                // This covers the case where the associated followedListEntry hasn't been synced yet (via periodic sync, not cloud sync)
+                //  for a newly joined page link list
+                if (
+                    event.manuallyPullLocalListData &&
+                    cachedList.type === 'page-link' &&
+                    !cachedList.sharedListEntryId
+                ) {
+                    const localData =
+                        await customListsBG.fetchLocalDataForRemoteListEntryFromServer(
+                            {
+                                remoteListId: event.sharedListId,
+                                normalizedPageUrl,
+                                opts: { needAnnotsFlag: true },
+                            },
+                        )
 
-        if (!this.fullPageUrl) {
-            throw new Error(
-                'Could not load remote list data for selected list mode without `props.fullPageUrl` being set in sidebar',
-            )
-        }
+                    if (localData == null) {
+                        return
+                    }
 
-        // Else we're dealing with a foreign list which we need to load remotely
-        await executeUITask(this, 'foreignSelectedListLoadState', async () => {
-            const sharedList = await customListsBG.fetchSharedListDataWithPageAnnotations(
-                {
-                    remoteListId: event.sharedListId,
-                    normalizedPageUrl,
-                },
-            )
-            if (!sharedList) {
-                throw new Error(
-                    `Could not load remote list data for selected list mode - ID: ${event.sharedListId}`,
-                )
-            }
-
-            let localListData: {
-                localListId?: number
-                sharedListEntryId: AutoPk
-            }
-
-            if (event.manuallyPullLocalListData) {
-                localListData = await customListsBG.fetchLocalDataForRemoteListEntryFromServer(
-                    {
-                        remoteListId: event.sharedListId,
+                    annotationsCache.updateList({
                         normalizedPageUrl,
-                        opts: { needLocalListd: true },
-                    },
-                )
-                if (!localListData) {
-                    throw new Error(
-                        'Could not find data for local list on cloud',
+                        unifiedId: cachedList.unifiedId,
+                        sharedListEntryId: localData.sharedListEntryId,
+                        hasRemoteAnnotationsToLoad:
+                            localData.hasAnnotationsFromOthers,
+                    })
+                    await this.maybeLoadListRemoteAnnotations(
+                        { ...nextState, lists: annotationsCache.lists },
+                        cachedList.unifiedId,
                     )
                 }
-                this.emitMutation({
-                    hasListDataBeenManuallyPulled: { $set: true },
-                    spaceTitleEditValue: { $set: sharedList.title },
+
+                this.options.events?.emit('renderHighlights', {
+                    highlights: cacheUtils.getListHighlightsArray(
+                        annotationsCache,
+                        cachedList.unifiedId,
+                    ),
+                    removeExisting: true,
                 })
-            }
-
-            this.emitMutation({
-                spaceTitleEditValue: { $set: sharedList.title },
-            })
-
-            let unifiedListId: string
-            const listCommon = {
-                remoteId: event.sharedListId,
-                name: sharedList.title,
-                order: sharedList.order,
-                creator: sharedList.creator,
-                description: sharedList.description,
-                localId: localListData?.localListId ?? undefined,
-                isForeignList: localListData == null,
-                hasRemoteAnnotationsToLoad:
-                    sharedList.sharedAnnotations == null ? false : true,
-                unifiedAnnotationIds: [], // Will be populated soon when annots get cached
-            }
-
-            if (sharedList.type === 'page-link') {
-                const { unifiedId } = annotationsCache.addList<'page-link'>({
-                    type: 'page-link',
-                    ...listCommon,
-                    normalizedPageUrl,
-                    sharedListEntryId: localListData?.sharedListEntryId.toString(),
-                })
-                unifiedListId = unifiedId
-            } else {
-                const { unifiedId } = annotationsCache.addList<'user-list'>({
-                    type: 'user-list',
-                    ...listCommon,
-                })
-                unifiedListId = unifiedId
-            }
-
-            this.options.events?.emit('setSelectedList', unifiedListId)
-
-            const buildCoreMutation = (
-                sharedAnnotationReferences: SharedAnnotationReference[],
-            ): UIMutation<SidebarContainerState> => ({
-                loadState: { $set: 'success' },
-                selectedListId: { $set: unifiedListId },
-                // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
-                listInstances: {
-                    [unifiedListId]: {
-                        annotationRefsLoadState: { $set: 'success' },
-                        conversationsLoadState: { $set: 'success' },
-                        annotationsLoadState: { $set: 'success' },
-                        sharedAnnotationReferences: {
-                            $set: sharedAnnotationReferences,
-                        },
-                    },
-                },
-            })
-
-            if (sharedList.sharedAnnotations == null) {
-                this.emitMutation(buildCoreMutation([]))
                 return
             }
 
-            const sharedAnnotationUnifiedIds: string[] = []
-            const sharedAnnotationReferences: SharedAnnotationReference[] = []
-            for (const sharedAnnot of sharedList.sharedAnnotations) {
-                const { unifiedId } = annotationsCache.addAnnotation({
-                    body: sharedAnnot.body,
-                    creator: sharedAnnot.creator,
-                    comment: sharedAnnot.comment,
-                    lastEdited: sharedAnnot.updatedWhen,
-                    createdWhen: sharedAnnot.createdWhen,
-                    selector:
-                        sharedAnnot.selector != null
-                            ? JSON.parse(sharedAnnot.selector)
-                            : undefined,
-                    remoteId: sharedAnnot.reference.id.toString(),
-                    normalizedPageUrl: sharedAnnot.normalizedPageUrl,
-                    unifiedListIds: [unifiedListId],
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                    localListIds: [],
-                })
-                sharedAnnotationUnifiedIds.push(unifiedId)
-                sharedAnnotationReferences.push(sharedAnnot.reference)
+            if (!this.fullPageUrl) {
+                throw new Error(
+                    'Could not load remote list data for selected list mode without `props.fullPageUrl` being set in sidebar',
+                )
             }
 
-            this.emitMutation({
-                ...buildCoreMutation(sharedAnnotationReferences),
-                conversations: {
-                    $merge: fromPairs(
-                        sharedAnnotationUnifiedIds.map((unifiedId) => [
-                            generateAnnotationCardInstanceId(
-                                { unifiedId },
-                                unifiedListId,
+            // Else we're dealing with a foreign list which we need to load remotely
+            await executeUITask(
+                this,
+                'foreignSelectedListLoadState',
+                async () => {
+                    const sharedList =
+                        await customListsBG.fetchSharedListDataWithPageAnnotations(
+                            {
+                                remoteListId: event.sharedListId,
+                                normalizedPageUrl,
+                            },
+                        )
+                    if (!sharedList) {
+                        throw new Error(
+                            `Could not load remote list data for selected list mode - ID: ${event.sharedListId}`,
+                        )
+                    }
+
+                    let localListData: {
+                        localListId?: number
+                        sharedListEntryId: AutoPk
+                    }
+
+                    if (event.manuallyPullLocalListData) {
+                        localListData =
+                            await customListsBG.fetchLocalDataForRemoteListEntryFromServer(
+                                {
+                                    remoteListId: event.sharedListId,
+                                    normalizedPageUrl,
+                                    opts: { needLocalListd: true },
+                                },
+                            )
+                        if (!localListData) {
+                            throw new Error(
+                                'Could not find data for local list on cloud',
+                            )
+                        }
+                        this.emitMutation({
+                            hasListDataBeenManuallyPulled: { $set: true },
+                            spaceTitleEditValue: { $set: sharedList.title },
+                        })
+                    }
+
+                    this.emitMutation({
+                        spaceTitleEditValue: { $set: sharedList.title },
+                    })
+
+                    let unifiedListId: string
+                    const listCommon = {
+                        remoteId: event.sharedListId,
+                        name: sharedList.title,
+                        order: sharedList.order,
+                        creator: sharedList.creator,
+                        description: sharedList.description,
+                        localId: localListData?.localListId ?? undefined,
+                        isForeignList: localListData == null,
+                        hasRemoteAnnotationsToLoad:
+                            sharedList.sharedAnnotations == null ? false : true,
+                        unifiedAnnotationIds: [], // Will be populated soon when annots get cached
+                    }
+
+                    if (sharedList.type === 'page-link') {
+                        const { unifiedId } =
+                            annotationsCache.addList<'page-link'>({
+                                type: 'page-link',
+                                ...listCommon,
+                                normalizedPageUrl,
+                                sharedListEntryId:
+                                    localListData?.sharedListEntryId.toString(),
+                            })
+                        unifiedListId = unifiedId
+                    } else {
+                        const { unifiedId } =
+                            annotationsCache.addList<'user-list'>({
+                                type: 'user-list',
+                                ...listCommon,
+                            })
+                        unifiedListId = unifiedId
+                    }
+
+                    this.options.events?.emit('setSelectedList', unifiedListId)
+
+                    const buildCoreMutation = (
+                        sharedAnnotationReferences: SharedAnnotationReference[],
+                    ): UIMutation<SidebarContainerState> => ({
+                        loadState: { $set: 'success' },
+                        selectedListId: { $set: unifiedListId },
+                        // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
+                        listInstances: {
+                            [unifiedListId]: {
+                                annotationRefsLoadState: { $set: 'success' },
+                                conversationsLoadState: { $set: 'success' },
+                                annotationsLoadState: { $set: 'success' },
+                                sharedAnnotationReferences: {
+                                    $set: sharedAnnotationReferences,
+                                },
+                            },
+                        },
+                    })
+
+                    if (sharedList.sharedAnnotations == null) {
+                        this.emitMutation(buildCoreMutation([]))
+                        return
+                    }
+
+                    const sharedAnnotationUnifiedIds: string[] = []
+                    const sharedAnnotationReferences: SharedAnnotationReference[] =
+                        []
+                    for (const sharedAnnot of sharedList.sharedAnnotations) {
+                        const { unifiedId } = annotationsCache.addAnnotation({
+                            body: sharedAnnot.body,
+                            creator: sharedAnnot.creator,
+                            comment: sharedAnnot.comment,
+                            lastEdited: sharedAnnot.updatedWhen,
+                            createdWhen: sharedAnnot.createdWhen,
+                            selector:
+                                sharedAnnot.selector != null
+                                    ? JSON.parse(sharedAnnot.selector)
+                                    : undefined,
+                            remoteId: sharedAnnot.reference.id.toString(),
+                            normalizedPageUrl: sharedAnnot.normalizedPageUrl,
+                            unifiedListIds: [unifiedListId],
+                            privacyLevel: AnnotationPrivacyLevels.SHARED,
+                            localListIds: [],
+                        })
+                        sharedAnnotationUnifiedIds.push(unifiedId)
+                        sharedAnnotationReferences.push(sharedAnnot.reference)
+                    }
+
+                    this.emitMutation({
+                        ...buildCoreMutation(sharedAnnotationReferences),
+                        conversations: {
+                            $merge: fromPairs(
+                                sharedAnnotationUnifiedIds.map((unifiedId) => [
+                                    generateAnnotationCardInstanceId(
+                                        { unifiedId },
+                                        unifiedListId,
+                                    ),
+                                    getInitialAnnotationConversationState(),
+                                ]),
                             ),
-                            getInitialAnnotationConversationState(),
-                        ]),
-                    ),
+                        },
+                    })
+
+                    this.options.events?.emit('renderHighlights', {
+                        highlights: cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListId,
+                        ),
+                        removeExisting: true,
+                    })
+
+                    await this.detectConversationThreads(
+                        unifiedListId,
+                        event.sharedListId,
+                        sharedAnnotationReferences,
+                    )
                 },
-            })
-
-            this.options.events?.emit('renderHighlights', {
-                highlights: cacheUtils.getListHighlightsArray(
-                    annotationsCache,
-                    unifiedListId,
-                ),
-                removeExisting: true,
-            })
-
-            await this.detectConversationThreads(
-                unifiedListId,
-                event.sharedListId,
-                sharedAnnotationReferences,
             )
-        })
-    }
+        }
 
-    setAnnotationShareModalShown: EventHandler<
-        'setAnnotationShareModalShown'
-    > = ({ event }) => {
-        this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
-    }
+    setAnnotationShareModalShown: EventHandler<'setAnnotationShareModalShown'> =
+        ({ event }) => {
+            this.emitMutation({
+                showAnnotationsShareModal: { $set: event.shown },
+            })
+        }
 
-    setPrivatizeNoteConfirmArgs: EventHandler<
-        'setPrivatizeNoteConfirmArgs'
-    > = ({ event }) => {
-        this.emitMutation({ confirmPrivatizeNoteArgs: { $set: event } })
-    }
+    setPrivatizeNoteConfirmArgs: EventHandler<'setPrivatizeNoteConfirmArgs'> =
+        ({ event }) => {
+            this.emitMutation({ confirmPrivatizeNoteArgs: { $set: event } })
+        }
 
-    setSelectNoteSpaceConfirmArgs: EventHandler<
-        'setSelectNoteSpaceConfirmArgs'
-    > = ({ event }) => {
-        this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: event } })
-    }
+    setSelectNoteSpaceConfirmArgs: EventHandler<'setSelectNoteSpaceConfirmArgs'> =
+        ({ event }) => {
+            this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: event } })
+        }
 
-    setSharingTutorialVisibility: EventHandler<
-        'setSharingTutorialVisibility'
-    > = async ({ previousState, event }) => {
-        await this.showSharingTutorial()
-    }
+    setSharingTutorialVisibility: EventHandler<'setSharingTutorialVisibility'> =
+        async ({ previousState, event }) => {
+            await this.showSharingTutorial()
+        }
 
     async showSharingTutorial() {
         const hasEverSharedPageLink = await browser.storage.local.get(
@@ -5257,57 +5254,55 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    updateAllAnnotationsShareInfo: EventHandler<
-        'updateAllAnnotationsShareInfo'
-    > = ({ event }) => {
-        const { annotationsCache } = this.options
+    updateAllAnnotationsShareInfo: EventHandler<'updateAllAnnotationsShareInfo'> =
+        ({ event }) => {
+            const { annotationsCache } = this.options
 
-        for (const annotation of normalizedStateToArray(
-            annotationsCache.annotations,
-        )) {
-            const sharingState = event[annotation?.localId]
-            if (!sharingState) {
-                continue
+            for (const annotation of normalizedStateToArray(
+                annotationsCache.annotations,
+            )) {
+                const sharingState = event[annotation?.localId]
+                if (!sharingState) {
+                    continue
+                }
+
+                const unifiedListIds = [
+                    ...sharingState.privateListIds,
+                    ...sharingState.sharedListIds,
+                ]
+                    .map(
+                        (localListId) =>
+                            annotationsCache.getListByLocalId(localListId)
+                                ?.unifiedId,
+                    )
+                    .filter((id) => !!id)
+
+                annotationsCache.updateAnnotation({
+                    remoteId: sharingState?.remoteId
+                        ? sharingState.remoteId.toString()
+                        : undefined,
+                    unifiedId: annotation.unifiedId,
+                    privacyLevel: sharingState.privacyLevel,
+                    unifiedListIds,
+                })
+            }
+        }
+
+    updateAnnotationShareInfo: EventHandler<'updateAnnotationShareInfo'> =
+        async ({ previousState, event }) => {
+            const existing =
+                previousState.annotations.byId[event.unifiedAnnotationId]
+
+            if (existing.privacyLevel === event.privacyLevel) {
+                return
             }
 
-            const unifiedListIds = [
-                ...sharingState.privateListIds,
-                ...sharingState.sharedListIds,
-            ]
-                .map(
-                    (localListId) =>
-                        annotationsCache.getListByLocalId(localListId)
-                            ?.unifiedId,
-                )
-                .filter((id) => !!id)
-
-            annotationsCache.updateAnnotation({
-                remoteId: sharingState?.remoteId
-                    ? sharingState.remoteId.toString()
-                    : undefined,
-                unifiedId: annotation.unifiedId,
-                privacyLevel: sharingState.privacyLevel,
-                unifiedListIds,
-            })
+            this.options.annotationsCache.updateAnnotation(
+                {
+                    ...existing,
+                    privacyLevel: event.privacyLevel,
+                },
+                { keepListsIfUnsharing: event.keepListsIfUnsharing },
+            )
         }
-    }
-
-    updateAnnotationShareInfo: EventHandler<
-        'updateAnnotationShareInfo'
-    > = async ({ previousState, event }) => {
-        const existing =
-            previousState.annotations.byId[event.unifiedAnnotationId]
-
-        if (existing.privacyLevel === event.privacyLevel) {
-            return
-        }
-
-        this.options.annotationsCache.updateAnnotation(
-            {
-                ...existing,
-                privacyLevel: event.privacyLevel,
-            },
-            { keepListsIfUnsharing: event.keepListsIfUnsharing },
-        )
-    }
 }

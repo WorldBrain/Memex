@@ -523,12 +523,8 @@ export class AnnotationsSidebar extends React.Component<
 
         if (!sidebarContainer) return
 
-        const {
-            left,
-            top,
-            width,
-            height,
-        } = sidebarContainer.getBoundingClientRect()
+        const { left, top, width, height } =
+            sidebarContainer.getBoundingClientRect()
         const isMouseOverSidebar =
             e.clientX >= left &&
             e.clientX <= left + width &&
@@ -935,20 +931,20 @@ export class AnnotationsSidebar extends React.Component<
                         ? this.props.conversations[instanceId]
                         : null
 
-                const annotationCard = this.props.annotationCardInstances[
-                    instanceId
-                ]
+                const annotationCard =
+                    this.props.annotationCardInstances[instanceId]
                 const sharedAnnotationRef: SharedAnnotationReference = {
                     id: annotation.remoteId,
                     type: 'shared-annotation-reference',
                 }
-                const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
-                    sharedAnnotationRef,
-                    {
-                        type: 'shared-list-reference',
-                        id: listData.remoteId,
-                    },
-                )
+                const eventHandlers =
+                    this.props.bindSharedAnnotationEventHandlers(
+                        sharedAnnotationRef,
+                        {
+                            type: 'shared-list-reference',
+                            id: listData.remoteId,
+                        },
+                    )
                 const hasReplies =
                     conversation?.thread != null ||
                     conversation?.replies?.length > 0
@@ -961,10 +957,11 @@ export class AnnotationsSidebar extends React.Component<
                         AnnotationPrivacyLevels.SHARED_PROTECTED,
                     ].includes(annotation.privacyLevel)
                     ownAnnotationProps.unifiedId = annotation.unifiedId
-                    ownAnnotationProps.lists = cacheUtils.getLocalListIdsForCacheIds(
-                        this.props.annotationsCache,
-                        annotation.unifiedListIds,
-                    )
+                    ownAnnotationProps.lists =
+                        cacheUtils.getLocalListIdsForCacheIds(
+                            this.props.annotationsCache,
+                            annotation.unifiedListIds,
+                        )
                     ownAnnotationProps.comment = annotation.comment
                     ownAnnotationProps.isShared = [
                         AnnotationPrivacyLevels.SHARED,
@@ -983,21 +980,19 @@ export class AnnotationsSidebar extends React.Component<
                         annotation,
                         unifiedListId,
                     )
-                    const footerDeps = this.props.bindAnnotationFooterEventProps(
-                        annotation,
-                        unifiedListId,
-                    )
+                    const footerDeps =
+                        this.props.bindAnnotationFooterEventProps(
+                            annotation,
+                            unifiedListId,
+                        )
                     ownAnnotationProps.annotationEditDependencies = editDeps
                     ownAnnotationProps.annotationFooterDependencies = footerDeps
-                    ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
-                        unifiedListId,
-                    )
-                    ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation(
-                        unifiedListId,
-                    )
-                    ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
-                        unifiedListId,
-                    )
+                    ownAnnotationProps.renderListsPickerForAnnotation =
+                        this.props.renderListsPickerForAnnotation(unifiedListId)
+                    ownAnnotationProps.renderCopyPasterForAnnotation =
+                        this.props.renderCopyPasterForAnnotation(unifiedListId)
+                    ownAnnotationProps.renderShareMenuForAnnotation =
+                        this.props.renderShareMenuForAnnotation(unifiedListId)
                     ownAnnotationProps.initShowSpacePicker =
                         annotationCard?.cardMode === 'space-picker'
                             ? 'footer'
@@ -1624,8 +1619,8 @@ export class AnnotationsSidebar extends React.Component<
                         analyticsBG: this.props.analyticsBG,
                         annotationsCache: this.props.annotationsCache,
                         contentSharingBG: this.props.contentSharingBG,
-                        contentSharingByTabsBG: this.props
-                            .contentSharingByTabsBG,
+                        contentSharingByTabsBG:
+                            this.props.contentSharingByTabsBG,
                         copyToClipboard: this.props.copyToClipboard,
                         fullPageUrl: this.props.fullPageUrl,
                         getRootElement: this.props.getRootElement,
@@ -1708,12 +1703,8 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
-        const {
-            followedLists,
-            pageLinkLists,
-            joinedLists,
-            myLists,
-        } = cacheUtils.siftListsIntoCategories(allLists, this.props.currentUser)
+        const { followedLists, pageLinkLists, joinedLists, myLists } =
+            cacheUtils.siftListsIntoCategories(allLists, this.props.currentUser)
 
         return (
             <>
@@ -1737,10 +1728,10 @@ export class AnnotationsSidebar extends React.Component<
                     )}
                 </SpaceTypeSection>
                 <SpaceTypeSection>
-                    <SpaceTypeSectionHeader>
+                    {/* <SpaceTypeSectionHeader>
                         My Spaces{' '}
                         <SpacesCounter>{myLists.length}</SpacesCounter>
-                    </SpaceTypeSectionHeader>
+                    </SpaceTypeSectionHeader> */}
                     {myLists.length > 0 && (
                         <SpaceTypeSectionContainer>
                             {myLists.map((listData) => {
@@ -1755,7 +1746,7 @@ export class AnnotationsSidebar extends React.Component<
                     )}
                 </SpaceTypeSection>
 
-                <SpaceTypeSection>
+                {/* <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Followed Spaces{' '}
                         <SpacesCounter>{followedLists.length}</SpacesCounter>
@@ -1770,9 +1761,9 @@ export class AnnotationsSidebar extends React.Component<
                             )}
                         </SpaceTypeSectionContainer>
                     )}
-                </SpaceTypeSection>
+                </SpaceTypeSection> */}
 
-                <SpaceTypeSection>
+                {/* <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Joined Spaces{' '}
                         <SpacesCounter>{joinedLists.length}</SpacesCounter>
@@ -1787,7 +1778,7 @@ export class AnnotationsSidebar extends React.Component<
                             )}
                         </SpaceTypeSectionContainer>
                     )}
-                </SpaceTypeSection>
+                </SpaceTypeSection> */}
             </>
         )
     }
@@ -2156,42 +2147,6 @@ export class AnnotationsSidebar extends React.Component<
                         </SummaryActionsButton>
                     </TooltipBox>
                 </SummaryActionButtonBox>
-                <SummaryActionButtonBox>
-                    <SummaryActionsButton padding={'0px'}>
-                        <DropdownMenuBtnSmall
-                            elementHeight="fit-content"
-                            hideDescriptionInPreview
-                            menuItems={[
-                                {
-                                    id: 'gpt-4o-mini',
-                                    name: 'GPT-4o Mini',
-                                    info: 'Faster & good for summarization',
-                                },
-                                {
-                                    id: 'gpt-4o',
-                                    name: 'GPT-4o',
-                                    isDisabled: this.props.hasKey
-                                        ? false
-                                        : true,
-                                    info: (
-                                        <span>
-                                            Better at reasoning and with
-                                            complexity
-                                            <br />
-                                            ONLY WITH OWN KEY
-                                        </span>
-                                    ),
-                                },
-                            ]}
-                            onMenuItemClick={async (item) => {
-                                this.props.setAIModel(item.id)
-                            }}
-                            initSelectedItem={this.props.AImodel ?? 'gpt-3'}
-                            keepSelectedState
-                            getRootElement={this.props.getRootElement}
-                        />
-                    </SummaryActionsButton>
-                </SummaryActionButtonBox>
             </OptionsContainer>
         )
     }
@@ -2274,16 +2229,16 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
-        if (this.props.activeTab === 'citations') {
-            return this.renderCitations()
-        }
+        // if (this.props.activeTab === 'citations') {
+        //     return this.renderCitations()
+        // }
 
         return (
             <>
                 {(this.props.activeTab === 'annotations' ||
                     this.props.activeTab === 'spaces') && (
                     <AnnotationsSectionStyled>
-                        <SuggestionsListSwitcher>
+                        {/* <SuggestionsListSwitcher>
                             <SuggestionsSwitcherButton
                                 onClick={() => {
                                     this.props.setActiveTab('annotations')
@@ -2300,7 +2255,7 @@ export class AnnotationsSidebar extends React.Component<
                             >
                                 By Spaces{' '}
                             </SuggestionsSwitcherButton>
-                        </SuggestionsListSwitcher>
+                        </SuggestionsListSwitcher> */}
                         <AnnotationSectionScrollContainer
                             id={'AnnotationSectionScrollContainer'}
                         >
@@ -2314,8 +2269,8 @@ export class AnnotationsSidebar extends React.Component<
                                         this.renderAnnotationsEditable(
                                             cacheUtils.getUserAnnotationsArray(
                                                 {
-                                                    annotations: this.props
-                                                        .annotations,
+                                                    annotations:
+                                                        this.props.annotations,
                                                 },
                                                 this.props.normalizedPageUrl,
                                                 this.props.currentUser?.id.toString(),
@@ -2442,9 +2397,8 @@ export class AnnotationsSidebar extends React.Component<
         annots.push(
             ...annotations.map((annot, i) => {
                 const instanceId = generateAnnotationCardInstanceId(annot)
-                const instanceState = this.props.annotationCardInstances[
-                    instanceId
-                ]
+                const instanceState =
+                    this.props.annotationCardInstances[instanceId]
                 const instanceRefs = getOrCreateAnnotationInstanceRefs(
                     instanceId,
                     this.props.annotationInstanceRefs,
@@ -2729,26 +2683,28 @@ export class AnnotationsSidebar extends React.Component<
                                         if (
                                             isUrlYTVideo(this.props.fullPageUrl)
                                         ) {
-                                            let video = document.getElementsByTagName(
-                                                'video',
-                                            )[0]
+                                            let video =
+                                                document.getElementsByTagName(
+                                                    'video',
+                                                )[0]
 
                                             let duration = Math.floor(
                                                 video.duration,
                                             )
 
-                                            executed = await this.props.events.emit(
-                                                'addMediaRangeToEditor',
-                                                0,
-                                                duration,
-                                                '',
-                                                false,
-                                                (success) => {
-                                                    if (success) {
-                                                        executed = success
-                                                    }
-                                                },
-                                            )
+                                            executed =
+                                                await this.props.events.emit(
+                                                    'addMediaRangeToEditor',
+                                                    0,
+                                                    duration,
+                                                    '',
+                                                    false,
+                                                    (success) => {
+                                                        if (success) {
+                                                            executed = success
+                                                        }
+                                                    },
+                                                )
                                         } else {
                                             executed = this.props.events.emit(
                                                 'addPageUrlToEditor',
@@ -2777,7 +2733,7 @@ export class AnnotationsSidebar extends React.Component<
 
                     <TopBarButtonContainer>
                         <PrimaryAction
-                            label={'Cite'}
+                            label={'Share'}
                             onClick={this.props.clickCreatePageLinkBtn}
                             type="menuBar"
                             iconColor="prime1"
@@ -2838,39 +2794,39 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private handleNameEditInputKeyDown: React.KeyboardEventHandler<
-        HTMLInputElement
-    > = async (event) => {
-        const selectedList = this.props.annotationsCache.lists.byId[
-            this.props.selectedListId
-        ]
+    private handleNameEditInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> =
+        async (event) => {
+            const selectedList =
+                this.props.annotationsCache.lists.byId[
+                    this.props.selectedListId
+                ]
 
-        event.stopPropagation()
-        if (
-            (event.target as HTMLInputElement).value?.length != null &&
-            event.key === 'Enter'
-        ) {
-            // this blurring is tracked and will automatically save it
-            this.spaceTitleEditFieldRef.current.blur()
-            this.setState({
-                spaceTitleEditState: false,
-            })
-            this.props.setSpaceTitleEditValue(null)
-        } else if (event.key === 'Escape') {
             event.stopPropagation()
-            this.setState({
-                spaceTitleEditState: false,
-            })
-            this.props.setSpaceTitleEditValue(selectedList.name)
+            if (
+                (event.target as HTMLInputElement).value?.length != null &&
+                event.key === 'Enter'
+            ) {
+                // this blurring is tracked and will automatically save it
+                this.spaceTitleEditFieldRef.current.blur()
+                this.setState({
+                    spaceTitleEditState: false,
+                })
+                this.props.setSpaceTitleEditValue(null)
+            } else if (event.key === 'Escape') {
+                event.stopPropagation()
+                this.setState({
+                    spaceTitleEditState: false,
+                })
+                this.props.setSpaceTitleEditValue(selectedList.name)
+            }
+
+            // If we don't have this, events will bubble up into the page!
+
+            const nativeEvent = event.nativeEvent as KeyboardEvent
+
+            nativeEvent.stopImmediatePropagation()
+            event.stopPropagation()
         }
-
-        // If we don't have this, events will bubble up into the page!
-
-        const nativeEvent = event.nativeEvent as KeyboardEvent
-
-        nativeEvent.stopImmediatePropagation()
-        event.stopPropagation()
-    }
 
     private renderSelectedListTopBar() {
         const { selectedListId, annotationsCache } = this.props
@@ -3006,10 +2962,11 @@ export class AnnotationsSidebar extends React.Component<
                         ) === 'Creator'
                     }
                     onClick={() => {
-                        const permissionStatus = cacheUtils.deriveListOwnershipStatus(
-                            selectedList,
-                            this.props.currentUser,
-                        )
+                        const permissionStatus =
+                            cacheUtils.deriveListOwnershipStatus(
+                                selectedList,
+                                this.props.currentUser,
+                            )
                         if (permissionStatus === 'Creator') {
                             this.props.setSpaceTitleEditValue(selectedList.name)
                             this.spaceTitleEditFieldRef.current.addEventListener(
@@ -3047,9 +3004,8 @@ export class AnnotationsSidebar extends React.Component<
             this.throwNoSelectedListError()
         }
 
-        const selectedList = this.props.annotationsCache.lists.byId[
-            this.props.selectedListId
-        ]
+        const selectedList =
+            this.props.annotationsCache.lists.byId[this.props.selectedListId]
 
         const permissionStatus = cacheUtils.deriveListOwnershipStatus(
             selectedList,
@@ -3224,7 +3180,7 @@ export class AnnotationsSidebar extends React.Component<
                             active={this.state.showSortDropDown}
                         />
                     </TooltipBox>
-                    <RightSideContainer>
+                    {/* <RightSideContainer>
                         <TooltipBox
                             tooltipText={
                                 this.props.isAutoAddEnabled ? (
@@ -3284,7 +3240,7 @@ export class AnnotationsSidebar extends React.Component<
                                 />
                             </AutoAddContainer>
                         </TooltipBox>
-                    </RightSideContainer>
+                    </RightSideContainer> */}
 
                     {/* <TooltipBox
                         tooltipText={'Bulk Share Notes'}
@@ -4500,7 +4456,7 @@ const TopAreaContainer = styled.div`
     width: fill-available;
     z-index: 1;
     padding: 5px 10px;
-            justify-content: flex-start;
+    justify-content: flex-start;
 
     &::-webkit-scrollbar {
         display: none;
@@ -4511,7 +4467,7 @@ const TopAreaContainer = styled.div`
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
 
-    &:hover{
+    &:hover {
         z-index: 19;
     }
 `

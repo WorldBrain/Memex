@@ -48,12 +48,13 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
     render() {
         return (
             <Container spaceSidebarWidth={this.props.spaceSidebarWidth}>
+                {/* 
                 <GroupHeaderContainer
                     spaceSidebarWidth={this.props.spaceSidebarWidth}
                     onClick={this.props.onExpandBtnClick}
                 >
                     <GroupHeaderInnerDiv className="inner">
-                        {/* {this.props.onExpandBtnClick && (
+                        {this.props.onExpandBtnClick && (
                                 <ArrowIcon
                                     rotation={this.props.isExpanded ? 0 : -90}
                                     heightAndWidth="16px"
@@ -63,7 +64,7 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
                                     hoverOff
                                 />
                             )} */}
-                        <GroupTitle>
+                {/* <GroupTitle>
                             {this.props.title}
                             <IconGroup>
                                 {this.props.onAddBtnClick && (
@@ -91,6 +92,7 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
                         </GroupTitle>
                     </GroupHeaderInnerDiv>
                 </GroupHeaderContainer>
+                     */}
                 <GroupScrollContainer
                     spaceSidebarWidth={this.props.spaceSidebarWidth}
                 >

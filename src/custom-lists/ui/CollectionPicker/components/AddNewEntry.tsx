@@ -64,12 +64,12 @@ export const AddNew = styled.div`
     justify-content: center;
     align-items: center;
     color: ${(props) => props.theme.colors.black};
-    background: ${(props) => props.theme.colors.white};
+    /* background: ${(props) => props.theme.colors.white}; */
     font-size: ${fontSizeSmall}px;
     font-weight: 500;
     min-height: 20px;
     height: fit-content;
-    padding: 8px 20px;
+    padding: 3px 20px;
     word-break: break-word;
     cursor: pointer;
     border-radius: 5px;

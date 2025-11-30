@@ -12,9 +12,8 @@ import { UIEventHandler, UILogic } from 'ui-logic-core'
 import { AI_PROMPT_DEFAULTS } from 'src/sidebar/annotations-sidebar/constants'
 import { marked } from 'marked'
 
-type EventHandler<
-    EventName extends keyof PromptTemplatesEvent
-> = UIEventHandler<PromptTemplatesState, PromptTemplatesEvent, EventName>
+type EventHandler<EventName extends keyof PromptTemplatesEvent> =
+    UIEventHandler<PromptTemplatesState, PromptTemplatesEvent, EventName>
 
 export default class PromptTemplatesLogic extends UILogic<
     PromptTemplatesState,
@@ -149,6 +148,44 @@ export default class PromptTemplatesLogic extends UILogic<
             'promptSuggestions',
             updatedTemplates,
         )
+    }
+    cancelEditTemplate: EventHandler<'cancelEditTemplate'> = async ({
+        event,
+        previousState,
+    }) => {
+        const currentTemplates = previousState.promptTemplatesArray
+        const templateBeingEdited = currentTemplates[event.id]
+        const editValue =
+            templateBeingEdited?.isEditing ?? previousState.editValue
+
+        // If the template is empty (or just whitespace), remove it
+        if (!editValue || editValue.trim().length === 0) {
+            const updatedTemplates = currentTemplates.filter(
+                (_, index) => index !== event.id,
+            )
+
+            this.emitMutation({
+                promptTemplatesArray: { $set: updatedTemplates },
+                editValue: { $set: null },
+            })
+
+            // Save the updated list of templates
+            await this.syncSettings.openAI.set(
+                'promptSuggestions',
+                updatedTemplates,
+            )
+        } else {
+            // Otherwise, just cancel the edit
+            const updatedTemplates = [...currentTemplates]
+            updatedTemplates[event.id] = {
+                ...currentTemplates[event.id],
+                isEditing: null,
+            }
+            this.emitMutation({
+                promptTemplatesArray: { $set: updatedTemplates },
+                editValue: { $set: null },
+            })
+        }
     }
     startNewTemplate: EventHandler<'startNewTemplate'> = async ({
         event,

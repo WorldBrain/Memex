@@ -393,8 +393,8 @@ export default class PageResultView extends PureComponent<Props> {
                     onClick={(event) => {
                         {
                             this.setState({
-                                showVideoFullSize: !this.state
-                                    .showVideoFullSize,
+                                showVideoFullSize:
+                                    !this.state.showVideoFullSize,
                             })
                             event.preventDefault()
                         }
@@ -620,7 +620,7 @@ export default class PageResultView extends PureComponent<Props> {
                     !(
                         this.props.isNotesSidebarShown &&
                         this.props.isListsSidebarShown
-                    ) && 'Cite',
+                    ) && 'Share',
 
                 onClick: (e) => {
                     if (e.altKey) {
@@ -1443,7 +1443,7 @@ const ResultsMatchingTextToggleContainer = styled.div<{
 }>`
     display: flex;
     flex-direction: column;
-border-radius: 0 0 8px 8px;
+    border-radius: 0 0 8px 8px;
     align-items: center;
     justify-content: flex-start;
     overflow: hidden;

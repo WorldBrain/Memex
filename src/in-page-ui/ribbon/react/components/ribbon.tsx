@@ -177,11 +177,10 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     async initialiseHighlightColor() {
-        const {
-            [HIGHLIGHT_COLOR_KEY]: highlightsColor,
-        } = await browser.storage.local.get({
-            [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
-        })
+        const { [HIGHLIGHT_COLOR_KEY]: highlightsColor } =
+            await browser.storage.local.get({
+                [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
+            })
         this.setState({
             pickerColor: highlightsColor,
             initialHighlightColor: highlightsColor,
@@ -198,7 +197,7 @@ export default class Ribbon extends Component<Props, State> {
             '.' + DEF_HIGHLIGHT_CSS_CLASS,
         )
 
-        for (let item of (highlights as any) as HTMLElement[]) {
+        for (let item of highlights as any as HTMLElement[]) {
             const existingStyle = item.style.backgroundColor
             let backgroundColor = ''
 
@@ -516,7 +515,8 @@ export default class Ribbon extends Component<Props, State> {
                                 <SupportBox>
                                     <ExtraButtonRow
                                         onClick={async () => {
-                                            const token = await this.props.getFeatureBaseToken()
+                                            const token =
+                                                await this.props.getFeatureBaseToken()
                                             this.setState({
                                                 featureBaseToken: token ?? null,
                                                 renderFeedback: true,
@@ -535,7 +535,8 @@ export default class Ribbon extends Component<Props, State> {
                                     </ExtraButtonRow>
                                     <ExtraButtonRow
                                         onClick={async () => {
-                                            const token = await this.props.getFeatureBaseToken()
+                                            const token =
+                                                await this.props.getFeatureBaseToken()
                                             this.setState({
                                                 featureBaseToken: token ?? null,
                                                 renderChangeLog: true,
@@ -926,8 +927,9 @@ export default class Ribbon extends Component<Props, State> {
                                 value={this.state.blockListValue}
                                 onChange={(event) =>
                                     this.setState({
-                                        blockListValue: (event.target as HTMLInputElement)
-                                            .value,
+                                        blockListValue: (
+                                            event.target as HTMLInputElement
+                                        ).value,
                                     })
                                 }
                                 width="fill-available"
@@ -1498,7 +1500,7 @@ export default class Ribbon extends Component<Props, State> {
                         <PrimaryAction
                             size={'medium'}
                             type="tertiary"
-                            label={'Cite'}
+                            label={'Share'}
                             fontColor={'greyScale8'}
                             onClick={null}
                             icon={'copy'}
@@ -2443,7 +2445,6 @@ const IconContainer = styled.div<{ ribbonPosition; isYoutube: boolean }>`
     width: fit-content;
     background: ${(props) => props.theme.colors.greyScale1}95;
 
-
     ${(props) =>
         props.ribbonPosition === 'bottomRight' &&
         css`
@@ -2461,7 +2462,6 @@ const IconContainer = styled.div<{ ribbonPosition; isYoutube: boolean }>`
         css`
             backdrop-filter: blur(4px);
         `}
-
 `
 
 const SupportContainer = styled.div`
@@ -2797,8 +2797,6 @@ const InnerRibbon = styled.div<{
             : props.theme.colors.black + 'c9'};
     outline: 1px solid ${(props) => props.theme.colors.greyScale3};
 
-
-
     // Peeking State
     ${(props) =>
         props.isPeeking &&
@@ -2836,58 +2834,55 @@ const InnerRibbon = styled.div<{
         `}
 
         ${(props) =>
-            props.ribbonPosition === 'topRight' &&
-            props.isPeeking &&
-            css`
-                border-radius: 0 0 0 8px;
-                top: 0px;
-            `}
+        props.ribbonPosition === 'topRight' &&
+        props.isPeeking &&
+        css`
+            border-radius: 0 0 0 8px;
+            top: 0px;
+        `}
         ${(props) =>
-            props.ribbonPosition === 'bottomRight' &&
-            props.isPeeking &&
-            css`
-                border-radius: 8px 0 0 0;
-                bottom: 0px;
-            `}
+        props.ribbonPosition === 'bottomRight' &&
+        props.isPeeking &&
+        css`
+            border-radius: 8px 0 0 0;
+            bottom: 0px;
+        `}
         ${(props) =>
-            props.ribbonPosition === 'centerRight' &&
-            props.isPeeking &&
-            css`
-                border-radius: 8px;
-                width: ${TOOLTIP_WIDTH};
-            `}
+        props.ribbonPosition === 'centerRight' &&
+        props.isPeeking &&
+        css`
+            border-radius: 8px;
+            width: ${TOOLTIP_WIDTH};
+        `}
 
             ${(props) =>
-                props.isSidebarOpen &&
-                css`
-                    display: flex;
-                    box-shadow: none;
-                    justify-content: center;
-                    height: 100%;
-                    flex-direction: column;
-                    padding: 0px 0px;
-                    width: ${TOOLTIP_WIDTH};
-                    align-items: flex-start;
-                    right: 0px;
-                    transition: unset;
-                    border-radius: 0px;
-                    justify-content: space-between;
-                    outline: 1px solid
-                        ${(props) => props.theme.colors.greyScale3};
+        props.isSidebarOpen &&
+        css`
+            display: flex;
+            box-shadow: none;
+            justify-content: center;
+            height: 100%;
+            flex-direction: column;
+            padding: 0px 0px;
+            width: ${TOOLTIP_WIDTH};
+            align-items: flex-start;
+            right: 0px;
+            transition: unset;
+            border-radius: 0px;
+            justify-content: space-between;
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
 
-                    & .removeSidebar {
-                        visibility: hidden;
-                        display: none;
-                    }
-                `}
+            & .removeSidebar {
+                visibility: hidden;
+                display: none;
+            }
+        `}
 
     ${(props) =>
         !props.isYoutube &&
         css`
             backdrop-filter: blur(30px);
         `}
-
-
 `
 
 const ExtraButtonRow = styled.div<{ deactivateHover? }>`

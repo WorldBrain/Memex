@@ -123,9 +123,7 @@ export interface ListsSidebarSearchBarProps {
     getRootElement: () => HTMLElement
 }
 
-export default class ListsSidebarSearchBar extends PureComponent<
-    ListsSidebarSearchBarProps
-> {
+export default class ListsSidebarSearchBar extends PureComponent<ListsSidebarSearchBarProps> {
     private inputRef = React.createRef<HTMLInputElement>()
 
     private handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
@@ -196,7 +194,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                             </IconContainer>
                         )}
                         <Input
-                            placeholder="Search Spaces"
+                            placeholder="Search & Add Spaces"
                             ref={this.inputRef}
                             id={'spaces-search-bar'}
                             onChange={this.handleInputChange}

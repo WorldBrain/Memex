@@ -20,6 +20,7 @@ export type PromptTemplatesEvent = UIEvent<{
     focusTemplate: { id: number }
     setTemplateEdit: { id: number; value: string }
     saveEditTemplate: { id: number; text: string }
+    cancelEditTemplate: { id: number }
     startNewTemplate: { text: string }
     deleteTemplate: { id: number }
     reorderTemplates: { oldIndex: number; newIndex: number }

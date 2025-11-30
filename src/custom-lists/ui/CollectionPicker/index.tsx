@@ -253,9 +253,10 @@ class SpacePicker extends StatefulUIElement<
         return baseEntries.map((baseEntry, index) => {
             // If this entry is a root of a tree flagged to be shown in tree view, render it with all descendents in tree view
             if (this.state.listIdsShownAsTrees.includes(baseEntry.unifiedId)) {
-                let allTreeMembers = this.props.annotationsCache.getAllListsInTreeByRootId(
-                    baseEntry.pathUnifiedIds[0] ?? baseEntry.unifiedId,
-                )
+                let allTreeMembers =
+                    this.props.annotationsCache.getAllListsInTreeByRootId(
+                        baseEntry.pathUnifiedIds[0] ?? baseEntry.unifiedId,
+                    )
 
                 return (
                     <EntryOuterContainer
@@ -346,10 +347,11 @@ class SpacePicker extends StatefulUIElement<
                                             this.processEvent(
                                                 'focusListEntry',
                                                 {
-                                                    listRenderedId: generateRenderedListEntryId(
-                                                        baseEntry,
-                                                        treeNodeEntry,
-                                                    ),
+                                                    listRenderedId:
+                                                        generateRenderedListEntryId(
+                                                            baseEntry,
+                                                            treeNodeEntry,
+                                                        ),
                                                 },
                                             )
                                         }
@@ -396,8 +398,7 @@ class SpacePicker extends StatefulUIElement<
                                                       this.processEvent(
                                                           'toggleEntryContextMenu',
                                                           {
-                                                              listId:
-                                                                  treeNodeEntry.localId,
+                                                              listId: treeNodeEntry.localId,
                                                           },
                                                       )
                                                 : undefined
@@ -409,8 +410,7 @@ class SpacePicker extends StatefulUIElement<
                                                       this.processEvent(
                                                           'toggleEntryEditMenu',
                                                           {
-                                                              listId:
-                                                                  treeNodeEntry.localId,
+                                                              listId: treeNodeEntry.localId,
                                                           },
                                                       )
                                                 : undefined
@@ -419,8 +419,7 @@ class SpacePicker extends StatefulUIElement<
                                             this.processEvent(
                                                 'onOpenInTabGroupPress',
                                                 {
-                                                    listId:
-                                                        treeNodeEntry.localId,
+                                                    listId: treeNodeEntry.localId,
                                                 },
                                             )
                                         }
@@ -455,10 +454,11 @@ class SpacePicker extends StatefulUIElement<
                                                             this.processEvent(
                                                                 'toggleListShownAsTree',
                                                                 {
-                                                                    listRenderedId: generateRenderedListEntryId(
-                                                                        baseEntry,
-                                                                        treeNodeEntry,
-                                                                    ),
+                                                                    listRenderedId:
+                                                                        generateRenderedListEntryId(
+                                                                            baseEntry,
+                                                                            treeNodeEntry,
+                                                                        ),
                                                                 },
                                                             )
                                                         } else {
@@ -533,14 +533,6 @@ class SpacePicker extends StatefulUIElement<
                     shouldShorten={shouldShorten && pathElements.length > 1}
                     key={item.unifiedId}
                 >
-                    {i > 0 && (
-                        <Icon
-                            filePath="arrowRight"
-                            heightAndWidth="14px"
-                            color="greyScale4"
-                            hoverOff
-                        />
-                    )}
                     <BreadCrumbItem>{item.name}</BreadCrumbItem>
                 </PathElementBox>
             ))
@@ -551,13 +543,12 @@ class SpacePicker extends StatefulUIElement<
                     <EntryRowContainer>
                         <EntryRow
                             blockMouseOver={this.state.blockMouseOver}
-                            ancestryPath={ancestryPath}
+                            ancestryPath={pathElements}
                             onAncestryPathClick={(e) => {
                                 e.stopPropagation()
                                 this.processEvent('toggleListShownAsTree', {
-                                    listRenderedId: generateRenderedListEntryId(
-                                        baseEntry,
-                                    ),
+                                    listRenderedId:
+                                        generateRenderedListEntryId(baseEntry),
                                 })
                             }}
                             id={`ListKeyName-${baseEntry.unifiedId}`}
@@ -590,9 +581,8 @@ class SpacePicker extends StatefulUIElement<
                             bgScriptBG={this.props.bgScriptBG}
                             onFocus={() =>
                                 this.processEvent('focusListEntry', {
-                                    listRenderedId: generateRenderedListEntryId(
-                                        baseEntry,
-                                    ),
+                                    listRenderedId:
+                                        generateRenderedListEntryId(baseEntry),
                                 })
                             }
                             onUnfocus={() =>
@@ -661,9 +651,8 @@ class SpacePicker extends StatefulUIElement<
                             getRootElement={this.props.getRootElement}
                             toggleShowNewChildInput={() =>
                                 this.processEvent('toggleListShownAsTree', {
-                                    listRenderedId: generateRenderedListEntryId(
-                                        baseEntry,
-                                    ),
+                                    listRenderedId:
+                                        generateRenderedListEntryId(baseEntry),
                                     shouldShowNewChildInput: true,
                                 })
                             }
@@ -705,10 +694,12 @@ class SpacePicker extends StatefulUIElement<
                                                 this.processEvent(
                                                     'toggleListShownAsTree',
                                                     {
-                                                        listRenderedId: generateRenderedListEntryId(
-                                                            baseEntry,
-                                                        ),
-                                                        shouldShowNewChildInput: !hasChildren,
+                                                        listRenderedId:
+                                                            generateRenderedListEntryId(
+                                                                baseEntry,
+                                                            ),
+                                                        shouldShowNewChildInput:
+                                                            !hasChildren,
                                                     },
                                                 )
                                             }}
@@ -1130,18 +1121,6 @@ const BreadCrumbItem = styled.div<{}>`
 
 const EntryOuterContainer = styled.div<{
     active: boolean
-}>`
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
-
-    ${(props) =>
-        props.active &&
-        css`
-            background: ${(props) => props.theme.colors.black2};
-        `};
-
-    &:last-child {
-        border-bottom: none;
-    }
-`
+}>``
 
 export default SpacePicker

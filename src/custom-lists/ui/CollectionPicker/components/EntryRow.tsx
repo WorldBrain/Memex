@@ -34,7 +34,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     goToButtonRef?: React.RefObject<HTMLDivElement>
     bgScriptBG: RemoteBGScriptInterface<'caller'>
     onAncestryPathClick?: React.MouseEventHandler
-    ancestryPath?: React.ReactChild[]
+    ancestryPath?: { name: string; unifiedId: string }[]
     getRootElement?: () => HTMLElement
     renderLeftSideIcon?: () => JSX.Element
     toggleShowNewChildInput?: ListTreeActions['toggleShowNewChildInput']
@@ -268,6 +268,8 @@ class EntryRow extends React.PureComponent<Props, State> {
 
         let cleanID = parseInt(id.split('ListKeyName-')[1])
 
+        console.log('props ancestryPath', this.props.ancestryPath)
+
         return (
             <Row
                 onDragStart={dndActions?.onDragStart}
@@ -303,14 +305,52 @@ class EntryRow extends React.PureComponent<Props, State> {
                 <NameWrapper>
                     {this.props.ancestryPath?.length > 0 && (
                         <TooltipBox
-                            tooltipText="Toggle Path"
+                            tooltipText={
+                                <TooltipTextContainer>
+                                    <TooltipPath>
+                                        {this.props.ancestryPath.map(
+                                            (item, i) => (
+                                                <span key={item.unifiedId}>
+                                                    {item.name}
+                                                    {i <
+                                                        this.props.ancestryPath
+                                                            .length -
+                                                            1 && (
+                                                        <span> / </span>
+                                                    )}
+                                                </span>
+                                            ),
+                                        )}
+                                    </TooltipPath>
+                                    <TooltipSubTitle>
+                                        Click to toggle
+                                    </TooltipSubTitle>
+                                </TooltipTextContainer>
+                            }
                             placement="bottom"
                             getPortalRoot={this.props.getRootElement}
                             width={''}
                         >
-                            <PathBox onClick={this.props.onAncestryPathClick}>
-                                {this.props.ancestryPath}{' '}
-                            </PathBox>
+                            <PathBoxContainer>
+                                <PathBox
+                                    onClick={this.props.onAncestryPathClick}
+                                >
+                                    {this.props.ancestryPath.length > 1 && (
+                                        <SlashSeparators onlyright>
+                                            ... /{' '}
+                                        </SlashSeparators>
+                                    )}
+                                    <AncestryPathItem>
+                                        {
+                                            this.props.ancestryPath[
+                                                this.props.ancestryPath.length -
+                                                    1
+                                            ].name
+                                        }
+                                    </AncestryPathItem>
+                                    <SlashSeparators> / </SlashSeparators>
+                                </PathBox>
+                            </PathBoxContainer>
                         </TooltipBox>
                     )}
                     <NameRow>
@@ -339,7 +379,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                         this.state.showExtraMenu) && (
                         <>
                             {this.renderShowExtraMenu(cleanID)}
-                            <TooltipBox
+                            {/* <TooltipBox
                                 tooltipText="Add Sub-Space"
                                 placement="right"
                                 targetElementRef={
@@ -357,7 +397,7 @@ class EntryRow extends React.PureComponent<Props, State> {
                                         this.props.toggleShowNewChildInput?.()
                                     }}
                                 />
-                            </TooltipBox>
+                            </TooltipBox> */}
                             <TooltipBox
                                 tooltipText={'More Options'}
                                 placement="bottom"
@@ -538,9 +578,7 @@ const Row = styled.div<{
     align-items: center;
     display: flex;
     justify-content: flex-start;
-    transition: background 0.3s;
-
-    height: 60px;
+    height: 40px;
     width: fill-available;
     cursor: pointer;
     padding: 0px 0px 0 ${({ indentSteps }) => 9 + indentSteps * 15}px;
@@ -557,40 +595,36 @@ const Row = styled.div<{
     ${(props) =>
         props.isFocused &&
         css`
-            outline: 1px solid ${(props) => props.theme.colors.greyScale4};
-            background: transparent;
+            background: ${(props) => props.theme.colors.greyScale2};
         `}
 
     &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
-        background: transparent;
+        background: ${(props) => props.theme.colors.greyScale2};
     }
 
     ${(props) =>
         props.theme.variant === 'light' &&
         css`
             &:focus {
-                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+                background: ${(props) => props.theme.colors.greyScale2};
             }
             &:hover {
-                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
-                background: transparent;
+                background: ${(props) => props.theme.colors.greyScale2};
             }
 
             ${(props) =>
                 props.isFocused &&
                 css`
-                    outline: 1px solid
-                        ${(props) => props.theme.colors.greyScale2};
-                    background: transparent;
+                    background: ${(props) => props.theme.colors.greyScale2};
                 `}
         `};
 `
 
 const NameWrapper = styled.div`
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
+    align-items: center;
     padding-left: 10px;
     grid-gap: 2px;
     max-width: 80%;
@@ -629,5 +663,46 @@ const NameRow = styled.div`
     text-align: left;
     justify-content: flex-start;
 `
+const PathBoxContainer = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 2px;
+    margin-right: 4px;
+`
 
 export default EntryRow
+
+const TooltipTextContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 2px;
+`
+
+const TooltipPath = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale6};
+`
+
+const TooltipSubTitle = styled.div`
+    font-size: 13px;
+    color: ${(props) => props.theme.colors.greyScale5};
+`
+
+const SlashSeparators = styled.span<{ onlyright?: boolean }>`
+    padding: 0 3px;
+    ${(props) =>
+        props.onlyright &&
+        css`
+            padding-left: 0;
+        `}
+`
+
+const AncestryPathItem = styled.span`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50px;
+    display: inline-block;
+`

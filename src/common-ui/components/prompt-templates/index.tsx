@@ -303,7 +303,9 @@ export default class PromptTemplatesComponent extends UIElement<
                                                                                 'setTemplateEdit',
                                                                                 {
                                                                                     id: index,
-                                                                                    value: (event.target as HTMLTextAreaElement)
+                                                                                    value: (
+                                                                                        event.target as HTMLTextAreaElement
+                                                                                    )
                                                                                         .value,
                                                                                 },
                                                                             )
@@ -323,7 +325,9 @@ export default class PromptTemplatesComponent extends UIElement<
                                                                                 event.metaKey
                                                                             ) {
                                                                                 if (
-                                                                                    (event.target as HTMLTextAreaElement)
+                                                                                    (
+                                                                                        event.target as HTMLTextAreaElement
+                                                                                    )
                                                                                         .value
                                                                                         .length >
                                                                                     0
@@ -333,7 +337,9 @@ export default class PromptTemplatesComponent extends UIElement<
                                                                                         'saveEditTemplate',
                                                                                         {
                                                                                             id: index,
-                                                                                            text: (event.target as HTMLTextAreaElement)
+                                                                                            text: (
+                                                                                                event.target as HTMLTextAreaElement
+                                                                                            )
                                                                                                 .value,
                                                                                         },
                                                                                     )
@@ -343,6 +349,16 @@ export default class PromptTemplatesComponent extends UIElement<
                                                                                 'Enter'
                                                                             ) {
                                                                                 // Allow Enter to function normally for new lines
+                                                                            } else if (
+                                                                                event.key ===
+                                                                                'Escape'
+                                                                            ) {
+                                                                                this.processEvent(
+                                                                                    'cancelEditTemplate',
+                                                                                    {
+                                                                                        id: index,
+                                                                                    },
+                                                                                )
                                                                             } else {
                                                                                 // Handle other keys if needed
                                                                             }
@@ -360,12 +376,13 @@ export default class PromptTemplatesComponent extends UIElement<
                                                                             fontSize="12px"
                                                                             padding="2px 4px;"
                                                                             onClick={() => {
-                                                                                let content = this
-                                                                                    .state
-                                                                                    .promptTemplatesArray[
-                                                                                    index
-                                                                                ]
-                                                                                    .isEditing
+                                                                                let content =
+                                                                                    this
+                                                                                        .state
+                                                                                        .promptTemplatesArray[
+                                                                                        index
+                                                                                    ]
+                                                                                        .isEditing
 
                                                                                 if (
                                                                                     content !=
@@ -483,7 +500,7 @@ const Title = styled.div`
 `
 
 const ContentBlock = styled.div`
-    padding: 0 5px 5px 5px;
+    padding: 0 10px 5px 10px;
     width: 100%;
     box-sizing: border-box;
     display: flex;
@@ -602,7 +619,8 @@ const Row = styled.div<{
     }
 
     &:hover {
-        ${ActionsContainer} { // if DeleteButtonContainer is not under an hovered ContainerSection
+        ${ActionsContainer} {
+            // if DeleteButtonContainer is not under an hovered ContainerSection
             display: flex;
         }
     }
@@ -616,8 +634,6 @@ const Row = styled.div<{
         css`
             outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         `}
-
-
 `
 
 const TemplateRowTitle = styled.div<{

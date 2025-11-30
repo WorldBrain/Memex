@@ -167,7 +167,7 @@ let ReorderLine = styled.div<{
 }>`
     position: relative;
     z-index: -1;
-    border-bottom: 3px solid
+    border-bottom: 0px solid
         ${(props) =>
             props.isVisible && props.isActive
                 ? props.theme.colors.prime3
@@ -195,6 +195,7 @@ let ReorderLine = styled.div<{
         props.isActive &&
         css`
             z-index: 2147483647;
+            border-bottom-width: 3px;
         `}
     ${(props) =>
         props.topItem &&

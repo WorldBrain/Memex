@@ -61,38 +61,39 @@ export const main: InPageUIInjectionsMain = async ({
                     options.imageElements,
                     options.contentScriptsBG,
                 )
-            } else if (component === 'search-engine-integration') {
-                const url = window.location.href
-                const matched = utils.matchURL(url) as SearchEngineName | false
-
-                if (matched) {
-                    const searchInjection =
-                        (await syncSettings.searchInjection.get(
-                            'searchEnginesEnabled',
-                        )) ?? constants.SEARCH_INJECTION_DEFAULT
-                    if (searchInjection[matched]) {
-                        try {
-                            const query = utils.fetchQuery(url)
-
-                            await handleRenderSearchInjection(
-                                query,
-                                matched,
-                                syncSettings,
-                                () =>
-                                    searchDisplayProps.bgScriptBG.openOptionsTab(
-                                        {
-                                            query: 'settings',
-                                        },
-                                    ),
-                                searchDisplayProps.searchBG,
-                                searchDisplayProps.openPDFinViewer,
-                            )
-                        } catch (err) {
-                            console.error(err)
-                        }
-                    }
-                }
             }
+            // else if (component === 'search-engine-integration') {
+            //     const url = window.location.href
+            //     const matched = utils.matchURL(url) as SearchEngineName | false
+
+            //     if (matched) {
+            //         const searchInjection =
+            //             (await syncSettings.searchInjection.get(
+            //                 'searchEnginesEnabled',
+            //             )) ?? constants.SEARCH_INJECTION_DEFAULT
+            //         if (searchInjection[matched]) {
+            //             try {
+            //                 const query = utils.fetchQuery(url)
+
+            //                 await handleRenderSearchInjection(
+            //                     query,
+            //                     matched,
+            //                     syncSettings,
+            //                     () =>
+            //                         searchDisplayProps.bgScriptBG.openOptionsTab(
+            //                             {
+            //                                 query: 'settings',
+            //                             },
+            //                         ),
+            //                     searchDisplayProps.searchBG,
+            //                     searchDisplayProps.openPDFinViewer,
+            //                 )
+            //             } catch (err) {
+            //                 console.error(err)
+            //             }
+            //         }
+            //     }
+            // }
         },
     )
 }

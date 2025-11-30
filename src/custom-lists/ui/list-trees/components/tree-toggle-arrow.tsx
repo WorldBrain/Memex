@@ -38,7 +38,7 @@ export class ListTreeToggleArrow extends React.Component<Props> {
                             : 'arrowRight'
                     }
                     heightAndWidth="16px"
-                    color={treeState.hasChildren ? 'greyScale5' : 'greyScale3'}
+                    color={treeState.hasChildren ? 'prime1' : 'greyScale4'}
                     onClick={(event) => {
                         if (treeState.hasChildren) {
                             actions.toggleShowChildren()

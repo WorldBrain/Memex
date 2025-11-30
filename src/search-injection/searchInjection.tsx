@@ -74,9 +74,8 @@ class Root extends React.Component<RootProps, RootState> {
 
         const contentIdentifier = async (url) => {
             if (url.includes('memex.cloud/')) {
-                const urlData = await this.props.searchBG.resolvePdfPageFullUrls(
-                    url,
-                )
+                const urlData =
+                    await this.props.searchBG.resolvePdfPageFullUrls(url)
                 const originalURL = urlData?.originalLocation ?? url
                 return originalURL
             } else {
@@ -193,66 +192,50 @@ export const handleRenderSearchInjection = async (
         const containerIdentifier = searchEngineObj.container[position]
 
         if (searchEngine === 'google') {
-            const searchList = document.getElementById(
-                searchEngineObj.container.searchList,
-            )
-            const suggestionsContainer = document.getElementById(
-                searchEngineObj.container.side,
-            )
-            const featurePreview = document.getElementById(
-                searchEngineObj.container.featurePreview,
-            )
-            const containerWithSuggestions = document.getElementById(
-                searchEngineObj.container.sideAlternative,
-            )
-
-            if (position === 'side') {
-                if (featurePreview && !suggestionsContainer) {
-                    searchList.style.display = 'grid'
-                    searchList.style.gap = '130px'
-                    searchList.style.flexDirection = 'row'
-                    searchList.style.gridAutoFlow = 'column'
-                    searchList.insertAdjacentElement('beforeend', root)
-                } else if (!suggestionsContainer) {
-                    const containerAbove = document.getElementById(
-                        searchEngineObj.container.above,
-                    )
-
-                    const newDiv = document.createElement('div')
-                    newDiv.style.display = 'flex'
-                    newDiv.style.gap = '50px'
-                    if (containerAbove) {
-                        newDiv.appendChild(containerAbove)
-                        containerWithSuggestions.appendChild(newDiv)
-                    }
-                    const sideBoxContainer = document.createElement('div')
-                    sideBoxContainer.style.height = '100%'
-                    sideBoxContainer.style.overflow = 'visible'
-                    sideBoxContainer.appendChild(root)
-
-                    root.style.position = 'sticky'
-                    root.style.top = '100px'
-                    root.style.zIndex = '100'
-
-                    containerWithSuggestions.style.display = 'grid'
-                    containerWithSuggestions.style.gap = '130px'
-                    containerWithSuggestions.style.flexDirection = 'row'
-                    containerWithSuggestions.style.gridAutoFlow = 'column'
-                    containerWithSuggestions.style.justifyContent =
-                        'space-between'
-
-                    newDiv.insertAdjacentElement('beforeend', sideBoxContainer)
-                } else {
-                    suggestionsContainer.insertBefore(
-                        root,
-                        suggestionsContainer.firstChild,
-                    )
-                }
-            } else {
-                const containerAbove = document.getElementById(
-                    searchEngineObj.container.above,
+            const toolsContainer = document.querySelector('div[data-noaftde]')
+            if (toolsContainer) {
+                const existingButton = document.getElementById(
+                    'memex-google-button',
                 )
-                containerAbove.insertBefore(root, containerAbove.firstChild)
+                if (!existingButton) {
+                    const button = document.createElement('button')
+                    button.id = 'memex-google-button'
+                    button.innerHTML = 'Memex'
+                    button.style.cssText =
+                        'margin-left: 10px; background: none; border: none; cursor: pointer; color: #70757a; font-family: Google Sans,arial,sans-serif; font-size: 14px;'
+
+                    button.addEventListener('click', () => {
+                        const rcnt = document.getElementById('rcnt')
+                        if (rcnt) {
+                            root.style.position = 'absolute'
+                            root.style.display = 'flex'
+                            root.style.zIndex = '2147483647'
+                            root.style.width = '100%'
+                            root.style.height = '100%'
+                            root.style.backgroundColor = 'white'
+                            root.style.top = '0px'
+                            rcnt.style.position = 'relative'
+                            rcnt.appendChild(root)
+
+                            // const closeListener = (e) => {
+                            //     const target = e.target as HTMLElement
+                            //     const navigation = target.closest(
+                            //         '[role="navigation"]',
+                            //     )
+                            //     if (navigation) {
+                            //         root.style.display = 'none'
+                            //         document.removeEventListener(
+                            //             'click',
+                            //             closeListener,
+                            //         )
+                            //     }
+                            // }
+                            // document.addEventListener('click', closeListener)
+                        }
+                    })
+
+                    toolsContainer.appendChild(button)
+                }
             }
         }
 
@@ -327,9 +310,8 @@ export const handleRenderSearchInjection = async (
         }
 
         if (searchEngine === 'duckduckgo') {
-            const container = document.getElementsByClassName(
-                containerIdentifier,
-            )[0]
+            const container =
+                document.getElementsByClassName(containerIdentifier)[0]
             container.insertBefore(root, container.firstChild)
         }
 

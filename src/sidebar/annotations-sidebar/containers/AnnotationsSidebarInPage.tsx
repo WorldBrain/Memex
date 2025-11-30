@@ -37,9 +37,7 @@ export interface Props extends ContainerProps {
     getRootElement: () => HTMLElement
 }
 
-export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
-    Props
-> {
+export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<Props> {
     static defaultProps: Pick<Props, 'isLockable' | 'sidebarContext'> = {
         sidebarContext: 'in-page',
         isLockable: true,
@@ -139,16 +137,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         inPageUI.events.on('stateChanged', this.handleInPageUIStateChange)
         inPageUI.events.on('sidebarAction', this.handleExternalAction)
 
-        // No longer used, as of the sidebar refactor
-        // sidebarEvents.on('removeTemporaryHighlights', () =>
-        //     highlighter.removeTempHighlights(),
-        // )
-        // sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
-        //     highlighter.removeAnnotationHighlight(url),
-        // )
-        // sidebarEvents.on('removeAnnotationHighlights', ({ urls }) =>
-        //     highlighter.removeAnnotationHighlights(urls),
-        // )
         sidebarEvents.on('highlightAndScroll', async ({ highlight }) => {
             await highlighter.highlightAndScroll({
                 id: highlight.unifiedId,
@@ -159,12 +147,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             highlighter.renderHighlight(
                 { id: highlight.unifiedId, selector: highlight.selector },
                 ({ annotationId, openInEdit }) => inPageUI.showTooltip(),
-                // {
-                //     annotationCacheId: annotationId.toString(),
-                //     // action: openInEdit
-                //     //     ? 'edit_annotation'
-                //     //     : 'show_annotation',
-                // }),
             ),
         )
         sidebarEvents.on(
@@ -403,9 +385,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     tab: 'spaces',
                 })
             }
-            const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
-                event.listId,
-            ).unifiedId
+            const unifiedListId: UnifiedList['unifiedId'] =
+                this.props.annotationsCache.getListByLocalId(
+                    event.listId,
+                ).unifiedId
 
             this.processEvent('setSelectedList', {
                 unifiedListId: unifiedListId,

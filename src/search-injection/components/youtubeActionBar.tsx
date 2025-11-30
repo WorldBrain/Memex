@@ -92,6 +92,7 @@ interface State {
         vasId: string
     }[]
     languageSearchTerm: string
+    transcriptSearchTerm: string
 }
 
 interface TranscriptLine {
@@ -155,6 +156,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             transcriptLanguageOptions: null,
             transcriptLanguageSelection: false,
             languageSearchTerm: '',
+            transcriptSearchTerm: '',
         }
     }
 
@@ -165,9 +167,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         if (this.syncSettings != null) {
             let summarizeVideoPromptSetting
             try {
-                summarizeVideoPromptSetting = await this.syncSettings.openAI?.get(
-                    'videoPromptSetting',
-                )
+                summarizeVideoPromptSetting =
+                    await this.syncSettings.openAI?.get('videoPromptSetting')
             } catch (e) {
                 if (summarizeVideoPromptSetting == null) {
                     await this.syncSettings.openAI?.set(
@@ -276,20 +277,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     }
 
     handleRangeChange = (from, to) => {
-        let fromSecondsPosition = from
-        if (!fromSecondsPosition) {
-            fromSecondsPosition = this.state.fromSecondsPosition
-        }
-        let toSecondsPosition = to
-        if (!toSecondsPosition) {
-            toSecondsPosition = this.state.toSecondsPosition
-        }
-
         this.setState({
-            fromSecondsPosition: fromSecondsPosition,
-            toSecondsPosition: toSecondsPosition,
+            fromSecondsPosition: from,
+            toSecondsPosition: to,
         })
-        this.adjustTranscriptRange(fromSecondsPosition, toSecondsPosition)
+        this.adjustTranscriptRange(from, to)
     }
 
     adjustTranscriptRange = (fromInput, toInput) => {
@@ -307,6 +299,12 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         )
 
         return filteredTranscript
+    }
+
+    decodeHtmlEntities = (text: string): string => {
+        const textarea = document.createElement('textarea')
+        textarea.innerHTML = text
+        return textarea.value
     }
 
     adjustScaleToFitParent = async () => {
@@ -444,7 +442,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 const startTime = formatTimestamp(cluster[0].start)
                 const startInSec = Math.floor(cluster[0].start)
                 const duration = Math.floor(cluster[0].start - cluster[0].start)
-                const text = cluster.map((line) => line.text).join(' ')
+                const rawText = cluster.map((line) => line.text).join(' ')
+                const text = this.decodeHtmlEntities(rawText)
                 clusteredTranscript.push({
                     startTime,
                     text,
@@ -471,7 +470,20 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
         let timestampToSend = null
 
-        if (event.shiftKey) {
+        if (from === 0 && to === 100) {
+            let video = document.getElementsByTagName('video')[0]
+            if (video) {
+                let currentTime = Math.floor(video.currentTime)
+                const currentTimeStamp = this.createTimestampAndURL(
+                    currentUrl,
+                    currentTime,
+                )
+                timestampToSend = this.createAhref(
+                    currentTimeStamp[1],
+                    currentTimeStamp[0],
+                )
+            }
+        } else {
             const range = this.calculateRangeInSeconds(
                 this.state.videoDuration,
                 from,
@@ -491,19 +503,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 'to ' +
                 this.createAhref(toTimestampInfo[1], toTimestampInfo[0])
             ).toString()
-        } else {
-            let video = document.getElementsByTagName('video')[0]
-            if (video) {
-                let currentTime = Math.floor(video.currentTime)
-                const currentTimeStamp = this.createTimestampAndURL(
-                    currentUrl,
-                    currentTime,
-                )
-                timestampToSend = this.createAhref(
-                    currentTimeStamp[1],
-                    currentTimeStamp[0],
-                )
-            }
         }
         // Logic for annotate button click
         this.props.annotationsFunctions.createYoutubeTimestamp(timestampToSend)
@@ -599,9 +598,10 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             showYoutubeSummaryNudge: false,
         })
 
-        const onboardingNudgesStorage = await this.props.browserAPIs.storage.local.get(
-            ONBOARDING_NUDGES_STORAGE,
-        )
+        const onboardingNudgesStorage =
+            await this.props.browserAPIs.storage.local.get(
+                ONBOARDING_NUDGES_STORAGE,
+            )
         let onboardingNudgesValues =
             onboardingNudgesStorage[ONBOARDING_NUDGES_STORAGE] ??
             ONBOARDING_NUDGES_DEFAULT
@@ -648,7 +648,23 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             return
         }
 
-        return filteredTranscript?.map((transcriptLine, index) => {
+        // Filter by search terms
+        let searchFilteredTranscript = filteredTranscript
+        if (this.state.transcriptSearchTerm.trim()) {
+            const searchTerms = this.state.transcriptSearchTerm
+                .toLowerCase()
+                .split(/\s+/)
+                .filter((term) => term.length > 0)
+
+            searchFilteredTranscript = filteredTranscript.filter(
+                (transcriptLine) => {
+                    const text = transcriptLine.text.toLowerCase()
+                    return searchTerms.some((term) => text.includes(term))
+                },
+            )
+        }
+
+        return searchFilteredTranscript?.map((transcriptLine, index) => {
             return (
                 <TranscriptElement
                     id={'transcriptElement-' + transcriptLine.index}
@@ -672,11 +688,27 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     renderTranscriptActionBar = () => {
         return (
             <TranscriptActionBar>
+                <TextField
+                    type="text"
+                    placeholder="Search transcript..."
+                    value={this.state.transcriptSearchTerm}
+                    onChange={(e) =>
+                        this.setState({
+                            transcriptSearchTerm: e.target.value,
+                        })
+                    }
+                    autoFocus={true}
+                    width="200px"
+                    background={'greyScale1'}
+                    padding="6px 12px"
+                    borderRadius="6px"
+                    icon={'searchIcon'}
+                />
                 <PrimaryAction
                     onClick={() => {
                         this.setState({
                             fromSecondsPosition: 0,
-                            toSecondsPosition: this.state.videoDuration,
+                            toSecondsPosition: 100,
                         })
                         this.scrollToTimeStamp()
                     }}
@@ -703,7 +735,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                     type="tertiary"
                     size="medium"
                 />
-                <PrimaryAction
+                {/* <PrimaryAction
                     onClick={async () => {
                         this.setState({
                             transcriptLanguageSelection: !this.state
@@ -738,7 +770,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                     size="medium"
                     innerRef={this.languageSwitchButtonRef}
                 />
-                {this.renderLanguageSelectionTooltip()}
+                {this.renderLanguageSelectionTooltip()} */}
             </TranscriptActionBar>
         )
     }
@@ -846,15 +878,15 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 instaClose
             >
                 <TextFieldContainerPrompt>
-                    Use a custom prompt. Click again to apply.
                     <TextArea
                         type="text"
                         placeholder={'Add your custom prompt here'}
                         value={this.state.summarizePrompt}
                         onChange={(event) => {
                             this.setState({
-                                summarizePrompt: (event.target as HTMLTextAreaElement)
-                                    .value,
+                                summarizePrompt: (
+                                    event.target as HTMLTextAreaElement
+                                ).value,
                             })
                         }}
                         onClick={(e) => {
@@ -869,16 +901,21 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         autoFocus={true}
                     />
                 </TextFieldContainerPrompt>
+                <ModalFooter>
+                    <PrimaryAction
+                        onClick={actionFunction}
+                        label="Apply"
+                        type="primary"
+                        size="medium"
+                        icon="stars"
+                    />
+                </ModalFooter>
             </PopoutBox>
         )
     }
 
     render() {
         const { runtime } = this.props
-        const sliderValues = [
-            this.state.fromSecondsPosition,
-            this.state.toSecondsPosition,
-        ]
         return (
             <ParentContainer
                 ref={this.parentContainerRef}
@@ -903,12 +940,39 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                             <TooltipBox
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
-                                    <span>
-                                        Add a note with a link to the current
-                                        time. <br />
-                                        <strong>+ Shift</strong> to add range
-                                        selected below
-                                    </span>
+                                    <ToolTipContainer>
+                                        Note with screenshot
+                                        <br />
+                                        of current frame
+                                    </ToolTipContainer>
+                                }
+                                placement="bottom"
+                            >
+                                <YTPMenuItem
+                                    onClick={this.handleScreenshotButtonClick}
+                                >
+                                    <Icon
+                                        filePath={runtime.getURL(
+                                            '/img/cameraIcon.svg',
+                                        )}
+                                        heightAndWidth="20px"
+                                        color={'greyScale6'}
+                                        hoverOff
+                                    />
+                                    <YTPMenuItemLabel>
+                                        Screenshot
+                                    </YTPMenuItemLabel>
+                                </YTPMenuItem>
+                            </TooltipBox>
+                            <TooltipBox
+                                getPortalRoot={this.props.getRootElement}
+                                tooltipText={
+                                    <ToolTipContainer>
+                                        Add a note to current time
+                                        <TooltipSubTitle>
+                                            or selected range below
+                                        </TooltipSubTitle>
+                                    </ToolTipContainer>
                                 }
                                 placement="bottom"
                             >
@@ -931,10 +995,13 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                             <TooltipBox
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
-                                    <span>
-                                        Instant summary + note of selected
-                                        range.
+                                    <ToolTipContainer>
+                                        <span>
+                                            Instant summary + note of selected
+                                            range.
+                                        </span>
                                         <TooltipSubTitle>
+                                            +{' '}
                                             <KeyboardShortcuts
                                                 size={'small'}
                                                 keys={['Shift']}
@@ -942,9 +1009,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                                     this.props.getRootElement
                                                 }
                                             />
-                                            - Click for custom prompt
+                                            for custom prompt
                                         </TooltipSubTitle>
-                                    </span>
+                                    </ToolTipContainer>
                                 }
                                 placement="bottom"
                             >
@@ -973,18 +1040,16 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                         hoverOff
                                     />
                                     <YTPMenuItemLabel>AI Note</YTPMenuItemLabel>
-                                    {this.state.showAINoteTooltip
-                                        ? this.renderPromptTooltip('AInote')
-                                        : null}
                                 </YTPMenuItem>
                             </TooltipBox>
                             <TooltipBox
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
-                                    <span>
-                                        Summarize this video with custom prompts
+                                    <ToolTipContainer>
+                                        Summarize video
                                         <br />
-                                    </span>
+                                        with custom prompts
+                                    </ToolTipContainer>
                                 }
                                 placement="bottom"
                             >
@@ -1023,40 +1088,13 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                             <TooltipBox
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
-                                    <span>
-                                        Take a screenshot of the current frame
-                                        <br />
-                                        and adds a linked timestamp.
-                                    </span>
-                                }
-                                placement="bottom"
-                            >
-                                <YTPMenuItem
-                                    onClick={this.handleScreenshotButtonClick}
-                                >
-                                    <Icon
-                                        filePath={runtime.getURL(
-                                            '/img/cameraIcon.svg',
-                                        )}
-                                        heightAndWidth="20px"
-                                        color={'greyScale6'}
-                                        hoverOff
-                                    />
-                                    <YTPMenuItemLabel>
-                                        Screenshot
-                                    </YTPMenuItemLabel>
-                                </YTPMenuItem>
-                            </TooltipBox>
-                            <TooltipBox
-                                getPortalRoot={this.props.getRootElement}
-                                tooltipText={
-                                    <span>
+                                    <ToolTipContainer>
                                         {this.state.showTranscript ===
                                         'pristine'
                                             ? 'Show Transcript'
                                             : 'Hide Transcript'}
                                         <br />
-                                    </span>
+                                    </ToolTipContainer>
                                 }
                                 placement="bottom"
                             >
@@ -1087,7 +1125,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 <TooltipBox
                                     getPortalRoot={this.props.getRootElement}
                                     tooltipText={
-                                        <span>Remove Youtube bar</span>
+                                        <ToolTipContainer>
+                                            Remove Youtube bar
+                                        </ToolTipContainer>
                                     }
                                     placement="bottom"
                                 >
@@ -1104,6 +1144,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 <BottomArea>
                                     <VideoRangeSelector
                                         onChange={(values) => {
+                                            console.log('onChange1', values)
                                             this.handleRangeChange(
                                                 values[0],
                                                 values[1],
@@ -1116,8 +1157,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     />
                                 </BottomArea>
                             )}
-                        {(this.state.showTranscript === 'success' ||
-                            this.state.showTranscript === 'running') &&
+                        {this.state.showTranscript === 'success' &&
                             this.renderTranscriptActionBar()}
 
                         {this.state.showTranscript !== 'pristine' ? (
@@ -1134,6 +1174,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     this.renderTranscriptContainer()}
                             </TranscriptContainer>
                         ) : null}
+                        {this.state.showAINoteTooltip
+                            ? this.renderPromptTooltip('AInote')
+                            : null}
                     </MemexButtonInnerContainer>
                 </InnerContainer>
                 {this.renderYouTubeSummaryNudge()}
@@ -1402,6 +1445,7 @@ const TranscriptActionBar = styled.div`
     border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     width: 100%;
     box-sizing: border-box;
+    gap: 10px;
 `
 
 const LanguageSearchResultElement = styled.div`
@@ -1433,10 +1477,59 @@ const ToolTipTextBox = styled.div`
 `
 
 const TooltipSubTitle = styled.div`
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 13px;
+    color: ${(props) => props.theme.colors.greyScale6};
     display: flex;
     align-items: center;
     justify-content: center;
     grid-gap: 5px;
+`
+
+const TranscriptSearchField = styled.div`
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    flex: 0 0 auto;
+
+    > div {
+        background-color: ${(props) =>
+            props.theme.variant === 'light'
+                ? props.theme.colors.greyScale2
+                : props.theme.colors.greyScale1_5} !important;
+        border: 1px solid
+            ${(props) =>
+                props.theme.variant === 'light'
+                    ? props.theme.colors.greyScale3
+                    : props.theme.colors.greyScale2} !important;
+
+        &:focus-within {
+            outline: 2px solid ${(props) => props.theme.colors.prime1} !important;
+            outline-offset: -2px;
+            border-color: ${(props) => props.theme.colors.prime1} !important;
+            background-color: ${(props) =>
+                props.theme.variant === 'light'
+                    ? props.theme.colors.greyScale1
+                    : props.theme.colors.greyScale1} !important;
+        }
+    }
+`
+
+const ToolTipContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 14px;
+`
+
+const ModalFooter = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
 `

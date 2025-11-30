@@ -283,9 +283,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             prevProps.highlightColorSettings !=
             this.props.highlightColorSettings
         ) {
-            const defaultHighlightSettings = this.props.highlightColorSettings.find(
-                (setting) => setting.id === 'default',
-            )
+            const defaultHighlightSettings =
+                this.props.highlightColorSettings.find(
+                    (setting) => setting.id === 'default',
+                )
             if (defaultHighlightSettings?.color) {
                 this.setState({
                     defaultHighlightColor: defaultHighlightSettings.color,
@@ -374,9 +375,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         // this.props.onRemoveFromListBtnClick(event as any)
                     } else {
                         // Perform action for "Enter" key
-                        const {
-                            annotationFooterDependencies: footerDeps,
-                        } = this.props
+                        const { annotationFooterDependencies: footerDeps } =
+                            this.props
                         event.stopPropagation()
                         footerDeps.onDeleteIconClick(event as any)
                         break
@@ -507,8 +507,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             ref={this.highlightsBarRef}
                             onClick={() =>
                                 this.setState({
-                                    showHighlightColorPicker: !this.state
-                                        .showHighlightColorPicker,
+                                    showHighlightColorPicker:
+                                        !this.state.showHighlightColorPicker,
                                 })
                             }
                             barColor={barColor}
@@ -977,7 +977,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         template.
                     </span>
                 ),
-                ButtonText: 'Cite',
+                ButtonText: 'Share',
                 active:
                     this.props.copyPasterAnnotationInstanceId ===
                     this.props.unifiedId,
@@ -1479,9 +1479,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.spacePickerBodyButtonRef,
                         'lists-bar',
                     )} */}
-                    <AutoAddButtonContainer>
+                    {/* <AutoAddButtonContainer>
                         {this.renderAutoAddedIndicator()}
-                    </AutoAddButtonContainer>
+                    </AutoAddButtonContainer> */}
                 </AnnotationBox>
                 {this.state.showQuickTutorial && (
                     <PopoutBox
@@ -1772,7 +1772,7 @@ const HighlightActionsBox = styled.div<{}>`
     top: 0px;
     grid-gap: 5px;
     background: ${(props) => props.theme.colors.black}95;
-    padding: 5px;
+    padding: 2px;
 
     backdrop-filter: blur(5px);
     border-radius: 8px;
@@ -1810,8 +1810,8 @@ const NoteText = styled(Markdown)`
 const ActionBox = styled.div`
     z-index: 100000;
     position: absolute;
-    right: 15px;
-    top: 15px;
+    right: 5px;
+    top: 5px;
 `
 
 const HighlightStyled = styled.div<{ hasComment: boolean }>`
@@ -2011,7 +2011,7 @@ const CreationInfoBox = styled.div`
     display: flex;
     align-items: center;
     grid-gap: 10px;
-    padding-left: 30px;
+    padding-left: 5px;
     margin-bottom: -2px;
 `
 
