@@ -1,27 +1,23 @@
 import React, { Component } from 'react'
 import classNames from 'classnames'
-import browser from 'webextension-polyfill'
+
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
-import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
+import LoadingBlock from '@worldbrain/memex-common/ts/common-ui/components/loading-block'
 import RestoreConfirmation from '../components/restore-confirmation'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { WhiteSpacer10 } from 'src/common-ui/components/design-library/typography'
-import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { UserFeature } from '@worldbrain/memex-common/ts/subscriptions/types'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { subscription } from 'src/util/remote-functions-background'
 import styled from 'styled-components'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { formatTimeFromNow } from '@worldbrain/memex-common/lib/utils/date-time'
-
-const styles = require('../../styles.css')
-const settingsStyle = require('src/options/settings/components/settings.css')
-const localStyles = require('./overview.css')
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import { formatTimeFromNow } from '@worldbrain/memex-common/ts/utils/date-time'
 
 interface Props {
     onBackupRequested: (...args: any[]) => any
@@ -56,7 +52,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
     }
 
     async componentDidMount() {
-        const status = await checkServerStatus({ storageAPI: browser.storage })
+        const status = await checkServerStatus({ storageAPI: chrome.storage })
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
@@ -117,9 +113,8 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
     }
 
     private renderOldBackupPanes() {
-        const automaticBackupsAllowed = this.props.currentUser?.authorizedFeatures?.includes(
-            'backup',
-        )
+        const automaticBackupsAllowed =
+            this.props.currentUser?.authorizedFeatures?.includes('backup')
 
         return (
             <>
@@ -285,18 +280,11 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                     //<DumpPane onDumpClick={this.props.onDumpRequested} />
                 }
                 {this.state.isDev && (
-                    <div className={settingsStyle.section}>
-                        <div className={settingsStyle.sectionTitle}>
-                            Restore & Replace
-                        </div>
-                        <div className={styles.option}>
-                            <div className={localStyles.statusLine}>
-                                <span
-                                    className={classNames(
-                                        settingsStyle.subname,
-                                        localStyles.limitWidth,
-                                    )}
-                                >
+                    <div>
+                        <div>Restore & Replace</div>
+                        <div>
+                            <div>
+                                <span>
                                     <b>Replace</b> all current data with a
                                     backup.
                                 </span>

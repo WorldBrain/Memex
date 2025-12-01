@@ -3,8 +3,6 @@ import cx from 'classnames'
 
 import OutLink from 'src/common-ui/containers/OutLink'
 
-const styles = require('./Button.css')
-
 export interface Props {
     className?: string
     icon: string
@@ -19,23 +17,17 @@ class ButtonIcon extends PureComponent<Props> {
             return null
         }
 
-        return <div className={styles.badge}>{this.props.badgeCount}</div>
+        return <div>{this.props.badgeCount}</div>
     }
 
     render() {
         return (
             <OutLink
-                className={cx(styles.button, this.props.className)}
+                className={cx(this.props.className)}
                 tabIndex="-1"
                 to={this.props.href}
             >
-                <div
-                    className={cx(
-                        styles.customIcon,
-                        styles.buttonIcons,
-                        this.props.btnClass,
-                    )}
-                />
+                <div className={cx(this.props.btnClass)} />
                 {this.renderBadge()}
             </OutLink>
         )

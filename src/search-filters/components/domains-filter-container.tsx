@@ -10,8 +10,6 @@ import FilterButton from './filter-button'
 
 import cx from 'classnames'
 
-const styles = require('./domains-filter.css')
-
 interface StateProps {
     domainFilterDropdown: boolean
     domainsInc: string[]
@@ -54,10 +52,9 @@ class DomainsPopup extends PureComponent<Props, State> {
         return (
             !this.props.domainFilterDropdown &&
             this.props.displayDomains.map(({ value, isExclusive }, i) => (
-                <div className={styles.domainPill} style={{ display: 'flex' }}>
+                <div style={{ display: 'flex' }}>
                     <span>{value}</span>
                     <button
-                        className={styles.cross}
                         onClick={this.toggleDomainFilter({
                             value,
                             isExclusive,
@@ -68,11 +65,13 @@ class DomainsPopup extends PureComponent<Props, State> {
         )
     }
 
-    toggleDomainFilter = ({ value, isExclusive }) => () => {
-        !isExclusive
-            ? this.props.delIncDomainFilter(value)
-            : this.props.delExcDomainFilter(value)
-    }
+    toggleDomainFilter =
+        ({ value, isExclusive }) =>
+        () => {
+            !isExclusive
+                ? this.props.delIncDomainFilter(value)
+                : this.props.delExcDomainFilter(value)
+        }
 
     render() {
         return (
@@ -91,8 +90,7 @@ class DomainsPopup extends PureComponent<Props, State> {
                     <Tooltip
                         position={this.props.tooltipPosition}
                         itemClass={cx({
-                            [styles.domainTooltip]:
-                                this.props.env === 'overview',
+                            domainTooltip: this.props.env === 'overview',
                         })}
                     >
                         <IndexDropdown

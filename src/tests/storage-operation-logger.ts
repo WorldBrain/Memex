@@ -2,7 +2,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import {
     StorageMiddleware,
     StorageMiddlewareContext,
-} from '@worldbrain/storex/lib/types/middleware'
+} from '@worldbrain/storex/ts/types/middleware'
 
 export interface LoggedStorageOperation {
     operation: any[]

@@ -1,4 +1,4 @@
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
 
 import type {
     AnnotationSharingState,

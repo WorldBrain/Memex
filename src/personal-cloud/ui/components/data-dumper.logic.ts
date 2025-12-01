@@ -1,9 +1,9 @@
-import type { UIEventHandler } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+import type { UIEventHandler } from '@worldbrain/memex-common/ts/main-ui/classes/logic'
 import {
     UILogic,
     executeUITask,
-} from '@worldbrain/memex-common/lib/main-ui/classes/logic'
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+} from '@worldbrain/memex-common/ts/main-ui/classes/logic'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 import { dumpDB } from 'src/personal-cloud/storage/dump-db-contents'
 
 export interface State {

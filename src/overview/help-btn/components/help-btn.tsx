@@ -1,16 +1,16 @@
 import React from 'react'
-import browser from 'webextension-polyfill'
+
 import styled, { keyframes, css } from 'styled-components'
 
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
+import { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 import { SETTINGS_URL } from 'src/constants'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { TaskState } from 'ui-logic-core/ts/types'
 
 export interface Props {
     currentUser: AuthenticatedUser
@@ -97,8 +97,8 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                 this.state.showFeedbackForm
                                     ? `https://memex.featurebase.app?jwt=${this.state.token}`
                                     : this.state.showChangeLog
-                                    ? `https://memex.featurebase.app/changelog?jwt=${this.state.token}`
-                                    : `https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${this.props.currentUser.email}`
+                                      ? `https://memex.featurebase.app/changelog?jwt=${this.state.token}`
+                                      : `https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599&user_email=${this.props.currentUser.email}`
                             }
                             height={600}
                             width={500}
@@ -125,8 +125,8 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         <MenuItem
                             onClick={() =>
                                 this.setState({
-                                    showTutorialBox: !this.state
-                                        .showTutorialBox,
+                                    showTutorialBox:
+                                        !this.state.showTutorialBox,
                                 })
                             }
                         >
@@ -143,7 +143,8 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                 this.setState({
                                     loading: 'running',
                                 })
-                                const token = await this.props.getFeatureBaseToken()
+                                const token =
+                                    await this.props.getFeatureBaseToken()
 
                                 if (token) {
                                     this.setState({
@@ -175,7 +176,8 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                 this.setState({
                                     loading: 'running',
                                 })
-                                const token = await this.props.getFeatureBaseToken()
+                                const token =
+                                    await this.props.getFeatureBaseToken()
 
                                 if (token) {
                                     this.setState({
@@ -219,7 +221,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                             Twitter/X - @memexgarden
                         </MenuItem>
                         <FooterText>
-                            Memex {browser.runtime.getManifest().version}
+                            Memex {chrome.runtime.getManifest().version}
                         </FooterText>
                     </MenuList>
                 )}

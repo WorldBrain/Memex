@@ -4,8 +4,8 @@ import styled, { css } from 'styled-components'
 import { Template } from '../types'
 import ResultItemActionBtn from 'src/common-ui/components/result-item-action-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 const COPY_TIMEOUT = 2000
 
@@ -221,7 +221,8 @@ const Row = styled.div<{
     }
 
     &:hover {
-        ${ActionsContainer} { // if DeleteButtonContainer is not under an hovered ContainerSection
+        ${ActionsContainer} {
+            // if DeleteButtonContainer is not under an hovered ContainerSection
             display: flex;
         }
     }
@@ -235,8 +236,6 @@ const Row = styled.div<{
         css`
             outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         `}
-
-    
 `
 
 const Title = styled.div<{ fullWidth?: boolean; isDefault?: boolean }>`
@@ -246,7 +245,12 @@ const Title = styled.div<{ fullWidth?: boolean; isDefault?: boolean }>`
     text-align: left;
 
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     font-style: normal;
     font-weight: normal;

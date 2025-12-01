@@ -1,4 +1,4 @@
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import PushMessagingClient from '.'
 
@@ -59,14 +59,11 @@ describe('Push messaging client tests', () => {
 
     describe.skip('FCM implementation for page activity indicator', () => {
         it(`should create/delete followedListEntry records when receiving created/deleted sharedListEntry messages`, async () => {
-            const {
-                pushMessagingClient,
-                defaultListId,
-                storageManager,
-            } = await setupTest({
-                createDefaultList: true,
-                createAssocLocalFollowedList: true,
-            })
+            const { pushMessagingClient, defaultListId, storageManager } =
+                await setupTest({
+                    createDefaultList: true,
+                    createAssocLocalFollowedList: true,
+                })
 
             const expectedEntryA = {
                 id: expect.any(Number),
@@ -155,14 +152,11 @@ describe('Push messaging client tests', () => {
         })
 
         it(`should toggle 'hasAnnotations' flag on assoc. followedListEntry when receiving first/last sharedListEntry added/removed messages`, async () => {
-            const {
-                pushMessagingClient,
-                storageManager,
-                defaultListId,
-            } = await setupTest({
-                createDefaultList: true,
-                createAssocLocalFollowedList: true,
-            })
+            const { pushMessagingClient, storageManager, defaultListId } =
+                await setupTest({
+                    createDefaultList: true,
+                    createAssocLocalFollowedList: true,
+                })
 
             const expectedEntryA = {
                 id: expect.any(Number),
@@ -246,14 +240,11 @@ describe('Push messaging client tests', () => {
         })
 
         it(`should create/delete followedList and assoc. followedListEntry records when receiving sharedList followed/unfollowed messages`, async () => {
-            const {
-                pushMessagingClient,
-                storageManager,
-                defaultListId,
-            } = await setupTest({
-                createDefaultList: true,
-                createAssocLocalFollowedList: false,
-            })
+            const { pushMessagingClient, storageManager, defaultListId } =
+                await setupTest({
+                    createDefaultList: true,
+                    createAssocLocalFollowedList: false,
+                })
 
             expect(
                 await storageManager

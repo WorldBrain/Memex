@@ -1,11 +1,11 @@
 import omitBy from 'lodash/omitBy'
 import endsWith from 'lodash/endsWith'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 
 async function insertTestData({
     storageManager,
@@ -201,9 +201,10 @@ describe('Annotations storage', () => {
                 const { contentSharingStorage } = await setupTest()
 
                 const url = DATA.annotation.url
-                const origPrivacyLevel = await contentSharingStorage.findAnnotationPrivacyLevel(
-                    { annotation: url },
-                )
+                const origPrivacyLevel =
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
+                        annotation: url,
+                    })
                 expect(origPrivacyLevel).toEqual(
                     expect.objectContaining({
                         annotation: url,
@@ -300,10 +301,8 @@ describe('Annotations storage', () => {
             })
 
             test('delete annotation should result in delete of any privacy level', async () => {
-                const {
-                    backgroundModules,
-                    contentSharingStorage,
-                } = await setupTest()
+                const { backgroundModules, contentSharingStorage } =
+                    await setupTest()
 
                 const url = DATA.directLink.url
                 expect(
@@ -333,9 +332,8 @@ describe('Annotations storage', () => {
                 const { annotationStorage } = await setupTest()
 
                 const url = DATA.annotation.url
-                const tagsBefore = await annotationStorage.getTagsByAnnotationUrl(
-                    url,
-                )
+                const tagsBefore =
+                    await annotationStorage.getTagsByAnnotationUrl(url)
                 expect(tagsBefore).toBeDefined()
                 expect(tagsBefore.length).toBe(2)
 
@@ -344,9 +342,8 @@ describe('Annotations storage', () => {
                     url,
                 )
 
-                const tagsAfter1 = await annotationStorage.getTagsByAnnotationUrl(
-                    url,
-                )
+                const tagsAfter1 =
+                    await annotationStorage.getTagsByAnnotationUrl(url)
                 expect(tagsAfter1).toBeDefined()
 
                 expect(tagsAfter1.length).toBe(1)
@@ -356,9 +353,8 @@ describe('Annotations storage', () => {
                     url,
                 )
 
-                const tagsAfter2 = await annotationStorage.getTagsByAnnotationUrl(
-                    url,
-                )
+                const tagsAfter2 =
+                    await annotationStorage.getTagsByAnnotationUrl(url)
                 expect(tagsAfter2).toBeDefined()
                 expect(tagsAfter2.length).toBe(0)
             })
@@ -367,17 +363,15 @@ describe('Annotations storage', () => {
                 const { annotationStorage } = await setupTest()
 
                 const url = DATA.annotation.url
-                const before = await annotationStorage.getTagsByAnnotationUrl(
-                    url,
-                )
+                const before =
+                    await annotationStorage.getTagsByAnnotationUrl(url)
                 expect(before).toBeDefined()
                 expect(before.length).toBe(2)
 
                 await annotationStorage.deleteTagsByUrl({ url })
 
-                const after = await annotationStorage.getTagsByAnnotationUrl(
-                    url,
-                )
+                const after =
+                    await annotationStorage.getTagsByAnnotationUrl(url)
                 expect(after).toBeDefined()
                 expect(after.length).toBe(0)
             })

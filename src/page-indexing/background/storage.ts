@@ -3,37 +3,36 @@ import {
     StorageModule,
     StorageModuleConfig,
     StorageModuleConstructorArgs,
-} from '@worldbrain/storex-pattern-modules'
-import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+} from '@worldbrain/storex-pattern-modules/ts'
+import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/ts/storage/modules/pages/constants'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import type { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
-import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
+import { getTermsField } from '@worldbrain/memex-common/ts/storage/utils'
 import {
     mergeTermFields,
     fingerprintsEqual,
     isTempPdfAccessUrl,
-} from '@worldbrain/memex-common/lib/page-indexing/utils'
+} from '@worldbrain/memex-common/ts/page-indexing/utils'
 import {
     ContentIdentifier,
     ContentLocator,
-} from '@worldbrain/memex-common/lib/page-indexing/types'
+} from '@worldbrain/memex-common/ts/page-indexing/types'
 import decodeBlob from 'src/util/decode-blob'
 import {
     ContentFingerprint,
     LocationSchemeType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import { isPkmSyncEnabled } from 'src/pkm-integrations/utils'
 import { sharePageWithPKM } from 'src/pkm-integrations/background/backend/utils'
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 import type {
     Bookmark,
     PageEntity,
     PageMetadata,
     Visit,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 import type { PageMetadataUpdateArgs } from './types'
-import type { Storage } from 'webextension-polyfill'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false

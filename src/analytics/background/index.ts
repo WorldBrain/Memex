@@ -1,4 +1,3 @@
-import { Storage } from 'webextension-polyfill'
 import { updateLastActive } from '../utils'
 import { AnalyticsInterface } from './types'
 import { bindMethod } from 'src/util/functions'
@@ -6,7 +5,7 @@ import ActivityPings from './activity-pings'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { ActivityPingSettings } from './activity-pings/types'
 import { AnalyticsEvent, AnalyticsEvents, Analytics } from '../types'
-import { ClientAnalyticsEvent } from '@worldbrain/memex-common/lib/analytics/types'
+import { ClientAnalyticsEvent } from '@worldbrain/memex-common/ts/analytics/types'
 
 export class AnalyticsBackground {
     remoteFunctions: AnalyticsInterface
@@ -15,7 +14,7 @@ export class AnalyticsBackground {
     constructor(
         private analyticsManager: Analytics,
         public options: {
-            localBrowserStorage: Storage.LocalStorageArea
+            localBrowserStorage: chrome.storage.local
             sendBqEvent: (event: ClientAnalyticsEvent) => Promise<void>
         },
     ) {

@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from 'styled-components'
 import styled from 'styled-components'
 
@@ -9,7 +9,7 @@ import {
 } from 'src/common-ui/components/design-library/theme'
 import TutorialContainer, { Props } from './tutorial-container'
 import { tutorialContents } from './tutorial-cards-content'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 // card container (hold cycling logic)
 // card component (holds card content, isEndOfCycle, isStartOfCycle)
@@ -56,11 +56,14 @@ export function setupTutorialUIContainer(
     target: Element,
     params: TutorialParams,
 ): Promise<() => void> {
-    return new Promise(async (resolve) => {
-        ReactDOM.render(<Root params={params} />, target)
+    return new Promise((resolve) => {
+        const root = createRoot(target)
+        root.render(<Root params={params} />)
+        resolve(() => root.unmount())
     })
 }
 
 export function destroyUIContainer(target) {
-    ReactDOM.unmountComponentAtNode(target)
+    // unmount handled by caller
+    // ReactDOM.unmountComponentAtNode(target)
 }

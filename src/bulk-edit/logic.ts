@@ -1,7 +1,7 @@
-import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core/ts'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import { getBulkEditItems } from './utils'
-import browser from 'webextension-polyfill'
+
 import { BULK_SELECT_STORAGE_KEY } from './constants'
 import type { BulkEditCollection, BulkEditItem } from './types'
 
@@ -73,7 +73,7 @@ export default class BulkEditLogic extends UILogic<State, Event> {
             itemCounter: { $set: itemCounter },
         })
 
-        browser.storage.onChanged.addListener(this.listenToNewBulkItems)
+        chrome.storage.onChanged.addListener(this.listenToNewBulkItems)
     }
 
     listenToNewBulkItems(changes, area) {
@@ -98,13 +98,12 @@ export default class BulkEditLogic extends UILogic<State, Event> {
         }
     }
 
-    showBulkEditSelectionBox: EventHandler<
-        'showBulkEditSelectionBox'
-    > = async ({ previousState, event }) => {
-        this.emitMutation({
-            showBulkEditSelectionBox: { $set: event.isShown },
-        })
-    }
+    showBulkEditSelectionBox: EventHandler<'showBulkEditSelectionBox'> =
+        async ({ previousState, event }) => {
+            this.emitMutation({
+                showBulkEditSelectionBox: { $set: event.isShown },
+            })
+        }
     showSpacePicker: EventHandler<'showSpacePicker'> = async ({
         previousState,
         event,
@@ -114,13 +113,12 @@ export default class BulkEditLogic extends UILogic<State, Event> {
         })
     }
 
-    promptConfirmDeleteBulkSelection: EventHandler<
-        'promptConfirmDeleteBulkSelection'
-    > = async ({ previousState, event }) => {
-        this.emitMutation({
-            showConfirmBulkDeletion: { $set: event.isShown },
-        })
-    }
+    promptConfirmDeleteBulkSelection: EventHandler<'promptConfirmDeleteBulkSelection'> =
+        async ({ previousState, event }) => {
+            this.emitMutation({
+                showConfirmBulkDeletion: { $set: event.isShown },
+            })
+        }
     showCiteMenu: EventHandler<'showCiteMenu'> = async ({
         previousState,
         event,

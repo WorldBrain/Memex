@@ -4,14 +4,13 @@ import {
     BackupPlugin,
 } from 'src/search/plugins'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
-import { StorageBackendPlugin } from '@worldbrain/storex'
+import { StorageBackendPlugin } from '@worldbrain/storex/ts'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
-export const createStorexPlugins = (): StorageBackendPlugin<
-    DexieStorageBackend
->[] => [
-    new BackupPlugin(),
-    new AnnotationsListPlugin(),
-    new SuggestPlugin(),
-    new DexieUtilsPlugin(),
-]
+export const createStorexPlugins =
+    (): StorageBackendPlugin<DexieStorageBackend>[] => [
+        new BackupPlugin(),
+        new AnnotationsListPlugin(),
+        new SuggestPlugin(),
+        new DexieUtilsPlugin(),
+    ]

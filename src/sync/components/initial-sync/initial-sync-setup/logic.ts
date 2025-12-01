@@ -1,7 +1,7 @@
-import { UILogic, UIEvent } from 'ui-logic-core'
+import { UILogic, UIEvent } from 'ui-logic-core/ts'
 import TypedEventEmitter from 'typed-emitter'
-import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
-import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
+import { InitialSyncEvents } from '@worldbrain/storex-sync/ts/integration/initial-sync'
+import { FastSyncEvents } from '@worldbrain/storex-sync/ts/fast-sync'
 import analytics from 'src/analytics'
 
 type SyncSetupState =

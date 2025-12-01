@@ -1,16 +1,16 @@
 import React from 'react'
 import CopyPaster, { Props as CopyPasterProps } from './CopyPaster'
 import type { Template } from './types'
-import type { UnifiedSearchParams } from '@worldbrain/memex-common/lib/search/types'
+import type { UnifiedSearchParams } from '@worldbrain/memex-common/ts/search/types'
 
-export interface Props
-    extends Omit<CopyPasterProps, 'renderTemplate' | 'renderPreview'> {
+export interface Props extends Omit<
+    CopyPasterProps,
+    'renderTemplate' | 'renderPreview'
+> {
     searchParams: UnifiedSearchParams
 }
 
-export default class AnnotationSearchCopyPaster extends React.PureComponent<
-    Props
-> {
+export default class AnnotationSearchCopyPaster extends React.PureComponent<Props> {
     private renderTemplate = (id: number) =>
         this.props.copyPasterBG.renderTemplateForAnnotationSearch({
             id,

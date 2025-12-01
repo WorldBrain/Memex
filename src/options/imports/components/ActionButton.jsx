@@ -1,31 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
-
-import styles from '../../options.css'
-import localStyles from './ButtonBar.css'
-
-const getBtnClass = ({ isHidden, customClass }) =>
-    classNames(
-        styles.button,
-        localStyles.actionButton,
-        localStyles[customClass],
-        { [localStyles.hidden]: isHidden },
-    )
 
 const ActionButton = ({
     children,
     handleClick,
     isDisabled,
     type = 'button',
-    ...props
 }) => (
-    <button
-        className={getBtnClass(props)}
-        onClick={handleClick}
-        disabled={isDisabled}
-        type={type}
-    >
+    <button onClick={handleClick} disabled={isDisabled} type={type}>
         {children}
     </button>
 )

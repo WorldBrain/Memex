@@ -1,4 +1,4 @@
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 import { BrowserItem } from './types'
 
@@ -28,7 +28,7 @@ export default function (
 
     let idIt = 0
     const createBrowserItem = (type) => (url) =>
-        ({ id: idIt++, url, type } as BrowserItem)
+        ({ id: idIt++, url, type }) as typeof chromeItem
 
     const fakeCacheCounts = {
         completed: { b: 42, h: 13 },

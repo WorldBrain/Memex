@@ -1,11 +1,11 @@
 import React, { HTMLProps } from 'react'
 import styled, { css, keyframes } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import { padding } from 'polished'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     lists: Array<{
         id: number
@@ -212,7 +212,12 @@ const ListSpaceContainer = styled.div<{
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     text-overflow: ellipsis;
     max-width: 200px;
@@ -221,7 +226,8 @@ const ListSpaceContainer = styled.div<{
         props.isLoading &&
         css`
             width: 50px;
-            background: linear-gradient(
+            background:
+                linear-gradient(
                     0.25turn,
                     transparent,
                     ${(props) => props.theme.colors.greyScale3},
@@ -241,8 +247,16 @@ const ListSpaceContainer = styled.div<{
                     ${(props) => props.theme.colors.greyScale2}
                 );
             background-repeat: no-repeat;
-            background-size: 315px 250px, 315px 180px, 100px 100px, 225px 30px;
-            background-position: -315px 0, 0 0, 0px 190px, 50px 195px;
+            background-size:
+                315px 250px,
+                315px 180px,
+                100px 100px,
+                225px 30px;
+            background-position:
+                -315px 0,
+                0 0,
+                0px 190px,
+                50px 195px;
             animation: ${loading} 1.5s infinite;
         `};
 `

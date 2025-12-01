@@ -1,14 +1,13 @@
 import React from 'react'
 import styled from 'styled-components'
 import SidebarItem, { Props as SidebarItemProps } from './sidebar-item'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import type { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import type { IconKeys } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
-export interface Props
-    extends Omit<
-        SidebarItemProps,
-        'dropReceivingState' | 'isCollaborative' | 'renderLeftSideIcon'
-    > {
+export interface Props extends Omit<
+    SidebarItemProps,
+    'dropReceivingState' | 'isCollaborative' | 'renderLeftSideIcon'
+> {
     icon: IconKeys
 }
 

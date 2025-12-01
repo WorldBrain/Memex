@@ -1,10 +1,9 @@
 import type Storex from '@worldbrain/storex'
-import type { Tabs, Browser } from 'webextension-polyfill'
 import {
     normalizeUrl,
     isFullUrl,
-} from '@worldbrain/memex-common/lib/url-utils/normalize'
-import type { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
+} from '@worldbrain/memex-common/ts/url-utils/normalize'
+import type { URLNormalizer } from '@worldbrain/memex-common/ts/url-utils/normalize/types'
 
 import {
     makeRemotelyCallable,
@@ -14,8 +13,6 @@ import {
 import AnnotationStorage from './storage'
 import type { AnnotSearchParams } from 'src/search/background/types'
 import type { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
-import type SocialBG from 'src/social-integration/background'
-import { buildPostUrlId } from 'src/social-integration/util'
 import type { Annotation } from 'src/annotations/types'
 import type { AnnotationInterface, CreateAnnotationParams } from './types'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
@@ -25,9 +22,9 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 import type { Analytics } from 'src/analytics/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
-import type { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
-import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/events'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/ts/user-management/types'
+import { trackAnnotationCreate } from '@worldbrain/memex-common/ts/analytics/events'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { AuthBackground } from 'src/authentication/background'
 
@@ -38,7 +35,6 @@ interface TabArg {
 export default class DirectLinkingBackground {
     remoteFunctions: AnnotationInterface<'provider'>
     annotationStorage: AnnotationStorage
-    private socialBg: SocialBG
     private _normalizeUrl: URLNormalizer
 
     constructor(
@@ -47,7 +43,6 @@ export default class DirectLinkingBackground {
             storageManager: Storex
             analyticsBG: AnalyticsCoreInterface
             pages: PageIndexingBackground
-            socialBg: SocialBG
             pkmSyncBG: PKMSyncBackgroundModule
             normalizeUrl?: URLNormalizer
             authBG: AuthBackground
@@ -61,7 +56,6 @@ export default class DirectLinkingBackground {
             }): Promise<void>
         },
     ) {
-        this.socialBg = options.socialBg
         this.annotationStorage = new AnnotationStorage({
             storageManager: options.storageManager,
             pkmSyncBG: options.pkmSyncBG,
@@ -161,9 +155,10 @@ export default class DirectLinkingBackground {
         normalizedPageUrl: string,
         listId: number,
     ): Promise<void> {
-        const annotations = await this.annotationStorage.listAnnotationsByPageUrl(
-            { pageUrl: normalizedPageUrl },
-        )
+        const annotations =
+            await this.annotationStorage.listAnnotationsByPageUrl({
+                pageUrl: normalizedPageUrl,
+            })
 
         await Promise.all(
             annotations.map(({ url }) =>
@@ -179,12 +174,11 @@ export default class DirectLinkingBackground {
             ...args
         }: { pageUrl: string; withTags?: boolean; withBookmarks?: boolean },
     ) => {
-        const annotations = await this.annotationStorage.listAnnotationsByPageUrl(
-            {
+        const annotations =
+            await this.annotationStorage.listAnnotationsByPageUrl({
                 pageUrl,
                 ...args,
-            },
-        )
+            })
 
         return annotations.map((annot) => ({
             ...annot,
@@ -196,9 +190,8 @@ export default class DirectLinkingBackground {
         info: { tab: { id: number } },
         params: { color: string },
     ) => {
-        const annotationIDs = await this.annotationStorage.listAnnotationIdsByColor(
-            params.color,
-        )
+        const annotationIDs =
+            await this.annotationStorage.listAnnotationIdsByColor(params.color)
 
         return annotationIDs
     }
@@ -228,9 +221,7 @@ export default class DirectLinkingBackground {
 
         url =
             url == null && tab != null ? getUnderlyingResourceUrl(tab.url) : url
-        url = isSocialPost
-            ? await this.lookupSocialId(url)
-            : this._normalizeUrl(url)
+        url = this._normalizeUrl(url)
 
         const annotations = await this.annotationStorage.getAllAnnotationsByUrl(
             {
@@ -247,17 +238,17 @@ export default class DirectLinkingBackground {
             annotations.map(
                 async ({ createdWhen, lastEdited, ...annotation }) => {
                     try {
-                        const tags = await this.annotationStorage.getTagsByAnnotationUrl(
-                            annotation.url,
-                        )
+                        const tags =
+                            await this.annotationStorage.getTagsByAnnotationUrl(
+                                annotation.url,
+                            )
 
                         return {
                             ...annotation,
-                            hasBookmark: await this.annotationStorage.annotHasBookmark(
-                                {
+                            hasBookmark:
+                                await this.annotationStorage.annotHasBookmark({
                                     url: annotation.url,
-                                },
-                            ),
+                                }),
                             createdWhen: createdWhen.getTime(),
                             tags: tags.map((t) => t.name),
                             lastEdited:
@@ -292,10 +283,6 @@ export default class DirectLinkingBackground {
         }
 
         let normalizedPageUrl = this._normalizeUrl(fullPageUrl)
-
-        if (toCreate.isSocialPost) {
-            normalizedPageUrl = await this.lookupSocialId(normalizedPageUrl)
-        }
 
         const activeTab = await this.options.browserAPIs.tabs.query({
             active: true,
@@ -369,56 +356,54 @@ export default class DirectLinkingBackground {
         return this.annotationStorage.annotHasBookmark({ url })
     }
 
-    getSharedAnnotations: AnnotationInterface<
-        'provider'
-    >['getSharedAnnotations'] = async (
-        _,
-        { sharedAnnotationReferences, withCreatorData },
-    ) => {
-        const { users, contentSharing } = this.options.serverStorage
+    getSharedAnnotations: AnnotationInterface<'provider'>['getSharedAnnotations'] =
+        async (_, { sharedAnnotationReferences, withCreatorData }) => {
+            const { users, contentSharing } = this.options.serverStorage
 
-        const annotationsById = await contentSharing.getAnnotations({
-            references: sharedAnnotationReferences,
-            skipUserHighlightColors: true,
-        })
+            const annotationsById = await contentSharing.getAnnotations({
+                references: sharedAnnotationReferences,
+                skipUserHighlightColors: true,
+            })
 
-        let creatorData: GetUsersPublicDetailsResult
-        if (withCreatorData) {
-            const uniqueCreatorIds = new Set(
-                Object.values(annotationsById).map((annot) => annot.creator.id),
-            )
-            creatorData = await users
-                .getUsersPublicDetails(
-                    [...uniqueCreatorIds].map((id) => ({
-                        type: 'user-reference',
-                        id,
-                    })),
+            let creatorData: GetUsersPublicDetailsResult
+            if (withCreatorData) {
+                const uniqueCreatorIds = new Set(
+                    Object.values(annotationsById).map(
+                        (annot) => annot.creator.id,
+                    ),
                 )
-                .catch((err) => null) // TODO: remove this once user ops are allowed on server
+                creatorData = await users
+                    .getUsersPublicDetails(
+                        [...uniqueCreatorIds].map((id) => ({
+                            type: 'user-reference',
+                            id,
+                        })),
+                    )
+                    .catch((err) => null) // TODO: remove this once user ops are allowed on server
+            }
+
+            return sharedAnnotationReferences.map((ref) => ({
+                ...annotationsById[ref.id],
+                color: annotationsById[ref.id].color,
+                creatorReference: annotationsById[ref.id].creator,
+                creator: creatorData?.[annotationsById[ref.id].creator.id],
+                selector:
+                    annotationsById[ref.id].selector != null
+                        ? JSON.parse(annotationsById[ref.id].selector)
+                        : undefined,
+            }))
         }
 
-        return sharedAnnotationReferences.map((ref) => ({
-            ...annotationsById[ref.id],
-            color: annotationsById[ref.id].color,
-            creatorReference: annotationsById[ref.id].creator,
-            creator: creatorData?.[annotationsById[ref.id].creator.id],
-            selector:
-                annotationsById[ref.id].selector != null
-                    ? JSON.parse(annotationsById[ref.id].selector)
-                    : undefined,
-        }))
-    }
-
-    getListIdsForAnnotation: AnnotationInterface<
-        'provider'
-    >['getListIdsForAnnotation'] = async (_, { annotationId }) => {
-        const listEntries = await this.annotationStorage.findListEntriesByUrl({
-            url: annotationId,
-        })
-        const listIds = new Set<number>()
-        listEntries.forEach((entry) => listIds.add(entry.listId))
-        return [...listIds]
-    }
+    getListIdsForAnnotation: AnnotationInterface<'provider'>['getListIdsForAnnotation'] =
+        async (_, { annotationId }) => {
+            const listEntries =
+                await this.annotationStorage.findListEntriesByUrl({
+                    url: annotationId,
+                })
+            const listIds = new Set<number>()
+            listEntries.forEach((entry) => listIds.add(entry.listId))
+            return [...listIds]
+        }
 
     async updateAnnotationBookmark(
         _,
@@ -463,10 +448,7 @@ export default class DirectLinkingBackground {
         )
     }
 
-    async deleteAnnotation(_, pk, isSocialPost?: boolean) {
-        if (isSocialPost) {
-            pk = await this.lookupSocialId(pk)
-        }
+    async deleteAnnotation(_, pk) {
         const isBookmarked = await this.getAnnotBookmark(_, { url: pk })
         const listEntries = await this.annotationStorage.findListEntriesByUrl({
             url: pk,
@@ -515,9 +497,8 @@ export default class DirectLinkingBackground {
         _,
         { tags, url }: { tags: string[]; url: string },
     ) {
-        const existingTags = await this.annotationStorage.getTagsByAnnotationUrl(
-            url,
-        )
+        const existingTags =
+            await this.annotationStorage.getTagsByAnnotationUrl(url)
 
         const existingTagsSet = new Set(existingTags.map((tag) => tag.name))
         const incomingTagsSet = new Set(tags)
@@ -541,10 +522,5 @@ export default class DirectLinkingBackground {
             tagsToBeAdded,
             tagsToBeDeleted,
         })
-    }
-
-    private async lookupSocialId(id: string): Promise<string> {
-        const postId = await this.socialBg.getPostIdFromUrl(id)
-        return buildPostUrlId({ postId }).url
     }
 }

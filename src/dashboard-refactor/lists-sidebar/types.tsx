@@ -1,9 +1,9 @@
-import type { UIEvent } from 'ui-logic-core'
+import type { UIEvent } from 'ui-logic-core/ts'
 import type { ListsSidebarSearchBarProps } from './components/search-bar'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
-import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { NormalizedState } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<

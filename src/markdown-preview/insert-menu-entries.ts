@@ -1,7 +1,7 @@
 import {
     extractIdFromUrl,
     isUrlYTVideo,
-} from '@worldbrain/memex-common/lib/utils/youtube-url'
+} from '@worldbrain/memex-common/ts/utils/youtube-url'
 import { MenuItemProps } from './types'
 
 export const annotationMenuItems: MenuItemProps[] = [
@@ -9,9 +9,8 @@ export const annotationMenuItems: MenuItemProps[] = [
         name: 'YouTube Timestamp',
         isDisabled: !isUrlYTVideo(document.location.href),
         getTextToInsert() {
-            const videoEl = document.querySelector<HTMLVideoElement>(
-                '.video-stream',
-            )
+            const videoEl =
+                document.querySelector<HTMLVideoElement>('.video-stream')
 
             const timestampSecs = Math.trunc(videoEl?.currentTime ?? 0)
             const humanTimestamp = `${Math.floor(timestampSecs / 60)}:${(

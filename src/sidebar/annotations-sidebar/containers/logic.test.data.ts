@@ -6,11 +6,11 @@ import type {
 import type {
     SharedAnnotation,
     SharedAnnotationListEntry,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import type { UserPublicDetails } from '@worldbrain/memex-common/ts/user-management/types'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import type { PageList } from 'src/custom-lists/background/types'
 import type {
     SharedListMetadata,
@@ -20,13 +20,13 @@ import type {
 import {
     Anchor,
     AnnotationPrivacyLevels,
-} from '@worldbrain/memex-common/lib/annotations/types'
+} from '@worldbrain/memex-common/ts/annotations/types'
 import type {
     FollowedList,
     FollowedListEntry,
 } from 'src/page-activity-indicator/background/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
+import { SharedCollectionType } from '@worldbrain/memex-common/ts/content-sharing/storage/types'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
 
 export const COMMENT_1 = 'This is a test comment'

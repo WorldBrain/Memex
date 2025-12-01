@@ -1,7 +1,6 @@
-import { Browser } from 'webextension-polyfill'
-import { MemexSyncSettingsStore } from '@worldbrain/memex-common/lib/sync/settings'
-import { MemexSyncSetting } from '@worldbrain/memex-common/lib/sync/types'
-import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'
+import { MemexSyncSettingsStore } from '@worldbrain/memex-common/ts/sync/settings'
+import { MemexSyncSetting } from '@worldbrain/memex-common/ts/sync/types'
+import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/ts/sync/constants'
 import { getLocalStorage } from 'src/util/storage'
 
 export class MemexExtSyncSettingStore implements MemexSyncSettingsStore {

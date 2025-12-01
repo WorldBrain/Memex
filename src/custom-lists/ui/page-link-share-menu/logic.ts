@@ -1,8 +1,8 @@
-import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core/ts'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import type { TaskState } from 'ui-logic-core/lib/types'
-import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
+import type { InviteLink } from '@worldbrain/memex-common/ts/content-sharing/ui/list-share-modal/types'
 import type {
     ContentSharingInterface,
     RemoteContentSharingByTabsInterface,
@@ -12,12 +12,12 @@ import type {
     UnifiedList,
     UnifiedListForCache,
 } from 'src/annotations/cache/types'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { SharedListRoleID } from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/ts/telegram/utils'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 import { getPageLinkUrl } from 'src/content-sharing/utils'
 
 export interface Dependencies {
@@ -157,13 +157,14 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
                 localListId,
                 remoteListId,
                 remoteListEntryId,
-            } = await this.dependencies.contentSharingByTabsBG.schedulePageLinkCreation(
-                {
-                    fullPageUrl: this.dependencies.fullPageUrl,
-                    customPageTitle: title,
-                    skipPageIndexing: this.dependencies.fromDashboard,
-                },
-            )
+            } =
+                await this.dependencies.contentSharingByTabsBG.schedulePageLinkCreation(
+                    {
+                        fullPageUrl: this.dependencies.fullPageUrl,
+                        customPageTitle: title,
+                        skipPageIndexing: this.dependencies.fromDashboard,
+                    },
+                )
 
             const pageLinkList: UnifiedListForCache<'page-link'> = {
                 type: 'page-link',
@@ -179,9 +180,8 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
                 parentLocalId: null,
                 isPrivate: false,
             }
-            const { unifiedId } = this.dependencies.annotationsCache.addList(
-                pageLinkList,
-            )
+            const { unifiedId } =
+                this.dependencies.annotationsCache.addList(pageLinkList)
             const cachedList = this.dependencies.annotationsCache.lists.byId[
                 unifiedId
             ] as UnifiedList<'page-link'>

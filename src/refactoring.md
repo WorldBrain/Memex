@@ -18,7 +18,7 @@ To communicate between code on a page and code outside the page, a custom RPC wr
 
 Currently, code is structured so that functions that are intended to be run in the background script, are passed into the function `makeRemotelyCallable`, which registers the given function name in a variable `remotelyCallableFunctions`, responsible for looking these functions up.
 
-This variable referencing functions that can be run in the background is referenced by `incomingRPCListener` setup to run on the browser.runtime (the background extension script) with `browser.runtime.onMessage.addListener(incomingRPCListener)`
+This variable referencing functions that can be run in the background is referenced by `incomingRPCListener` setup to run on the chrome.runtime (the background extension script) with `chrome.runtime.onMessage.addListener(incomingRPCListener)`
 
 Background script functionality commonly resides in `/src/{feature}/background/index.js` and they are registered from `src/background.js`
 
@@ -49,26 +49,26 @@ Refactor these remote functions to be type safe. Including the setup of these fu
 
 ### Methodology
 
--   Identify a set of remote function registrations from the TODO list below.
+- Identify a set of remote function registrations from the TODO list below.
 
--   Create an interface that describes the functions, arguments and returns, or a set thereof, e.g. `NotificationInterface`. Interfaces should be defined in a standalone types file or inside an existing standalone file with only types, so that when importing this interface, it doesn't import the functionality too, and remains lightweight.
+- Create an interface that describes the functions, arguments and returns, or a set thereof, e.g. `NotificationInterface`. Interfaces should be defined in a standalone types file or inside an existing standalone file with only types, so that when importing this interface, it doesn't import the functionality too, and remains lightweight.
 
--   Modify where it is setup via `makeRemotelyCallable` to use `makeRemotelyCallableType<T>` where `T` is this newly created interface.
+- Modify where it is setup via `makeRemotelyCallable` to use `makeRemotelyCallableType<T>` where `T` is this newly created interface.
 
--   Move the registration of this remote function to alongside the others in `src/background.js`
+- Move the registration of this remote function to alongside the others in `src/background.js`
 
--   Search through all usages of this function from `remoteFunction`.
-    (N.B. usage may not be directly done using a string literal e.g. `remoteFunction('exampleFunc')`, it may be using a variable, e.g. `const func = 'exampleFunc'; remoteFunction(func)`).
+- Search through all usages of this function from `remoteFunction`.
+  (N.B. usage may not be directly done using a string literal e.g. `remoteFunction('exampleFunc')`, it may be using a variable, e.g. `const func = 'exampleFunc'; remoteFunction(func)`).
 
         -   Change usages to `runInBackground<T>` where `T` is this newly created interface.
 
         -   Change the usages to not each call `runInBackground` to create the function directly, but rather import from `src/util/remote-functions-background.ts`. Using the created proxy object (returned from `runInBackground`) transparently as if it were a concrete implementation. e.g. instead of calling `runInBackground('addBookmark')(args)` from within some feature's functionality, it uses `bookmarks.addBookmark(args)` where `bookmarks` is assigned to the created proxy object in `remote-functions-background.ts`, in the same manner the others are.
 
--   Test
+- Test
 
--   Update this documentation with progress and any inconsistencies found.
+- Update this documentation with progress and any inconsistencies found.
 
--   Commit regularly
+- Commit regularly
 
 ### Done so far:
 
@@ -293,9 +293,9 @@ This was only used from search results, and thus does not contain any code for i
 The other codepath for bookmarks is `addBookmark` in `src/search/bookmarks.ts:8` registered as `addPageBookmark`
 This does handle indexing and page creation.
 
--   Done: with the remoteFunction refactoring, usages of the remote function `addBookmark` have been changed to `addPageBookmark` such that bookmarking from either a tab or the search result dashboard, uses the same bookmarking code.
+- Done: with the remoteFunction refactoring, usages of the remote function `addBookmark` have been changed to `addPageBookmark` such that bookmarking from either a tab or the search result dashboard, uses the same bookmarking code.
 
--   TODO: Refactor this current `src/search/bookmarks.ts` code in the legacy `src/search/` namespace to this format of the now unused but newer designed `BookmarksBackground`. Retaining the page indexing code.
+- TODO: Refactor this current `src/search/bookmarks.ts` code in the legacy `src/search/` namespace to this format of the now unused but newer designed `BookmarksBackground`. Retaining the page indexing code.
 
 ## Notifications - two systems
 

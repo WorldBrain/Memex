@@ -2,10 +2,10 @@ import * as React from 'react'
 
 import { AnnotationsSidebarContainer } from './AnnotationsSidebarContainer'
 import { SidebarContainerOptions } from 'src/sidebar/annotations-sidebar/containers/logic'
-import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexTheme } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import styled from 'styled-components'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { EventEmitter } from 'events'
 
@@ -22,9 +22,7 @@ type Props = SidebarContainerOptions & {
     inPageMode?: boolean
 }
 
-export class AnnotationsSidebarInDashboardResults extends React.Component<
-    Props
-> {
+export class AnnotationsSidebarInDashboardResults extends React.Component<Props> {
     sidebarEvents: AnnotationsSidebarInPageEventEmitter
     static defaultProps: Partial<Props> = {
         showGoToAnnotationBtn: true,
@@ -39,7 +37,8 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
                 topOffsetPx: 60,
             },
         })
-        this.sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
+        this.sidebarEvents =
+            new EventEmitter() as AnnotationsSidebarInPageEventEmitter
     }
 
     render() {
@@ -59,7 +58,9 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
 }
 
 const SlideInWrapper = styled.div`
-    transition: width 200ms ease-in-out, opacity 200ms ease-in-out;
+    transition:
+        width 200ms ease-in-out,
+        opacity 200ms ease-in-out;
 
     display: flex;
     justify-content: flex-start;

@@ -1,16 +1,15 @@
 import type { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import type { Tabs, Browser } from 'webextension-polyfill'
 import delay from 'src/util/delay'
 import { openPDFInViewer } from 'src/pdf/util'
-import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { doesUrlPointToPdf } from '@worldbrain/memex-common/ts/page-indexing/utils'
 import { sleepPromise } from 'src/util/promises'
 import type { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
-import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { isUrlYTVideo } from '@worldbrain/memex-common/ts/utils/youtube-url'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/ts/content-sharing/storage/constants'
 import { isUrlSupported } from 'src/page-indexing/utils'
-import { updateTabAISessions } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { updateTabAISessions } from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
@@ -21,16 +20,16 @@ export class ContentScriptsBackground {
             contentSharingStorage: ContentSharingClientStorage
             injectScriptInTab: (tabId: number, file: string) => Promise<void>
             browserAPIs: Pick<
-                Browser,
+                typeof chrome,
                 'tabs' | 'storage' | 'runtime' | 'webNavigation'
             >
         },
     ) {
         this.remoteFunctions = {
-            goToAnnotationFromDashboardSidebar: this
-                .goToAnnotationFromDashboardSidebar,
-            openPageWithSidebarInSelectedListMode: this
-                .openPageWithSidebarInSelectedListMode,
+            goToAnnotationFromDashboardSidebar:
+                this.goToAnnotationFromDashboardSidebar,
+            openPageWithSidebarInSelectedListMode:
+                this.openPageWithSidebarInSelectedListMode,
             reloadTab: this.reloadTab,
             openPdfInViewer: this.openPdfInViewer,
             injectContentScriptComponent: this.injectContentScriptComponent,
@@ -62,9 +61,8 @@ export class ContentScriptsBackground {
                 return await response.json()
             },
             openAuthSettings: async () => {
-                const optionsPageUrl = this.options.browserAPIs.runtime.getURL(
-                    'options.html',
-                )
+                const optionsPageUrl =
+                    this.options.browserAPIs.runtime.getURL('options.html')
                 await this.options.browserAPIs.tabs.create({
                     active: true,
                     url: optionsPageUrl + '#/account',
@@ -111,14 +109,27 @@ export class ContentScriptsBackground {
         makeRemotelyCallable(this.remoteFunctions, { insertExtraArg: true })
     }
 
-    injectContentScriptComponent: ContentScriptsInterface<
-        'provider'
-    >['injectContentScriptComponent'] = async ({ tab }, { component }) => {
-        await this.options.injectScriptInTab(
-            tab.id,
-            `/content_script_${component}.js`,
-        )
-    }
+    injectContentScriptComponent: ContentScriptsInterface<'provider'>['injectContentScriptComponent'] =
+        async ({ tab }, { component }) => {
+            const file = `content_script_${component}.js`
+            console.log('Injecting content script component:', {
+                tabId: tab.id,
+                component,
+                file,
+            })
+            try {
+                await this.options.injectScriptInTab(tab.id, file)
+                console.log('Successfully injected content script:', file)
+            } catch (error) {
+                console.error('Failed to inject content script:', {
+                    tabId: tab.id,
+                    component,
+                    file,
+                    error,
+                })
+                throw error
+            }
+        }
 
     private async doSomethingInNewTab(
         fullPageUrl: string,
@@ -127,7 +138,7 @@ export class ContentScriptsBackground {
         retryDelay = 150,
         delayBeforeExecution = 1000,
     ) {
-        let activeTab: Tabs.Tab
+        let activeTab: chrome.tabs.Tab
         if (doesUrlPointToPdf(fullPageUrl)) {
             await openPDFInViewer(fullPageUrl, {
                 tabsAPI: this.options.browserAPIs.tabs,
@@ -147,9 +158,9 @@ export class ContentScriptsBackground {
 
         const listener = async (
             tabId: number,
-            changeInfo: Tabs.OnUpdatedChangeInfoType,
+            changeInfo: chrome.tabs.OnUpdatedInfo,
         ) => {
-            if (tabId === activeTab?.id && changeInfo.status === 'complete') {
+            if (tabId === activeTab?.id && changeInfo?.status === 'complete') {
                 await delay(delayBeforeExecution)
                 try {
                     // Continues to retry `something` every `retryDelay` ms until it resolves
@@ -195,107 +206,102 @@ export class ContentScriptsBackground {
         await this.options.browserAPIs.tabs.reload(tab.id, { bypassCache })
     }
 
-    openPdfInViewer: ContentScriptsInterface<
-        'provider'
-    >['openPdfInViewer'] = async ({ tab }, { fullPageUrl }) => {
-        await openPDFInViewer(fullPageUrl, {
-            tabsAPI: this.options.browserAPIs.tabs,
-            runtimeAPI: this.options.browserAPIs.runtime,
-        })
-    }
-
-    openPageWithSidebarInSelectedListMode: ContentScriptsInterface<
-        'provider'
-    >['openPageWithSidebarInSelectedListMode'] = async (
-        { tab },
-        { fullPageUrl, sharedListId, manuallyPullLocalListData },
-    ) => {
-        if (manuallyPullLocalListData && sharedListId != null) {
-            // Doing this to give a bit of time for the Firestore listener/FCM messages to trigger extension sync so it can receive any assumed data.
-            //  Main case: web UI reader auto-opens page in extension on page-link list join - joined list data needs to be DL'd locally for UI state to set up
-            let retries = 5
-            while (retries-- > 0) {
-                await sleepPromise(1000)
-                await this.options.waitForSync()
-                const existing = await this.options.contentSharingStorage.getRemoteListShareMetadata(
-                    {
-                        remoteListId: sharedListId,
-                    },
-                )
-                if (existing != null) {
-                    break
-                }
-            }
+    openPdfInViewer: ContentScriptsInterface<'provider'>['openPdfInViewer'] =
+        async ({ tab }, { fullPageUrl }) => {
+            await openPDFInViewer(fullPageUrl, {
+                tabsAPI: this.options.browserAPIs.tabs,
+                runtimeAPI: this.options.browserAPIs.runtime,
+            })
         }
 
-        const allTabs = await this.options.browserAPIs.tabs.query({
-            currentWindow: true,
-            active: true,
-        })
-
-        await this.doSomethingInNewTab(
-            fullPageUrl,
-            async (tabId) => {
-                await runInTab<InPageUIContentScriptRemoteInterface>(
-                    tabId,
-                ).showSidebar({
-                    action: 'selected_list_mode_from_web_ui',
-                    sharedListId,
-                    manuallyPullLocalListData,
-                })
-                return true
-            },
-            async (tabId) => {
-                await runInTab<InPageUIContentScriptRemoteInterface>(
-                    tabId,
-                ).testIfSidebarSetup()
-                return true
-            },
-        )
-        await Promise.all(
-            allTabs.map((tab) => {
-                if (
-                    tab.url.includes(sharedListId) &&
-                    tab.url.includes('/p/') &&
-                    !tab.url.includes('?dono')
-                ) {
-                    return this.options.browserAPIs.tabs.remove(tab.id)
+    openPageWithSidebarInSelectedListMode: ContentScriptsInterface<'provider'>['openPageWithSidebarInSelectedListMode'] =
+        async (
+            { tab },
+            { fullPageUrl, sharedListId, manuallyPullLocalListData },
+        ) => {
+            if (manuallyPullLocalListData && sharedListId != null) {
+                // Doing this to give a bit of time for the Firestore listener/FCM messages to trigger extension sync so it can receive any assumed data.
+                //  Main case: web UI reader auto-opens page in extension on page-link list join - joined list data needs to be DL'd locally for UI state to set up
+                let retries = 5
+                while (retries-- > 0) {
+                    await sleepPromise(1000)
+                    await this.options.waitForSync()
+                    const existing =
+                        await this.options.contentSharingStorage.getRemoteListShareMetadata(
+                            {
+                                remoteListId: sharedListId,
+                            },
+                        )
+                    if (existing != null) {
+                        break
+                    }
                 }
-                return Promise.resolve()
-            }),
-        )
-    }
+            }
 
-    goToAnnotationFromDashboardSidebar: ContentScriptsInterface<
-        'provider'
-    >['goToAnnotationFromDashboardSidebar'] = async (
-        { tab },
-        { fullPageUrl, annotationCacheId },
-    ) => {
-        await this.doSomethingInNewTab(
-            fullPageUrl,
-            async (tabId) => {
-                await runInTab<InPageUIContentScriptRemoteInterface>(
-                    tabId,
-                ).showSidebar({
-                    annotationCacheId,
-                    action: 'show_annotation',
-                })
+            const allTabs = await this.options.browserAPIs.tabs.query({
+                currentWindow: true,
+                active: true,
+            })
 
-                await runInTab<InPageUIContentScriptRemoteInterface>(
-                    tabId,
-                ).goToHighlight(annotationCacheId)
-                return true
-            },
-            async (tabId) => {
-                await runInTab<InPageUIContentScriptRemoteInterface>(
-                    tabId,
-                ).showSidebar({
-                    annotationCacheId,
-                    action: 'show_annotation',
-                })
-                return true
-            },
-        )
-    }
+            await this.doSomethingInNewTab(
+                fullPageUrl,
+                async (tabId) => {
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).showSidebar({
+                        action: 'selected_list_mode_from_web_ui',
+                        sharedListId,
+                        manuallyPullLocalListData,
+                    })
+                    return true
+                },
+                async (tabId) => {
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).testIfSidebarSetup()
+                    return true
+                },
+            )
+            await Promise.all(
+                allTabs.map((tab) => {
+                    if (
+                        tab.url.includes(sharedListId) &&
+                        tab.url.includes('/p/') &&
+                        !tab.url.includes('?dono')
+                    ) {
+                        return this.options.browserAPIs.tabs.remove(tab.id)
+                    }
+                    return Promise.resolve()
+                }),
+            )
+        }
+
+    goToAnnotationFromDashboardSidebar: ContentScriptsInterface<'provider'>['goToAnnotationFromDashboardSidebar'] =
+        async ({ tab }, { fullPageUrl, annotationCacheId }) => {
+            await this.doSomethingInNewTab(
+                fullPageUrl,
+                async (tabId) => {
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).showSidebar({
+                        annotationCacheId,
+                        action: 'show_annotation',
+                    })
+
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).goToHighlight(annotationCacheId)
+                    return true
+                },
+                async (tabId) => {
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).showSidebar({
+                        annotationCacheId,
+                        action: 'show_annotation',
+                    })
+                    return true
+                },
+            )
+        }
 }

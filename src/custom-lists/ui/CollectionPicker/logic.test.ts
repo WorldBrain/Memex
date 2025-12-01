@@ -9,13 +9,13 @@ import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import {
     EMPTY_SPACE_NAME_ERR_MSG,
     BAD_CHAR_SPACE_NAME_ERR_MSG,
-} from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+} from '@worldbrain/memex-common/ts/utils/space-name-validation'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import {
     initNormalizedState,
     normalizedStateToArray,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SpacePickerDependencies } from './types'
 import { generateRenderedListEntryId } from './utils'
@@ -92,7 +92,7 @@ const setupLogicHelper = async ({
         shouldHydrateCacheOnInit: shouldHydrateCacheOnInit ?? true,
         onSpaceCreate:
             args.onSpaceCreate ??
-            (async (name) => ({ localListId: generatedIds++ } as any)),
+            (async (name) => ({ localListId: generatedIds++ }) as any),
         selectEntry: args.selectEntry ?? (async (id) => {}),
         unselectEntry: args.unselectEntry ?? (async (id) => {}),
         initialSelectedListIds: async () => initialSelectedListIds ?? [],
@@ -290,16 +290,16 @@ describe('SpacePickerLogic', () => {
 
             await testLogic.init()
 
-            expect(
-                normalizedStateToArray(testLogic.state.listEntries),
-            ).toEqual([
-                DATA.TEST_USER_LIST_SUGGESTIONS[0],
-                DATA.TEST_USER_LIST_SUGGESTIONS[2],
-                DATA.TEST_USER_LIST_SUGGESTIONS[1],
-                DATA.TEST_USER_LIST_SUGGESTIONS[3],
-                DATA.TEST_USER_LIST_SUGGESTIONS[4],
-                DATA.TEST_USER_LIST_SUGGESTIONS[5],
-            ])
+            expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+                [
+                    DATA.TEST_USER_LIST_SUGGESTIONS[0],
+                    DATA.TEST_USER_LIST_SUGGESTIONS[2],
+                    DATA.TEST_USER_LIST_SUGGESTIONS[1],
+                    DATA.TEST_USER_LIST_SUGGESTIONS[3],
+                    DATA.TEST_USER_LIST_SUGGESTIONS[4],
+                    DATA.TEST_USER_LIST_SUGGESTIONS[5],
+                ],
+            )
             expect(testLogic.state.selectedListIds).toEqual([
                 DATA.TEST_LISTS[0].id,
                 DATA.TEST_LISTS[2].id,
@@ -324,9 +324,10 @@ describe('SpacePickerLogic', () => {
             ],
         })
 
-        await device.backgroundModules.customLists[
-            'localStorage'
-        ].set('suggestionIds', [DATA.TEST_LISTS[5].id, DATA.TEST_LISTS[4].id])
+        await device.backgroundModules.customLists['localStorage'].set(
+            'suggestionIds',
+            [DATA.TEST_LISTS[5].id, DATA.TEST_LISTS[4].id],
+        )
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
@@ -1112,13 +1113,10 @@ describe('SpacePickerLogic', () => {
     it('should reset focus on tab switch', async ({ device }) => {
         return
 
-        const {
-            testLogic,
-            annotationsCache,
-            entryPickerLogic,
-        } = await setupLogicHelper({
-            device,
-        })
+        const { testLogic, annotationsCache, entryPickerLogic } =
+            await setupLogicHelper({
+                device,
+            })
 
         await testLogic.init()
         expect(testLogic.state.currentTab).toEqual('user-lists')
@@ -1126,19 +1124,19 @@ describe('SpacePickerLogic', () => {
         expect(entryPickerLogic['focusIndex']).toBe(0)
 
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as React.KeyboardEvent<
-                HTMLInputElement
-            >,
+            event: {
+                key: 'ArrowDown',
+            } as React.KeyboardEvent<HTMLInputElement>,
         })
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as React.KeyboardEvent<
-                HTMLInputElement
-            >,
+            event: {
+                key: 'ArrowDown',
+            } as React.KeyboardEvent<HTMLInputElement>,
         })
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as React.KeyboardEvent<
-                HTMLInputElement
-            >,
+            event: {
+                key: 'ArrowDown',
+            } as React.KeyboardEvent<HTMLInputElement>,
         })
         expect(entryPickerLogic['focusIndex']).toBe(3)
         expect(testLogic.state.focusedListRenderedId).toEqual(
@@ -1151,14 +1149,14 @@ describe('SpacePickerLogic', () => {
         expect(testLogic.state.focusedListRenderedId).toEqual(null)
 
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as React.KeyboardEvent<
-                HTMLInputElement
-            >,
+            event: {
+                key: 'ArrowDown',
+            } as React.KeyboardEvent<HTMLInputElement>,
         })
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as React.KeyboardEvent<
-                HTMLInputElement
-            >,
+            event: {
+                key: 'ArrowDown',
+            } as React.KeyboardEvent<HTMLInputElement>,
         })
         expect(entryPickerLogic['focusIndex']).toBe(1)
         expect(testLogic.state.focusedListRenderedId).toEqual(

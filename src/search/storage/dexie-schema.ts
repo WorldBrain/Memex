@@ -1,4 +1,4 @@
-import { DexieSchema } from '@worldbrain/storex-backend-dexie/lib/types'
+import { DexieSchema } from '@worldbrain/storex-backend-dexie/ts/types'
 
 /**
  * Takes the generated schema versions, based on the registed collections, and finds the
@@ -35,7 +35,7 @@ export default function patchDirectLinksSchema(
         // Shim the schema with the incorrect indexes, so Dexie knows about its existence
         patchedSchema,
         // All subsequent schemas need to be 1 version higher to take the incorrect index schema into account
-        ...schemaVersions.slice(firstAppears).map(schema => ({
+        ...schemaVersions.slice(firstAppears).map((schema) => ({
             ...schema,
             dexieSchemaVersion: schema.dexieSchemaVersion + 1,
         })),

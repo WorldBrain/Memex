@@ -1,10 +1,9 @@
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import DataSources from './data-sources'
 import { chunk } from 'src/util/chunk'
-import { Browser } from 'webextension-polyfill'
 
 // Binds an import type to a function that transforms a history/bookmark doc to an import item.
 const deriveImportItem = (type) => (item) => ({
@@ -77,11 +76,11 @@ export default class ImportItemCreator {
         browserAPIs,
         limits = ImportItemCreator.DEF_LIMITS,
         dataSources = new DataSources({
-            browserAPIs: browserAPIs,
+            browserAPIs: typeof chromeAPIs,
         }),
         existingKeySource,
     }: {
-        browserAPIs: Browser
+        browserAPIs: typeof chrome
         limits?: any
         dataSources?: DataSources
         existingKeySource: () => Promise<{

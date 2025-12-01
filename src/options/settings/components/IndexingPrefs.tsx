@@ -2,7 +2,6 @@ import * as React from 'react'
 
 import { VISIT_DELAY_RANGE } from '../constants'
 import Checkbox, { CheckboxToggle } from 'src/common-ui/components/Checkbox'
-const styles = require('./settings.css')
 
 export interface Props {
     bookmarks: boolean
@@ -29,11 +28,9 @@ class IndexingPrefs extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.section}>
-                <div className={styles.sectionTitle}>Indexing Preferences</div>
-                <h3 className={styles.infoText}>
-                    Define which pages you would like to search.
-                </h3>
+            <div>
+                <div>Indexing Preferences</div>
+                <h3>Define which pages you would like to search.</h3>
                 <Checkbox
                     id="index-stubs"
                     isChecked={this.props.stubs}
@@ -42,9 +39,7 @@ class IndexingPrefs extends React.PureComponent<Props> {
                     Make title and URL of every visit searchable
                 </Checkbox>
 
-                <div className={styles.subSubTitle}>
-                    Make websites full-text searchable that I...?
-                </div>
+                <div>Make websites full-text searchable that I...?</div>
                 <Checkbox
                     id="index-visits"
                     isChecked={this.props.visits}

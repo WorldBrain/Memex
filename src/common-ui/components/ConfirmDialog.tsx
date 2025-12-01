@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 
 export interface Props {
     titleText: React.ReactChild

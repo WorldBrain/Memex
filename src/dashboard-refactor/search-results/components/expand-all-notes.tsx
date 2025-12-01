@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import colors from 'src/dashboard-refactor/colors'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 export interface Props {
     onClick?: React.MouseEventHandler<HTMLButtonElement>

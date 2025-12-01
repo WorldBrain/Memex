@@ -1,11 +1,11 @@
 import * as React from 'react'
 import styled, { ThemeProvider, css, keyframes } from 'styled-components'
-import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
+import ItemBox from '@worldbrain/memex-common/ts/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
-} from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
-import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+} from '@worldbrain/memex-common/ts/common-ui/components/item-box-bottom'
+import Markdown from '@worldbrain/memex-common/ts/common-ui/components/markdown'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
@@ -15,39 +15,39 @@ import AnnotationEdit, {
 } from 'src/annotations/components/AnnotationEdit'
 import SaveBtn from 'src/annotations/components/save-btn'
 import type { SidebarAnnotationTheme, ListDetailsGetter } from '../types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
-import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import QuickTutorial from '@worldbrain/memex-common/ts/editor/components/QuickTutorial'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
 import type { RGBAColor, UnifiedAnnotation, UnifiedList } from '../cache/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { YoutubePlayer } from '@worldbrain/memex-common/ts/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { Anchor } from 'src/highlighting/types'
 
 import tinycolor from 'tinycolor2'
-import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { RGBAobjectToString } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/utils'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import { sleepPromise } from 'src/util/promises'
-import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
+import CreationInfo from '@worldbrain/memex-common/ts/common-ui/components/creation-info'
 import Checkbox from 'src/common-ui/components/Checkbox'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
-import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
-import ListsSegment from '@worldbrain/memex-common/lib/common-ui/components/result-item-spaces-segment'
+import { SpaceSearchSuggestion } from '@worldbrain/memex-common/ts/editor'
+import ListsSegment from '@worldbrain/memex-common/ts/common-ui/components/result-item-spaces-segment'
 import HighlightColorPicker from './highlightColorPicker'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/ts/annotations/constants'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -425,8 +425,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             typeof date === 'number'
                 ? date
                 : typeof date === 'string'
-                ? new Date(date).getTime()
-                : date?.getTime()
+                  ? new Date(date).getTime()
+                  : date?.getTime()
 
         const createdWhen = handleDateData(this.props.createdWhen)
         const lastEdited = handleDateData(

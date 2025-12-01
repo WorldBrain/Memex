@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import Storex from '@worldbrain/storex'
+import Storex from '@worldbrain/storex/ts'
 
 import { DBGet } from './types'
 
@@ -12,7 +12,7 @@ import { DBGet } from './types'
 let db: Promise<Storex>
 let resolveDb: (db: Storex) => void = null
 const createNewDbPromise = () => {
-    db = new Promise<Storex>(resolve => (resolveDb = resolve))
+    db = new Promise<Storex>((resolve) => (resolveDb = resolve))
 }
 createNewDbPromise()
 
@@ -43,15 +43,16 @@ function overrideDexieOps(dexie: Dexie) {
             ? dexie['_createTransaction']
             : Dexie.override(
                   dexie['_createTransaction'],
-                  origFn => (mode: string, tables: string[], ...args) => {
-                      if (
-                          mode === 'readwrite' &&
-                          !tables.includes('backupChanges')
-                      ) {
-                          tables = [...tables, 'backupChanges']
-                      }
-                      return origFn.call(dexie, mode, tables, ...args)
-                  },
+                  (origFn) =>
+                      (mode: string, tables: string[], ...args) => {
+                          if (
+                              mode === 'readwrite' &&
+                              !tables.includes('backupChanges')
+                          ) {
+                              tables = [...tables, 'backupChanges']
+                          }
+                          return origFn.call(dexie, mode, tables, ...args)
+                      },
               )
 }
 

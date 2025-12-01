@@ -1,9 +1,9 @@
-import type { UIEventHandler } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+import type { UIEventHandler } from '@worldbrain/memex-common/ts/main-ui/classes/logic'
 import {
     UILogic,
     loadInitial,
     executeUITask,
-} from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+} from '@worldbrain/memex-common/ts/main-ui/classes/logic'
 import { BACKUP_URL } from 'src/constants'
 import type { Event, State, Dependencies } from './types'
 import {
@@ -42,7 +42,8 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     async init() {
         const { backupBG, personalCloudBG, onModalClose } = this.dependencies
         await loadInitial(this, async () => {
-            const needsToRemovePassiveData = await personalCloudBG.isPassiveDataRemovalNeeded()
+            const needsToRemovePassiveData =
+                await personalCloudBG.isPassiveDataRemovalNeeded()
             this.emitMutation({
                 needsToRemovePassiveData: { $set: needsToRemovePassiveData },
             })
@@ -92,11 +93,10 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         this.emitMutation({ stage: { $set: 'old-version-backup' } })
     }
 
-    cancelMigrateToOldVersion: EventHandler<
-        'cancelMigrateToOldVersion'
-    > = ({}) => {
-        this.emitMutation({ stage: { $set: 'data-dump' } })
-    }
+    cancelMigrateToOldVersion: EventHandler<'cancelMigrateToOldVersion'> =
+        ({}) => {
+            this.emitMutation({ stage: { $set: 'data-dump' } })
+        }
 
     goToBackupRoute: EventHandler<'goToBackupRoute'> = ({}) =>
         this._goToBackupRoute()

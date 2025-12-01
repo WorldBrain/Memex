@@ -1,10 +1,10 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from './logic.test.util'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 
 describe('Dashboard Refactor misc logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -14,12 +14,13 @@ describe('Dashboard Refactor misc logic', () => {
     it(
         'should be able to load local lists during init logic',
         async ({ device }) => {
-            device.backgroundModules.backupModule.isAutomaticBackupEnabled = async () =>
-                false
-            device.backgroundModules.backupModule.getBackupTimes = async () => ({
-                lastBackup: null,
-                nextBackup: null,
-            })
+            device.backgroundModules.backupModule.isAutomaticBackupEnabled =
+                async () => false
+            device.backgroundModules.backupModule.getBackupTimes =
+                async () => ({
+                    lastBackup: null,
+                    nextBackup: null,
+                })
             const { searchResults, annotationsCache } = await setupTest(
                 device,
                 {
@@ -33,9 +34,10 @@ describe('Dashboard Refactor misc logic', () => {
             }
             const listNames = ['testA', 'testB']
             const testDescription = 'this is a very interesting list'
-            const listIds = await device.backgroundModules.customLists.createCustomLists(
-                { names: listNames },
-            )
+            const listIds =
+                await device.backgroundModules.customLists.createCustomLists({
+                    names: listNames,
+                })
             await device.backgroundModules.customLists.storage.createListDescription(
                 { listId: listIds[0], description: testDescription },
             )
@@ -76,12 +78,13 @@ describe('Dashboard Refactor misc logic', () => {
     it(
         'should be able to load local + followed + joined lists during init logic',
         async ({ device }) => {
-            device.backgroundModules.backupModule.isAutomaticBackupEnabled = async () =>
-                false
-            device.backgroundModules.backupModule.getBackupTimes = async () => ({
-                lastBackup: null,
-                nextBackup: null,
-            })
+            device.backgroundModules.backupModule.isAutomaticBackupEnabled =
+                async () => false
+            device.backgroundModules.backupModule.getBackupTimes =
+                async () => ({
+                    lastBackup: null,
+                    nextBackup: null,
+                })
             const { searchResults } = await setupTest(device, {
                 withAuth: true,
             })
@@ -172,13 +175,11 @@ describe('Dashboard Refactor misc logic', () => {
                 createdAt: new Date(),
             })
 
-            const [
-                sharedListAData,
-                sharedListCData,
-            ] = await contentSharing.getListsByReferences([
-                sharedListARef,
-                sharedListCRef,
-            ])
+            const [sharedListAData, sharedListCData] =
+                await contentSharing.getListsByReferences([
+                    sharedListARef,
+                    sharedListCRef,
+                ])
 
             expect(searchResults.state.listsSidebar.lists.byId).toEqual({})
             expect(searchResults.state.listsSidebar.listLoadState).toEqual(
@@ -236,10 +237,8 @@ describe('Dashboard Refactor misc logic', () => {
     it(
         'should hydrate state from local storage during init logic',
         async ({ device }) => {
-            const {
-                searchResults: searchResultsA,
-                logic: logicA,
-            } = await setupTest(device, { withAuth: true })
+            const { searchResults: searchResultsA, logic: logicA } =
+                await setupTest(device, { withAuth: true })
 
             const now = Date.now()
             await logicA.syncSettings.dashboard.set('listSidebarLocked', false)
@@ -275,10 +274,8 @@ describe('Dashboard Refactor misc logic', () => {
                 true,
             )
 
-            const {
-                searchResults: searchResultsB,
-                logic: logicB,
-            } = await setupTest(device, { withAuth: true })
+            const { searchResults: searchResultsB, logic: logicB } =
+                await setupTest(device, { withAuth: true })
 
             await logicA.syncSettings.dashboard.set('listSidebarLocked', true)
             await logicA.syncSettings.dashboard.set(
@@ -369,38 +366,39 @@ describe('Dashboard Refactor misc logic', () => {
     it(
         'should get feed activity status during init logic',
         async ({ device }) => {
-            device.backgroundModules.backupModule.isAutomaticBackupEnabled = async () =>
-                false
-            device.backgroundModules.backupModule.getBackupTimes = async () => ({
-                lastBackup: null,
-                nextBackup: null,
-            })
-            device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
-                'has-unseen'
+            device.backgroundModules.backupModule.isAutomaticBackupEnabled =
+                async () => false
+            device.backgroundModules.backupModule.getBackupTimes =
+                async () => ({
+                    lastBackup: null,
+                    nextBackup: null,
+                })
+            device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus =
+                async () => 'has-unseen'
             await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             const { searchResults: logicA } = await setupTest(device)
             expect(logicA.state.listsSidebar.hasFeedActivity).toBe(false)
             await logicA.init()
             expect(logicA.state.listsSidebar.hasFeedActivity).toBe(true)
 
-            device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
-                'all-seen'
+            device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus =
+                async () => 'all-seen'
             await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             const { searchResults: logicB } = await setupTest(device)
             expect(logicB.state.listsSidebar.hasFeedActivity).toBe(false)
             await logicB.init()
             expect(logicB.state.listsSidebar.hasFeedActivity).toBe(false)
 
-            device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
-                'error'
+            device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus =
+                async () => 'error'
             await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             const { searchResults: logicC } = await setupTest(device)
             expect(logicC.state.listsSidebar.hasFeedActivity).toBe(false)
             await logicC.init()
             expect(logicC.state.listsSidebar.hasFeedActivity).toBe(false)
 
-            device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
-                'not-logged-in'
+            device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus =
+                async () => 'not-logged-in'
             await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             const { searchResults: logicD } = await setupTest(device)
             expect(logicD.state.listsSidebar.hasFeedActivity).toBe(false)

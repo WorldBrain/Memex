@@ -1,17 +1,17 @@
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import React from 'react'
 import styled, { css } from 'styled-components'
-import browser, { Browser } from 'webextension-polyfill'
+
 import {
     COUNTER_STORAGE_KEY,
     DEFAULT_POWERUP_LIMITS,
-} from '@worldbrain/memex-common/lib/subscriptions/constants'
+} from '@worldbrain/memex-common/ts/subscriptions/constants'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { DEFAULT_TRIAL_PERIOD } from '@worldbrain/memex-common/lib/subscriptions/constants'
-import { enforceTrialPeriod } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { DEFAULT_TRIAL_PERIOD } from '@worldbrain/memex-common/ts/subscriptions/constants'
+import { enforceTrialPeriod } from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
@@ -20,7 +20,7 @@ interface Props {
     getRootElement: () => HTMLElement
     events: AnnotationsSidebarInPageEventEmitter
     forceRibbonShow: (force: boolean) => void
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 export class TrialStatusIndicator extends React.Component<Props> {
@@ -37,7 +37,7 @@ export class TrialStatusIndicator extends React.Component<Props> {
             this.props.browserAPIs,
             this.props.signupDate,
         )
-        const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
+        const result = await chrome.storage.local.get(COUNTER_STORAGE_KEY)
         console.log(result[COUNTER_STORAGE_KEY]?.pU?.bookmarksPowerUp)
         console.log(result[COUNTER_STORAGE_KEY]?.pU?.AIpowerup)
         if (
@@ -173,10 +173,10 @@ export class TrialStatusIndicator extends React.Component<Props> {
                             this.props.isSidebarOpen
                                 ? 'left'
                                 : topRight
-                                ? 'bottom'
-                                : bottomRight
-                                ? 'top'
-                                : 'left'
+                                  ? 'bottom'
+                                  : bottomRight
+                                    ? 'top'
+                                    : 'left'
                         }
                         offsetX={15}
                         tooltipText={

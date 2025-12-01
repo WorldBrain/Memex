@@ -2,10 +2,10 @@ import {
     UILogic,
     executeUITask,
     UIEventHandler,
-} from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+} from '@worldbrain/memex-common/ts/main-ui/classes/logic'
 import type { Dependencies, State, Event, AuthDialogMode } from './types'
 import type { EmailPasswordCredentials } from 'src/authentication/background/types'
-import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { checkStripePlan } from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -117,9 +117,8 @@ export default class Logic extends UILogic<State, Event> {
             const auth = this.dependencies.authBG
             this.action = previousState.mode as 'login' | 'register'
             if (previousState.mode === 'signup') {
-                const { result } = await auth.registerWithEmailPassword(
-                    credentials,
-                )
+                const { result } =
+                    await auth.registerWithEmailPassword(credentials)
 
                 if (result.status === 'error') {
                     this.emitMutation({ error: { $set: result.reason } })
@@ -132,9 +131,8 @@ export default class Logic extends UILogic<State, Event> {
                     mode: 'login',
                     setSaveState: 'running',
                 })
-                const { result } = await auth.loginWithEmailPassword(
-                    credentials,
-                )
+                const { result } =
+                    await auth.loginWithEmailPassword(credentials)
                 if (result.status === 'error') {
                     this.emitMutation({ error: { $set: result.reason } })
                     return

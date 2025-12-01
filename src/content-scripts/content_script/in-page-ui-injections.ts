@@ -6,7 +6,7 @@ import { renderErrorDisplay } from '../../search-injection/error-display'
 import { renderSearchDisplay } from '../../search-injection/search-display'
 import type { ContentScriptRegistry, InPageUIInjectionsMain } from './types'
 import { renderUpgradeModal } from 'src/search-injection/upgrade-modal-display'
-import { handleRenderPDFOpenButton } from 'src/search-injection/pdf-open-button'
+// import { handleRenderPDFOpenButton } from 'src/search-injection/pdf-open-button' // TEMP: Comment out to test PDF binary issue
 import { handleRenderImgActionButtons } from 'src/search-injection/img-action-buttons'
 import type { SearchEngineName } from 'src/search-injection/types'
 
@@ -45,23 +45,25 @@ export const main: InPageUIInjectionsMain = async ({
                     )
                 }
             } else if (component === 'pdf-open-button') {
-                await handleRenderPDFOpenButton(
-                    syncSettings,
-                    syncSettingsBG,
-                    annotationsFunctions,
-                    upgradeModalProps.browserAPIs,
-                    options.embedElements,
-                    options.contentScriptsBG,
-                )
-            } else if (component === 'img-action-buttons') {
-                await handleRenderImgActionButtons(
-                    syncSettings,
-                    annotationsFunctions,
-                    upgradeModalProps.browserAPIs,
-                    options.imageElements,
-                    options.contentScriptsBG,
-                )
+                // TEMP: Comment out to test
+                // await handleRenderPDFOpenButton(
+                //     syncSettings,
+                //     syncSettingsBG,
+                //     annotationsFunctions,
+                //     upgradeModalProps.browserAPIs,
+                //     options.embedElements,
+                //     options.contentScriptsBG,
+                // )
             }
+            // else if (component === 'img-action-buttons') {
+            //     await handleRenderImgActionButtons(
+            //         syncSettings,
+            //         annotationsFunctions,
+            //         upgradeModalProps.browserAPIs,
+            //         options.imageElements,
+            //         options.contentScriptsBG,
+            //     )
+            // }
             // else if (component === 'search-engine-integration') {
             //     const url = window.location.href
             //     const matched = utils.matchURL(url) as SearchEngineName | false

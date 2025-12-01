@@ -1,5 +1,5 @@
 import expect from 'expect'
-import { AsyncMutex } from '@worldbrain/memex-common/lib/utils/async-mutex'
+import { AsyncMutex } from '@worldbrain/memex-common/ts/utils/async-mutex'
 
 describe('AsyncMutex', () => {
     it('should work', async () => {

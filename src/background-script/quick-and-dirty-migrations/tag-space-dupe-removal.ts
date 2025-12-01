@@ -1,4 +1,4 @@
-import type StorageManager from '@worldbrain/storex'
+import type StorageManager from '@worldbrain/storex/ts'
 import type { PageList, PageListEntry } from 'src/custom-lists/background/types'
 import type { SharedListMetadata } from 'src/content-sharing/background/types'
 import type { AnnotListEntry } from 'src/annotations/types'

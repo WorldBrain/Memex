@@ -1,4 +1,4 @@
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import {
     makeSingleDeviceUILogicTestFactory,
     insertBackgroundFunctionTab,
@@ -46,9 +46,8 @@ describe('Cloud onboarding UI logic', () => {
         'should set local storage flag upon data migration',
         async ({ device }) => {
             const { logic } = await setupTest(device, { isSyncDisabled: true })
-            const {
-                settingStore,
-            } = device.backgroundModules.personalCloud.options
+            const { settingStore } =
+                device.backgroundModules.personalCloud.options
 
             logic.processMutation({ needsToRemovePassiveData: { $set: false } })
 
@@ -95,9 +94,10 @@ describe('Cloud onboarding UI logic', () => {
         device,
     }) => {
         let recordingChanges = true
-        device.backgroundModules.backupModule.remoteFunctions.disableRecordingChanges = async () => {
-            recordingChanges = false
-        }
+        device.backgroundModules.backupModule.remoteFunctions.disableRecordingChanges =
+            async () => {
+                recordingChanges = false
+            }
         const { logic } = await setupTest(device)
 
         expect(recordingChanges).toBe(true)
@@ -129,10 +129,11 @@ describe('Cloud onboarding UI logic', () => {
     // })
 
     it('should not ask user to dump if using firefox', async ({ device }) => {
-        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
-            lastBackup: null, // As there isn't a last backup time, it should tell user to dump
-            nextBackup: null,
-        })
+        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes =
+            async () => ({
+                lastBackup: null, // As there isn't a last backup time, it should tell user to dump
+                nextBackup: null,
+            })
         const { logic: logicA } = await setupTest(device, {
             browser: 'firefox',
         })
@@ -140,10 +141,11 @@ describe('Cloud onboarding UI logic', () => {
         await logicA.init()
         expect(logicA.state.shouldBackupViaDump).toBe(false)
 
-        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
-            lastBackup: Date.now(), // As there now is a last backup time, it shouldn't tell user to dump
-            nextBackup: null,
-        })
+        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes =
+            async () => ({
+                lastBackup: Date.now(), // As there now is a last backup time, it shouldn't tell user to dump
+                nextBackup: null,
+            })
         const { logic: logicB } = await setupTest(device, {
             browser: 'firefox',
         })
@@ -155,9 +157,8 @@ describe('Cloud onboarding UI logic', () => {
     it('should determine whether passive data removal is needed, based on whether data exists from earlier than 2020-09-09', async ({
         device,
     }) => {
-        const {
-            localExtSettingStore,
-        } = device.backgroundModules.personalCloud.options
+        const { localExtSettingStore } =
+            device.backgroundModules.personalCloud.options
 
         await localExtSettingStore.set('installTimestamp', Date.now())
 

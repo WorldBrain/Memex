@@ -1,4 +1,3 @@
-import type { Tabs } from 'webextension-polyfill'
 import type { ContentScriptComponent } from '../types'
 import type { RemoteFunction } from 'src/util/webextensionRPC'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
@@ -8,7 +7,7 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
         Role,
         { component: ContentScriptComponent }
     >
-    reloadTab: RemoteFunction<Role, Tabs.ReloadReloadPropertiesType>
+    reloadTab: RemoteFunction<Role, chrome.tabs.ReloadProperties>
     getCurrentTab: RemoteFunction<Role, void, { id: number; url: string }>
     openBetaFeatureSettings: RemoteFunction<
         Role,

@@ -1,17 +1,15 @@
 import moment from 'moment'
-import { StorageBackendPlugin } from '@worldbrain/storex'
+import { StorageBackendPlugin } from '@worldbrain/storex/ts'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 import type { AnnotSearchParams } from './types'
-import { extractUrlParts } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
+import { extractUrlParts } from '@worldbrain/memex-common/ts/url-utils/extract-parts'
 import AnnotsStorage from 'src/annotations/background/storage'
 import type { Annotation } from 'src/annotations/types'
 import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
-import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/ts/content-sharing/utils'
 
-export class AnnotationsListPlugin extends StorageBackendPlugin<
-    DexieStorageBackend
-> {
+export class AnnotationsListPlugin extends StorageBackendPlugin<DexieStorageBackend> {
     static TERMS_SEARCH_OP_ID = 'memex:dexie.searchAnnotations'
     static LIST_BY_PAGE_OP_ID = 'memex:dexie.listAnnotationsByPage'
     static LIST_BY_DAY_OP_ID = 'memex:dexie.listAnnotationsByDay'

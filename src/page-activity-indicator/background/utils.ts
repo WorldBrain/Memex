@@ -1,9 +1,9 @@
-import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import type { SharedCollectionType } from '@worldbrain/memex-common/ts/content-sharing/storage/types'
 import type {
     SharedList,
     SharedListEntry,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import type { FollowedList, FollowedListEntry } from './types'
 
 export const sharedListToFollowedList = (

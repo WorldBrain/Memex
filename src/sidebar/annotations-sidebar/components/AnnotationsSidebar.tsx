@@ -1,20 +1,20 @@
 import * as React from 'react'
 
-import Waypoint from 'react-waypoint'
+import { Waypoint } from 'react-waypoint'
 import styled, { css, keyframes } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 import {
     ConversationReplies,
     SharedProps as RepliesProps,
-} from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
+} from '@worldbrain/memex-common/ts/content-conversations/ui/components/annotations-in-page'
 import type {
     SharedAnnotationReference,
     SharedListReference,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { NewReplyEventHandlers } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { NewReplyEventHandlers } from '@worldbrain/memex-common/ts/content-conversations/ui/components/new-reply'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import AnnotationCreate, {
     Props as AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
@@ -55,9 +55,9 @@ import type {
 } from 'src/content-sharing/background/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import Markdown from '@worldbrain/memex-common/ts/common-ui/components/markdown'
 import type {
     PageAnnotationsCacheInterface,
     RGBAColor,
@@ -65,54 +65,54 @@ import type {
     UnifiedList,
 } from 'src/annotations/cache/types'
 import * as cacheUtils from 'src/annotations/cache/utils'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import {
     generateAnnotationCardInstanceId,
     getOrCreateAnnotationInstanceRefs,
     initListInstance,
 } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
-import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { YoutubePlayer } from '@worldbrain/memex-common/ts/services/youtube/types'
+import IconBox from '@worldbrain/memex-common/ts/common-ui/components/icon-box'
+import { normalizedStateToArray } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import {
     getFeedUrl,
     getListShareUrl,
     getPageLinkUrl,
 } from 'src/content-sharing/utils'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import Checkbox from 'src/common-ui/components/Checkbox'
 import { DropdownMenuBtn as DropdownMenuBtnSmall } from 'src/common-ui/components/dropdown-menu-small'
-import { interceptLinks } from '@worldbrain/memex-common/lib/common-ui/utils/interceptVideoLinks'
-import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
+import { interceptLinks } from '@worldbrain/memex-common/ts/common-ui/utils/interceptVideoLinks'
+import ItemBox from '@worldbrain/memex-common/ts/common-ui/components/item-box'
 import { sleepPromise } from 'src/util/promises'
-import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
+import { ErrorNotification } from '@worldbrain/memex-common/ts/common-ui/components/error-notification'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import PageCitations from 'src/citations/PageCitations'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import { PageMetadataForm } from 'src/page-indexing/ui/metadata-form'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
-import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
-import AIChatComponent from '@worldbrain/memex-common/lib/ai-chat/index'
+import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/ts/editor'
+import AIChatComponent from '@worldbrain/memex-common/ts/ai-chat/index'
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
-import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
+import { extractDataFromPDFDocument } from '@worldbrain/memex-common/ts/page-indexing/content-extraction/extract-pdf-content'
 import {
     ChatHistoryItem,
     PromptData,
-} from '@worldbrain/memex-common/lib/summarization/types'
+} from '@worldbrain/memex-common/ts/summarization/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/index'
-import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/lib/subscriptions/constants'
-import browser, { Browser } from 'webextension-polyfill'
-import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
+import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/ts/subscriptions/constants'
+
+import { isUrlYTVideo } from '@worldbrain/memex-common/ts/utils/youtube-url'
 import debounce from 'lodash/debounce'
-import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { PremiumPlans } from '@worldbrain/memex-common/ts/subscriptions/availablePowerups'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 import { AIKeyEntry } from 'src/util/subscriptions/aiKeyEntry'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
@@ -301,7 +301,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     inPageMode?: boolean
     authBG: AuthRemoteFunctionsInterface
     analyticsBG: AnalyticsCoreInterface
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     pageIndexingBG: PageIndexingInterface<'caller'>
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
@@ -4407,7 +4407,12 @@ const SpaceTitleEditField = styled.input<{
     padding: 5px 3px 5px 5px;
     margin: -5px -3px -5px -5px;
     outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on;
     border: none;
 
     ${(props) =>
@@ -4423,7 +4428,11 @@ const SpaceTitleEditField = styled.input<{
             margin: -5px -3px -5px -5px;
             border-radius: 5px;
             outline: 1px solid transparent;
-            font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            font-feature-settings:
+                'pnum' on,
+                'lnum' on,
+                'case' on,
+                'ss03' on,
                 'ss04' on;
             border: none;
 
@@ -4854,7 +4863,12 @@ const LoadingIndicatorStyled = styled(LoadingIndicator)`
 
 const NewAnnotationSection = styled.section`
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     height: auto;
     display: flex;
@@ -4868,7 +4882,12 @@ const NewAnnotationSection = styled.section`
 
 const AnnotationSectionScrollContainer = styled.div`
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     color: ${(props) => props.theme.colors.white};
     display: flex;
@@ -4909,7 +4928,12 @@ const AnnotationSectionScrollContainer = styled.div`
 `
 const AnnotationsSectionStyled = styled.div`
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     color: ${(props) => props.theme.colors.white};
     display: flex;

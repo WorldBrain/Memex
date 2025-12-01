@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import cx from 'classnames'
 
-const extStyles = require('src/custom-lists/components/overview/sidebar/Index.css')
 import MyCollection from 'src/custom-lists/components/overview/sidebar/my-collections'
 import CreateListForm from 'src/custom-lists/components/overview/sidebar/CreateListForm'
 import ListItem from 'src/custom-lists/components/overview/sidebar/list-item'
@@ -62,22 +61,25 @@ export default class ListContainer extends Component<Props> {
         }))
     }
 
-    handleSearchKeyDown = (field, listName = '') => (e) => {
-        if (
-            this.props.env === 'inpage' &&
-            !(e.ctrlKey || e.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
-        ) {
-            e.preventDefault()
-            e.stopPropagation()
+    handleSearchKeyDown =
+        (field, listName = '') =>
+        (e) => {
+            if (
+                this.props.env === 'inpage' &&
+                !(e.ctrlKey || e.metaKey) &&
+                /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
+            ) {
+                e.preventDefault()
+                e.stopPropagation()
 
-            this.setState((state) => ({
-                ...state,
-                [field]:
-                    (state[field] !== null ? state[field] : listName) + e.key,
-            }))
+                this.setState((state) => ({
+                    ...state,
+                    [field]:
+                        (state[field] !== null ? state[field] : listName) +
+                        e.key,
+                }))
+            }
         }
-    }
 
     getSearchVal = (value) => value.trim().replace(/\s\s+/g, ' ')
 
@@ -99,16 +101,18 @@ export default class ListContainer extends Component<Props> {
         }))
     }
 
-    handleUpdateList = ({ id }, index) => (event) => {
-        event.preventDefault()
-        const { value } = event.target.elements['listName']
-        // value = list name
-        this.props.updateList(index, this.getSearchVal(value), id)
-        this.setState((state) => ({
-            ...state,
-            updatedListName: null,
-        }))
-    }
+    handleUpdateList =
+        ({ id }, index) =>
+        (event) => {
+            event.preventDefault()
+            const { value } = event.target.elements['listName']
+            // value = list name
+            this.props.updateList(index, this.getSearchVal(value), id)
+            this.setState((state) => ({
+                ...state,
+                updatedListName: null,
+            }))
+        }
 
     renderAllLists = () => {
         return this.props.lists.map((list, i) => {
@@ -180,15 +184,8 @@ export default class ListContainer extends Component<Props> {
                 />
 
                 {this.renderCreateList(this.props.showCreateList)}
-                <div className={extStyles.allListsInPage}>
-                    <div
-                        className={cx(
-                            extStyles.wrapper,
-                            extStyles.allListsInner,
-                        )}
-                    >
-                        {this.renderAllLists()}
-                    </div>
+                <div>
+                    <div>{this.renderAllLists()}</div>
                 </div>
                 <DeleteConfirmModal
                     message="Delete collection? This does not delete the pages in it"

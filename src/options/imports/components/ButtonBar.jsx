@@ -2,11 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
-import styles from './ButtonBar.css'
-
 const ButtonBar = ({ isRunning, helpText, children }) => (
     <Container>
-        <div className={styles.actionContainer}>
+        <div>
             <ActionBar>{children}</ActionBar>
         </div>
     </Container>

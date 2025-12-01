@@ -65,8 +65,10 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         resolve: {
             extensions,
             symlinks: false,
-            mainFields: ['browser', 'main', 'module'],
-            alias: aliases,
+            mainFields: ['chrome', 'main', 'module'],
+            alias: {
+                ...aliases,
+            },
         },
         stats: {
             assetsSort: 'size',

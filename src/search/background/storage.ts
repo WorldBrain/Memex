@@ -1,7 +1,7 @@
 import {
     StorageModule,
     StorageModuleConfig,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import { SuggestPlugin, SuggestType } from '../plugins/suggest'
 
 export default class SearchStorage extends StorageModule {

@@ -9,14 +9,14 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import analytics from 'src/analytics'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import {
     MemexTheme,
     MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { Browser } from 'webextension-polyfill'
-import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+} from '@worldbrain/memex-common/ts/common-ui/styles/types'
+
+import { pageActionAllowed } from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -26,7 +26,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     selectRibbonPositionOption: (option) => void
     analyticsBG: AnalyticsCoreInterface
     theme: MemexThemeVariant
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     // setVisibility: (visibility: boolean) => void
 }
 
@@ -176,9 +176,8 @@ export default class RibbonContainer extends StatefulUIElement<
                 ribbonRef={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListDetailsById={(id) => {
-                    const listDetails = this.props.annotationsCache.getListByLocalId(
-                        id,
-                    )
+                    const listDetails =
+                        this.props.annotationsCache.getListByLocalId(id)
                     return {
                         name: listDetails?.name ?? 'Missing list',
                         isShared: listDetails?.remoteId != null,
@@ -271,8 +270,8 @@ export default class RibbonContainer extends StatefulUIElement<
                     setShowSidebarCommentBox: () =>
                         this.props.inPageUI.showSidebar({ action: 'comment' }),
                     openSidebar: this.handleSidebarOpen,
-                    handleSidebarOpenInFocusMode: this
-                        .handleSidebarOpenInFocusMode,
+                    handleSidebarOpenInFocusMode:
+                        this.handleSidebarOpenInFocusMode,
                     sharePage: this.handlePageShare,
                     closeSidebar: () => this.props.inPageUI.hideSidebar(),
                     toggleReadingView: () =>

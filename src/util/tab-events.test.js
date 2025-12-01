@@ -11,19 +11,19 @@ describe('whenPageDOMLoaded', () => {
     const tabId = 1
 
     beforeEach(() => {
-        browser.tabs = {}
-        browser.webNavigation = {
+        chrome.tabs = {}
+        chrome.webNavigation = {
             onCommitted: jest.fn(),
         }
         eventToPromise.default = jest.fn().mockReturnValue(Promise.resolve())
     })
 
     test('should execute script and resolve promise if script executes', async () => {
-        browser.tabs = {
+        chrome.tabs = {
             executeScript: jest.fn().mockReturnValue(Promise.resolve()),
         }
         await whenPageDOMLoaded({ tabId })
-        expect(browser.tabs.executeScript).toHaveBeenCalledWith(tabId, {
+        expect(chrome.tabs.executeScript).toHaveBeenCalledWith(tabId, {
             code: 'undefined',
             runAt: 'document_end',
         })
@@ -31,7 +31,7 @@ describe('whenPageDOMLoaded', () => {
 
     test('should reject the promise if the script is not executed', async () => {
         expect.assertions(1)
-        browser.tabs = {
+        chrome.tabs = {
             executeScript: jest
                 .fn()
                 .mockReturnValue(
@@ -47,7 +47,7 @@ describe('whenPageDOMLoaded', () => {
 
     test.skip('should reject the promise if tab is changed', async () => {
         expect.assertions(1)
-        browser.tabs = {
+        chrome.tabs = {
             executeScript: jest
                 .fn()
                 .mockReturnValue(new Promise((resolve, reject) => {})),
@@ -66,24 +66,24 @@ describe('whenPageLoadComplete', () => {
 
     beforeEach(() => {
         eventToPromise.default = jest.fn().mockReturnValue(Promise.resolve())
-        browser.webNavigation = {
+        chrome.webNavigation = {
             onCommitted: jest.fn(),
         }
     })
 
     test('should return directly if the tab status is complete', async () => {
-        browser.tabs = {
+        chrome.tabs = {
             get: jest.fn().mockReturnValueOnce({
                 status: 'complete',
             }),
         }
         await whenPageLoadComplete({ tabId })
-        expect(browser.tabs.get).toHaveBeenCalledWith(tabId)
+        expect(chrome.tabs.get).toHaveBeenCalledWith(tabId)
         expect(eventToPromise.default).not.toHaveBeenCalled()
     })
 
     test('should run eventToPromise and resolve if its Promise resolves', async () => {
-        browser.tabs = {
+        chrome.tabs = {
             get: jest.fn().mockReturnValueOnce({
                 status: 'loading',
             }),
@@ -98,7 +98,7 @@ describe('whenPageLoadComplete', () => {
     })
 
     test.skip('should run eventToPromise and reject if its Promise rejects', async () => {
-        browser.tabs = {
+        chrome.tabs = {
             get: jest.fn().mockReturnValueOnce({
                 status: 'loading',
             }),
@@ -115,22 +115,22 @@ describe('whenPageLoadComplete', () => {
 describe('whenTabActive', () => {
     beforeEach(() => {
         eventToPromise.default = jest.fn().mockReturnValue(Promise.resolve())
-        browser.webNavigation = {
+        chrome.webNavigation = {
             onCommitted: jest.fn(),
         }
     })
 
     test('should return directly if the tab is already active', async () => {
-        browser.tabs = {
+        chrome.tabs = {
             query: jest.fn().mockReturnValueOnce([{ id: 1 }]),
         }
         await whenTabActive({ tabId: 1 })
-        expect(browser.tabs.query).toHaveBeenCalledWith({ active: true })
+        expect(chrome.tabs.query).toHaveBeenCalledWith({ active: true })
         expect(eventToPromise.default).not.toHaveBeenCalled()
     })
 
     test('should run eventToPromise and resolve if its Promise resolves', async () => {
-        browser.tabs = {
+        chrome.tabs = {
             query: jest.fn().mockReturnValueOnce([{ id: 2 }]),
         }
         // Add a 'shibboleth' to be able to check that *this* Promise was returned & resolved.
@@ -141,7 +141,7 @@ describe('whenTabActive', () => {
     })
 
     test.skip('should run eventToPromise and reject if its Promise rejects', async () => {
-        browser.tabs = {
+        chrome.tabs = {
             query: jest.fn().mockReturnValueOnce([{ id: 2 }]),
         }
         eventToPromise.default = jest

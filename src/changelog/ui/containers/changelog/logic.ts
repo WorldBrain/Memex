@@ -1,4 +1,4 @@
-import { UILogic, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEventHandler } from 'ui-logic-core/ts'
 import { ChangelogState, ChangelogDependencies, ChangelogEvent } from './types'
 
 export const INITIAL_STATE: ChangelogState = {
@@ -26,7 +26,8 @@ export default class ChangelogLogic extends UILogic<
     }
 
     init = async () => {
-        const JWTTokenForFeatureBase = await this.dependencies.authBG.getJWTTokenForFeatureBase()
+        const JWTTokenForFeatureBase =
+            await this.dependencies.authBG.getJWTTokenForFeatureBase()
 
         let urlToUseForIframe = `https://feedback.memex.garden/changelog?jwt=${JWTTokenForFeatureBase}`
 

@@ -1,18 +1,18 @@
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 import type {
     UnifiedTermsSearchParams,
     TermsSearchOpts,
-} from '@worldbrain/memex-common/lib/search/types'
+} from '@worldbrain/memex-common/ts/search/types'
 import type { SearchParams as OldSearchParams } from '../types'
 import type {
     Page,
     Visit,
     Bookmark,
     Annotation,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { WhereClause, default as Dexie } from 'dexie'
-import { processCJKCharacters } from '@worldbrain/memex-stemmer/lib/transform-page-text'
+import { processCJKCharacters } from '@worldbrain/memex-stemmer/ts/transform-page-text'
 
 export const reshapeParamsForOldSearch = (params): OldSearchParams => ({
     lists: params.collections,
@@ -81,120 +81,131 @@ const queryByTerm = <T, PK>(
         ? clause.startsWith(term)
         : clause.equals(term)
 
-export const queryAnnotationsByTerms = (
-    storageManager: Storex,
-    opts: TermsSearchOpts,
-): UnifiedTermsSearchParams['queryAnnotations'] => async (
-    terms,
-    phrases = [],
-) => {
-    if (!opts.matchHighlights && !opts.matchNotes) {
-        return []
+export const queryAnnotationsByTerms =
+    (
+        storageManager: Storex,
+        opts: TermsSearchOpts,
+    ): UnifiedTermsSearchParams['queryAnnotations'] =>
+    async (terms, phrases = []) => {
+        if (!opts.matchHighlights && !opts.matchNotes) {
+            return []
+        }
+
+        const dexie = (storageManager.backend as DexieStorageBackend)
+            .dexieInstance
+        const table = dexie.table<Annotation, string>('annotations')
+        const resultsPerTerm = await Promise.all([
+            ...terms.map((term) => {
+                if (opts.matchHighlights && !opts.matchNotes) {
+                    return queryByTerm(
+                        table.where('_body_terms'),
+                        term,
+                        opts,
+                    ).primaryKeys()
+                } else if (!opts.matchHighlights && opts.matchNotes) {
+                    return queryByTerm(
+                        table.where('_comment_terms'),
+                        term,
+                        opts,
+                    ).primaryKeys()
+                }
+                const coll = queryByTerm(table.where('_body_terms'), term, opts)
+                return queryByTerm(
+                    coll.or('_comment_terms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            }),
+            ...phrases.map((phrase) =>
+                table
+                    .filter((a) => {
+                        const inComment = a.comment
+                            ?.toLocaleLowerCase()
+                            .includes(phrase)
+                        const inHighlight =
+                            'body' in a
+                                ? a.body?.toLocaleLowerCase().includes(phrase)
+                                : false
+                        return inComment || inHighlight
+                    })
+                    .primaryKeys(),
+            ),
+        ])
+        const matchingIds = intersectResults(resultsPerTerm)
+        return table.bulkGet(matchingIds)
     }
 
-    const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
-    const table = dexie.table<Annotation, string>('annotations')
-    const resultsPerTerm = await Promise.all([
-        ...terms.map((term) => {
-            if (opts.matchHighlights && !opts.matchNotes) {
-                return queryByTerm(
-                    table.where('_body_terms'),
-                    term,
-                    opts,
-                ).primaryKeys()
-            } else if (!opts.matchHighlights && opts.matchNotes) {
-                return queryByTerm(
-                    table.where('_comment_terms'),
-                    term,
-                    opts,
-                ).primaryKeys()
-            }
-            const coll = queryByTerm(table.where('_body_terms'), term, opts)
-            return queryByTerm(
-                coll.or('_comment_terms'),
-                term,
-                opts,
-            ).primaryKeys()
-        }),
-        ...phrases.map((phrase) =>
-            table
-                .filter((a) => {
-                    const inComment = a.comment
-                        ?.toLocaleLowerCase()
-                        .includes(phrase)
-                    const inHighlight =
-                        'body' in a
-                            ? a.body?.toLocaleLowerCase().includes(phrase)
-                            : false
-                    return inComment || inHighlight
-                })
-                .primaryKeys(),
-        ),
-    ])
-    const matchingIds = intersectResults(resultsPerTerm)
-    return table.bulkGet(matchingIds)
-}
+export const queryPagesByTerms =
+    (
+        storageManager: Storex,
+        opts: TermsSearchOpts,
+    ): UnifiedTermsSearchParams['queryPages'] =>
+    async (terms, phrases = []) => {
+        if (!opts.matchPageText && !opts.matchPageTitleUrl) {
+            return []
+        }
 
-export const queryPagesByTerms = (
-    storageManager: Storex,
-    opts: TermsSearchOpts,
-): UnifiedTermsSearchParams['queryPages'] => async (terms, phrases = []) => {
-    if (!opts.matchPageText && !opts.matchPageTitleUrl) {
-        return []
-    }
-
-    const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
-    const table = dexie.table<Page, string>('pages')
-    const resultsPerTerm = await Promise.all([
-        ...terms.map((term) => {
-            if (opts.matchPageText && !opts.matchPageTitleUrl) {
-                return queryByTerm(
-                    table.where('terms'),
-                    term,
-                    opts,
-                ).primaryKeys()
-            } else if (!opts.matchPageText && opts.matchPageTitleUrl) {
-                const coll = queryByTerm(table.where('urlTerms'), term, opts)
+        const dexie = (storageManager.backend as DexieStorageBackend)
+            .dexieInstance
+        const table = dexie.table<Page, string>('pages')
+        const resultsPerTerm = await Promise.all([
+            ...terms.map((term) => {
+                if (opts.matchPageText && !opts.matchPageTitleUrl) {
+                    return queryByTerm(
+                        table.where('terms'),
+                        term,
+                        opts,
+                    ).primaryKeys()
+                } else if (!opts.matchPageText && opts.matchPageTitleUrl) {
+                    const coll = queryByTerm(
+                        table.where('urlTerms'),
+                        term,
+                        opts,
+                    )
+                    return queryByTerm(
+                        coll.or('titleTerms'),
+                        term,
+                        opts,
+                    ).primaryKeys()
+                }
+                let coll = queryByTerm(table.where('terms'), term, opts)
+                coll = queryByTerm(coll.or('urlTerms'), term, opts)
                 return queryByTerm(
                     coll.or('titleTerms'),
                     term,
                     opts,
                 ).primaryKeys()
-            }
-            let coll = queryByTerm(table.where('terms'), term, opts)
-            coll = queryByTerm(coll.or('urlTerms'), term, opts)
-            return queryByTerm(coll.or('titleTerms'), term, opts).primaryKeys()
-        }),
-        ...phrases.map((phrase) =>
-            table
-                .filter((page) =>
-                    page.text?.toLocaleLowerCase().includes(phrase),
-                )
-                .primaryKeys(),
-        ),
-    ])
-    const matchingIds = intersectResults(resultsPerTerm)
+            }),
+            ...phrases.map((phrase) =>
+                table
+                    .filter((page) =>
+                        page.text?.toLocaleLowerCase().includes(phrase),
+                    )
+                    .primaryKeys(),
+            ),
+        ])
+        const matchingIds = intersectResults(resultsPerTerm)
 
-    // Get latest visit/bm for each page
-    const latestTimestampByPageUrl = new Map<string, number>()
-    const trackLatestTimestamp = ({ url, time }: Visit | Bookmark) =>
-        latestTimestampByPageUrl.set(
-            url,
-            Math.max(time, latestTimestampByPageUrl.get(url) ?? 0),
-        )
-    const queryTimestamps = <T>(table: Dexie.Table<T>): Promise<T[]> =>
-        table.where('url').anyOf(matchingIds).reverse().sortBy('time')
+        // Get latest visit/bm for each page
+        const latestTimestampByPageUrl = new Map<string, number>()
+        const trackLatestTimestamp = ({ url, time }: Visit | Bookmark) =>
+            latestTimestampByPageUrl.set(
+                url,
+                Math.max(time, latestTimestampByPageUrl.get(url) ?? 0),
+            )
+        const queryTimestamps = <T>(table: Dexie.Table<T>): Promise<T[]> =>
+            table.where('url').anyOf(matchingIds).reverse().sortBy('time')
 
-    const [visits, bookmarks] = await Promise.all([
-        queryTimestamps(dexie.table<Visit>('visits')),
-        queryTimestamps(dexie.table<Bookmark>('bookmarks')),
-    ])
+        const [visits, bookmarks] = await Promise.all([
+            queryTimestamps(dexie.table<Visit>('visits')),
+            queryTimestamps(dexie.table<Bookmark>('bookmarks')),
+        ])
 
-    visits.forEach(trackLatestTimestamp)
-    bookmarks.forEach(trackLatestTimestamp)
+        visits.forEach(trackLatestTimestamp)
+        bookmarks.forEach(trackLatestTimestamp)
 
-    return matchingIds.map((id) => ({
-        id,
-        latestTimestamp: latestTimestampByPageUrl.get(id) ?? 0,
-    }))
-}
+        return matchingIds.map((id) => ({
+            id,
+            latestTimestamp: latestTimestampByPageUrl.get(id) ?? 0,
+        }))
+    }

@@ -2,11 +2,11 @@ import type { Anchor } from 'src/highlighting/types'
 import type {
     SharedAnnotation,
     SharedAnnotationReference,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import type { UserPublicDetails } from '@worldbrain/memex-common/ts/user-management/types'
 import type { RGBAColor } from './cache/types'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 
 // export interface Annotation {
 //     /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
@@ -109,9 +109,7 @@ export type TextTruncator = (
 
 export type SelectionIndices = [number, number]
 
-export type ListDetailsGetter = (
-    id: number,
-) => {
+export type ListDetailsGetter = (id: number) => {
     name: string | JSX.Element
     isShared: boolean
     description?: string

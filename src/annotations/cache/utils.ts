@@ -13,19 +13,19 @@ import type {
     UnifiedListForCache,
 } from './types'
 import { shareOptsToPrivacyLvl } from '../utils'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
+import { normalizedStateToArray } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
+import type { SharedListEntry } from '@worldbrain/memex-common/ts/content-sharing/types'
 import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/types'
 import type { SharedListMetadata } from 'src/content-sharing/background/types'
-import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { DEFAULT_KEY } from '@worldbrain/memex-common/ts/utils/item-ordering'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
-import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/constants'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -51,8 +51,8 @@ export const reshapeAnnotationForCache = (
         annot.lastEdited == null
             ? createdWhen
             : typeof annot.lastEdited === 'number'
-            ? annot.lastEdited
-            : annot.lastEdited.getTime()
+              ? annot.lastEdited
+              : annot.lastEdited.getTime()
     return {
         localId: annot.url,
         remoteId: undefined,
@@ -197,7 +197,7 @@ export const getLocalListIdsForCacheIds = (
         .filter((id) => id != null)
 
 interface CacheHydratorDeps<
-    T extends keyof BackgroundModuleRemoteInterfaces<'caller'>
+    T extends keyof BackgroundModuleRemoteInterfaces<'caller'>,
 > {
     user?: UserReference
     cache: PageAnnotationsCacheInterface
@@ -223,15 +223,17 @@ export async function hydrateCacheForPageAnnotations(
         const localListsData = await args.bgModules.customLists.fetchAllLists({
             includeTreeData: true,
         })
-        const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
-            {
+        const listMetadata =
+            await args.bgModules.contentSharing.getListShareMetadata({
                 localListIds: localListsData.map((list) => list.id),
-            },
-        )
-        const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
-            args.fullPageUrl,
-            Object.values(listMetadata).map((metadata) => metadata.remoteId),
-        )
+            })
+        const followedListsData =
+            await args.bgModules.pageActivityIndicator.getPageFollowedLists(
+                args.fullPageUrl,
+                Object.values(listMetadata).map(
+                    (metadata) => metadata.remoteId,
+                ),
+            )
 
         await hydrateCacheLists({
             listMetadata,
@@ -250,20 +252,21 @@ export async function hydrateCacheForPageAnnotations(
         HIGHLIGHT_COLORS_DEFAULT
     args.cache.setHighlightColorDictionary(highlightColors)
 
-    const annotationsData = await args.bgModules.annotations.listAnnotationsByPageUrl(
-        {
+    const annotationsData =
+        await args.bgModules.annotations.listAnnotationsByPageUrl({
             pageUrl: args.fullPageUrl,
             withLists: true,
-        },
-    )
+        })
 
     const annotationUrls = annotationsData.map((annot) => annot.url)
-    const privacyLvlsByAnnot = await args.bgModules.contentSharing.findAnnotationPrivacyLevels(
-        { annotationUrls },
-    )
-    const remoteIdsByAnnot = await args.bgModules.contentSharing.getRemoteAnnotationIds(
-        { annotationUrls },
-    )
+    const privacyLvlsByAnnot =
+        await args.bgModules.contentSharing.findAnnotationPrivacyLevels({
+            annotationUrls,
+        })
+    const remoteIdsByAnnot =
+        await args.bgModules.contentSharing.getRemoteAnnotationIds({
+            annotationUrls,
+        })
     const pageLocalListIds = await args.bgModules.customLists.fetchPageLists({
         url: args.fullPageUrl,
     })
@@ -277,9 +280,8 @@ export async function hydrateCacheForPageAnnotations(
                 privacyLevel >= AnnotationPrivacyLevels.SHARED
                     ? pageLocalListIds
                           .map((localListId) => {
-                              const cachedList = args.cache.getListByLocalId(
-                                  localListId,
-                              )
+                              const cachedList =
+                                  args.cache.getListByLocalId(localListId)
                               return cachedList?.remoteId != null
                                   ? cachedList.unifiedId
                                   : null
@@ -319,12 +321,12 @@ export async function hydrateCacheForListUsage(
         skipSpecialLists: false,
         includeTreeData: true,
     })
-    const followedListsData = await args.bgModules.pageActivityIndicator.getAllFollowedLists()
-    const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
-        {
+    const followedListsData =
+        await args.bgModules.pageActivityIndicator.getAllFollowedLists()
+    const listMetadata =
+        await args.bgModules.contentSharing.getListShareMetadata({
             localListIds: localListsData.map((list) => list.id),
-        },
-    )
+        })
 
     await hydrateCacheLists({
         listMetadata,
@@ -369,10 +371,11 @@ async function hydrateCacheLists(
         Pick<SharedListEntry, 'entryTitle' | 'normalizedUrl'> & { id: string }
     >()
     if (pageLinkListIds.size) {
-        const followedEntriesByList = await args.bgModules.pageActivityIndicator.getEntriesForFollowedLists(
-            [...pageLinkListIds],
-            { sortAscByCreationTime: true },
-        )
+        const followedEntriesByList =
+            await args.bgModules.pageActivityIndicator.getEntriesForFollowedLists(
+                [...pageLinkListIds],
+                { sortAscByCreationTime: true },
+            )
         for (const entries of Object.values(followedEntriesByList)) {
             if (entries.length) {
                 sharedListEntryMap.set(entries[0].followedList.toString(), {
@@ -392,7 +395,7 @@ async function hydrateCacheLists(
         const metadata = args.listMetadata[list.id]
         const sharedListEntryData =
             list.type === 'page-link'
-                ? sharedListEntryMap.get(metadata?.remoteId) ?? undefined
+                ? (sharedListEntryMap.get(metadata?.remoteId) ?? undefined)
                 : undefined
 
         if (
@@ -428,8 +431,8 @@ async function hydrateCacheLists(
         .forEach((list) => {
             const sharedListEntryData =
                 list.type === 'page-link'
-                    ? sharedListEntryMap.get(list.sharedList.toString()) ??
-                      undefined
+                    ? (sharedListEntryMap.get(list.sharedList.toString()) ??
+                      undefined)
                     : undefined
             listsToCache.push(
                 reshapeFollowedListForCache(list, {

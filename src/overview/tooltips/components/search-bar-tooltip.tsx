@@ -1,7 +1,5 @@
 import React from 'react'
 
-const styles = require('./tooltip.css')
-
 /**
  * React component which gets rendered for 'search-bar' tooltip
  * in overview.

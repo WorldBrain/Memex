@@ -1,9 +1,7 @@
 import React, { KeyboardEventHandler } from 'react'
 import qs from 'query-string'
 import { connect, MapStateToProps } from 'react-redux'
-import browser from 'webextension-polyfill'
 import styled from 'styled-components'
-
 import { StatefulUIElement } from 'src/util/ui-logic'
 import * as constants from '../constants'
 import Logic, { State, Event } from './logic'
@@ -28,22 +26,21 @@ import { ClickHandler, RootState } from './types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { collections } from 'src/util/remote-functions-background'
 import { BackContainer } from 'src/popup/components/BackContainer'
-const styles = require('./components/Popup.css')
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 import { createSyncSettingsStore } from 'src/sync-settings/util'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/ts/telegram/utils'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import { pageActionAllowed } from '@worldbrain/memex-common/ts/subscriptions/storage'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { DEFAULT_POWERUP_LIMITS } from '@worldbrain/memex-common/lib/subscriptions/constants'
+import { DEFAULT_POWERUP_LIMITS } from '@worldbrain/memex-common/ts/subscriptions/constants'
 
 export interface OwnProps {
     analyticsBG: AnalyticsCoreInterface
@@ -71,12 +68,13 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     private browserName = checkBrowser()
     private activityIndicatorBG = runInBackground<ActivityIndicatorInterface>()
     constructor(props: Props) {
+        const browserAPIs = chrome
         super(
             props,
             new Logic({
-                tabsAPI: browser.tabs,
-                runtimeAPI: browser.runtime,
-                extensionAPI: browser.extension,
+                tabsAPI: browserAPIs.tabs,
+                runtimeAPI: browserAPIs.runtime,
+                extensionAPI: browserAPIs.extension,
                 customListsBG: collections,
                 authBG: runInBackground(),
                 analyticsBG: runInBackground(),
@@ -113,7 +111,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             const queryFilters = extractQueryFilters(this.props.searchValue)
             const queryParams = qs.stringify(queryFilters)
 
-            browser.tabs.create({
+            chrome.tabs.create({
                 url: `${constants.OVERVIEW_URL}?${queryParams}`,
             }) // New tab with query
 
@@ -125,7 +123,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         const queryFilters = extractQueryFilters(this.props.searchValue)
         const queryParams = qs.stringify(queryFilters)
 
-        browser.tabs.create({
+        chrome.tabs.create({
             url: `${constants.OVERVIEW_URL}?${queryParams}`,
         }) // New tab with query
 
@@ -172,7 +170,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     getPDFMode = () => {
         if (
             isUrlPDFViewerUrl(this.state.currentTabFullUrl, {
-                runtimeAPI: browser.runtime,
+                runtimeAPI: chrome.runtime,
             })
         ) {
             return 'reader'
@@ -204,8 +202,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <PrimaryAction
                         label="Upgrade"
                         onClick={() => {
-                            browser.tabs.create({
-                                url: `chrome-extension://${browser.runtime.id}/options.html#/account`,
+                            chrome.tabs.create({
+                                url: `chrome-extension://${chrome.runtime.id}/options.html#/account`,
                             })
                             this.processEvent('showUpgradeNotif', false)
                         }}
@@ -261,8 +259,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <PrimaryAction
                         label="Go to Settings"
                         onClick={() =>
-                            browser.tabs.create({
-                                url: `chrome://extensions/?id=${browser.runtime.id}`,
+                            chrome.tabs.create({
+                                url: `chrome://extensions/?id=${chrome.runtime.id}`,
                             })
                         }
                         size={'medium'}
@@ -318,7 +316,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <CollectionPicker
                         selectEntry={async (listId) => {
                             const isAllowed = await pageActionAllowed(
-                                browser,
+                                chrome,
                                 null,
                                 collections,
                                 this.props.url,
@@ -348,7 +346,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }
                         initialSelectedListIds={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}
-                        localStorageAPI={browser.storage.local}
+                        localStorageAPI={chrome.storage.local}
                         shouldHydrateCacheOnInit
                         context={'popup'}
                         analyticsBG={this.state.analyticsBG}
@@ -385,11 +383,11 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     closePopup={this.closePopup}
                     isSavedPage={this.state.isSavedPage}
                     getRootElement={this.props.getRootElement}
-                    browserAPIs={browser}
+                    browserAPIs={chrome}
                     collectionsBG={collections}
                     saveBookmark={async () => {
                         const isAllowed = await pageActionAllowed(
-                            browser,
+                            chrome,
                             null,
                             collections,
                             this.props.url,
@@ -484,7 +482,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        return <div className={styles.popup}>{this.renderChildren()}</div>
+        return <div className="popup">{this.renderChildren()}</div>
     }
 }
 

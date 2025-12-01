@@ -2,7 +2,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { NotificationCreator } from 'src/util/notification-types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { SubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/types'
 import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -15,10 +15,10 @@ import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AnalyticsInterface } from 'src/analytics/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 
 export interface RemoteFunctionImplementations<
-    Role extends 'provider' | 'caller'
+    Role extends 'provider' | 'caller',
 > {
     notifications: NotificationCreator
     bookmarks: BookmarksInterface

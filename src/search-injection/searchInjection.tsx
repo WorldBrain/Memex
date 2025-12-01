@@ -5,6 +5,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
 import debounce from 'lodash/debounce'
+import { createRoot } from 'react-dom/client'
 
 import Container from './components/container'
 import * as constants from './constants'
@@ -12,11 +13,11 @@ import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import type { ResultItemProps, SearchEngineName } from './types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { RemoteSearchInterface } from 'src/search/background/types'
-import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { isMemexPageAPdf } from '@worldbrain/memex-common/ts/page-indexing/utils'
 
 interface RootProps {
     rootEl: HTMLElement
@@ -186,8 +187,11 @@ export const handleRenderSearchInjection = async (
             sideBox.style.marginLeft = '40px'
         }
 
-        const root = document.createElement('div')
-        root.setAttribute('id', constants.REACT_ROOTS.searchEngineInjection)
+        const rootElement = document.createElement('div')
+        rootElement.setAttribute(
+            'id',
+            constants.REACT_ROOTS.searchEngineInjection,
+        )
 
         const containerIdentifier = searchEngineObj.container[position]
 
@@ -207,15 +211,15 @@ export const handleRenderSearchInjection = async (
                     button.addEventListener('click', () => {
                         const rcnt = document.getElementById('rcnt')
                         if (rcnt) {
-                            root.style.position = 'absolute'
-                            root.style.display = 'flex'
-                            root.style.zIndex = '2147483647'
-                            root.style.width = '100%'
-                            root.style.height = '100%'
-                            root.style.backgroundColor = 'white'
-                            root.style.top = '0px'
+                            rootElement.style.position = 'absolute'
+                            rootElement.style.display = 'flex'
+                            rootElement.style.zIndex = '2147483647'
+                            rootElement.style.width = '100%'
+                            rootElement.style.height = '100%'
+                            rootElement.style.backgroundColor = 'white'
+                            rootElement.style.top = '0px'
                             rcnt.style.position = 'relative'
-                            rcnt.appendChild(root)
+                            rcnt.appendChild(rootElement)
 
                             // const closeListener = (e) => {
                             //     const target = e.target as HTMLElement
@@ -223,7 +227,7 @@ export const handleRenderSearchInjection = async (
                             //         '[role="navigation"]',
                             //     )
                             //     if (navigation) {
-                            //         root.style.display = 'none'
+                            //         rootElement.style.display = 'none'
                             //         document.removeEventListener(
                             //             'click',
                             //             closeListener,
@@ -258,11 +262,11 @@ export const handleRenderSearchInjection = async (
 
                     containerWithSuggestions.insertAdjacentElement(
                         'beforeend',
-                        root,
+                        rootElement,
                     )
                 } else {
                     suggestionsContainer.insertBefore(
-                        root,
+                        rootElement,
                         suggestionsContainer.firstChild,
                     )
                 }
@@ -270,7 +274,10 @@ export const handleRenderSearchInjection = async (
                 const containerAbove = document.getElementsByClassName(
                     searchEngineObj.container.above,
                 )[0] as HTMLElement
-                containerAbove.insertBefore(root, containerAbove.firstChild)
+                containerAbove.insertBefore(
+                    rootElement,
+                    containerAbove.firstChild,
+                )
             }
         }
 
@@ -293,11 +300,11 @@ export const handleRenderSearchInjection = async (
 
                     containerWithSuggestions.insertAdjacentElement(
                         'beforeend',
-                        root,
+                        rootElement,
                     )
                 } else {
                     suggestionsContainer.insertBefore(
-                        root,
+                        rootElement,
                         suggestionsContainer.firstChild,
                     )
                 }
@@ -305,14 +312,17 @@ export const handleRenderSearchInjection = async (
                 const containerAbove = document.getElementById(
                     searchEngineObj.container.above,
                 )
-                containerAbove.insertBefore(root, containerAbove.firstChild)
+                containerAbove.insertBefore(
+                    rootElement,
+                    containerAbove.firstChild,
+                )
             }
         }
 
         if (searchEngine === 'duckduckgo') {
             const container =
                 document.getElementsByClassName(containerIdentifier)[0]
-            container.insertBefore(root, container.firstChild)
+            container.insertBefore(rootElement, container.firstChild)
         }
 
         // // If re-rendering remove the already present component
@@ -343,10 +353,11 @@ export const handleRenderSearchInjection = async (
         //     component.style.top = '100px'
         //     component.style.zIndex = '100'
         // }
-        ReactDOM.render(
+        const reactRoot = createRoot(rootElement)
+        reactRoot.render(
             <Root
                 query={query}
-                rootEl={root}
+                rootEl={rootElement}
                 position={position}
                 syncSettings={syncSettings}
                 searchEngine={searchEngine}
@@ -355,7 +366,7 @@ export const handleRenderSearchInjection = async (
                 searchBG={searchBG}
                 openPDFinViewer={openPDFinViewer}
             />,
-            root,
+            rootElement,
         )
     }
 

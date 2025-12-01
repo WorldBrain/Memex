@@ -1,6 +1,6 @@
 import React from 'react'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import type { ListTreeState, ListTreeActions } from '../types'
 
 export interface Props {
@@ -20,8 +20,8 @@ export class ListTreeToggleArrow extends React.Component<Props> {
                     !treeState.hasChildren
                         ? 'Add Sub-Space'
                         : treeState.areChildrenShown
-                        ? 'Hide Sub-Spaces'
-                        : 'Show Sub-Spaces'
+                          ? 'Hide Sub-Spaces'
+                          : 'Show Sub-Spaces'
                 }
                 placement="bottom"
                 targetElementRef={this.toggleBtnRef.current}
@@ -34,8 +34,8 @@ export class ListTreeToggleArrow extends React.Component<Props> {
                         !treeState.hasChildren
                             ? 'plus'
                             : treeState.areChildrenShown
-                            ? 'arrowDown'
-                            : 'arrowRight'
+                              ? 'arrowDown'
+                              : 'arrowRight'
                     }
                     heightAndWidth="16px"
                     color={treeState.hasChildren ? 'prime1' : 'greyScale4'}

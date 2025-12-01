@@ -1,6 +1,6 @@
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
 
 export interface Props {
@@ -99,7 +99,8 @@ const Container = styled.div<{ isExpanded }>`
     padding: 10px;
     border: 1px solid ${(props) => props.theme.colors.greyScale2};
     background-color: ${(props) => props.theme.colors.black};
-    box-shadow: 0px 4px 16px rgba(14, 15, 21, 0.3),
+    box-shadow:
+        0px 4px 16px rgba(14, 15, 21, 0.3),
         0px 12px 24px rgba(14, 15, 21, 0.15);
     display: flex;
     align-items: center;

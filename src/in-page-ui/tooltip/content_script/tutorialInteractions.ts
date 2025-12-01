@@ -73,7 +73,7 @@ export const removeTutorial = (options?: { override?: boolean }) => {
     if (!tutorialTarget) {
         return
     }
-    destroyUIContainer(tutorialTarget)
+    showTutorial?.()
     tutorialTarget.remove()
 
     tutorialTarget = null

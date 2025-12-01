@@ -1,14 +1,13 @@
-import { Browser } from 'webextension-polyfill'
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import { SyncPostReceiveProcessor } from '@worldbrain/storex-sync'
-import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
+import { SharedSyncLog } from '@worldbrain/storex-sync/ts/shared-sync-log'
 
-import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import { AuthService } from '@worldbrain/memex-common/ts/authentication/types'
 import SyncService, {
     SignalTransportFactory,
-} from '@worldbrain/memex-common/lib/sync'
-import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
-import { TweetNaclSyncEncryption } from '@worldbrain/memex-common/lib/sync/secrets/tweetnacl'
+} from '@worldbrain/memex-common/ts/sync'
+import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/ts/sync/constants'
+import { TweetNaclSyncEncryption } from '@worldbrain/memex-common/ts/sync/secrets/tweetnacl'
 
 import { PublicSyncInterface } from './types'
 import {
@@ -16,10 +15,10 @@ import {
     MemexExtSyncInfoStorage,
 } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
-import { filterSyncLog } from '@worldbrain/memex-common/lib/sync//sync-logging'
+import { filterSyncLog } from '@worldbrain/memex-common/ts/sync//sync-logging'
 import { MemexExtSyncSettingStore } from './setting-store'
 import { resolvablePromise } from 'src/util/promises'
-import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import { InitialSyncEvents } from '@worldbrain/storex-sync/ts/integration/initial-sync'
 import { bindMethod } from 'src/util/functions'
 import { Analytics } from 'src/analytics/types'
 import { captureException } from 'src/util/raven'
@@ -209,9 +208,8 @@ export default class SyncBackground extends SyncService {
     }
 
     retrieveLastSyncTimestamp = async (): Promise<number> => {
-        const timestamp = await this.settingStore.retrieveSetting(
-            'lastSyncTimestamp',
-        )
+        const timestamp =
+            await this.settingStore.retrieveSetting('lastSyncTimestamp')
 
         if (!timestamp) {
             throw new Error('No last sync timestamp exists')

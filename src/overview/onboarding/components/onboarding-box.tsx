@@ -1,8 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
-const styles = require('./onboarding-box.css')
-
 export interface Props {}
 
 class OnboardingBox extends PureComponent<Props> {
@@ -10,10 +8,8 @@ class OnboardingBox extends PureComponent<Props> {
         return (
             <div>
                 <FlexLayout>
-                    <div className={styles.container}>
-                        {this.props.children}
-                    </div>
-                    <div className={styles.black} />
+                    <div className="container">{this.props.children}</div>
+                    <div className="black" />
                 </FlexLayout>
             </div>
         )
@@ -33,8 +29,13 @@ const FlexLayout = styled.div`
 
     * {
         font-family: 'Satoshi', sans-serif;
-        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
-            'ss04' on, 'liga' off;
+        font-feature-settings:
+            'pnum' on,
+            'lnum' on,
+            'case' on,
+            'ss03' on,
+            'ss04' on,
+            'liga' off;
         letter-spacing: 0.8px;
     }
 `

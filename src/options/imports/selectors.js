@@ -9,7 +9,7 @@ import {
     IMPORT_TYPE_DISPLAY as TYPE_DISPLAY,
     DOWNLOAD_STATUS as DL_STAT,
 } from './constants'
-import { humanizeDuration } from '@worldbrain/memex-common/lib/utils/date-time'
+import { humanizeDuration } from '@worldbrain/memex-common/ts/utils/date-time'
 
 export const imports = (state) => state.imports
 

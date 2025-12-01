@@ -1,4 +1,4 @@
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 
 /**
  * This exists as a bit of a hack so that the dashboard static list items in the sidebar can

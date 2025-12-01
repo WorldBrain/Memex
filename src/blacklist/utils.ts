@@ -1,9 +1,8 @@
-import browser from 'webextension-polyfill'
 import { INPAGE_UI_BLACKLIST_STORAGE_KEY } from './constants'
 import type { BlacklistEntry } from './types'
 
 export const getUrlBlacklist = async (): Promise<BlacklistEntry[]> => {
-    const storageValues = await browser.storage.local.get(
+    const storageValues = await chrome.storage.local.get(
         INPAGE_UI_BLACKLIST_STORAGE_KEY,
     )
     return storageValues[INPAGE_UI_BLACKLIST_STORAGE_KEY] ?? []
@@ -33,7 +32,7 @@ export const addUrlToBlacklist = async (pageUrl: string): Promise<void> => {
         return
     }
 
-    await browser.storage.local.set({
+    await chrome.storage.local.set({
         [INPAGE_UI_BLACKLIST_STORAGE_KEY]: [
             ...urlBlacklist,
             { expression: pageUrl, dateAdded: Date.now() },

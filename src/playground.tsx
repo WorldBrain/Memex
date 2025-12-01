@@ -1,10 +1,4 @@
-import {
-    setupRpcConnection,
-    remoteFunction,
-    runInBackground,
-    makeRemotelyCallable,
-} from 'src/util/webextensionRPC'
-import browser from 'webextension-polyfill'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 async function main() {
     console.log(1)
@@ -12,7 +6,7 @@ async function main() {
         testCallable: () => Promise<void>
     }>().testCallable()
     console.log(2)
-    // const port = browser.runtime.connect(undefined, {
+    // const port = chrome.runtime.connect(undefined, {
     //     name: 'options',
     // })
     // port.onMessage.addListener((msg, sender) => {

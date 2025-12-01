@@ -1,8 +1,4 @@
 import React from 'react'
-
-import cx from 'classnames'
-const styles = require('./Index.css')
-
 interface Props {
     handleRenderCreateList: () => void
     isForInpage?: boolean
@@ -15,28 +11,11 @@ const List = ({
     isForInpage = false,
     isSidebarLocked,
 }: Props) => (
-    <div
-        className={cx(styles.collection, {
-            [styles.collectionSidebar]: isForInpage,
-        })}
-        onClick={handleRenderCreateList}
-    >
-        {isForInpage ? (
-            <div className={styles.collectionSidebarTitle}>Collections</div>
-        ) : null}
-        <div
-            className={cx(styles.addNew, {
-                [styles.addNewHover]: isSidebarLocked,
-            })}
-        >
-            <span className={styles.plus} />
-            <span
-                className={cx(styles.myCollection, {
-                    [styles.myCollectionSidebar]: isForInpage,
-                })}
-            >
-                Add New{' '}
-            </span>
+    <div onClick={handleRenderCreateList}>
+        {isForInpage ? <div>Collections</div> : null}
+        <div>
+            <span />
+            <span>Add New </span>
         </div>
     </div>
 )

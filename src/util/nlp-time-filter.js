@@ -1,4 +1,4 @@
-import chrono from 'chrono-node'
+import * as chrono from 'chrono-node'
 
 const BEFORE_REGEX = /to:[''"](.+)['"]/i
 const AFTER_REGEX = /from:['"](.+)['"]/i

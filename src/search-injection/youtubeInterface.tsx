@@ -2,7 +2,7 @@
 DOM manipulation helper functions
 */
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import {
@@ -10,9 +10,8 @@ import {
     theme,
 } from 'src/common-ui/components/design-library/theme'
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
-import { Browser, runtime } from 'webextension-polyfill'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
+import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/ts/editor/utils'
 import YoutubeButtonMenu from './components/youtubeActionBar'
 import { sleepPromise } from 'src/util/promises'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
@@ -25,7 +24,8 @@ interface RootProps {
     syncSettings: SyncSettingsStore<'openAI'>
     annotationsFunctions: any
     transcriptFunctions: any
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
+    removeYoutubeBar: () => void
 }
 
 interface RootState {
@@ -59,7 +59,7 @@ class Root extends React.Component<RootProps, RootState> {
                         syncSettings={props.syncSettings}
                         getRootElement={() => props.rootEl}
                         browserAPIs={props.browserAPIs}
-                        removeYoutubeBar={() => props.rootEl.remove()}
+                        removeYoutubeBar={() => props.removeYoutubeBar()}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -72,7 +72,7 @@ export const handleRenderYoutubeInterface = async (
     syncSettingsBG: RemoteSyncSettingsInterface,
     annotationsFunctions: any,
     transcriptFunctions: any,
-    browserAPIs: Browser,
+    browserAPIs: typeof chrome,
 ) => {
     const existingButton = document.getElementById(
         constants.REACT_ROOTS.youtubeInterface,
@@ -113,19 +113,18 @@ export const handleRenderYoutubeInterface = async (
                             if (node instanceof HTMLElement) {
                                 // Check if the "player" element is in the added node or its descendants
                                 if (node.querySelector('#player')) {
-                                    const existingElement = document.getElementById(
-                                        'MemexButtonContainer',
-                                    )
+                                    const existingElement =
+                                        document.getElementById(
+                                            'MemexButtonContainer',
+                                        )
 
                                     if (existingElement) {
                                         return
                                     }
-                                    const below = document.querySelector(
-                                        '#below',
-                                    )
-                                    const player = document.querySelector(
-                                        '#player',
-                                    )
+                                    const below =
+                                        document.querySelector('#below')
+                                    const player =
+                                        document.querySelector('#player')
 
                                     injectYoutubeContextMenu(
                                         annotationsFunctions,
@@ -145,19 +144,18 @@ export const handleRenderYoutubeInterface = async (
                             if (node instanceof HTMLElement) {
                                 // Check if the "below" element is in the added node or its descendants
                                 if (node.querySelector('#below')) {
-                                    const existingElement = document.getElementById(
-                                        'MemexButtonContainer',
-                                    )
+                                    const existingElement =
+                                        document.getElementById(
+                                            'MemexButtonContainer',
+                                        )
 
                                     if (existingElement) {
                                         return
                                     }
-                                    const below = document.querySelector(
-                                        '#below',
-                                    )
-                                    const player = document.querySelector(
-                                        '#player',
-                                    )
+                                    const below =
+                                        document.querySelector('#below')
+                                    const player =
+                                        document.querySelector('#player')
                                     below.insertAdjacentElement(
                                         'afterbegin',
                                         target,
@@ -187,9 +185,8 @@ export const handleRenderYoutubeInterface = async (
                                             .startsWith(videoPath)
                                     ) {
                                         const selector2 = `#description-inline-expander .yt-core-attributed-string__link[href^="${videoPath}"]`
-                                        const chapterTimestamps = document.querySelectorAll(
-                                            selector2,
-                                        )
+                                        const chapterTimestamps =
+                                            document.querySelectorAll(selector2)
                                         const chapterBlocks = []
                                         hasChapterContainer = true
                                         Array.from(chapterTimestamps).forEach(
@@ -202,13 +199,13 @@ export const handleRenderYoutubeInterface = async (
 
                                         const firstBlock = chapterBlocks[0]
 
-                                        const buttonIcon = runtime.getURL(
-                                            '/img/memex-icon.svg',
-                                        )
+                                        const buttonIcon =
+                                            chrome.runtime.getURL(
+                                                '/img/memex-icon.svg',
+                                            )
 
-                                        const newBlock = document.createElement(
-                                            'div',
-                                        )
+                                        const newBlock =
+                                            document.createElement('div')
                                         newBlock.style.display = 'flex'
                                         newBlock.style.alignItems = 'center'
                                         newBlock.style.marginTop = '10px'
@@ -255,7 +252,8 @@ export const handleRenderYoutubeInterface = async (
             observer.observe(document.body, { childList: true, subtree: true })
         }
 
-        ReactDOM.render(
+        const root = createRoot(target)
+        root.render(
             <Root
                 rootEl={target}
                 syncSettings={syncSettings}
@@ -263,6 +261,10 @@ export const handleRenderYoutubeInterface = async (
                 transcriptFunctions={transcriptFunctions}
                 browserAPIs={browserAPIs}
                 syncSettingsBG={syncSettingsBG}
+                removeYoutubeBar={() => {
+                    root.unmount()
+                    target.remove()
+                }}
             />,
             target,
         )
@@ -290,7 +292,7 @@ export const handleRenderYoutubeInterface = async (
 
 export function injectYoutubeContextMenu(annotationsFunctions: any) {
     const config = { attributes: true, childList: true, subtree: true }
-    const icon = runtime.getURL('/img/memex-icon.svg')
+    const icon = chrome.runtime.getURL('/img/memex-icon.svg')
     let panel = null
 
     const contextMenu = document.getElementsByClassName(
@@ -312,9 +314,8 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 
             for (let i = 0; i < targetChildren.length; i++) {
                 if (targetChildren[i].classList.contains('ytp-panel')) {
-                    const potentialPanel = targetChildren[i].querySelector(
-                        '.ytp-panel-menu',
-                    )
+                    const potentialPanel =
+                        targetChildren[i].querySelector('.ytp-panel-menu')
                     if (potentialPanel) {
                         panel = potentialPanel
                         break

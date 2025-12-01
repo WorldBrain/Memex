@@ -1,5 +1,4 @@
 import * as React from 'react'
-const styles = require('./ribbon.css')
 
 interface Props {
     closePanel: () => void
@@ -11,7 +10,7 @@ class TutorialPanel extends React.PureComponent<Props> {
     }
 
     render() {
-        return <div className={styles.tutorialPanel}>{this.props.children}</div>
+        return <div></div>
     }
 }
 

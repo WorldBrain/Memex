@@ -1,12 +1,12 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import { colorDarkText } from 'src/common-ui/components/design-library/colors'
 import DismissibleResultsMessage from 'src/dashboard-refactor/search-results/components/dismissible-results-message'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 const PioneerPlanContainer = styled.div`
     display: flex;
@@ -18,7 +18,12 @@ const PioneerPlanContainer = styled.div`
     width: 100%;
     flex-direction: column;
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
 `
 const PioneerPlanContentBox = styled.div`

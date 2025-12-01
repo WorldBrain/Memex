@@ -3,10 +3,7 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 
-import browser from 'webextension-polyfill'
-const styles = require('./IndexDropdown.css')
-
-const searchImg = browser.runtime.getURL('/img/search.svg')
+const searchImg = chrome.runtime.getURL('/img/search.svg')
 
 export interface Props {
     children?: any[]
@@ -61,16 +58,6 @@ class IndexDropdown extends PureComponent<Props> {
         errMsg: PropTypes.string,
     }
 
-    get mainClass() {
-        return cx(styles.tagDiv, {
-            [styles.tagDivFromOverview]: this.props.hover,
-            [styles.tagDivForAnnotations]: this.props.isForAnnotation,
-            [styles.tagDivForFilter]: !this.props.url,
-            [styles.tagDivForFilterSB]: this.props.isForSidebar,
-            [styles.tagDivForSidebarResults]: this.props.sidebarTagDiv,
-        })
-    }
-
     get searchPlaceholder() {
         return `Search & Add ${this.placeholder}`
     }
@@ -108,22 +95,17 @@ class IndexDropdown extends PureComponent<Props> {
             return null
         }
 
-        return <p className={styles.errMsg}>{this.errMsg}</p>
+        return <p>{this.errMsg}</p>
     }
 
     render() {
         return (
-            <div className={this.mainClass} ref={this.props.setTagDivRef}>
-                <div
-                    className={cx(styles.searchContainer, {
-                        [styles.commentBox]: this.props.allowAdd,
-                    })}
-                >
-                    <span className={styles.searchIcon}>
-                        <img src={searchImg} className={styles.searchImg} />
+            <div ref={this.props.setTagDivRef}>
+                <div>
+                    <span>
+                        <img src={searchImg} />
                     </span>
                     <TextInputControlled
-                        className={styles.search}
                         name="query"
                         placeholder={this.searchPlaceholder}
                         onChange={this.props.onTagSearchChange}
@@ -138,32 +120,18 @@ class IndexDropdown extends PureComponent<Props> {
                     />
                 </div>
                 {this.renderError()}
-                {this.props.allTabs && (
-                    <p className={styles.allTabs}>
-                        Add tags to all tabs in window
-                    </p>
-                )}
+                {this.props.allTabs && <p>Add tags to all tabs in window</p>}
                 {this.props.allTabsCollection && (
-                    <p className={styles.allTabs}>
-                        Add all tabs in window to collections
-                    </p>
+                    <p>Add all tabs in window to collections</p>
                 )}
-                <div
-                    className={cx(styles.tagContainer, {
-                        [styles.tagContainerAnnotations]: this.props
-                            .isForAnnotation,
-                    })}
-                >
-                    <div className={styles.TagBox}>{this.props.children}</div>
+                <div>
+                    <div>{this.props.children}</div>
                 </div>
                 {!this.props.isForSidebar &&
                     !this.props.isForAnnotation &&
                     !this.props.isForRibbon && (
-                        <div className={styles.summaryTagContainer}>
-                            <button
-                                className={styles.backButton}
-                                onClick={this.props.onBackBtnClick}
-                            >
+                        <div>
+                            <button onClick={this.props.onBackBtnClick}>
                                 Back
                             </button>
                         </div>

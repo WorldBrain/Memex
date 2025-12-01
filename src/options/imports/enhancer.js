@@ -2,9 +2,9 @@ import * as actions from './actions'
 import * as selectors from './selectors'
 import { STORAGE_KEYS } from './constants'
 
-const hydrateImportsFromStorage = store => {
+const hydrateImportsFromStorage = (store) => {
     const hydrate = (key, action) =>
-        browser.storage.local.get(key).then(data => {
+        chrome.storage.local.get(key).then((data) => {
             if (!data[key]) {
                 return
             }
@@ -23,9 +23,9 @@ const hydrateImportsFromStorage = store => {
     hydrate(STORAGE_KEYS.FAIL_STATE, actions.initFailCounts)
 }
 
-const syncImportsToStorage = store =>
+const syncImportsToStorage = (store) =>
     store.subscribe(() => {
-        const dump = (key, data) => browser.storage.local.set({ [key]: data })
+        const dump = (key, data) => chrome.storage.local.set({ [key]: data })
 
         const state = store.getState()
         dump(STORAGE_KEYS.ALLOW_TYPES, selectors.allowTypes(state))
@@ -35,7 +35,7 @@ const syncImportsToStorage = store =>
         dump(STORAGE_KEYS.FAIL_STATE, selectors.fail(state))
     })
 
-export default storeCreator => (reducer, initState, enhancer) => {
+export default (storeCreator) => (reducer, initState, enhancer) => {
     const store = storeCreator(reducer, initState, enhancer)
 
     // Subscribe to changes and update local storage

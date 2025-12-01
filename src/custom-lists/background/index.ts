@@ -1,7 +1,6 @@
-import type Storex from '@worldbrain/storex'
-import type { Browser } from 'webextension-polyfill'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { isFullUrl } from '@worldbrain/memex-common/lib/url-utils/normalize/utils'
+import type Storex from '@worldbrain/storex/ts'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { isFullUrl } from '@worldbrain/memex-common/ts/url-utils/normalize/utils'
 import CustomListStorage from './storage'
 import type {
     RemoteCollectionsInterface,
@@ -11,23 +10,23 @@ import type {
 import { maybeIndexTabs } from 'src/page-indexing/utils'
 import type { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/suggestions-cache'
+import { updateSuggestionsCache } from '@worldbrain/memex-common/ts/utils/suggestions-cache'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type TabManagementBackground from 'src/tab-management/background'
 import type { AuthServices } from 'src/services/types'
-import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { ContentIdentifier } from '@worldbrain/memex-common/ts/page-indexing/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
-import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
+import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/ts/content-sharing/backend/types'
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
-import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
+import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/ts/content-sharing/storage/list-tree-middleware'
 import {
     DEFAULT_KEY,
     defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 
@@ -67,10 +66,10 @@ export default class CustomListBackground {
         })
 
         this.remoteFunctions = {
-            createCustomList: this.createCustomList,
-            deleteListTree: this.deleteListTree,
-            updateListTreeParent: this.updateListTreeParent,
-            updateListTreeOrder: this.updateListTreeOrder,
+            createCustomList: this.createCustomList.bind(this),
+            deleteListTree: this.deleteListTree.bind(this),
+            updateListTreeParent: this.updateListTreeParent.bind(this),
+            updateListTreeOrder: this.updateListTreeOrder.bind(this),
             insertPageToList: async (params) => {
                 if (!params.indexUrl) {
                     const currentTab = await options.browserAPIs.tabs.query({
@@ -81,32 +80,33 @@ export default class CustomListBackground {
                 }
                 return this.insertPageToList(params)
             },
-            updateListName: this.updateList,
-            findPageByUrl: this.findPageByUrl,
-            removePageFromList: this.removePageFromList,
-            removeAllListPages: this.removeAllListPages,
-            fetchAllLists: this.fetchAllLists,
-            fetchListById: this.fetchListById,
-            fetchListTreeById: this.fetchListTreeById,
-            findSimilarBackground: this.findSimilarBackground,
-            fetchAnnotationRefsForRemoteListsOnPage: this
-                .fetchAnnotationRefsForRemoteListsOnPage,
-            fetchSharedListDataWithPageAnnotations: this
-                .fetchSharedListDataWithPageAnnotations,
-            fetchSharedListDataWithOwnership: this
-                .fetchSharedListDataWithOwnership,
-            fetchListPagesByUrl: this.fetchListPagesByUrl,
-            fetchPageListEntriesByUrl: this.fetchPageListEntriesByUrl,
-            fetchPageLists: this.fetchPageLists,
-            addOpenTabsToList: this.addOpenTabsToList,
-            removeOpenTabsFromList: this.removeOpenTabsFromList,
-            updateListForPage: this.updateListForPage,
-            fetchListDescriptions: this.fetchListDescriptions,
-            updateListDescription: this.updateListDescription,
-            getInboxUnreadCount: this.getInboxUnreadCount,
-            createTabGroup: this.createTabGroup,
-            fetchLocalDataForRemoteListEntryFromServer: this
-                .fetchLocalDataForRemoteListEntryFromServer,
+            updateListName: this.updateList.bind(this),
+            findPageByUrl: this.findPageByUrl.bind(this),
+            removePageFromList: this.removePageFromList.bind(this),
+            removeAllListPages: this.removeAllListPages.bind(this),
+            fetchAllLists: this.fetchAllLists.bind(this),
+            fetchListById: this.fetchListById.bind(this),
+            fetchListTreeById: this.fetchListTreeById.bind(this),
+            findSimilarBackground: this.findSimilarBackground.bind(this),
+            fetchAnnotationRefsForRemoteListsOnPage:
+                this.fetchAnnotationRefsForRemoteListsOnPage.bind(this),
+            fetchSharedListDataWithPageAnnotations:
+                this.fetchSharedListDataWithPageAnnotations.bind(this),
+            fetchSharedListDataWithOwnership:
+                this.fetchSharedListDataWithOwnership.bind(this),
+            fetchListPagesByUrl: this.fetchListPagesByUrl.bind(this),
+            fetchPageListEntriesByUrl:
+                this.fetchPageListEntriesByUrl.bind(this),
+            fetchPageLists: this.fetchPageLists.bind(this),
+            addOpenTabsToList: this.addOpenTabsToList.bind(this),
+            removeOpenTabsFromList: this.removeOpenTabsFromList.bind(this),
+            updateListForPage: this.updateListForPage.bind(this),
+            fetchListDescriptions: this.fetchListDescriptions.bind(this),
+            updateListDescription: this.updateListDescription.bind(this),
+            getInboxUnreadCount: this.getInboxUnreadCount.bind(this),
+            createTabGroup: this.createTabGroup.bind(this),
+            fetchLocalDataForRemoteListEntryFromServer:
+                this.fetchLocalDataForRemoteListEntryFromServer.bind(this),
         }
 
         this.localStorage = new BrowserSettingsStore(
@@ -121,102 +121,97 @@ export default class CustomListBackground {
         return Date.now()
     }
 
-    fetchAnnotationRefsForRemoteListsOnPage: RemoteCollectionsInterface['fetchAnnotationRefsForRemoteListsOnPage'] = async ({
-        sharedListIds,
-        normalizedPageUrl,
-    }) => {
-        const response = await this.options.contentSharingBackend.loadPageAnnotationRefsForLists(
-            {
-                listIds: sharedListIds,
-                normalizedPageUrl,
-            },
-        )
-        return response
-    }
-
-    fetchLocalDataForRemoteListEntryFromServer: RemoteCollectionsInterface['fetchLocalDataForRemoteListEntryFromServer'] = async ({
-        normalizedPageUrl,
-        remoteListId,
-        opts,
-    }) => {
-        const response = await this.options.contentSharingBackend.loadLocalDataForListEntry(
-            {
-                listId: remoteListId,
-                normalizedPageUrl,
-                opts,
-            },
-        )
-        if (response.status === 'permission-denied') {
-            throw new Error(
-                'Cannot get user data from server when unauthorized',
-            )
-        }
-        if (response.status === 'not-found') {
-            return null
-        }
-        return response.data
-    }
-
-    fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] = async ({
-        normalizedPageUrl,
-        remoteListId,
-    }) => {
-        const response = await this.options.contentSharingBackend.loadCollectionDetails(
-            {
-                listId: remoteListId,
-                normalizedPageUrl,
-            },
-        )
-
-        if (response.status === 'permission-denied') {
-            throw new Error(
-                'Cannot get user data from server when unauthorized',
-            )
-        }
-        if (response.status === 'not-found') {
-            return null
-        }
-        return {
-            ...response.data.retrievedList.sharedList,
-            sharedAnnotations: Object.values(response.data.annotations ?? {}),
-            order: response.data.retrievedList.sharedListTree?.order ?? 1,
-        }
-    }
-
-    fetchSharedListDataWithOwnership: RemoteCollectionsInterface['fetchSharedListDataWithOwnership'] = async ({
-        remoteListId,
-    }) => {
-        const currentUser = await this.options.authServices.auth.getCurrentUser()
-        if (!currentUser) {
-            return null
+    fetchAnnotationRefsForRemoteListsOnPage: RemoteCollectionsInterface['fetchAnnotationRefsForRemoteListsOnPage'] =
+        async ({ sharedListIds, normalizedPageUrl }) => {
+            const response =
+                await this.options.contentSharingBackend.loadPageAnnotationRefsForLists(
+                    {
+                        listIds: sharedListIds,
+                        normalizedPageUrl,
+                    },
+                )
+            return response
         }
 
-        const response = await this.options.contentSharingBackend.loadCollectionDetails(
-            {
-                listId: remoteListId,
-            },
-        )
-        if (response.status === 'permission-denied') {
-            throw new Error(
-                'Cannot get user data from server when unauthorized',
-            )
+    fetchLocalDataForRemoteListEntryFromServer: RemoteCollectionsInterface['fetchLocalDataForRemoteListEntryFromServer'] =
+        async ({ normalizedPageUrl, remoteListId, opts }) => {
+            const response =
+                await this.options.contentSharingBackend.loadLocalDataForListEntry(
+                    {
+                        listId: remoteListId,
+                        normalizedPageUrl,
+                        opts,
+                    },
+                )
+            if (response.status === 'permission-denied') {
+                throw new Error(
+                    'Cannot get user data from server when unauthorized',
+                )
+            }
+            if (response.status === 'not-found') {
+                return null
+            }
+            return response.data
         }
-        if (response.status === 'not-found') {
-            return null
-        }
-        const sharedList = response.data.retrievedList.sharedList
 
-        return {
-            name: sharedList.title,
-            id: sharedList.createdWhen,
-            order: response.data.retrievedList.sharedListTree?.order ?? 1,
-            remoteId: sharedList.reference.id.toString(),
-            createdAt: new Date(sharedList.createdWhen),
-            isOwned: sharedList.creator.id === currentUser.id,
-            parentListId: null,
-            pathListIds: [],
+    fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] =
+        async ({ normalizedPageUrl, remoteListId }) => {
+            const response =
+                await this.options.contentSharingBackend.loadCollectionDetails({
+                    listId: remoteListId,
+                    normalizedPageUrl,
+                })
+
+            if (response.status === 'permission-denied') {
+                throw new Error(
+                    'Cannot get user data from server when unauthorized',
+                )
+            }
+            if (response.status === 'not-found') {
+                return null
+            }
+            return {
+                ...response.data.retrievedList.sharedList,
+                sharedAnnotations: Object.values(
+                    response.data.annotations ?? {},
+                ),
+                order: response.data.retrievedList.sharedListTree?.order ?? 1,
+            }
         }
-    }
+
+    fetchSharedListDataWithOwnership: RemoteCollectionsInterface['fetchSharedListDataWithOwnership'] =
+        async ({ remoteListId }) => {
+            const currentUser =
+                await this.options.authServices.auth.getCurrentUser()
+            if (!currentUser) {
+                return null
+            }
+
+            const response =
+                await this.options.contentSharingBackend.loadCollectionDetails({
+                    listId: remoteListId,
+                })
+            if (response.status === 'permission-denied') {
+                throw new Error(
+                    'Cannot get user data from server when unauthorized',
+                )
+            }
+            if (response.status === 'not-found') {
+                return null
+            }
+            const sharedList = response.data.retrievedList.sharedList
+
+            return {
+                name: sharedList.title,
+                id: sharedList.createdWhen,
+                order: response.data.retrievedList.sharedListTree?.order ?? 1,
+                remoteId: sharedList.reference.id.toString(),
+                createdAt: new Date(sharedList.createdWhen),
+                isOwned: sharedList.creator.id === currentUser.id,
+                parentListId: null,
+                pathListIds: [],
+            }
+        }
 
     fetchAllLists: RemoteCollectionsInterface['fetchAllLists'] = async ({
         skip = 0,
@@ -248,30 +243,29 @@ export default class CustomListBackground {
             ) as number[],
         }))
     }
-    fetchListTreeById: RemoteCollectionsInterface['fetchListTreeById'] = async ({
-        id,
-    }) => {
-        const lists = await this.storage.fetchListByIds([id])
-        const list = lists[0]
-        const treeData = await this.storage.getTreeDataForList({
-            localListId: list.id,
-        })
+    fetchListTreeById: RemoteCollectionsInterface['fetchListTreeById'] =
+        async ({ id }) => {
+            const lists = await this.storage.fetchListByIds([id])
+            const list = lists[0]
+            const treeData = await this.storage.getTreeDataForList({
+                localListId: list.id,
+            })
 
-        if (!treeData) {
-            return null // or throw an error if a list must exist
-        }
+            if (!treeData) {
+                return null // or throw an error if a list must exist
+            }
 
-        return {
-            ...list,
-            ...treeData,
-            order: treeData.order ?? DEFAULT_KEY,
-            parentListId: treeData.parentListId ?? null,
-            pathListIds: extractMaterializedPathIds(
-                treeData.path ?? '',
-                'number',
-            ) as number[],
+            return {
+                ...list,
+                ...treeData,
+                order: treeData.order ?? DEFAULT_KEY,
+                parentListId: treeData.parentListId ?? null,
+                pathListIds: extractMaterializedPathIds(
+                    treeData.path ?? '',
+                    'number',
+                ) as number[],
+            }
         }
-    }
 
     fetchListById = async ({ id }: { id: number }) => {
         return this.storage.fetchListWithPagesById(id)
@@ -430,13 +424,12 @@ export default class CustomListBackground {
             dontTrack,
         })
         await this.updateListSuggestionsCache({ added: id })
-        const listShareResult = await this.options.contentSharing.scheduleListShare(
-            {
+        const listShareResult =
+            await this.options.contentSharing.scheduleListShare({
                 localListId,
                 isPrivate: type !== 'page-link',
                 ...preGeneratedIds,
-            },
-        )
+            })
         await this.createListTree({
             order,
             localListId,
@@ -469,66 +462,64 @@ export default class CustomListBackground {
         return { treeId }
     }
 
-    updateListTreeOrder: RemoteCollectionsInterface['updateListTreeOrder'] = async ({
-        localListId,
-        siblingListIds,
-        intendedIndexAmongSiblings,
-        now,
-    }) => {
-        const siblingListTrees = await this.storage.getTreeDataForLists({
-            localListIds: siblingListIds,
-        })
-        const orderedSiblingItems = Object.values(siblingListTrees)
-            .sort(defaultOrderableSorter)
-            .map((tree) => ({
-                id: tree.id,
-                key: tree.order,
-            }))
-
-        const changes =
-            intendedIndexAmongSiblings === siblingListIds.length
-                ? pushOrderedItem(orderedSiblingItems, localListId)
-                : insertOrderedItemBeforeIndex(
-                      orderedSiblingItems,
-                      localListId,
-                      intendedIndexAmongSiblings,
-                  )
-
-        await this.storage.updateListTreeOrder({
-            order: changes.create.key,
+    updateListTreeOrder: RemoteCollectionsInterface['updateListTreeOrder'] =
+        async ({
             localListId,
+            siblingListIds,
+            intendedIndexAmongSiblings,
             now,
-        })
-    }
+        }) => {
+            const siblingListTrees = await this.storage.getTreeDataForLists({
+                localListIds: siblingListIds,
+            })
+            const orderedSiblingItems = Object.values(siblingListTrees)
+                .sort(defaultOrderableSorter)
+                .map((tree) => ({
+                    id: tree.id,
+                    key: tree.order,
+                }))
 
-    updateListTreeParent: RemoteCollectionsInterface['updateListTreeParent'] = async ({
-        localListId,
-        parentListId,
-        now,
-    }) => {
-        if (
-            parentListId != null &&
-            (await this.storage.isListAAncestorOfListB(
+            const changes =
+                intendedIndexAmongSiblings === siblingListIds.length
+                    ? pushOrderedItem(orderedSiblingItems, localListId)
+                    : insertOrderedItemBeforeIndex(
+                          orderedSiblingItems,
+                          localListId,
+                          intendedIndexAmongSiblings,
+                      )
+
+            await this.storage.updateListTreeOrder({
+                order: changes.create.key,
                 localListId,
-                parentListId,
-            ))
-        ) {
-            throw new Error(
-                'Cannot make list a child of a descendent - this would result in a cycle',
-            )
+                now,
+            })
         }
 
-        // This will get caught by the ListTreeMiddleware
-        await this.options.storageManager.operation(
-            LIST_TREE_OPERATION_ALIASES.moveTree,
-            CustomListStorage.LIST_TREES_COLL,
-            {
-                localListId,
-                newParentListId: parentListId,
-                now,
-            },
-        )
-    }
+    updateListTreeParent: RemoteCollectionsInterface['updateListTreeParent'] =
+        async ({ localListId, parentListId, now }) => {
+            if (
+                parentListId != null &&
+                (await this.storage.isListAAncestorOfListB(
+                    localListId,
+                    parentListId,
+                ))
+            ) {
+                throw new Error(
+                    'Cannot make list a child of a descendent - this would result in a cycle',
+                )
+            }
+
+            // This will get caught by the ListTreeMiddleware
+            await this.options.storageManager.operation(
+                LIST_TREE_OPERATION_ALIASES.moveTree,
+                CustomListStorage.LIST_TREES_COLL,
+                {
+                    localListId,
+                    newParentListId: parentListId,
+                    now,
+                },
+            )
+        }
 
     deleteListTree: RemoteCollectionsInterface['deleteListTree'] = async ({
         treeId,
@@ -597,11 +588,10 @@ export default class CustomListBackground {
         const existing = await this.storage.fetchListEntry(id, pageUrl)
         let remoteID = null
         try {
-            remoteID = await this.options.contentSharing.storage.getRemoteListId(
-                {
+            remoteID =
+                await this.options.contentSharing.storage.getRemoteListId({
                     localId: id,
-                },
-            )
+                })
         } catch (error) {
             console.error(error)
         }
@@ -617,7 +607,7 @@ export default class CustomListBackground {
             createdAt: params.createdAt,
             pageTitle: params.pageTitle,
             analyticsBG: this.options.analyticsBG,
-            isShared: remoteID != null ?? false,
+            isShared: remoteID != null || false,
             dontTrack: params.dontTrack,
         })
 
@@ -646,7 +636,8 @@ export default class CustomListBackground {
         if (!(await this.fetchListById({ id: args.listId }))) {
             throw new Error('No list found for ID:' + args.listId)
         }
-        const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
+        const tabs =
+            await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         // Ensure content scripts are injected into each tab, so they can init page content identifier
         await Promise.all(
@@ -657,19 +648,18 @@ export default class CustomListBackground {
 
         const indexed = await maybeIndexTabs(tabs, {
             createPage: this.options.pages.indexPage,
-            waitForContentIdentifier: this.options.pages
-                .waitForContentIdentifier,
+            waitForContentIdentifier:
+                this.options.pages.waitForContentIdentifier,
             time: args.time ?? '$now',
         })
 
-        const existingListEntries = await this.storage.fetchListPageEntriesByUrls(
-            {
+        const existingListEntries =
+            await this.storage.fetchListPageEntriesByUrls({
                 listId: args.listId,
                 normalizedPageUrls: indexed.map(({ fullUrl }) =>
                     normalizeUrl(fullUrl),
                 ),
-            },
-        )
+            })
         const existingEntryUrls = new Set(
             existingListEntries.map((entry) => entry.fullUrl),
         )
@@ -692,7 +682,8 @@ export default class CustomListBackground {
     }
 
     removeOpenTabsFromList = async ({ listId }: { listId: number }) => {
-        const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
+        const tabs =
+            await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         await Promise.all(
             tabs.map((tab) =>
@@ -704,50 +695,40 @@ export default class CustomListBackground {
         )
     }
 
-    fetchListDescriptions: RemoteCollectionsInterface['fetchListDescriptions'] = async ({
-        listIds,
-    }) => {
-        const descriptions = await this.storage.fetchListDescriptionsByLists(
-            listIds,
-        )
-        return descriptions.reduce(
-            (acc, curr) => ({ ...acc, [curr.listId]: curr.description }),
-            {},
-        )
-    }
+    fetchListDescriptions: RemoteCollectionsInterface['fetchListDescriptions'] =
+        async ({ listIds }) => {
+            const descriptions =
+                await this.storage.fetchListDescriptionsByLists(listIds)
+            return descriptions.reduce(
+                (acc, curr) => ({ ...acc, [curr.listId]: curr.description }),
+                {},
+            )
+        }
 
-    updateListDescription: RemoteCollectionsInterface['updateListDescription'] = async ({
-        description,
-        listId,
-    }) => {
-        await this.storage.createOrUpdateListDescription({
-            description,
-            listId,
-        })
-    }
-
-    updateListForPage: RemoteCollectionsInterface['updateListForPage'] = async ({
-        added,
-        deleted,
-        url,
-        tabId,
-        skipPageIndexing,
-        pageTitle,
-    }) => {
-        const listId = added ?? deleted
-
-        if (added) {
-            await this.insertPageToList({
-                id: listId,
-                url,
-                tabId,
-                skipPageIndexing,
-                pageTitle,
+    updateListDescription: RemoteCollectionsInterface['updateListDescription'] =
+        async ({ description, listId }) => {
+            await this.storage.createOrUpdateListDescription({
+                description,
+                listId,
             })
         }
 
-        if (deleted) {
-            await this.removePageFromList({ id: listId, url })
+    updateListForPage: RemoteCollectionsInterface['updateListForPage'] =
+        async ({ added, deleted, url, tabId, skipPageIndexing, pageTitle }) => {
+            const listId = added ?? deleted
+
+            if (added) {
+                await this.insertPageToList({
+                    id: listId,
+                    url,
+                    tabId,
+                    skipPageIndexing,
+                    pageTitle,
+                })
+            }
+
+            if (deleted) {
+                await this.removePageFromList({ id: listId, url })
+            }
         }
-    }
 }

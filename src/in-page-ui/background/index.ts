@@ -1,11 +1,10 @@
-import type { Tabs, ContextMenus, Browser } from 'webextension-polyfill'
 import { bindMethod } from 'src/util/functions'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from './types'
 import { InPageUIContentScriptRemoteInterface } from '../content_script/types'
 // import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { OVERVIEW_URL } from 'src/constants'
-import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { checkStripePlan } from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 import { blobToDataURL } from 'src/util/blob-utils'
 
@@ -17,9 +16,9 @@ export const CONTEXT_MENU_ANALYSE_IMAGE_ID =
     CONTEXT_MENU_ID_PREFIX + 'analyseImage'
 
 export interface Props {
-    tabsAPI: Tabs.Static
-    contextMenuAPI: ContextMenus.Static
-    browserAPIs: Browser
+    tabsAPI: typeof chrome.tabs
+    contextMenuAPI: typeof chrome.contextMenus
+    browserAPIs: typeof chrome
     fetch: typeof fetch
 }
 

@@ -2,6 +2,9 @@ import * as Global from './global'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentScriptsInterface } from '../background/types'
 
+// Ensure RPC is set up first by calling main early
+Global.main()
+
 const contentScriptsBG = runInBackground<ContentScriptsInterface<'caller'>>()
 
 // auto-reload the old memex.garden homepage that had caching issues
@@ -36,4 +39,4 @@ if (window.location.href.includes('memex.garden')) {
 }
 
 // load regular content script global file
-Global.main()
+// Global.main()  // Already called above

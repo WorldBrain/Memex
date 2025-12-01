@@ -2,10 +2,7 @@ import React, { PureComponent } from 'react'
 import Button from './Button'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-
-const styles = require('./Button.css')
-const LinkButtonStyles = require('src/popup/collections-button/components/CollectionsButton.css')
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 interface Props {
     currentPageUrl?: string
@@ -50,11 +47,11 @@ class CopyPDFLinkButton extends PureComponent<Props, State> {
                     />
                     <ButtonInnerContent>
                         {this.state.isCopied === false ? (
-                            <div className={styles.buttonInnerContent}>
+                            <div className="buttonInnerContent">
                                 Copy PDF Url
                             </div>
                         ) : (
-                            <div className={styles.buttonInnerContent}>
+                            <div className="buttonInnerContent">
                                 Copied to Clipboard
                             </div>
                         )}

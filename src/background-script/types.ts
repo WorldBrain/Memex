@@ -1,4 +1,4 @@
-import type { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import type { PremiumPlans } from '@worldbrain/memex-common/ts/subscriptions/availablePowerups'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
@@ -58,7 +58,7 @@ export interface RemoteBGScriptInterface<Role extends RemoteFunctionRole> {
 
 // TODO: Fill in this type with remaining BG modules
 export interface BackgroundModuleRemoteInterfaces<
-    Role extends RemoteFunctionRole
+    Role extends RemoteFunctionRole,
 > {
     annotations: AnnotationInterface<Role>
     contentSharing: ContentSharingInterface

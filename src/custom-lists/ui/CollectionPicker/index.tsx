@@ -1,6 +1,5 @@
 import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
-import browser from 'webextension-polyfill'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic from 'src/custom-lists/ui/CollectionPicker/logic'
@@ -11,7 +10,7 @@ import type {
 } from 'src/custom-lists/ui/CollectionPicker/types'
 import { PickerSearchInput } from './components/SearchInput'
 import AddNewEntry from './components/AddNewEntry'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import EntryRow from './components/EntryRow'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { ListResultItem } from './components/ListResultItem'
@@ -22,25 +21,25 @@ import {
     contentSharing,
     pageActivityIndicator,
 } from 'src/util/remote-functions-background'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import SpaceEditMenu from 'src/custom-lists/ui/space-edit-menu'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import IconBox from '@worldbrain/memex-common/ts/common-ui/components/icon-box'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import {
     generateRenderedListEntryId,
     getEntriesForCurrentPickerTab,
 } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
-import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
+import { ErrorNotification } from '@worldbrain/memex-common/ts/common-ui/components/error-notification'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ListTrees } from '../list-trees'
 import { ListTreeToggleArrow } from '../list-trees/components/tree-toggle-arrow'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { validateSpaceName } from '@worldbrain/memex-common/ts/utils/space-name-validation'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
@@ -69,7 +68,7 @@ class SpacePicker extends StatefulUIElement<
         analyticsBG: analyticsBG,
         bgScriptBG: runInBackground(),
         contentSharingBG: contentSharing,
-        localStorageAPI: browser.storage.local,
+        localStorageAPI: chrome.storage.local,
         pageActivityIndicatorBG: pageActivityIndicator,
         annotationsCache: new PageAnnotationsCache({}),
     }
@@ -425,8 +424,8 @@ class SpacePicker extends StatefulUIElement<
                                         }
                                         actOnAllTooltipText="Add all tabs in window to Space"
                                         shareState={
-                                            treeNodeEntry?.isPrivate ??
-                                            'private'
+                                            (treeNodeEntry?.isPrivate ??
+                                            'private')
                                                 ? 'private'
                                                 : 'shared'
                                         }
@@ -644,7 +643,7 @@ class SpacePicker extends StatefulUIElement<
                             }
                             actOnAllTooltipText="Add all tabs in window to Space"
                             shareState={
-                                baseEntry?.isPrivate ?? 'private'
+                                (baseEntry?.isPrivate ?? 'private')
                                     ? 'private'
                                     : 'shared'
                             }
@@ -848,8 +847,8 @@ class SpacePicker extends StatefulUIElement<
                             this.props.searchInputPlaceholder
                                 ? this.props.searchInputPlaceholder
                                 : this.props.filterMode
-                                ? 'Search for Spaces to filter'
-                                : 'Search & Add Spaces'
+                                  ? 'Search for Spaces to filter'
+                                  : 'Search & Add Spaces'
                         }
                         showPlaceholder={
                             this.state.selectedListIds.length === 0

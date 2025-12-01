@@ -1,4 +1,4 @@
-import Storex from '@worldbrain/storex'
+import Storex from '@worldbrain/storex/ts'
 
 import { VisitInteraction } from '..'
 import AbstractModel from './abstract-model'
@@ -6,7 +6,7 @@ import Visit from './visit'
 import Bookmark from './bookmark'
 import Tag from './tag'
 import { DBGet } from '../types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import { initErrHandler } from '../storage'
 
 // Keep these properties as Symbols to avoid storing them to DB
@@ -41,8 +41,10 @@ export interface PageConstructorOptions {
 
 type TermsIndexName = 'terms' | 'urlTerms' | 'titleTerms'
 
-export default class Page extends AbstractModel
-    implements PageConstructorOptions {
+export default class Page
+    extends AbstractModel
+    implements PageConstructorOptions
+{
     public url: string
     public text: string
     public fullUrl: string

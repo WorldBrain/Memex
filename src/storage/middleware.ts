@@ -1,13 +1,13 @@
-import type StorageManager from '@worldbrain/storex'
-import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
-import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
-import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type StorageManager from '@worldbrain/storex/ts'
+import type { StorageMiddleware } from '@worldbrain/storex/ts/types/middleware'
+import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher/ts'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/ts/types'
 import { WATCHED_COLLECTIONS } from './constants'
 import type { BackgroundModules } from 'src/background-script/setup'
 import {
     ListTreeMiddleware,
     initListTreeOperationWatchers,
-} from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
+} from '@worldbrain/memex-common/ts/content-sharing/storage/list-tree-middleware'
 
 export function setStorageMiddleware(
     storageManager: StorageManager,

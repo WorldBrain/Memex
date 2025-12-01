@@ -1,5 +1,3 @@
-import browser from 'webextension-polyfill'
-
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { StorageAreaName } from './storage-changes'
 
@@ -9,7 +7,7 @@ const testKeyB = 'testB'
 
 describe('Storage changes listeners manager', () => {
     const storageChangesManager = new StorageChangesManager({
-        storage: browser.storage,
+        storage: chrome.storage,
     })
 
     storageAreas.forEach((areaName) =>

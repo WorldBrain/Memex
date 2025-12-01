@@ -4,13 +4,13 @@ import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import TooltipContainer, {
     Props,
-} from '@worldbrain/memex-common/lib/in-page-ui/tooltip/container'
+} from '@worldbrain/memex-common/ts/in-page-ui/tooltip/container'
 import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { UnifiedAnnotation, UnifiedList } from 'src/annotations/cache/types'
@@ -21,10 +21,9 @@ import { AuthRemoteFunctionsInterface } from 'src/authentication/background/type
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { Storage } from 'webextension-polyfill'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import {
     TypedRemoteEventEmitter,
@@ -33,7 +32,7 @@ import {
 import {
     AnnotationPrivacyLevels,
     RGBAColor,
-} from '@worldbrain/memex-common/lib/annotations/types'
+} from '@worldbrain/memex-common/ts/annotations/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import {
@@ -41,10 +40,13 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import HighlightColorPicker from 'src/annotations/components/highlightColorPicker'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
-import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
-import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/constants'
+import { PseudoSelection } from '@worldbrain/memex-common/ts/in-page-ui/types'
+import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/ts/annotations/utils'
+import { createRoot } from 'react-dom/client'
+
+let tooltipRoot: ReturnType<typeof createRoot> | null = null
 
 interface TooltipRootProps {
     mount: InPageUIRootMount
@@ -60,7 +62,7 @@ interface TooltipRootProps {
     syncSettingsBG: RemoteSyncSettingsInterface
     bgScriptsBG: RemoteBGScriptInterface<'caller'>
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    localStorageAPI: Storage.LocalStorageArea
+    localStorageAPI: chrome.storage.local
     getRootElement: () => HTMLElement
     inPageUI: SharedInPageUIInterface
     createHighlight(
@@ -139,9 +141,8 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
     }
 
     getAnnotationData = (annotationId: string) => {
-        const annotation = this.props.annotationsCache.annotations.byId[
-            annotationId
-        ]
+        const annotation =
+            this.props.annotationsCache.annotations.byId[annotationId]
         return annotation.comment
     }
 
@@ -177,9 +178,8 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
     }
 
     getAnnotationLists = async (annotationId: string) => {
-        const annotation = this.props.annotationsCache.annotations.byId[
-            annotationId
-        ]
+        const annotation =
+            this.props.annotationsCache.annotations.byId[annotationId]
         const lists = annotation.unifiedListIds
         const annotationLists = []
         for (const list of lists) {
@@ -201,9 +201,8 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
             })
             return
         }
-        const annotation = this.props.annotationsCache.annotations.byId[
-            annotationId
-        ]
+        const annotation =
+            this.props.annotationsCache.annotations.byId[annotationId]
         this.setState({
             currentAnnotation: annotation,
             currentAnnotationLists: [],
@@ -233,9 +232,10 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
             currentAnnotationLists: listsForState,
         })
 
-        const existing = this.props.annotationsCache.annotations.byId[
-            currentAnnotation.unifiedId
-        ]?.unifiedListIds
+        const existing =
+            this.props.annotationsCache.annotations.byId[
+                currentAnnotation.unifiedId
+            ]?.unifiedListIds
 
         const unifiedListId = newList.unifiedId
         const updatedUnifiedListIdLists: UnifiedList['unifiedId'][] = [
@@ -261,9 +261,8 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
             return
         }
 
-        const listToRemove = this.props.annotationsCache.getListByLocalId(
-            listId,
-        )
+        const listToRemove =
+            this.props.annotationsCache.getListByLocalId(listId)
 
         let existingListsState = [...this.state.currentAnnotationLists]
 
@@ -281,9 +280,10 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
 
         const UnifiedIdToRemove = listToRemove?.unifiedId
 
-        const existing = this.props.annotationsCache.annotations.byId[
-            currentAnnotation.unifiedId
-        ].unifiedListIds
+        const existing =
+            this.props.annotationsCache.annotations.byId[
+                currentAnnotation.unifiedId
+            ].unifiedListIds
         const unifiedListIds = [...existing]
 
         const unifiedIdIndex = unifiedListIds.indexOf(UnifiedIdToRemove)
@@ -303,13 +303,10 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
     }
 
     addNewSpaceViaWikiLinks = async (spaceName: string) => {
-        const {
-            localListId,
-            remoteListId,
-            collabKey,
-        } = await this.props.spacesBG.createCustomList({
-            name: spaceName,
-        })
+        const { localListId, remoteListId, collabKey } =
+            await this.props.spacesBG.createCustomList({
+                name: spaceName,
+            })
 
         const creatorId = (await this.props.authBG.getCurrentUser()).id
         const userReference: UserReference = {
@@ -381,16 +378,16 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         let comment = commentState
 
         if (unifiedId) {
-            currentAnnotation = this.props.annotationsCache.annotations.byId[
-                unifiedId
-            ]
+            currentAnnotation =
+                this.props.annotationsCache.annotations.byId[unifiedId]
         } else {
             currentAnnotation = this.state.currentAnnotation
         }
 
-        const existingHighlight = this.props.annotationsCache.annotations.byId[
-            currentAnnotation.unifiedId
-        ]
+        const existingHighlight =
+            this.props.annotationsCache.annotations.byId[
+                currentAnnotation.unifiedId
+            ]
 
         this.props.annotationsCache.updateAnnotation(
             {
@@ -567,8 +564,9 @@ export function setupUIContainer(
     params: Omit<Props, 'onTooltipInit'>,
     props: Omit<TooltipRootProps, 'mount' | 'params' | 'onTooltipInit'>,
 ): Promise<() => void> {
-    return new Promise(async (resolve) => {
-        ReactDOM.render(
+    return new Promise((resolve) => {
+        tooltipRoot = createRoot(mount.rootElement)
+        tooltipRoot.render(
             <TooltipRoot
                 mount={mount}
                 params={params}
@@ -591,11 +589,11 @@ export function setupUIContainer(
                 tooltip={params.tooltip}
                 shouldInitTooltip={params.shouldInitTooltip}
             />,
-            mount.rootElement,
         )
     })
 }
 
 export function destroyUIContainer(target) {
-    ReactDOM.unmountComponentAtNode(target)
+    tooltipRoot?.unmount()
+    tooltipRoot = null
 }

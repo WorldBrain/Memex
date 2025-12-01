@@ -1,5 +1,5 @@
-import AbstractListKeysService from '@worldbrain/memex-common/lib/content-sharing/service/list-keys'
-import type { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import AbstractListKeysService from '@worldbrain/memex-common/ts/content-sharing/service/list-keys'
+import type { SharedListReference } from '@worldbrain/memex-common/ts/content-sharing/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
 
 export default class ListKeysService extends AbstractListKeysService {

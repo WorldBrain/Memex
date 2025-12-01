@@ -1,4 +1,4 @@
-import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { ColorThemeKeys } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
 
@@ -36,15 +36,13 @@ const IconContainer = styled.div<IconProps>`
 `
 
 const IconInner = styled.div<IconProps>`
-        ${(props) =>
-            css`
-                height: ${props.heightAndWidth};
-                width: ${props.heightAndWidth};
-            `};
-        ${(props) =>
-            css`
-                ${props.path &&
-                `mask-image: url(${props.path});
+    ${(props) => css`
+        height: ${props.heightAndWidth};
+        width: ${props.heightAndWidth};
+    `};
+    ${(props) => css`
+        ${props.path &&
+        `mask-image: url(${props.path});
                 mask-repeat: no-repeat;
                 mask-size: contain;
                 mask-position: center;
@@ -54,26 +52,26 @@ const IconInner = styled.div<IconProps>`
                         : props.theme.colors['greyScale4']
                 };
                 `}
-            `}
+    `}
+    ${(props) =>
+        props.rotation &&
+        css`
+            animation: ${rotate(props.rotation)} 0.2s ease-in-out forwards;
+            animation-fill-mode: forwards;
+        `}
         ${(props) =>
-            props.rotation &&
-            css`
-                animation: ${rotate(props.rotation)} 0.2s ease-in-out forwards;
-                animation-fill-mode: forwards;
-            `}
+        props.faded &&
+        css`
+            opacity: 0.5;
+        `}
         ${(props) =>
-            props.faded &&
-            css`
-                opacity: 0.5;
-            `}
-        ${(props) =>
-            props.paddingHorizontal &&
-            css`
-                padding-left: ${props.paddingHorizontal};
-                padding-right: ${props.paddingHorizontal};
-            `}
+        props.paddingHorizontal &&
+        css`
+            padding-left: ${props.paddingHorizontal};
+            padding-right: ${props.paddingHorizontal};
+        `}
         flex: none;
-        `
+`
 
 export const Icon = (props: IconProps) => {
     return (

@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 
 export type UserFeatureOptIn =
@@ -49,7 +48,7 @@ export class FeatureOptIns implements FeaturesInterface {
         } else if (featureDefaultByInstallDate[feature]) {
             // If a default for this feature is based on install time (support depreciated features for old users)
             const installTime = (
-                await browser.storage.local.get(__OLD_INSTALL_TIME_KEY)
+                await chrome.storage.local.get(__OLD_INSTALL_TIME_KEY)
             )[__OLD_INSTALL_TIME_KEY]
             return installTime <= featureDefaultByInstallDate[feature]
         } else {

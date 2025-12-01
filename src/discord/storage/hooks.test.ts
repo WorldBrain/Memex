@@ -1,12 +1,12 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { ChatEventActionProcessor } from '@worldbrain/memex-common/lib/chat-bots/storage-hooks'
-import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discord/event-processor'
+import { ChatEventActionProcessor } from '@worldbrain/memex-common/ts/chat-bots/storage-hooks'
+import { createDiscordEventProcessor } from '@worldbrain/memex-common/ts/discord/event-processor'
 import type {
     DiscordEvent,
     DiscordEventAction,
     DiscordUser,
-} from '@worldbrain/memex-common/lib/discord/types'
-import { DiscordChannelManager } from '@worldbrain/memex-common/lib/discord/channel-manager'
+} from '@worldbrain/memex-common/ts/discord/types'
+import { DiscordChannelManager } from '@worldbrain/memex-common/ts/discord/channel-manager'
 
 const defaultGuildId = 'guild-1'
 const defaultChannelId = 'channel-1'
@@ -66,11 +66,8 @@ async function setupTest(ops: { withDefaultList: boolean }) {
 
 describe('Discord integration data fetch tests', () => {
     it('should create discordEventAction record upon processing of a Discord message with a link', async () => {
-        const {
-            storageManager,
-            actionProcessor,
-            eventProcessor,
-        } = await setupTest({ withDefaultList: true })
+        const { storageManager, actionProcessor, eventProcessor } =
+            await setupTest({ withDefaultList: true })
 
         expect(
             await storageManager
@@ -106,11 +103,8 @@ describe('Discord integration data fetch tests', () => {
     })
 
     it('should NOT create discordEventAction record upon processing of a Discord message with NO link', async () => {
-        const {
-            storageManager,
-            actionProcessor,
-            eventProcessor,
-        } = await setupTest({ withDefaultList: true })
+        const { storageManager, actionProcessor, eventProcessor } =
+            await setupTest({ withDefaultList: true })
 
         expect(
             await storageManager
@@ -137,12 +131,8 @@ describe('Discord integration data fetch tests', () => {
     })
 
     it('should be able to process a discordEventAction, updating the assoc. sharedListEntry title with fetched data', async () => {
-        const {
-            storageManager,
-            actionProcessor,
-            eventProcessor,
-            fetchMock,
-        } = await setupTest({ withDefaultList: true })
+        const { storageManager, actionProcessor, eventProcessor, fetchMock } =
+            await setupTest({ withDefaultList: true })
 
         const testTitle = 'My test title'
         fetchMock.mock('*', 200, {
@@ -207,12 +197,8 @@ describe('Discord integration data fetch tests', () => {
     })
 
     it('should not attempt fetch if sharedListEntry title already different to the URL when processing discordEventAction', async () => {
-        const {
-            storageManager,
-            actionProcessor,
-            eventProcessor,
-            fetchMock,
-        } = await setupTest({ withDefaultList: true })
+        const { storageManager, actionProcessor, eventProcessor, fetchMock } =
+            await setupTest({ withDefaultList: true })
 
         const testTitle = 'My test title'
         fetchMock.mock('*', 200, {
@@ -312,12 +298,8 @@ describe('Discord integration data fetch tests', () => {
     })
 
     it('should not write anything if unable to extract title from fetched data when processing a discordEventAction', async () => {
-        const {
-            storageManager,
-            actionProcessor,
-            eventProcessor,
-            fetchMock,
-        } = await setupTest({ withDefaultList: true })
+        const { storageManager, actionProcessor, eventProcessor, fetchMock } =
+            await setupTest({ withDefaultList: true })
 
         const testTitle = 'My test title'
         fetchMock.mock('*', 200, {

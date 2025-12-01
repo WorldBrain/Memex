@@ -2,7 +2,7 @@ import type {
     UserPlan,
     Claims,
     UserFeature,
-} from '@worldbrain/memex-common/lib/subscriptions/types'
+} from '@worldbrain/memex-common/ts/subscriptions/types'
 import type { SettingStore } from 'src/util/settings'
 import type { AuthSettings } from './types'
 

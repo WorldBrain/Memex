@@ -1,5 +1,3 @@
-import browser from 'webextension-polyfill'
-
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import * as constants from './constants'
 
@@ -20,7 +18,7 @@ export const delayed = (f, delay) => {
 }
 
 export const getExtURL = (location) =>
-    browser.runtime ? browser.runtime.getURL(location) : location
+    chrome.runtime ? chrome.runtime.getURL(location) : location
 
 export const getTooltipState: () => Promise<boolean> = async () =>
     await getLocalStorage(
@@ -56,7 +54,7 @@ export const setPositionState = async (positionValue) =>
  * More info: https://stackoverflow.com/questions/25840674/chrome-runtime-sendmessage-throws-exception-from-content-script-after-reloading/25844023#25844023
  */
 export function runOnScriptShutdown(callback) {
-    const destroyEvent = `destroy-${browser.runtime.id}`
+    const destroyEvent = `destroy-${chrome.runtime.id}`
     document.dispatchEvent(new CustomEvent(destroyEvent))
 
     document.addEventListener(destroyEvent, function () {

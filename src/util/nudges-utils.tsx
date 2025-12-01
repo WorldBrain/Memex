@@ -1,18 +1,18 @@
 import React, { Component } from 'react'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
 import {
     ONBOARDING_NUDGES_DEFAULT,
     ONBOARDING_NUDGES_MAX_COUNT,
     ONBOARDING_NUDGES_STORAGE,
 } from 'src/content-scripts/constants'
-import { Browser } from 'webextension-polyfill'
+
 import styled from 'styled-components'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { Placement } from '@popperjs/core'
 
 export async function updateNudgesCounter(
     nudgeType: string,
-    browserAPIs: Browser,
+    browserAPIs: typeof chrome,
 ) {
     const onboardingNudgesStorage = await browserAPIs.storage.local.get(
         ONBOARDING_NUDGES_STORAGE,
@@ -48,7 +48,7 @@ export async function updateNudgesCounter(
 }
 export async function disableNudgeType(
     nudgeType: string,
-    browserAPIs: Browser,
+    browserAPIs: typeof chrome,
 ) {
     const onboardingNudgesStorage = await browserAPIs.storage.local.get(
         ONBOARDING_NUDGES_STORAGE,

@@ -1,5 +1,3 @@
-import browser from 'webextension-polyfill'
-
 import analytics from 'src/analytics'
 import { delayed, getPositionState } from '../utils'
 import { setupUIContainer, destroyUIContainer } from './components'
@@ -7,7 +5,7 @@ import {
     conditionallyRemoveOnboardingSelectOption,
     conditionallyShowHighlightNotification,
 } from '../onboarding-interactions'
-import type { TooltipPosition } from '@worldbrain/memex-common/lib/in-page-ui/tooltip/types'
+import type { TooltipPosition } from '@worldbrain/memex-common/ts/in-page-ui/tooltip/types'
 import type { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
 import { STAGES } from 'src/overview/onboarding/constants'
@@ -35,15 +33,14 @@ export function destroyTooltipTrigger() {
 const CLOSE_MESSAGESHOWN_KEY = 'tooltip.close-message-shown'
 
 async function _setCloseMessageShown() {
-    await browser.storage.local.set({
+    await chrome.storage.local.set({
         [CLOSE_MESSAGESHOWN_KEY]: true,
     })
 }
 
 async function _getCloseMessageShown() {
-    const {
-        [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown,
-    } = await browser.storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
+    const { [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown } =
+        await chrome.storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
 
     return closeMessageShown
 }
@@ -116,21 +113,20 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                 params.toggleTooltipState
             },
             onExternalDestroy: (destroyTooltip) => {
-                const handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (
-                    event,
-                ) => {
-                    if (!('tooltip' in event.changes)) {
-                        return
-                    }
+                const handleUIStateChange: SharedInPageUIEvents['stateChanged'] =
+                    (event) => {
+                        if (!('tooltip' in event.changes)) {
+                            return
+                        }
 
-                    if (!event.newState.tooltip) {
-                        analytics.trackEvent({
-                            category: 'InPageTooltip',
-                            action: 'closeTooltip',
-                        })
-                        destroyTooltip()
+                        if (!event.newState.tooltip) {
+                            analytics.trackEvent({
+                                category: 'InPageTooltip',
+                                action: 'closeTooltip',
+                            })
+                            destroyTooltip()
+                        }
                     }
-                }
 
                 params.inPageUI.events?.on('stateChanged', handleUIStateChange)
                 removeTooltipStateChangeListener = () =>

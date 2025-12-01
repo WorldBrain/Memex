@@ -8,7 +8,7 @@ import * as acts from '../actions'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 export interface OwnProps {
     closePopup: () => void
@@ -40,10 +40,8 @@ class TooltipButton extends PureComponent<Props, State> {
     state: State = { highlightInfo: undefined }
 
     private async getHighlightContextMenuTitle() {
-        const {
-            shortcutsEnabled,
-            toggleSidebar,
-        } = await getKeyboardShortcutsState()
+        const { shortcutsEnabled, toggleSidebar } =
+            await getKeyboardShortcutsState()
 
         if (!shortcutsEnabled || !toggleSidebar.enabled) {
             this.setState({

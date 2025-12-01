@@ -1,4 +1,4 @@
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 
 import { bindMethod } from 'src/util/functions'
 import CopyPasterStorage from './storage'
@@ -40,11 +40,11 @@ export default class CopyPasterBackground {
             renderTemplate: this.renderTemplate,
             renderPreview: this.renderPreview,
             renderTemplateForPageSearch: this.renderTemplateForPageSearch,
-            renderTemplateForAnnotationSearch: this
-                .renderTemplateForAnnotationSearch,
+            renderTemplateForAnnotationSearch:
+                this.renderTemplateForAnnotationSearch,
             renderPreviewForPageSearch: this.renderPreviewForPageSearch, // Add this line
-            renderPreviewForAnnotationSearch: this
-                .renderPreviewForAnnotationSearch, // And this line
+            renderPreviewForAnnotationSearch:
+                this.renderPreviewForAnnotationSearch, // And this line
         }
     }
 
@@ -92,8 +92,7 @@ export default class CopyPasterBackground {
                     PageTitle: '@startvalue%Testing Page Title @endvalue%',
                     PageUrl: '@startvalue%Testing Page URL @endvalue%',
                     title: '@startvalue%Testing Title @endvalue%',
-                    url:
-                        '@startvalue%https://en.wikipedia.org/wiki/NCAA_Division_I@endvalue%',
+                    url: '@startvalue%https://en.wikipedia.org/wiki/NCAA_Division_I@endvalue%',
                 },
             ]
         } else {
@@ -131,55 +130,9 @@ export default class CopyPasterBackground {
         return joinTemplateDocs(templateDocs, template)
     }
 
-    renderTemplateForPageSearch: RemoteCopyPasterInterface['renderTemplateForPageSearch'] = async ({
-        id,
-        searchParams,
-    }) => {
-        const template = await this.storage.findTemplate({ id })
-        const searchResponse = await this.options.search.unifiedSearch({
-            ...searchParams,
-            fromWhen: 0,
-            untilWhen: Date.now(),
-            skip: 0,
-            limit: 100000,
-        })
-
-        const normalizedPageUrls = searchResponse.docs.map((page) => page.url)
-        const templateDocs = await generateTemplateDocs({
-            annotationUrls: [],
-            normalizedPageUrls,
-            templateAnalysis: analyzeTemplate(template),
-            dataFetchers: getTemplateDataFetchers(this.options),
-        })
-        return joinTemplateDocs(templateDocs, template)
-    }
-
-    renderPreviewForPageSearch: RemoteCopyPasterInterface['renderPreviewForPageSearch'] = async ({
-        template,
-        searchParams,
-        templateType,
-    }) => {
-        let templateDocs = []
-        if (templateType === 'examplePage') {
-            templateDocs = [
-                {
-                    HasNotes: true,
-                    Notes: [
-                        {
-                            NoteHighlight:
-                                '@startvalue%Testing this highlight@endvalue%',
-                            NoteText:
-                                '@startvalue%Testing this note @endvalue%',
-                        },
-                    ],
-                    PageTitle: '@startvalue%Testing Page Title @endvalue%',
-                    PageUrl: '@startvalue%Testing Page URL @endvalue%',
-                    title: '@startvalue%Testing Title @endvalue%',
-                    url:
-                        '@startvalue%https://en.wikipedia.org/wiki/NCAA_Division_I@endvalue%',
-                },
-            ]
-        } else {
+    renderTemplateForPageSearch: RemoteCopyPasterInterface['renderTemplateForPageSearch'] =
+        async ({ id, searchParams }) => {
+            const template = await this.storage.findTemplate({ id })
             const searchResponse = await this.options.search.unifiedSearch({
                 ...searchParams,
                 fromWhen: 0,
@@ -188,59 +141,68 @@ export default class CopyPasterBackground {
                 limit: 100000,
             })
 
-            // TODO: Improve this in search implementation - still brings everything into memory
-            const resultsPreviewSlice = searchResponse.docs.slice(0, 100)
-            const normalizedPageUrls = resultsPreviewSlice.map((p) => p.url)
-
-            templateDocs = await generateTemplateDocs({
+            const normalizedPageUrls = searchResponse.docs.map(
+                (page) => page.url,
+            )
+            const templateDocs = await generateTemplateDocs({
                 annotationUrls: [],
                 normalizedPageUrls,
                 templateAnalysis: analyzeTemplate(template),
-                dataFetchers: getTemplateDataFetchers({
-                    ...this.options,
-                    previewMode: true,
-                }),
+                dataFetchers: getTemplateDataFetchers(this.options),
             })
+            return joinTemplateDocs(templateDocs, template)
         }
-        return joinTemplateDocs(templateDocs, template)
-    }
 
-    renderTemplateForAnnotationSearch: RemoteCopyPasterInterface['renderTemplateForAnnotationSearch'] = async ({
-        id,
-        searchParams,
-    }) => {
-        const template = await this.storage.findTemplate({ id })
-        const searchResponse = await this.options.search.unifiedSearch({
-            ...searchParams,
-            fromWhen: 0,
-            untilWhen: Date.now(),
-            skip: 0,
-            limit: 100000,
-        })
+    renderPreviewForPageSearch: RemoteCopyPasterInterface['renderPreviewForPageSearch'] =
+        async ({ template, searchParams, templateType }) => {
+            let templateDocs = []
+            if (templateType === 'examplePage') {
+                templateDocs = [
+                    {
+                        HasNotes: true,
+                        Notes: [
+                            {
+                                NoteHighlight:
+                                    '@startvalue%Testing this highlight@endvalue%',
+                                NoteText:
+                                    '@startvalue%Testing this note @endvalue%',
+                            },
+                        ],
+                        PageTitle: '@startvalue%Testing Page Title @endvalue%',
+                        PageUrl: '@startvalue%Testing Page URL @endvalue%',
+                        title: '@startvalue%Testing Title @endvalue%',
+                        url: '@startvalue%https://en.wikipedia.org/wiki/NCAA_Division_I@endvalue%',
+                    },
+                ]
+            } else {
+                const searchResponse = await this.options.search.unifiedSearch({
+                    ...searchParams,
+                    fromWhen: 0,
+                    untilWhen: Date.now(),
+                    skip: 0,
+                    limit: 100000,
+                })
 
-        const normalizedPageUrls = searchResponse.docs.map((p) => p.url)
-        const annotationUrls = searchResponse.docs.flatMap((p) =>
-            p.annotations.map((a) => a.url),
-        )
+                // TODO: Improve this in search implementation - still brings everything into memory
+                const resultsPreviewSlice = searchResponse.docs.slice(0, 100)
+                const normalizedPageUrls = resultsPreviewSlice.map((p) => p.url)
 
-        const templateDocs = await generateTemplateDocs({
-            annotationUrls,
-            normalizedPageUrls,
-            templateAnalysis: analyzeTemplate(template),
-            dataFetchers: getTemplateDataFetchers(this.options),
-        })
-        return joinTemplateDocs(templateDocs, template)
-    }
+                templateDocs = await generateTemplateDocs({
+                    annotationUrls: [],
+                    normalizedPageUrls,
+                    templateAnalysis: analyzeTemplate(template),
+                    dataFetchers: getTemplateDataFetchers({
+                        ...this.options,
+                        previewMode: true,
+                    }),
+                })
+            }
+            return joinTemplateDocs(templateDocs, template)
+        }
 
-    renderPreviewForAnnotationSearch: RemoteCopyPasterInterface['renderPreviewForAnnotationSearch'] = async ({
-        template,
-        searchParams,
-        templateType,
-    }) => {
-        // TODO: Unify the prevew with the template rendering methods. They're the same thing
-        let templateDocs = []
-        if (templateType === 'examplePage') {
-        } else {
+    renderTemplateForAnnotationSearch: RemoteCopyPasterInterface['renderTemplateForAnnotationSearch'] =
+        async ({ id, searchParams }) => {
+            const template = await this.storage.findTemplate({ id })
             const searchResponse = await this.options.search.unifiedSearch({
                 ...searchParams,
                 fromWhen: 0,
@@ -249,23 +211,51 @@ export default class CopyPasterBackground {
                 limit: 100000,
             })
 
-            // TODO: Improve this in search implementation - still brings everything into memory
-            const resultsPreviewSlice = searchResponse.docs.slice(0, 100)
-            const normalizedPageUrls = resultsPreviewSlice.map((p) => p.url)
-            const annotationUrls = resultsPreviewSlice.flatMap((p) =>
+            const normalizedPageUrls = searchResponse.docs.map((p) => p.url)
+            const annotationUrls = searchResponse.docs.flatMap((p) =>
                 p.annotations.map((a) => a.url),
             )
 
-            templateDocs = await generateTemplateDocs({
+            const templateDocs = await generateTemplateDocs({
                 annotationUrls,
                 normalizedPageUrls,
                 templateAnalysis: analyzeTemplate(template),
-                dataFetchers: getTemplateDataFetchers({
-                    ...this.options,
-                    previewMode: true,
-                }),
+                dataFetchers: getTemplateDataFetchers(this.options),
             })
+            return joinTemplateDocs(templateDocs, template)
         }
-        return joinTemplateDocs(templateDocs, template)
-    }
+
+    renderPreviewForAnnotationSearch: RemoteCopyPasterInterface['renderPreviewForAnnotationSearch'] =
+        async ({ template, searchParams, templateType }) => {
+            // TODO: Unify the prevew with the template rendering methods. They're the same thing
+            let templateDocs = []
+            if (templateType === 'examplePage') {
+            } else {
+                const searchResponse = await this.options.search.unifiedSearch({
+                    ...searchParams,
+                    fromWhen: 0,
+                    untilWhen: Date.now(),
+                    skip: 0,
+                    limit: 100000,
+                })
+
+                // TODO: Improve this in search implementation - still brings everything into memory
+                const resultsPreviewSlice = searchResponse.docs.slice(0, 100)
+                const normalizedPageUrls = resultsPreviewSlice.map((p) => p.url)
+                const annotationUrls = resultsPreviewSlice.flatMap((p) =>
+                    p.annotations.map((a) => a.url),
+                )
+
+                templateDocs = await generateTemplateDocs({
+                    annotationUrls,
+                    normalizedPageUrls,
+                    templateAnalysis: analyzeTemplate(template),
+                    dataFetchers: getTemplateDataFetchers({
+                        ...this.options,
+                        previewMode: true,
+                    }),
+                })
+            }
+            return joinTemplateDocs(templateDocs, template)
+        }
 }

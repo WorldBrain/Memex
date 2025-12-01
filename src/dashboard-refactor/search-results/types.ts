@@ -1,18 +1,18 @@
-import type { TaskState } from 'ui-logic-core/lib/types'
-import type { UIEvent } from 'ui-logic-core'
+import type { TaskState } from 'ui-logic-core/ts/types'
+import type { UIEvent } from 'ui-logic-core/ts'
 import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import type { StandardSearchResponse } from 'src/search/background/types'
 import type { PipelineRes } from 'src/search'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
-import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import type { NormalizedState } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import type {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
-import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -66,9 +66,7 @@ export type NoteInteractionProps = Omit<
     updateLists: PickerUpdateHandler<number>
     addNewSpaceViaWikiLinksEditNote: (spaceName: string) => void
     onEditCancel: React.MouseEventHandler
-    onEditConfirm: (
-        showExternalConfirmations?: boolean,
-    ) => (
+    onEditConfirm: (showExternalConfirmations?: boolean) => (
         shouldShare: boolean,
         isProtected: boolean,
         opts?: {

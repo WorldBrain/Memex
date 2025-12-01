@@ -1,12 +1,12 @@
 import React, { PureComponent } from 'react'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import SpaceEditMenu, {
     Props as SpaceEditMenuProps,
 } from 'src/custom-lists/ui/space-edit-menu'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
 
 export interface Props extends Omit<SpaceEditMenuProps, 'copyToClipboard'> {
     isMenuDisplayed: boolean

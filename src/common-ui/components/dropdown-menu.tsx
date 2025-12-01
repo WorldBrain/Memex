@@ -1,8 +1,8 @@
 import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { ClickAway } from '@worldbrain/memex-common/ts/common-ui/components/click-away-wrapper'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 export interface MenuItemProps {
     name: string

@@ -1,4 +1,4 @@
-import type { ReadwiseAPIResponse } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
+import type { ReadwiseAPIResponse } from '@worldbrain/memex-common/ts/readwise-integration/api/types'
 import type {
     RemoteFunctionRole,
     RemoteFunctionWithoutExtraArgs,

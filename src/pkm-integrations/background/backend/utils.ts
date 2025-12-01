@@ -1,5 +1,5 @@
-import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-src-with-cloud-address.service-worker'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import resolveImgSrc from '@worldbrain/memex-common/ts/annotations/replace-img-src-with-cloud-address.service-worker'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import type { PKMSyncBackgroundModule } from '..'
 
 export async function shareAnnotationWithPKM(

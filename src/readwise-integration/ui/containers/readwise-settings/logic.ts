@@ -1,4 +1,4 @@
-import { UILogic, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEventHandler } from 'ui-logic-core/ts'
 import {
     ReadwiseSettingsState,
     ReadwiseSettingsEvent,
@@ -16,9 +16,8 @@ export const INITIAL_STATE: ReadwiseSettingsState = {
     apiKey: null,
 }
 
-type EventHandler<
-    EventName extends keyof ReadwiseSettingsEvent
-> = UIEventHandler<ReadwiseSettingsState, ReadwiseSettingsEvent, EventName>
+type EventHandler<EventName extends keyof ReadwiseSettingsEvent> =
+    UIEventHandler<ReadwiseSettingsState, ReadwiseSettingsEvent, EventName>
 
 export default class ReadwiseSettingsLogic extends UILogic<
     ReadwiseSettingsState,
@@ -37,8 +36,10 @@ export default class ReadwiseSettingsLogic extends UILogic<
     init = async () => {
         await loadInitial<ReadwiseSettingsState>(this, async () => {
             const apiKey = await this.dependencies.readwise.getAPIKey()
-            const onlyHighlightSyncSetting = await this.dependencies.readwise.getOnlyHighlightsSetting()
-            const isFeatureAuthorized = await this.dependencies.checkFeatureAuthorized()
+            const onlyHighlightSyncSetting =
+                await this.dependencies.readwise.getOnlyHighlightsSetting()
+            const isFeatureAuthorized =
+                await this.dependencies.checkFeatureAuthorized()
             this.emitMutation({
                 apiKey: { $set: apiKey },
                 syncOnlyNotesWithHighlights: { $set: onlyHighlightSyncSetting },
@@ -80,9 +81,10 @@ export default class ReadwiseSettingsLogic extends UILogic<
             async () => {
                 this.emitMutation({ apiKeyEditable: { $set: false } })
 
-                const validationResult = await this.dependencies.readwise.validateAPIKey(
-                    { key: previousState.apiKey },
-                )
+                const validationResult =
+                    await this.dependencies.readwise.validateAPIKey({
+                        key: previousState.apiKey,
+                    })
                 if (!validationResult.success) {
                     this.emitMutation({ keySaveState: { $set: 'error' } })
                     this.emitMutation({

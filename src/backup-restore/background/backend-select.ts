@@ -5,7 +5,6 @@ import type { BackupBackend } from './backend/types'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from './types'
 import { LOCAL_SERVER_ROOT } from '../ui/backup-pane/constants'
-import type { Storage } from 'webextension-polyfill'
 
 export class BackendSelect {
     serverToTalkTo = LOCAL_SERVER_ROOT
@@ -48,9 +47,8 @@ export class BackendSelect {
     }
 
     async restoreBackendLocation(): Promise<string> {
-        const storageObject = await this.deps.storageAPI.local.get(
-            'backendInfo',
-        )
+        const storageObject =
+            await this.deps.storageAPI.local.get('backendInfo')
         if (storageObject.backendInfo) {
             const backendLocation = storageObject.backendInfo.location
             return backendLocation

@@ -1,5 +1,5 @@
 import type { Template } from '../types'
-import type { UnifiedSearchParams } from '@worldbrain/memex-common/lib/search/types'
+import type { UnifiedSearchParams } from '@worldbrain/memex-common/ts/search/types'
 
 export interface RemoteCopyPasterInterface {
     createTemplate(args: Omit<Template, 'id'>): Promise<number>

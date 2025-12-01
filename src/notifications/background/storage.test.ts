@@ -1,5 +1,5 @@
 import expect from 'expect'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules/ts'
 
 import { READ, UNREAD } from './storage.test.data'
 import Storage from './storage'

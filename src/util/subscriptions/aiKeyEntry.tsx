@@ -1,6 +1,6 @@
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 import React from 'react'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import {
@@ -8,14 +8,8 @@ import {
     SyncSettingsStore,
 } from 'src/sync-settings/util'
 import styled, { css } from 'styled-components'
-import browser, { Browser, Storage } from 'webextension-polyfill'
-import {
-    COUNTER_STORAGE_KEY,
-    DEFAULT_COUNTER_STORAGE_VALUE,
-    DEFAULT_POWERUP_LIMITS,
-} from '@worldbrain/memex-common/lib/subscriptions/constants'
-import type { TaskState } from 'ui-logic-core/lib/types'
-import type { CustomerPowerUps } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import type { TaskState } from 'ui-logic-core/ts/types'
+import type { CustomerPowerUps } from '@worldbrain/memex-common/ts/subscriptions/availablePowerups'
 import UpgradeModal from 'src/authentication/upgrade-modal'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
@@ -27,7 +21,7 @@ export interface Props {
     checkIfKeyValid: (apiKey: string) => Promise<void>
     isKeyValid: boolean
     authBG: AuthRemoteFunctionsInterface
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 interface State {
@@ -111,7 +105,9 @@ export class AIKeyEntry extends React.Component<Props, State> {
                                 value={this.state.openAIKey.trim()}
                                 onChange={(e) => {
                                     this.setState({
-                                        openAIKey: (e.target as HTMLInputElement).value.trim(),
+                                        openAIKey: (
+                                            e.target as HTMLInputElement
+                                        ).value.trim(),
                                         keyChanged: true,
                                     })
                                 }}

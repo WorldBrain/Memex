@@ -1,7 +1,7 @@
 import expect from 'expect'
-import type StorageManager from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import type StorageManager from '@worldbrain/storex/ts'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
@@ -10,12 +10,12 @@ import {
 } from 'src/tests/integration-tests'
 import * as data from './index.test.data'
 import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integration-tests'
-import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
+import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/ts/storage/hooks'
 import { createMemoryServerStorage } from 'src/storage/server.tests'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import { SharingTestHelper } from './index.tests'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import {
     SharedList,
     SharedListEntry,
@@ -24,42 +24,44 @@ import {
     SharedListRoleID,
     SharedListTree,
     SharedPageInfo,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import { createPageLinkListTitle } from '@worldbrain/memex-common/lib/content-sharing/utils'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import { createPageLinkListTitle } from '@worldbrain/memex-common/ts/content-sharing/utils'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import type {
     PersonalContentLocator,
     PersonalContentMetadata,
     PersonalList,
     PersonalListTree,
-} from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
+} from '@worldbrain/memex-common/ts/web-interface/types/storex-generated/personal-cloud'
 import {
     ContentLocatorFormat,
     ContentLocatorType,
     FingerprintSchemeType,
     LocationSchemeType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import { getPageLinkUrl } from '../utils'
-import { buildBaseLocatorUrl } from '@worldbrain/memex-common/lib/page-indexing/utils'
-import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher/lib/index'
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
-import { RETRIEVE_PDF_ROUTE } from '@worldbrain/memex-common/lib/pdf/uploads/constants'
-import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
-import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { buildBaseLocatorUrl } from '@worldbrain/memex-common/ts/page-indexing/utils'
+import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher/ts/index'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/ts/content-sharing/storage/constants'
+import { RETRIEVE_PDF_ROUTE } from '@worldbrain/memex-common/ts/pdf/uploads/constants'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/ts/content-sharing/tree-utils'
+import { DEFAULT_KEY } from '@worldbrain/memex-common/ts/utils/item-ordering'
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
 }
 
-const sortByField = <T = any>(field: keyof T) => (a: T, b: T) => {
-    if (a[field] < b[field]) {
-        return -1
+const sortByField =
+    <T = any>(field: keyof T) =>
+    (a: T, b: T) => {
+        if (a[field] < b[field]) {
+            return -1
+        }
+        if (a[field] > b[field]) {
+            return 1
+        }
+        return 0
     }
-    if (a[field] > b[field]) {
-        return 1
-    }
-    return 0
-}
 
 interface TestData {
     localListId?: number
@@ -72,11 +74,8 @@ async function setupTest(options: {
     createTestList?: boolean
 }) {
     const { setup, testData } = options
-    const {
-        contentSharing,
-        personalCloud,
-        directLinking,
-    } = setup.backgroundModules
+    const { contentSharing, personalCloud, directLinking } =
+        setup.backgroundModules
 
     let sentPrivateListEmailInvite: Pick<
         SharedListKey,
@@ -87,12 +86,11 @@ async function setupTest(options: {
         spaceURLwithKey: string
     } = null
 
-    contentSharing.options.backend[
-        'dependencies'
-    ].sendPrivateListEmailInvite = async (email, details) => {
-        sentPrivateListEmailInvite = { email, ...details }
-        return { status: 'success' }
-    }
+    contentSharing.options.backend['dependencies'].sendPrivateListEmailInvite =
+        async (email, details) => {
+            sentPrivateListEmailInvite = { email, ...details }
+            return { status: 'success' }
+        }
 
     await setup.authService.setUser(TEST_USER)
     await personalCloud.options.settingStore.set('deviceId', data.DEVICE_ID_A)
@@ -118,16 +116,15 @@ async function setupTest(options: {
         return listShareResult.remoteListId
     }
 
-    const getFromDB = (storageManager: StorageManager) => (
-        collection: string,
-        opts?: { skipOrdering?: boolean },
-    ) =>
-        storageManager.operation(
-            'findObjects',
-            collection,
-            {},
-            opts?.skipOrdering ? undefined : { order: [['id', 'asc']] },
-        )
+    const getFromDB =
+        (storageManager: StorageManager) =>
+        (collection: string, opts?: { skipOrdering?: boolean }) =>
+            storageManager.operation(
+                'findObjects',
+                collection,
+                {},
+                opts?.skipOrdering ? undefined : { order: [['id', 'asc']] },
+            )
 
     const getShared = getFromDB(serverStorage.manager)
     const getLocal = getFromDB(setup.storageManager)
@@ -479,13 +476,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                         },
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                         },
                                     ],
                                 )
@@ -565,8 +560,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                             updated: true,
                                         },
                                     ],
@@ -628,8 +622,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                         },
                                     ],
                                 )
@@ -760,8 +753,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.createAnnotation(setup, {
                                     id: 1,
                                     pageId: 1,
-                                    level:
-                                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                    level: AnnotationPrivacyLevels.SHARED_PROTECTED,
                                     expectedSharingState: {
                                         hasLink: true,
                                         sharedListIds: [1, 2],
@@ -787,8 +779,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                            level: AnnotationPrivacyLevels.SHARED_PROTECTED,
                                         },
                                     ],
                                 )
@@ -940,8 +931,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -1026,8 +1016,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                             updated: true,
                                         },
                                     ],
@@ -1132,8 +1121,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PRIVATE,
+                                            level: AnnotationPrivacyLevels.PRIVATE,
                                             updated: true,
                                         },
                                     ],
@@ -1253,8 +1241,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                             updated: true,
                                         },
                                     ],
@@ -1482,8 +1469,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PRIVATE,
+                                            level: AnnotationPrivacyLevels.PRIVATE,
                                             updated: true,
                                         },
                                     ],
@@ -1576,13 +1562,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.PRIVATE,
+                                            level: AnnotationPrivacyLevels.PRIVATE,
                                         },
                                     ],
                                 )
@@ -1715,8 +1699,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -1796,8 +1779,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -1816,8 +1798,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PRIVATE,
+                                            level: AnnotationPrivacyLevels.PRIVATE,
                                             updated: true,
                                         },
                                     ],
@@ -1915,8 +1896,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -3043,13 +3023,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                })
+                                const { contentSharing, personalCloud } =
+                                    await setupTest({
+                                        setup,
+                                        testData,
+                                    })
 
                                 const { manager } = setup.serverStorage
                                 const now = Date.now()
@@ -3065,9 +3043,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     fingerprintA,
                                     ContentLocatorFormat.PDF,
                                 )
-                                const normalizedBaseLocatorUrl = normalizeUrl(
-                                    fullBaseLocatorUrl,
-                                )
+                                const normalizedBaseLocatorUrl =
+                                    normalizeUrl(fullBaseLocatorUrl)
                                 const userId = TEST_USER.id
 
                                 contentSharing.options.backend[
@@ -3121,9 +3098,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
                                 }
 
-                                const pageLinkParamsA = await contentSharing.options.backend.createPageLink(
-                                    { now, fullPageUrl },
-                                )
+                                const pageLinkParamsA =
+                                    await contentSharing.options.backend.createPageLink(
+                                        { now, fullPageUrl },
+                                    )
                                 const linkA = getPageLinkUrl(pageLinkParamsA)
 
                                 // Shared cloud DB data
@@ -3567,12 +3545,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
 
                                 // Try it once more to assert that sharedPageInfo+personalContentMetadata+personalContentLocator isn't recreated
-                                const pageLinkParamsB = await contentSharing.options.backend.createPageLink(
-                                    {
-                                        fullPageUrl,
-                                        now: now + 10,
-                                    },
-                                )
+                                const pageLinkParamsB =
+                                    await contentSharing.options.backend.createPageLink(
+                                        {
+                                            fullPageUrl,
+                                            now: now + 10,
+                                        },
+                                    )
                                 const linkB = getPageLinkUrl(pageLinkParamsB)
 
                                 // Shared cloud DB data
@@ -4522,16 +4501,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         .findAllObjects({}),
                                 ).toEqual([])
 
-                                const {
-                                    status,
-                                } = await contentSharing.options.backend.createListEmailInvite(
-                                    {
-                                        now,
-                                        email: emailA,
-                                        listId: sharedListIdA,
-                                        roleID: SharedListRoleID.Commenter,
-                                    },
-                                )
+                                const { status } =
+                                    await contentSharing.options.backend.createListEmailInvite(
+                                        {
+                                            now,
+                                            email: emailA,
+                                            listId: sharedListIdA,
+                                            roleID: SharedListRoleID.Commenter,
+                                        },
+                                    )
 
                                 expect(status).toEqual('permission-denied')
                                 expect(
@@ -8728,13 +8706,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -8800,14 +8776,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                             updated: true,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -8909,13 +8883,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -8977,14 +8949,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                             updated: true,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -9083,13 +9053,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -9151,14 +9119,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                             updated: true,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -9218,14 +9184,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PRIVATE,
+                                            level: AnnotationPrivacyLevels.PRIVATE,
                                             updated: true,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -9325,13 +9289,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -9397,14 +9359,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.PROTECTED,
+                                            level: AnnotationPrivacyLevels.PROTECTED,
                                             updated: true,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -9467,14 +9427,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     [
                                         {
                                             annotationId: 1,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                             updated: true,
                                         },
                                         {
                                             annotationId: 2,
-                                            level:
-                                                AnnotationPrivacyLevels.SHARED,
+                                            level: AnnotationPrivacyLevels.SHARED,
                                         },
                                     ],
                                 )
@@ -9560,9 +9518,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ),
                                 ).toEqual(null)
 
-                                const remotePageId = await setup.backgroundModules.contentSharing.ensureRemotePageId(
-                                    normalizedPageUrl,
-                                )
+                                const remotePageId =
+                                    await setup.backgroundModules.contentSharing.ensureRemotePageId(
+                                        normalizedPageUrl,
+                                    )
 
                                 expect(
                                     await setup.backgroundModules.contentSharing.options.contentSharingSettingsStore.get(
@@ -9812,12 +9771,14 @@ function makeShareAnnotationTest(options: {
                     })
                     await helper.shareAnnotationsToAllLists(setup, {
                         ids: [1],
-                        expectedSharingStates: expectedSharingStatesPostAllLists(),
+                        expectedSharingStates:
+                            expectedSharingStatesPostAllLists(),
                     })
                     if (options.testDuplicateSharing) {
                         await helper.shareAnnotationsToAllLists(setup, {
                             ids: [1],
-                            expectedSharingStates: expectedSharingStatesPostAllLists(),
+                            expectedSharingStates:
+                                expectedSharingStatesPostAllLists(),
                         })
                     }
 
@@ -9847,20 +9808,19 @@ function makeAnnotationFromWebUiTest(options: {
     let storageHooksChangeWatcher: StorageHooksChangeWatcher
 
     return {
-        getSetupOptions: async (): Promise<
-            BackgroundIntegrationTestSetupOpts
-        > => {
-            storageHooksChangeWatcher = new StorageHooksChangeWatcher()
-            const serverStorage = await createMemoryServerStorage({
-                setupMiddleware: (storageManager) => [
-                    new ChangeWatchMiddleware({
-                        storageManager,
-                        ...storageHooksChangeWatcher,
-                    }),
-                ],
-            })
-            return { serverStorage }
-        },
+        getSetupOptions:
+            async (): Promise<BackgroundIntegrationTestSetupOpts> => {
+                storageHooksChangeWatcher = new StorageHooksChangeWatcher()
+                const serverStorage = await createMemoryServerStorage({
+                    setupMiddleware: (storageManager) => [
+                        new ChangeWatchMiddleware({
+                            storageManager,
+                            ...storageHooksChangeWatcher,
+                        }),
+                    ],
+                })
+                return { serverStorage }
+            },
         setup: async (context) => {
             const fakeFetch = new FakeFetch()
             const getNow = () => Date.now()
@@ -9925,29 +9885,29 @@ function makeAnnotationFromWebUiTest(options: {
 
                     const createdWhen = Date.now()
                     const dummyLocalId = 'aaa'
-                    const {
-                        sharedAnnotationReferences,
-                    } = await serverStorage.modules.contentSharing.createAnnotations(
-                        {
-                            annotationsByPage: {
-                                [normalizeUrl(
-                                    data.ANNOTATION_1_1_DATA.pageUrl,
-                                )]: [
-                                    {
-                                        localId: dummyLocalId,
-                                        createdWhen,
-                                        comment:
-                                            data.ANNOTATION_1_1_DATA.comment,
-                                    },
-                                ],
+                    const { sharedAnnotationReferences } =
+                        await serverStorage.modules.contentSharing.createAnnotations(
+                            {
+                                annotationsByPage: {
+                                    [normalizeUrl(
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
+                                    )]: [
+                                        {
+                                            localId: dummyLocalId,
+                                            createdWhen,
+                                            comment:
+                                                data.ANNOTATION_1_1_DATA
+                                                    .comment,
+                                        },
+                                    ],
+                                },
+                                creator: {
+                                    type: 'user-reference',
+                                    id: 'someone-else',
+                                },
+                                listReferences: [],
                             },
-                            creator: {
-                                type: 'user-reference',
-                                id: 'someone-else',
-                            },
-                            listReferences: [],
-                        },
-                    )
+                        )
 
                     await personalCloud.waitForSync() // wait for receival
                     await personalCloud.integrateAllUpdates()

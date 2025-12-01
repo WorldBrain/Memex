@@ -1,19 +1,20 @@
-export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
+export * from '@worldbrain/memex-common/ts/content-sharing/client-storage/types'
 import type {
     ListKeysServiceInterface,
     AnnotationSharingServiceInterface,
     ListShareResult,
-} from '@worldbrain/memex-common/lib/content-sharing/service/types'
-import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+} from '@worldbrain/memex-common/ts/content-sharing/service/types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import type {
     RemoteFunction,
     RemoteFunctionRole,
 } from 'src/util/webextensionRPC'
-import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
+import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/ts/content-sharing/backend/types'
 import type { SharedListMetadata } from './types'
 
 export interface ContentSharingInterface
-    extends Pick<
+    extends
+        Pick<
             ListKeysServiceInterface,
             'deleteKeyLink' | 'getExistingKeyLinksForList'
         >,
@@ -53,9 +54,7 @@ export interface ContentSharingInterface
     getRemoteAnnotationIds(params: {
         annotationUrls: string[]
     }): Promise<{ [localId: string]: string | number }>
-    getRemoteAnnotationMetadata(params: {
-        annotationUrls: string[]
-    }): Promise<{
+    getRemoteAnnotationMetadata(params: { annotationUrls: string[] }): Promise<{
         [localId: string]: {
             localId: string
             remoteId: string | number
@@ -73,9 +72,7 @@ export interface ContentSharingInterface
         localListId: number
     }): Promise<{ sharingState: AnnotationSharingState }>
     executePendingActions(): Promise<void>
-    findAnnotationPrivacyLevels(params: {
-        annotationUrls: string[]
-    }): Promise<{
+    findAnnotationPrivacyLevels(params: { annotationUrls: string[] }): Promise<{
         [annotationUrl: string]: AnnotationPrivacyLevels
     }>
     updateListPrivacy(args: {
@@ -98,7 +95,7 @@ export interface CreatedPageLinkDetails {
 }
 
 export interface RemoteContentSharingByTabsInterface<
-    Role extends RemoteFunctionRole
+    Role extends RemoteFunctionRole,
 > {
     schedulePageLinkCreation: RemoteFunction<
         Role,
@@ -125,9 +122,7 @@ export interface __DeprecatedContentSharingInterface {
     }): Promise<{ sharingState: AnnotationSharingState }>
     deleteAnnotationShare(params: { annotationUrl: string }): Promise<void>
     deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
-    suggestSharedLists(params: {
-        prefix: string
-    }): Promise<
+    suggestSharedLists(params: { prefix: string }): Promise<
         Array<{
             localId: number
             name: string

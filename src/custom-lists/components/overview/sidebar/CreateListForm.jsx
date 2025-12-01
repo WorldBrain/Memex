@@ -1,17 +1,11 @@
 import React from 'react'
-import cx from 'classnames'
 import PropTypes from 'prop-types'
-import styles from './CreateListForm.css'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 const CreateListForm = (props) => (
     <div>
-        <form
-            className={styles.createListForm}
-            onSubmit={props.onCheckboxClick}
-        >
+        <form onSubmit={props.onCheckboxClick}>
             <input
-                className={styles.listForm}
                 name="listName"
                 type="text"
                 autoComplete="off"
@@ -23,34 +17,24 @@ const CreateListForm = (props) => (
                 autoFocus
                 required
             />
-            <span className={styles.buttonBox}>
+            <span>
                 <TooltipBox
                     tooltipText="Save"
                     placement="bottom"
                     getPortalRoot={null}
                 >
-                    <button
-                        type="submit"
-                        className={cx(styles.tick, styles.button)}
-                    />
+                    <button type="submit" />
                 </TooltipBox>
                 <TooltipBox
                     tooltipText="Cancel"
                     placement="bottom"
                     getPortalRoot={null}
                 >
-                    <button
-                        onClick={props.closeCreateListForm}
-                        className={cx(styles.deleteButton, styles.button)}
-                    />
+                    <button onClick={props.closeCreateListForm} />
                 </TooltipBox>
             </span>
         </form>
-        {props.showWarning && (
-            <small className={styles.sameNameWarning}>
-                List name already taken.
-            </small>
-        )}
+        {props.showWarning && <small>List name already taken.</small>}
     </div>
 )
 

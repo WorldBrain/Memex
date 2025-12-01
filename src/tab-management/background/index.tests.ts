@@ -1,5 +1,4 @@
 import TabManagementBackground from '.'
-import { Tabs } from 'webextension-polyfill'
 
 export type FakeTab = FakeHtmlTab | FakePdfTab
 export interface FakeHtmlTab {
@@ -19,7 +18,7 @@ export interface FakePdfTab {
 
 export function injectFakeTabs(params: {
     tabManagement: TabManagementBackground
-    tabsAPI: Tabs.Static
+    tabsAPI: typeof chrome.tabs
     tabs: Array<FakeTab>
     excludeBody?: boolean
     includeTitle?: boolean
@@ -44,7 +43,7 @@ export function injectFakeTabs(params: {
             type: 'html',
             url: fakeTab.url,
             body: !params.excludeBody
-                ? fakeTab.htmlBody ?? `Body ${tabId}`
+                ? (fakeTab.htmlBody ?? `Body ${tabId}`)
                 : undefined,
             lang: 'en',
             metadata: params.includeTitle

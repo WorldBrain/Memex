@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
@@ -64,37 +64,38 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         recipients must drop it into the web reader.
                     </LocalPDFWarning>
                 )}
-                {this.props.isCreator && this.props.listData.remoteId != null && (
-                    <DropdownMenuBtn
-                        elementHeight="60px"
-                        backgroundColor={'greyScale2'}
-                        menuItems={[
-                            {
-                                id: SET_LIST_PRIVATE_ID,
-                                name: 'Private',
-                                info: 'Only visible to you and people invited',
-                            },
-                            {
-                                id: 'public-space-selection-state',
-                                name: 'Shared',
-                                info: 'Viewable to anyone with the link',
-                            },
-                        ]}
-                        onMenuItemClick={(item) =>
-                            this.processEvent('updateSpacePrivacy', {
-                                isPrivate: item.id === SET_LIST_PRIVATE_ID,
-                            })
-                        }
-                        initSelectedIndex={
-                            this.props.listData?.isPrivate == null
-                                ? 0
-                                : this.props.listData?.isPrivate
-                                ? 0
-                                : 1
-                        }
-                        keepSelectedState
-                    />
-                )}
+                {this.props.isCreator &&
+                    this.props.listData.remoteId != null && (
+                        <DropdownMenuBtn
+                            elementHeight="60px"
+                            backgroundColor={'greyScale2'}
+                            menuItems={[
+                                {
+                                    id: SET_LIST_PRIVATE_ID,
+                                    name: 'Private',
+                                    info: 'Only visible to you and people invited',
+                                },
+                                {
+                                    id: 'public-space-selection-state',
+                                    name: 'Shared',
+                                    info: 'Viewable to anyone with the link',
+                                },
+                            ]}
+                            onMenuItemClick={(item) =>
+                                this.processEvent('updateSpacePrivacy', {
+                                    isPrivate: item.id === SET_LIST_PRIVATE_ID,
+                                })
+                            }
+                            initSelectedIndex={
+                                this.props.listData?.isPrivate == null
+                                    ? 0
+                                    : this.props.listData?.isPrivate
+                                      ? 0
+                                      : 1
+                            }
+                            keepSelectedState
+                        />
+                    )}
                 {this.props.listData.remoteId != null && (
                     <SectionTitle>Invite Links</SectionTitle>
                 )}

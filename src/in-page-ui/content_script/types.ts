@@ -1,9 +1,9 @@
-import type { RawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
+import type { RawPageContent } from '@worldbrain/memex-common/ts/page-indexing/content-extraction/types'
 import type {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from '../shared-state/types'
-import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexing/types'
+import type { ExtractedPDFData } from '@worldbrain/memex-common/ts/page-indexing/types'
 import type {
     UnifiedAnnotation,
     UnifiedList,

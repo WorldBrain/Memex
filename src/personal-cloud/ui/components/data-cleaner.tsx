@@ -1,10 +1,10 @@
 import React from 'react'
 
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import { Container, BtnBox, Header, Text } from './shared-components'
 
 export interface Props {

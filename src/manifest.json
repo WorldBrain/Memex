@@ -4,7 +4,7 @@
     "version": "0.3.3",
     "description": "Search, annotate and organize what you've read online.",
     "background": {
-        "scripts": ["lib/browser-polyfill.js", "background.js"]
+        "scripts": ["src/background.ts"]
     },
     "externally_connectable": {
         "matches": [
@@ -16,14 +16,19 @@
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["lib/browser-polyfill.js", "content_script.js"],
+            "js": ["src/content_script.ts"],
             "css": [],
             "run_at": "document_end"
         }
     ],
     "browser_action": {
+        "default_icon": {
+            "16": "img/browserIcons/logo-16.png",
+            "48": "img/browserIcons/logo-48.png",
+            "128": "img/browserIcons/logo-128.png"
+        },
         "default_title": "Memex",
-        "default_popup": "./popup.html"
+        "default_popup": "popup.html"
     },
     "applications": {
         "gecko": {
@@ -31,9 +36,9 @@
         }
     },
     "icons": {
-        "16": "./img/browserIcons/logo-16.png",
-        "48": "./img/browserIcons/logo-48.png",
-        "128": "./img/browserIcons/logo-128.png"
+        "16": "img/browserIcons/logo-16.png",
+        "48": "img/browserIcons/logo-48.png",
+        "128": "img/browserIcons/logo-128.png"
     },
     "permissions": [
         "<all_urls>",
@@ -48,7 +53,7 @@
         "clipboardWrite"
     ],
     "web_accessible_resources": [
-        "/lib/pdf.worker.min.js",
+        "/ts/pdf.worker.min.js",
         "/img/*",
         "/content_script*.css",
         "/fonts/*",
@@ -65,7 +70,7 @@
         "keyword": "m"
     },
     "options_ui": {
-        "page": "./options.html#/settings",
+        "page": "options.html",
         "open_in_tab": true
     },
     "manifest_version": 2

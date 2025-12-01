@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import { createAction } from 'redux-act'
 import {
     remoteFunction,
@@ -27,12 +26,11 @@ export const openSidebar = createAction<number>('popup/openSidebar')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
 
-const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
-    dispatch,
-) => {
-    await dispatch(setTabId(id))
-    await dispatch(setUrl(url))
-}
+const setTabAndUrl: (id: number, url: string) => Thunk =
+    (id, url) => async (dispatch) => {
+        await dispatch(setTabId(id))
+        await dispatch(setUrl(url))
+    }
 
 export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
     const state = getState()
@@ -44,17 +42,16 @@ export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
     ).showSidebar()
 }
 
-const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
-    dispatch,
-) => {
-    const hasBoomark = await bookmarks.pageHasBookmark(pageUrl)
-    await dispatch(bookmarkActs.setIsBookmarked(hasBoomark))
-}
+const setTabIsBookmarked: (pageUrl: string) => Thunk =
+    (pageUrl) => async (dispatch) => {
+        const hasBoomark = await bookmarks.pageHasBookmark(pageUrl)
+        await dispatch(bookmarkActs.setIsBookmarked(hasBoomark))
+    }
 
 async function init() {
     const currentTab = await getCurrentTab({
-        runtimeAPI: browser.runtime,
-        tabsAPI: browser.tabs,
+        runtimeAPI: chrome.runtime,
+        tabsAPI: chrome.tabs,
     })
 
     // If we can't get the tab data, then can't init action button states

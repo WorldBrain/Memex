@@ -1,7 +1,6 @@
-import { Tabs, Browser, Bookmarks } from 'webextension-polyfill'
-import Storex from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { isFullUrl } from '@worldbrain/memex-common/lib/url-utils/normalize/utils'
+import Storex from '@worldbrain/storex/ts'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { isFullUrl } from '@worldbrain/memex-common/ts/url-utils/normalize/utils'
 
 import BookmarksStorage from './storage'
 import { BookmarksInterface } from './types'
@@ -14,8 +13,8 @@ import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import {
     trackAnnotationCreate,
     trackBookmarkCreate,
-} from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+} from '@worldbrain/memex-common/ts/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 
 const BOOKMARK_SYNC_STORAGE_NAME = 'memex:settings:bookmarkSync'
 
@@ -41,13 +40,14 @@ export default class BookmarksBackground {
         this.delBookmark = this.delBookmark.bind(this)
 
         this.remoteFunctions = {
-            addPageBookmark: this.addPageBookmark,
-            delPageBookmark: this.delPageBookmark,
+            addPageBookmark: this.addPageBookmark.bind(this),
+            delPageBookmark: this.delPageBookmark.bind(this),
             findBookmark: this.storage.findBookmark,
             pageHasBookmark: this.storage.pageHasBookmark,
-            setBookmarkStatusInBrowserIcon: this.setBookmarkStatusInBrowserIcon,
-            autoSetBookmarkStatusInBrowserIcon: this
-                .autoSetBookmarkStatusInBrowserIcon,
+            setBookmarkStatusInBrowserIcon:
+                this.setBookmarkStatusInBrowserIcon.bind(this),
+            autoSetBookmarkStatusInBrowserIcon:
+                this.autoSetBookmarkStatusInBrowserIcon.bind(this),
         }
     }
     get ROOT_BM() {
@@ -179,7 +179,7 @@ export default class BookmarksBackground {
     }
 
     async getBookmarkCollectionName(parentId: string) {
-        // call browser.bookmark.get(id) with parent id until we get to the root which has id "0"
+        // call chrome.bookmark.get(id) with parent id until we get to the root which has id "0"
         // format collection name as "dir1 > ... > dirN"
         // Unused for now but will be useful in the future
         let collectionName = ''
@@ -232,31 +232,28 @@ export default class BookmarksBackground {
         }
     }
 
-    autoSetBookmarkStatusInBrowserIcon: BookmarksInterface['autoSetBookmarkStatusInBrowserIcon'] = async (
-        tabId,
-    ) => {
-        const tab = await this.options.browserAPIs.tabs.get(tabId)
-        if (tab?.url == null) {
-            return
+    autoSetBookmarkStatusInBrowserIcon: BookmarksInterface['autoSetBookmarkStatusInBrowserIcon'] =
+        async (tabId) => {
+            const tab = await this.options.browserAPIs.tabs.get(tabId)
+            if (tab?.url == null) {
+                return
+            }
+
+            const pageHasBookmark = await this.storage.pageHasBookmark(tab.url)
+            await this.setBookmarkStatus(pageHasBookmark, tabId)
         }
 
-        const pageHasBookmark = await this.storage.pageHasBookmark(tab.url)
-        await this.setBookmarkStatus(pageHasBookmark, tabId)
-    }
+    setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] =
+        async (value, pageUrl) => {
+            const [activeTab] = await this.options.browserAPIs.tabs.query({
+                currentWindow: true,
+                active: true,
+            })
 
-    setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] = async (
-        value,
-        pageUrl,
-    ) => {
-        const [activeTab] = await this.options.browserAPIs.tabs.query({
-            currentWindow: true,
-            active: true,
-        })
+            if (activeTab?.url !== pageUrl) {
+                return
+            }
 
-        if (activeTab?.url !== pageUrl) {
-            return
+            await this.setBookmarkStatus(value, activeTab.id)
         }
-
-        await this.setBookmarkStatus(value, activeTab.id)
-    }
 }

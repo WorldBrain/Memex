@@ -1,38 +1,29 @@
-import React, { Component } from 'react'
+import React from 'react'
+import { useLocation, Outlet } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import Navigation from './components/navigation'
 import routes from './routes'
-import styles from './base.css'
 import { HelpBtn } from '../overview/help-btn'
 import AccountMenu from '../authentication/components/AccountMenu'
 import styled from 'styled-components'
 
-class Layout extends Component {
-    isActive = (route) => this.props.location.pathname === route.pathname
+const Layout = () => {
+    const location = useLocation()
 
-    render() {
-        const shouldFullScreen =
-            this.props.location.pathname === '/changelog' ||
-            this.props.location.pathname === '/feedback'
-        return (
-            <RootContainer>
-                <Navigation
-                    currentLocation={this.props.location}
-                    routes={routes}
-                >
-                    <AccountMenu />
-                </Navigation>
-                <div
-                    className={
-                        shouldFullScreen ? styles.fullScreen : styles.route
-                    }
-                >
-                    {this.props.children}
-                </div>
-                <HelpBtn />
-            </RootContainer>
-        )
-    }
+    const shouldFullScreen =
+        location.pathname === '/changelog' || location.pathname === '/feedback'
+
+    return (
+        <RootContainer>
+            <Navigation currentLocation={location} routes={routes}>
+                <AccountMenu />
+            </Navigation>
+            <div className={shouldFullScreen ? 'fullScreen' : 'route'}>
+                <Outlet />
+            </div>
+            <HelpBtn />
+        </RootContainer>
+    )
 }
 
 const RootContainer = styled.div`
@@ -44,15 +35,19 @@ const RootContainer = styled.div`
     & * {
         box-sizing: border-box;
         font-family: 'Satoshi', sans-serif;
-        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
-            'ss04' on, 'liga' off;
+        font-feature-settings:
+            'pnum' on,
+            'lnum' on,
+            'case' on,
+            'ss03' on,
+            'ss04' on,
+            'liga' off;
         letter-spacing: 0.8px;
     }
 `
 
 Layout.propTypes = {
-    location: PropTypes.object.isRequired,
-    children: PropTypes.object.isRequired,
+    routeData: PropTypes.object,
 }
 
 export default Layout

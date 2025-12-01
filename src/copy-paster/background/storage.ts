@@ -2,11 +2,11 @@ import {
     StorageModule,
     StorageModuleConfig,
     StorageModuleConstructorArgs,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/copy-paster/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/copy-paster/constants'
 import type { Template } from '../types'
 
 export default class CopyPasterStorage extends StorageModule {

@@ -1,9 +1,8 @@
-import type { Tabs, Runtime } from 'webextension-polyfill'
 import { PDF_VIEWER_HTML } from './constants'
 
 export const constructPDFViewerUrl = (
     urlToPdf: string,
-    args: { runtimeAPI: Pick<Runtime.Static, 'getURL'> },
+    args: { runtimeAPI: typeof chrome.runtime },
 ): string =>
     args.runtimeAPI.getURL(PDF_VIEWER_HTML) +
     '?file=' +
@@ -12,7 +11,7 @@ export const constructPDFViewerUrl = (
 
 export const isUrlPDFViewerUrl = (
     url: string,
-    args: { runtimeAPI: Pick<Runtime.Static, 'getURL'> },
+    args: { runtimeAPI: typeof chrome.runtime },
 ): boolean => {
     const pdfViewerUrl = args.runtimeAPI.getURL(PDF_VIEWER_HTML)
     return url.includes(pdfViewerUrl)
@@ -21,8 +20,8 @@ export const isUrlPDFViewerUrl = (
 export async function openPDFInViewer(
     fullPdfUrl: string,
     args: {
-        tabsAPI: Tabs.Static
-        runtimeAPI: Runtime.Static
+        tabsAPI: typeof chrome.tabs
+        runtimeAPI: typeof chrome.runtime
     },
 ): Promise<void> {
     const url = constructPDFViewerUrl(fullPdfUrl, {

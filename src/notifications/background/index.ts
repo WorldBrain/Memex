@@ -3,8 +3,8 @@ import NotificationStorage from './storage'
 import * as notifications from '../notifications'
 import createNotif from 'src/util/notifications'
 import { NotifDefinition } from '../types'
-import browser from 'webextension-polyfill'
-import StorageManager from '@worldbrain/storex'
+
+import StorageManager from '@worldbrain/storex/ts'
 import type { RemoteNotificationsInterface } from './types'
 
 interface OptionalNotificationDependencies {
@@ -42,27 +42,13 @@ export default class NotificationBackground {
             storageManager: options.storageManager,
         })
         this.remoteFunctions = {
-            storeNotification: (...params: [any]) => {
-                return this.storeNotification(...params)
-            },
-            fetchUnreadCount: () => {
-                return this.fetchUnreadCount()
-            },
-            fetchUnreadNotifications: () => {
-                return this.fetchUnreadNotifications()
-            },
-            fetchReadNotifications: (args) => {
-                return this.fetchReadNotifications(args)
-            },
-            readNotification: (id) => {
-                return this.readNotification(id)
-            },
-            fetchNotifById: (id) => {
-                return this.fetchNotifById(id)
-            },
-            dispatchNotification: (notification) => {
-                return this.dispatchNotification(notification)
-            },
+            storeNotification: this.storeNotification.bind(this),
+            fetchUnreadCount: this.fetchUnreadCount.bind(this),
+            fetchUnreadNotifications: this.fetchUnreadNotifications.bind(this),
+            fetchReadNotifications: this.fetchReadNotifications.bind(this),
+            readNotification: this.readNotification.bind(this),
+            fetchNotifById: this.fetchNotifById.bind(this),
+            dispatchNotification: this.dispatchNotification.bind(this),
             createNotification: async (notification) => {
                 await createNotif(notification)
             },
@@ -130,7 +116,7 @@ export default class NotificationBackground {
                 },
                 () => {
                     if (url) {
-                        return browser.tabs.create({
+                        return chrome.tabs.create({
                             url,
                         })
                     }
@@ -141,7 +127,7 @@ export default class NotificationBackground {
 
     async deliverStaticNotifications() {
         const lastReleaseTime = (
-            await browser.storage.local.get(
+            await chrome.storage.local.get(
                 NotificationBackground.LAST_NOTIF_TIME,
             )
         )[NotificationBackground.LAST_NOTIF_TIME]
@@ -161,7 +147,7 @@ export default class NotificationBackground {
                             message: notification.system.message,
                         },
                         () => {
-                            return browser.tabs.create({
+                            return chrome.tabs.create({
                                 url,
                             })
                         },
@@ -186,7 +172,7 @@ export default class NotificationBackground {
             }
         }
 
-        browser.storage.local.set({
+        chrome.storage.local.set({
             [NotificationBackground.LAST_NOTIF_TIME]: Date.now(),
         })
     }

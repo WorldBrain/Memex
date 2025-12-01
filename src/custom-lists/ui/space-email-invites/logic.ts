@@ -1,19 +1,19 @@
-import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core/ts'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
-import type { TaskState } from 'ui-logic-core/lib/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import {
     SharedListEmailInvite,
     SharedListRoleID,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
 import {
     NormalizedState,
     initNormalizedState,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
+import { isValidEmail } from '@worldbrain/memex-common/ts/utils/email-validation'
 
 export interface Dependencies {
     listData: UnifiedList
@@ -99,14 +99,13 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                 return
             }
 
-            const emailInvites = await this.dependencies.contentSharingBG.loadListEmailInvites(
-                {
+            const emailInvites =
+                await this.dependencies.contentSharingBG.loadListEmailInvites({
                     listReference: {
                         type: 'shared-list-reference',
                         id: remoteListId,
                     },
-                },
-            )
+                })
             if (emailInvites.status !== 'success') {
                 throw new Error('Failed to load email invites for list')
             }
@@ -123,33 +122,30 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
         })
     }
 
-    setEmailInvitesHoverState: EventHandler<
-        'setEmailInvitesHoverState'
-    > = async ({ event }) => {
-        this.emitMutation({
-            emailInvitesHoverState: { $set: event.id },
-        })
-    }
-
-    updateEmailInviteInputValue: EventHandler<
-        'updateEmailInviteInputValue'
-    > = async ({ event }) => {
-        this.emitMutation({ emailInviteInputValue: { $set: event.value } })
-    }
-
-    updateEmailInviteInputRole: EventHandler<
-        'updateEmailInviteInputRole'
-    > = async ({ event }) => {
-        if (
-            event.role !== SharedListRoleID.Commenter &&
-            event.role !== SharedListRoleID.ReadWrite
-        ) {
-            throw new Error(
-                'Cannot set invite role other than Commenter and ReadWrite',
-            )
+    setEmailInvitesHoverState: EventHandler<'setEmailInvitesHoverState'> =
+        async ({ event }) => {
+            this.emitMutation({
+                emailInvitesHoverState: { $set: event.id },
+            })
         }
-        this.emitMutation({ emailInviteInputRole: { $set: event.role } })
-    }
+
+    updateEmailInviteInputValue: EventHandler<'updateEmailInviteInputValue'> =
+        async ({ event }) => {
+            this.emitMutation({ emailInviteInputValue: { $set: event.value } })
+        }
+
+    updateEmailInviteInputRole: EventHandler<'updateEmailInviteInputRole'> =
+        async ({ event }) => {
+            if (
+                event.role !== SharedListRoleID.Commenter &&
+                event.role !== SharedListRoleID.ReadWrite
+            ) {
+                throw new Error(
+                    'Cannot set invite role other than Commenter and ReadWrite',
+                )
+            }
+            this.emitMutation({ emailInviteInputRole: { $set: event.role } })
+        }
 
     inviteViaEmail: EventHandler<'inviteViaEmail'> = async ({
         event,
@@ -198,21 +194,23 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                 let remoteId = this.dependencies.listData?.remoteId ?? null
 
                 while (remoteId == null) {
-                    remoteId = await this.dependencies.contentSharingBG.getRemoteListId(
-                        {
-                            localListId: this.dependencies.listData.localId,
-                        },
-                    )
+                    remoteId =
+                        await this.dependencies.contentSharingBG.getRemoteListId(
+                            {
+                                localListId: this.dependencies.listData.localId,
+                            },
+                        )
                 }
 
-                const result = await this.dependencies.contentSharingBG.createListEmailInvite(
-                    {
-                        now,
-                        email,
-                        roleID,
-                        listId: remoteId,
-                    },
-                )
+                const result =
+                    await this.dependencies.contentSharingBG.createListEmailInvite(
+                        {
+                            now,
+                            email,
+                            roleID,
+                            listId: remoteId,
+                        },
+                    )
                 if (result.status === 'success') {
                     this.emitMutation({
                         emailInvites: {
@@ -276,11 +274,10 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                     },
                 },
             })
-            const result = await this.dependencies.contentSharingBG.deleteListEmailInvite(
-                {
+            const result =
+                await this.dependencies.contentSharingBG.deleteListEmailInvite({
                     keyString: event.key,
-                },
-            )
+                })
             if (result.status !== 'success') {
                 throw new Error(
                     'Email invite deletion encountered a server-side error',

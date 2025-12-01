@@ -1,4 +1,4 @@
-import { UILogic } from 'ui-logic-core'
+import { UILogic } from 'ui-logic-core/ts'
 import type {
     DashboardResultsDependencies,
     DashboardResultsEvent,

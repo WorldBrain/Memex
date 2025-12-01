@@ -1,22 +1,14 @@
 import { featuresBeta } from 'src/util/remote-functions-background'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { TaskState } from 'ui-logic-core/ts/types'
 
 import React from 'react'
-import {
-    TypographyHeadingBig,
-    TypographyHeadingNormal,
-    TypographyHeadingBigger,
-    TypographyLink,
-    TypographyTextNormal,
-} from 'src/common-ui/components/design-library/typography'
+
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { auth, subscription } from 'src/util/remote-functions-background'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
-const settingsStyle = require('src/options/settings/components/settings.css')
 import {
     UserBetaFeature,
     UserBetaFeatureId,

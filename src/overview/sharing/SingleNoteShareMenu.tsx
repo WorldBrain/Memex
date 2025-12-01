@@ -5,7 +5,7 @@ import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
@@ -20,19 +20,19 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
 } from './constants'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
-import { TaskState } from 'ui-logic-core/lib/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { trackSharedAnnotation } from '@worldbrain/memex-common/lib/analytics/events'
+import { TaskState } from 'ui-logic-core/ts/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import { trackSharedAnnotation } from '@worldbrain/memex-common/ts/analytics/events'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
 import Checkbox from 'src/common-ui/components/Checkbox'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import Margin from '@worldbrain/memex-common/lib/common-ui/components/Margin'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import Margin from '@worldbrain/memex-common/ts/common-ui/components/Margin'
 
 type SelectType = 'select' | 'unselect'
 
@@ -284,12 +284,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
     private setRemoteLinkIfExists = async (): Promise<boolean> => {
-        const {
-            annotationUrl,
-            contentSharingBG,
-            isShared,
-            showLink,
-        } = this.props
+        const { annotationUrl, contentSharingBG, isShared, showLink } =
+            this.props
         const link = await contentSharingBG.getRemoteAnnotationLink({
             annotationUrl,
         })
@@ -425,16 +421,15 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             this,
             'autoShareState',
             async () => {
-                const sharingState = await contentSharingBG.setAnnotationPrivacyLevel(
-                    {
+                const sharingState =
+                    await contentSharingBG.setAnnotationPrivacyLevel({
                         annotationUrl,
                         keepListsIfUnsharing: options.keepListsIfUnsharing,
                         privacyLevel: shareOptsToPrivacyLvl({
                             shouldShare: false,
                             isBulkShareProtected: options.isBulkShareProtected,
                         }),
-                    },
-                )
+                    })
 
                 this.props.postShareHook?.(sharingState, {
                     keepListsIfUnsharing: options.keepListsIfUnsharing,
@@ -448,8 +443,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     private getAnnotationSharedLists = async (): Promise<string[]> => {
         let lists = []
         for (const listId of this.props.annotationData.unifiedListIds) {
-            const list = this.props.spacePickerProps.annotationsCache.lists
-                .byId[listId]
+            const list =
+                this.props.spacePickerProps.annotationsCache.lists.byId[listId]
             if (list.remoteId != null) {
                 lists.push(list)
             }
@@ -483,32 +478,31 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         // }
     }
 
-    private handleSpacePickerSelection = (
-        selectType: 'select' | 'unselect',
-    ) => async (listId: number) => {
-        const { selectEntry, unselectEntry } = this.props.spacePickerProps
+    private handleSpacePickerSelection =
+        (selectType: 'select' | 'unselect') => async (listId: number) => {
+            const { selectEntry, unselectEntry } = this.props.spacePickerProps
 
-        if (
-            this.props.isShared &&
-            this.props.getRemoteListIdForLocalId(listId) != null &&
-            selectType === 'select'
-        ) {
-            this.setState({
-                confirmationMode: {
-                    type: 'public-select-space',
-                    listId,
-                    selectType,
-                },
-            })
-            return selectType === 'select'
-                ? selectEntry(listId)
-                : unselectEntry(listId)
-        } else {
-            return selectType === 'select'
-                ? selectEntry(listId)
-                : unselectEntry(listId)
+            if (
+                this.props.isShared &&
+                this.props.getRemoteListIdForLocalId(listId) != null &&
+                selectType === 'select'
+            ) {
+                this.setState({
+                    confirmationMode: {
+                        type: 'public-select-space',
+                        listId,
+                        selectType,
+                    },
+                })
+                return selectType === 'select'
+                    ? selectEntry(listId)
+                    : unselectEntry(listId)
+            } else {
+                return selectType === 'select'
+                    ? selectEntry(listId)
+                    : unselectEntry(listId)
+            }
         }
-    }
 
     private renderConfirmationMode() {
         const { selectEntry, unselectEntry } = this.props.spacePickerProps

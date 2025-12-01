@@ -2,7 +2,7 @@ import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 interface Props {
     dataAttributeName: string

@@ -1,8 +1,7 @@
-import browser from 'webextension-polyfill'
 import { BULK_SELECT_STORAGE_KEY } from './constants'
 import type { BulkEditCollection, BulkEditItem } from './types'
 
-// write a function that gets browser.local.storage.set and browser.local.storage.get to write to a storage entry called "bulkEdit"
+// write a function that gets chrome.local.storage.set and chrome.local.storage.get to write to a storage entry called "bulkEdit"
 
 export async function setBulkEdit(
     data: BulkEditCollection,
@@ -20,15 +19,15 @@ export async function setBulkEdit(
         }
     }
 
-    await browser.storage.local.set({ [BULK_SELECT_STORAGE_KEY]: dataToWrite })
+    await chrome.storage.local.set({ [BULK_SELECT_STORAGE_KEY]: dataToWrite })
 }
 
 export async function getBulkEditItems(): Promise<BulkEditCollection> {
-    const data = await browser.storage.local.get(BULK_SELECT_STORAGE_KEY)
+    const data = await chrome.storage.local.get(BULK_SELECT_STORAGE_KEY)
     const currentData: BulkEditCollection = data[BULK_SELECT_STORAGE_KEY]
 
     return currentData ? currentData : {}
 }
 export async function clearBulkEditItems() {
-    await browser.storage.local.remove(BULK_SELECT_STORAGE_KEY)
+    await chrome.storage.local.remove(BULK_SELECT_STORAGE_KEY)
 }

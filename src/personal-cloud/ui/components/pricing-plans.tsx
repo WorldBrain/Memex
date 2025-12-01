@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import type { PaymentPeriod } from '../types'
 

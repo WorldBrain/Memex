@@ -2,8 +2,6 @@ import React, { PureComponent, MouseEventHandler } from 'react'
 import TagPill from './tag-pill'
 import cx from 'classnames'
 
-const styles = require('./tag-holder.css')
-
 interface Props {
     tags: string[]
     maxTagsLimit: number
@@ -39,15 +37,7 @@ class TagHolder extends PureComponent<Props, {}> {
     }
 
     render() {
-        return (
-            <div
-                className={cx(styles.tagList, {
-                    [styles.tagListSidebar]: this.props.env === 'sidebar',
-                })}
-            >
-                {this.renderTagPills()}
-            </div>
-        )
+        return <div>{this.renderTagPills()}</div>
     }
 }
 

@@ -8,8 +8,6 @@ import PowerSearchBrowse from './notifications/power-search-browse'
 import GoToDashboard from './notifications/go-to-dashboard'
 import TagThisPage from './notifications/tag-this-page'
 
-const styles = require('./styles.css')
-
 export interface Props {
     type: string
     onCloseRequested: () => void
@@ -51,8 +49,8 @@ export class ToolbarNotification extends Component<Props> {
     render() {
         const containerStyles = this.deriveContainerStyles(this.props.position)
         return (
-            <div className={styles.screen}>
-                <div className={styles.container} style={containerStyles}>
+            <div className="screen">
+                <div className="container" style={containerStyles}>
                     {this.props.type === 'tooltip-first-close' && (
                         <TooltipFirstCloseNotification
                             onCloseRequested={this.props.onCloseRequested}

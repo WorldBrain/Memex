@@ -1,4 +1,4 @@
-import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import { PremiumPlans } from '@worldbrain/memex-common/ts/subscriptions/availablePowerups'
 import { RemoteFunction, RemoteFunctionRole } from 'src/util/webextensionRPC'
 
 export interface InPageUIInterface<Role extends RemoteFunctionRole> {

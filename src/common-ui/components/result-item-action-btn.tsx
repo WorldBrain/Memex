@@ -1,8 +1,6 @@
 import React, { MouseEventHandler } from 'react'
 import cx from 'classnames'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-
-const styles = require('./result-item.css')
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 export interface Props {
     tooltipText: string
@@ -20,14 +18,11 @@ const ResultItemActionBtn: React.SFC<Props> = (props) => (
         getPortalRoot={null}
     >
         <button
-            className={props.permanent ? styles.permanentButton : styles.button}
+            className={props.permanent ? 'permanentButton' : 'button'}
             onClick={props.onClick}
             ref={props.refHandler}
         >
-            <img
-                src={props.imgSrc}
-                className={cx(styles.img, props.className)}
-            />
+            <img src={props.imgSrc} className={cx('img', props.className)} />
         </button>
     </TooltipBox>
 )

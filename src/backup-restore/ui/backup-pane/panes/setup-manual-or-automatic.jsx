@@ -1,14 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import OnboardingBackupMode from '../components/onboarding-backup-mode'
-import Styles from '../../styles.css'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
-
-const settingsStyle = require('src/options/settings/components/settings.css')
 
 class SetupManualOrAutomatic extends React.Component {
     state = {
@@ -19,18 +16,17 @@ class SetupManualOrAutomatic extends React.Component {
     render() {
         return (
             <div>
-                <div className={settingsStyle.section}>
-                    <div className={settingsStyle.sectionTitle}>
+                <div>
+                    <div>
                         <strong>STEP 2/5: </strong>
                         More or less work?
                     </div>
                     <OnboardingBackupMode
-                        className={Styles.selectionlist}
                         onModeChange={(mode) => this.setState({ mode })}
                         showSubscriptionModal={this.props.showSubscriptionModal}
                         isAuthorizedForAutomaticBackup={this.state.automatic}
                     />
-                    <div className={settingsStyle.buttonArea}>
+                    <div>
                         <SecondaryAction
                             onClick={this.props.onBackRequested}
                             label={'Go Back'}
@@ -42,8 +38,6 @@ class SetupManualOrAutomatic extends React.Component {
                                         this.props.onChoice({ type: 'manual' })
                                     }
                                     label={'Continue'}
-                                    type={'primary'}
-                                    size={'medium'}
                                 />
                             )}
                             {this.state.mode === 'automatic' && (
@@ -55,8 +49,6 @@ class SetupManualOrAutomatic extends React.Component {
                                         })
                                     }
                                     label={'Next'}
-                                    type={'primary'}
-                                    size={'medium'}
                                 />
                             )}
                         </div>
@@ -67,9 +59,7 @@ class SetupManualOrAutomatic extends React.Component {
     }
 }
 
-export default connect(null, (dispatch) => ({
-    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
-}))(withCurrentUser(SetupManualOrAutomatic))
+export default withCurrentUser(SetupManualOrAutomatic)
 
 SetupManualOrAutomatic.propTypes = {
     onChoice: PropTypes.func.isRequired,

@@ -1,4 +1,4 @@
-import inMemoryDb from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import inMemoryDb from '@worldbrain/storex-backend-dexie/ts/in-memory'
 
 import initStorex from './storex'
 

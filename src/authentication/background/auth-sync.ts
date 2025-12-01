@@ -6,13 +6,11 @@ import {
     validGeneratedLoginToken,
     logUnpackedMessage,
     logPackedMessage,
-} from '@worldbrain/memex-common/lib/authentication/auth-sync'
-import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+} from '@worldbrain/memex-common/ts/authentication/auth-sync'
+import type { AuthService } from '@worldbrain/memex-common/ts/authentication/types'
 import { OVERVIEW_URL } from 'src/constants'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
-import type { Runtime, Storage } from 'webextension-polyfill'
-import browser from 'webextension-polyfill'
 
 function validSender(sender: any, expectedOrigins: string[]) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
@@ -41,7 +39,7 @@ function addListener(
         messageObj: ReturnType<typeof unpackMessage>,
     ) => void,
     expectedOrigins: string[],
-    runtimeAPI: Runtime.Static,
+    runtimeAPI: typeof chrome.runtime,
 ) {
     runtimeAPI.onMessageExternal.addListener(
         //@ts-ignore next-line
@@ -121,17 +119,17 @@ export async function listenToWebAppMessage(
                     const isLoggedIn = !!user
                     if (isLoggedIn) {
                         sendResponse(packMessage(ExtMessage.TRIGGER_ONBOARDING))
-                        browser.tabs.create({
+                        chrome.tabs.create({
                             url: `${OVERVIEW_URL}?${ONBOARDING_QUERY_PARAMS.NEW_USER}`,
                         })
-                        browser.tabs.query({}).then((tabs) => {
+                        chrome.tabs.query({}).then((tabs) => {
                             const authTab = tabs.find((tab) =>
                                 expectedOrigins.some((origin) =>
                                     tab.url.startsWith(`${origin}/auth`),
                                 ),
                             )
                             if (authTab) {
-                                browser.tabs.remove(authTab.id)
+                                chrome.tabs.remove(authTab.id)
                             }
                         })
                         reactingToMessage = false

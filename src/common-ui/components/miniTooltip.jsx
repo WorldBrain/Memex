@@ -2,16 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
-import styles from './miniTooltip.css'
-
 const Tooltip = ({ showTooltip, children }) => {
     return (
-        <div className={styles.tooltip}>
-            <span
-                className={cx(styles.tooltiptext, {
-                    [styles.hideTooltip]: !showTooltip,
-                })}
-            >
+        <div>
+            <span className={cx({ hideTooltip: !showTooltip })}>
                 {children}
             </span>
         </div>

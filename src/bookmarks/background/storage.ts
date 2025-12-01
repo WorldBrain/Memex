@@ -1,14 +1,14 @@
-import Storex from '@worldbrain/storex'
+import Storex from '@worldbrain/storex/ts'
 import {
     StorageModule,
     StorageModuleConfig,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import type { Bookmark } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
+} from '@worldbrain/memex-common/ts/storage/modules/pages/constants'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import type { Bookmark } from '@worldbrain/memex-common/ts/storage/modules/mobile-app/features/overview/types'
 
 export default class BookmarksStorage extends StorageModule {
     static BMS_COLL = COLLECTION_NAMES.bookmark

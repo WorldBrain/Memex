@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-const styles = require('./TrialExpiryWarning.css')
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 interface Props {
     showPaymentWindow: () => void
@@ -46,7 +45,7 @@ class TrialExpiryWarning extends PureComponent<Props> {
 
     render() {
         return (
-            <div id="TrialExpiryWarning" className={styles.box}>
+            <div id="TrialExpiryWarning" className="box">
                 {this.state.expired ? (
                     <span>
                         {'Your trial EXPIRED. Premium features disabled'}
@@ -59,7 +58,7 @@ class TrialExpiryWarning extends PureComponent<Props> {
                 )}
                 <span
                     onClick={this.props.showPaymentWindow}
-                    className={styles.closeButton}
+                    className="closeButton"
                 >
                     {this.props.loadingPortal ? (
                         <LoadingIndicator />
@@ -75,13 +74,13 @@ class TrialExpiryWarning extends PureComponent<Props> {
                 {}
                 <span
                     onClick={() => this.closeButton()}
-                    className={styles.closeButton}
+                    className="closeButton"
                 >
                     Close
                 </span>
                 {/*<span
                         onClick={this.props.closeTrialNotif}
-                        className={styles.closeButton}
+                        className="closeButton"
                     >close</span>*/}
             </div>
         )

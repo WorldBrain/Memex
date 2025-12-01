@@ -1,8 +1,7 @@
-import type { Tabs, Runtime, Storage } from 'webextension-polyfill'
 import type {
     PdfUploadServiceInterface,
     RequestPdfSuccessResult,
-} from '@worldbrain/memex-common/lib/pdf/uploads/types'
+} from '@worldbrain/memex-common/ts/pdf/uploads/types'
 import type { SyncSettingsStore } from '../../sync-settings/util'
 import type PageStorage from '../../page-indexing/background/storage'
 import type { PDFRemoteInterface } from './types'
@@ -10,13 +9,13 @@ import {
     ContentLocatorFormat,
     ContentLocatorType,
     LocationSchemeType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import type { PagePutHandler } from 'src/page-indexing/background/types'
 import { runInTab } from 'src/util/webextensionRPC'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import type { ContentIdentifier } from 'src/search'
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
-import { RETRIEVE_PDF_ROUTE } from '@worldbrain/memex-common/lib/pdf/uploads/constants'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/ts/content-sharing/storage/constants'
+import { RETRIEVE_PDF_ROUTE } from '@worldbrain/memex-common/ts/pdf/uploads/constants'
 
 export class PDFBackground {
     static OPEN_PDF_VIEWER_ONE_TIME_KEY =
@@ -27,9 +26,9 @@ export class PDFBackground {
     constructor(
         private deps: {
             manifestVersion: '2' | '3'
-            tabsAPI: Pick<Tabs.Static, 'update'>
-            storageAPI: Pick<Storage.Static, 'local'>
-            runtimeAPI: Pick<Runtime.Static, 'getURL'>
+            tabsAPI: typeof chrome.tabs
+            storageAPI: typeof chrome.storage
+            runtimeAPI: typeof chrome.runtime
             pdfUploads: PdfUploadServiceInterface
             generateUploadId: () => string | number
             syncSettings: SyncSettingsStore<'pdfIntegration'>
@@ -53,24 +52,23 @@ export class PDFBackground {
         }
     }
 
-    private getTempPdfAccessUrl: PDFRemoteInterface['getTempPdfAccessUrl'] = async (
-        uploadId,
-    ) => {
-        const result = await this.deps.pdfUploads.getDownloadToken({
-            uploadId,
-        })
+    private getTempPdfAccessUrl: PDFRemoteInterface['getTempPdfAccessUrl'] =
+        async (uploadId) => {
+            const result = await this.deps.pdfUploads.getDownloadToken({
+                uploadId,
+            })
 
-        const workerUrl =
-            process.env.NODE_ENV === 'production'
-                ? CLOUDFLARE_WORKER_URLS.production
-                : CLOUDFLARE_WORKER_URLS.staging
+            const workerUrl =
+                process.env.NODE_ENV === 'production'
+                    ? CLOUDFLARE_WORKER_URLS.production
+                    : CLOUDFLARE_WORKER_URLS.staging
 
-        if ('token' in result) {
-            return `${workerUrl}${RETRIEVE_PDF_ROUTE}?token=${result.token}`
+            if ('token' in result) {
+                return `${workerUrl}${RETRIEVE_PDF_ROUTE}?token=${result.token}`
+            }
+
+            throw new Error(result.error)
         }
-
-        throw new Error(result.error)
-    }
 
     handlePagePut: PagePutHandler = async (event) => {
         if (event.isNew && event.isPdf && event.isLocalPdf && event.tabId) {
@@ -93,9 +91,10 @@ export class PDFBackground {
         tabId: number
         identifier: ContentIdentifier
     }) => {
-        const existingLocators = await this.deps.pageStorage.findLocatorsByNormalizedUrl(
-            params.identifier.normalizedUrl,
-        )
+        const existingLocators =
+            await this.deps.pageStorage.findLocatorsByNormalizedUrl(
+                params.identifier.normalizedUrl,
+            )
         const existingStorageLocator = existingLocators.find(
             (loc) => loc.locationScheme === LocationSchemeType.UploadStorage,
         )
@@ -124,9 +123,8 @@ export class PDFBackground {
         if (existingStorageLocator?.status === 'uploaded') {
             return
         }
-        const contentScriptRPC = runInTab<
-            InPDFPageUIContentScriptRemoteInterface
-        >(params.tabId)
+        const contentScriptRPC =
+            runInTab<InPDFPageUIContentScriptRemoteInterface>(params.tabId)
         await contentScriptRPC.setPdfUploadState(true)
 
         if (process.env.NODE_ENV !== 'test') {

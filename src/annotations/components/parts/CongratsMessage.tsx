@@ -1,17 +1,16 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
-import browser from 'webextension-polyfill'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 
-const partyPopperIcon = browser.runtime.getURL('/img/party_popper.svg')
+const partyPopperIcon = chrome.runtime.getURL('/img/party_popper.svg')
 
 class CongratsMessage extends Component {
     private openOptionsTab = remoteFunction('openOptionsTab')
 
     private moreAboutSidebar = () => {
         // TODO: remove this direct use of WebExt API
-        browser.tabs.create({
+        chrome.tabs.create({
             url: 'https://worldbrain.io',
         })
     }

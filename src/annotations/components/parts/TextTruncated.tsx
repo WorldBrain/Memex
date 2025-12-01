@@ -5,9 +5,9 @@ import { TextTruncator } from 'src/annotations/types'
 import { truncateText } from 'src/annotations/utils'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import memexStorex from 'src/search/memex-storex'
-import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
+import Markdown from '@worldbrain/memex-common/ts/common-ui/components/markdown'
 
 export interface Props {
     text: string

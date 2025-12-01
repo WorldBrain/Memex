@@ -1,9 +1,9 @@
-import type { UIEvent } from 'ui-logic-core'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { UIEvent } from 'ui-logic-core/ts'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import type {
     AnnotationConversationEvent,
     AnnotationConversationsState,
-} from '@worldbrain/memex-common/lib/content-conversations/ui/types'
+} from '@worldbrain/memex-common/ts/content-conversations/ui/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
@@ -14,44 +14,43 @@ import type {
 } from 'src/content-sharing/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { Analytics } from 'src/analytics'
-import type { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
+import type { SubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { AnnotationsSorter } from '../sorting'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import type { MemexTheme } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import type {
     PageAnnotationsCacheInterface,
     RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { SummarizationInterface } from 'src/summarization-llm/background/index'
-import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
-import type { Storage, Runtime, Browser } from 'webextension-polyfill'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { YoutubePlayer } from '@worldbrain/memex-common/ts/services/youtube/types'
+import type { YoutubeService } from '@worldbrain/memex-common/ts/services/youtube'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
-import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
+import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/ts/editor'
 import type {
     AImodels,
     PromptData,
     ChatHistoryItem,
-} from '@worldbrain/memex-common/lib/summarization/types'
-import type { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+} from '@worldbrain/memex-common/ts/summarization/types'
+import type { PremiumPlans } from '@worldbrain/memex-common/ts/subscriptions/availablePowerups'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
-import { CreationInfoProps } from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/types'
+import { CreationInfoProps } from '@worldbrain/memex-common/ts/common-ui/components/creation-info'
 
 export type WindowAPISubset = Pick<
     Window,
@@ -66,7 +65,7 @@ export type WindowAPISubset = Pick<
 
 export interface SidebarContainerDependencies {
     elements?: {
-        topBarLeft?: JSX.Element
+        topBarLeft?: React.ReactNode
     }
     fullPageUrl?: string
     pageTitle?: string
@@ -78,8 +77,8 @@ export interface SidebarContainerDependencies {
     showAnnotationShareModal?: () => void
     highlighter: HighlightRendererInterface
 
-    storageAPI: Storage.Static
-    runtimeAPI: Runtime.Static
+    storageAPI: typeof chrome.storage
+    runtimeAPI: typeof chrome.runtime
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface
     analyticsBG: AnalyticsCoreInterface
@@ -96,7 +95,7 @@ export interface SidebarContainerDependencies {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     windowAPI: WindowAPISubset
     bgScriptBG: RemoteBGScriptInterface<'caller'>
     pkmSyncBG: PkmSyncInterface

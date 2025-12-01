@@ -1,5 +1,3 @@
-import { Tabs } from 'webextension-polyfill'
-
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 
 // NOTE: Commented out as CS injection is no longer performed on tab tracking
@@ -58,7 +56,7 @@ describe('activity logger background tests', () => {
             //     }
 
             //     expectedCalls.push(
-            //         createScriptCallObj(tab.id, '/lib/browser-polyfill.js'),
+            //         createScriptCallObj(tab.id, '/ts/browser-polyfill.js'),
             //         createScriptCallObj(tab.id, '/content_script.js'),
             //     )
             // })

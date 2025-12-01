@@ -5,10 +5,10 @@ import { ClickHandler, RootState } from '../../types'
 import * as acts from '../actions'
 import * as popup from '../../selectors'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
 
 export interface OwnProps {
     pageListsIds: number[]
@@ -37,10 +37,8 @@ class CollectionsButton extends PureComponent<Props> {
     }
 
     private async getKeyboardShortcutText() {
-        const {
-            shortcutsEnabled,
-            addToCollection,
-        } = await getKeyboardShortcutsState()
+        const { shortcutsEnabled, addToCollection } =
+            await getKeyboardShortcutsState()
 
         if (!shortcutsEnabled || !addToCollection.enabled) {
             this.setState({

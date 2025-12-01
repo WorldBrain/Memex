@@ -1,9 +1,12 @@
-import createResolvable, { Resolvable } from '@josephg/resolvable'
+import * as resolvable from '@josephg/resolvable'
+import type { Resolvable } from '@josephg/resolvable'
 import type { RPCManager, RPCManagerDependencies, RPCRequest } from './types'
-import type { Runtime } from 'webextension-polyfill'
 import { createRPCRequestObject, createRPCResponseObject } from './utils'
 import { RpcError, __REMOTE_EMITTER_EVENT__ } from '../webextensionRPC'
+import { serializeError } from 'serialize-error'
 import { resolveTabUrl } from '../uri-utils'
+
+const createResolvable = () => resolvable.default()
 
 export class EventBasedRPCManager implements RPCManager {
     private paused?: Resolvable<void>
@@ -45,58 +48,59 @@ export class EventBasedRPCManager implements RPCManager {
             `messageRequester:: Got response for [${request.headers.name}]`,
             ret.payload,
         )
+
+        if (ret.error != null) {
+            throw new RpcError(
+                ret.error ??
+                    ret.serializedError ??
+                    new Error('Unknown RPC error'),
+            )
+        }
+
         return ret.payload
     }
 
-    postMessageRequestToBackground: RPCManager['postMessageRequestToBackground'] = async (
-        name,
-        payload,
-    ) => {
-        const request = createRPCRequestObject(
-            {
-                name,
-                originSide: this.deps.sideName,
-                recipientSide: 'background',
-            },
-            payload,
-        )
-        return this.postMessageRequestToRPC(request)
-    }
+    postMessageRequestToBackground: RPCManager['postMessageRequestToBackground'] =
+        async (name, payload) => {
+            const request = createRPCRequestObject(
+                {
+                    name,
+                    originSide: this.deps.sideName,
+                    recipientSide: 'background',
+                },
+                payload,
+            )
+            return this.postMessageRequestToRPC(request)
+        }
 
-    postMessageRequestToContentScript: RPCManager['postMessageRequestToContentScript'] = async (
-        tabId,
-        name,
-        payload,
-    ) => {
-        const request = createRPCRequestObject(
-            {
-                name,
-                tabId,
-                originSide: this.deps.sideName,
-                recipientSide: 'content-script-global',
-            },
-            payload,
-        )
-        return this.postMessageRequestToRPC(request)
-    }
+    postMessageRequestToContentScript: RPCManager['postMessageRequestToContentScript'] =
+        async (tabId, name, payload) => {
+            const request = createRPCRequestObject(
+                {
+                    name,
+                    tabId,
+                    originSide: this.deps.sideName,
+                    recipientSide: 'content-script-global',
+                },
+                payload,
+            )
+            return this.postMessageRequestToRPC(request)
+        }
 
-    postMessageRequestToCSViaBG: RPCManager['postMessageRequestToCSViaBG'] = async (
-        tabId,
-        name,
-        payload,
-    ) => {
-        const request = createRPCRequestObject(
-            {
-                tabId,
-                name,
-                proxy: 'background',
-                originSide: this.deps.sideName,
-                recipientSide: 'background',
-            },
-            payload,
-        )
-        return this.postMessageRequestToRPC(request)
-    }
+    postMessageRequestToCSViaBG: RPCManager['postMessageRequestToCSViaBG'] =
+        async (tabId, name, payload) => {
+            const request = createRPCRequestObject(
+                {
+                    tabId,
+                    name,
+                    proxy: 'background',
+                    originSide: this.deps.sideName,
+                    recipientSide: 'background',
+                },
+                payload,
+            )
+            return this.postMessageRequestToRPC(request)
+        }
 
     // NOTE: in Chrome there's a bug which prevents this from being able to return a Promise, so instead
     //  we need to return true (synchronously) then call the `sendResponse` callback after the async stuff is
@@ -104,7 +108,7 @@ export class EventBasedRPCManager implements RPCManager {
     // see: https://issues.chromium.org/issues/40753031
     private messageResponder = (
         request: RPCRequest,
-        sender: Runtime.MessageSender,
+        sender: any,
         sendResponse: (res: any) => void,
     ): true => {
         // These are intended for remote event emitters, which are implemented separately
@@ -129,58 +133,67 @@ export class EventBasedRPCManager implements RPCManager {
                     return
                 }
 
-                // If the Request type was a proxy, the background shouldn't fullill this request itself
-                // but pass it on to the specific tab to fullfill
-                if (headers.proxy === 'background') {
-                    await this.postMessageRequestToContentScript(
-                        headers.tabId,
-                        name,
-                        payload,
-                    )
-                } else {
-                    const f = this.deps.getRegisteredRemoteFunction(name)
+                let functionReturn: any
+                try {
+                    if (headers.proxy === 'background') {
+                        functionReturn =
+                            await this.postMessageRequestToContentScript(
+                                headers.tabId!,
+                                name,
+                                payload,
+                            )
+                    } else {
+                        const f = this.deps.getRegisteredRemoteFunction(name)
 
-                    if (!f) {
-                        console.error({
-                            side: this.deps.sideName,
-                            packet: request,
-                        })
-                        throw Error(
-                            `No registered remote function called ${name}`,
+                        if (!f) {
+                            console.error({
+                                side: this.deps.sideName,
+                                packet: request,
+                            })
+                            throw Error(
+                                `No registered remote function called ${name}`,
+                            )
+                        }
+                        Object.defineProperty(f, 'name', { value: name })
+
+                        this.log(
+                            `messageResponder:: RUNNING Function [${name}]`,
                         )
-                    }
-                    Object.defineProperty(f, 'name', { value: name })
 
-                    this.log(`messageResponder:: RUNNING Function [${name}]`)
+                        let tab =
+                            sender.tab ??
+                            (request.headers.tabId != null
+                                ? await this.deps.browserAPIs.tabs?.get(
+                                      request.headers.tabId,
+                                  ) // Tabs API only available in non-CS
+                                : undefined)
+                        tab = resolveTabUrl(tab)
 
-                    let tab =
-                        sender.tab ??
-                        (request.headers.tabId != null
-                            ? await this.deps.browserAPIs.tabs?.get(
-                                  request.headers.tabId,
-                              ) // Tabs API only available in non-CS
-                            : undefined)
-                    tab = resolveTabUrl(tab)
-
-                    try {
-                        const functionReturn = await f({ tab }, ...payload)
+                        functionReturn = await f({ tab }, ...payload)
                         this.log(
                             `messageResponder:: FINISHED Function [${name}]`,
                             functionReturn,
                         )
-                        const res = createRPCResponseObject({
-                            request,
-                            payload: functionReturn,
-                            originSide: this.deps.sideName,
-                            recipientSide: request.headers.originSide,
-                        })
-                        sendResponse(res)
-                    } catch (err) {
-                        this.log(
-                            `messageResponder:: ERRORED Function [${name}]`,
-                        )
-                        throw new RpcError(err)
                     }
+
+                    const res = createRPCResponseObject({
+                        request,
+                        payload: functionReturn,
+                        originSide: this.deps.sideName,
+                        recipientSide: request.headers.originSide,
+                    })
+                    sendResponse(res)
+                } catch (err: any) {
+                    this.log(`messageResponder:: ERRORED Function [${name}]`)
+                    const res = createRPCResponseObject({
+                        request,
+                        payload: undefined,
+                        error: err,
+                        serializedError: serializeError(err),
+                        originSide: this.deps.sideName,
+                        recipientSide: request.headers.originSide,
+                    })
+                    sendResponse(res)
                 }
             } else if (type === 'RPC_RESPONSE') {
                 this.log(`messageResponder:: RESPONSE received for [${name}]`)
@@ -197,9 +210,7 @@ export class EventBasedRPCManager implements RPCManager {
     }
 
     setup: RPCManager['setup'] = () => {
-        this.deps.browserAPIs.runtime.onMessage.addListener(
-            this.messageResponder as any,
-        )
+        chrome.runtime.onMessage.addListener(this.messageResponder as any)
     }
 
     unpause: RPCManager['unpause'] = () => {

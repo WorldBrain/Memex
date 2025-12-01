@@ -1,5 +1,5 @@
 import type { Annotation } from 'src/annotations/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 export const PAGE_URL_1 = 'https://test.com'
 export const COMMENT_1 = 'This is a test comment'

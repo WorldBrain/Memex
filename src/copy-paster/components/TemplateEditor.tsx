@@ -2,15 +2,15 @@ import React, { PureComponent } from 'react'
 import { Template } from '../types'
 import styled, { css } from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { TaskState } from 'ui-logic-core/lib/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { TaskState } from 'ui-logic-core/ts/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 import { DEFAULT_TEMPLATES } from '../background/default-templates'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
 
 interface TemplateEditorProps {
     previewString: string
@@ -65,9 +65,8 @@ export default class TemplateEditor extends PureComponent<
         const sidebar = sidebarContainer?.shadowRoot.getElementById(
             'annotationSidebarContainer',
         )
-        const test = sidebarContainer?.shadowRoot.getElementById(
-            'CopyPasterTextArea',
-        )
+        const test =
+            sidebarContainer?.shadowRoot.getElementById('CopyPasterTextArea')
 
         if (sidebar != null) {
             textarea = sidebar.querySelector('#CopyPasterTextArea')
@@ -309,8 +308,11 @@ export default class TemplateEditor extends PureComponent<
                                     this.props.onCodeChange(e.target.value)
                                 }}
                                 onDragOver={(event) => {
-                                    ;(event.target as HTMLTextAreaElement).focus()
-                                    const target = event.target as HTMLTextAreaElement
+                                    ;(
+                                        event.target as HTMLTextAreaElement
+                                    ).focus()
+                                    const target =
+                                        event.target as HTMLTextAreaElement
                                     target.selectionStart = target.selectionEnd
                                 }}
                                 onKeyUp={(e) => {
@@ -320,12 +322,15 @@ export default class TemplateEditor extends PureComponent<
                                     e.stopPropagation()
                                     if (e.key === 'Tab') {
                                         e.preventDefault()
-                                        const start = (e.target as HTMLTextAreaElement)
-                                            .selectionStart
-                                        const end = (e.target as HTMLTextAreaElement)
-                                            .selectionEnd
-                                        const value = (e.target as HTMLTextAreaElement)
-                                            .value
+                                        const start = (
+                                            e.target as HTMLTextAreaElement
+                                        ).selectionStart
+                                        const end = (
+                                            e.target as HTMLTextAreaElement
+                                        ).selectionEnd
+                                        const value = (
+                                            e.target as HTMLTextAreaElement
+                                        ).value
                                         let newValue, newCursorPos
                                         if (!e.shiftKey) {
                                             newValue =
@@ -338,9 +343,8 @@ export default class TemplateEditor extends PureComponent<
                                                 0,
                                                 start,
                                             )
-                                            const lastTwoChars = beforeTab.slice(
-                                                -2,
-                                            )
+                                            const lastTwoChars =
+                                                beforeTab.slice(-2)
                                             if (lastTwoChars === '  ') {
                                                 newValue =
                                                     beforeTab.slice(0, -2) +
@@ -354,7 +358,11 @@ export default class TemplateEditor extends PureComponent<
                                         this.props.onCodeChange(newValue)
                                         // Move the cursor to the right of the inserted tab or back if shift+tab
                                         setTimeout(() => {
-                                            ;(e.target as HTMLTextAreaElement).selectionStart = (e.target as HTMLTextAreaElement).selectionEnd = newCursorPos
+                                            ;(
+                                                e.target as HTMLTextAreaElement
+                                            ).selectionStart = (
+                                                e.target as HTMLTextAreaElement
+                                            ).selectionEnd = newCursorPos
                                         }, 0)
                                     }
                                     if (e.key === 'Enter' && e.metaKey) {
@@ -427,7 +435,8 @@ export default class TemplateEditor extends PureComponent<
                                             <PreviewRichText
                                                 ref={(element) => {
                                                     if (element) {
-                                                        element.innerHTML = this.props.previewString
+                                                        element.innerHTML =
+                                                            this.props.previewString
                                                     }
                                                 }}
                                                 onClick={(e) =>
@@ -469,9 +478,8 @@ export default class TemplateEditor extends PureComponent<
                                 }}
                                 onDragStart={(e) => {
                                     // Create a custom drag image (optional)
-                                    const dragIcon = document.createElement(
-                                        'div',
-                                    )
+                                    const dragIcon =
+                                        document.createElement('div')
                                     const value = button.insertedText
                                     dragIcon.style.opacity = '1'
                                     dragIcon.style.pointerEvents = 'none'

@@ -1,8 +1,6 @@
 import React, { MouseEventHandler, PureComponent } from 'react'
 import cx from 'classnames'
 
-const styles = require('./tag-holder.css')
-
 export interface Props {
     value: string
     noBg: boolean
@@ -13,20 +11,13 @@ export interface Props {
 class TagPill extends PureComponent<Props> {
     static defaultProps = {
         noBg: false,
-        onClick: f => f,
-    }
-
-    private get tagClass() {
-        return cx(styles.tagname, {
-            [styles.greyBorder]: this.props.noBg,
-        })
+        onClick: (f) => f,
     }
 
     render() {
         return (
             <span
                 ref={this.props.setRef}
-                className={this.tagClass}
                 onClick={this.props.onClick}
                 title={this.props.value}
             >

@@ -1,9 +1,10 @@
 import React from 'react'
 import SidebarItem, { Props as SidebarItemProps } from './sidebar-item'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 export interface Props
-    extends Omit<SidebarItemProps, 'dragNDropActions'>,
+    extends
+        Omit<SidebarItemProps, 'dragNDropActions'>,
         Required<Pick<SidebarItemProps, 'dragNDropActions'>> {}
 
 const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (

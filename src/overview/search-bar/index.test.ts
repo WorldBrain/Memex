@@ -1,7 +1,7 @@
 import {
     VALID_TAG_PATTERN,
     HASH_TAG_PATTERN,
-} from '@worldbrain/memex-common/lib/storage/constants'
+} from '@worldbrain/memex-common/ts/storage/constants'
 
 import { SEARCH_INPUT_SPLIT_PATTERN } from './constants'
 import { stripTagPattern, splitInputIntoTerms } from './utils'

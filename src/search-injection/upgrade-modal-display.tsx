@@ -1,7 +1,7 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import {
     loadThemeVariant,
     theme,
@@ -10,7 +10,6 @@ import { createInPageUI } from 'src/in-page-ui/utils'
 import UpgradeModal from 'src/authentication/upgrade-modal'
 import type { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import type { Browser } from 'webextension-polyfill'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 type RootProps = {
@@ -19,7 +18,7 @@ type RootProps = {
     createCheckOutLink: RemoteBGScriptInterface<'caller'>['createCheckoutLink']
     authBG: AuthRemoteFunctionsInterface
     limitReachedNotif: PowerUpModalVersion
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 interface RootState {
@@ -78,7 +77,8 @@ export type UpgradeModalProps = Omit<RootProps, 'rootEl' | 'shadowRoot'>
 
 export const renderUpgradeModal = (props: UpgradeModalProps): void => {
     const { rootElement, shadowRoot } = createInPageUI('upgrade-modal')
-    ReactDOM.render(
+    const root = createRoot(rootElement)
+    root.render(
         <Root rootEl={rootElement} shadowRoot={shadowRoot} {...props} />,
         rootElement,
     )

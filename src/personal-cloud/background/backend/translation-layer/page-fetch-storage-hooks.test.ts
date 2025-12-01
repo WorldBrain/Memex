@@ -1,26 +1,26 @@
-// import { MemoryTwitterAPI } from '@worldbrain/memex-common/lib/twitter-integration/api/index.tests'
+// import { MemoryTwitterAPI } from '@worldbrain/memex-common/ts/twitter-integration/api/index.tests'
 import {
     DataFetchActionProcessor,
     TitleFetchAction,
     TextFetchAction,
-} from '@worldbrain/memex-common/lib/opengraph/storage/hooks'
-import type { ExceptionCapturer } from '@worldbrain/memex-common/lib/firebase-backend/types'
+} from '@worldbrain/memex-common/ts/opengraph/storage/hooks'
+import type { ExceptionCapturer } from '@worldbrain/memex-common/ts/firebase-backend/types'
 import { setupSyncBackgroundTest } from '../../index.tests'
 import {
     ContentLocatorType,
     LocationSchemeType,
     ContentLocatorFormat,
     DataChangeType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import type { TweetData } from '@worldbrain/memex-common/lib/twitter-integration/api/types'
-import { createUploadStorageUtils } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/storage-utils'
-import { TITLE_FETCH_ACTION_COLLECTION_NAME } from '@worldbrain/memex-common/lib/opengraph/constants'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
+import type { TweetData } from '@worldbrain/memex-common/ts/twitter-integration/api/types'
+import { createUploadStorageUtils } from '@worldbrain/memex-common/ts/personal-cloud/backend/translation-layer/storage-utils'
+import { TITLE_FETCH_ACTION_COLLECTION_NAME } from '@worldbrain/memex-common/ts/opengraph/constants'
 import type { FetchMockSandbox } from 'fetch-mock'
-import type { OpenGraphSiteLookupResponse } from '@worldbrain/memex-common/lib/opengraph/types'
-import { buildTwitterTitleFromOGResponse } from '@worldbrain/memex-common/lib/opengraph/utils'
-import { PersonalCloudMediaContentType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { buildMediaStoragePath } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
-import { StorexPersonalCloudMediaBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
+import type { OpenGraphSiteLookupResponse } from '@worldbrain/memex-common/ts/opengraph/types'
+import { buildTwitterTitleFromOGResponse } from '@worldbrain/memex-common/ts/opengraph/utils'
+import { PersonalCloudMediaContentType } from '@worldbrain/memex-common/ts/personal-cloud/backend/types'
+import { buildMediaStoragePath } from '@worldbrain/memex-common/ts/personal-cloud/backend/utils'
+import { StorexPersonalCloudMediaBackend } from '@worldbrain/memex-common/ts/personal-cloud/backend/storex'
 
 const TEST_TWEET_A: TweetData = {
     name: 'Test User',
@@ -325,18 +325,13 @@ describe('Translation-layer page data fetch hook integration tests', () => {
     it('given a stored page text fetch action, should derive page URL from stored locator data, download page HTML data, then upload it to media storage', async () => {
         return
         let capturedException: Error | null = null
-        const {
-            processor,
-            storage,
-            userId,
-            context,
-            mediaBackend,
-        } = await setupTest({
-            testTweetData: TEST_TWEET_A,
-            captureException: async (e) => {
-                capturedException = e
-            },
-        })
+        const { processor, storage, userId, context, mediaBackend } =
+            await setupTest({
+                testTweetData: TEST_TWEET_A,
+                captureException: async (e) => {
+                    capturedException = e
+                },
+            })
 
         const normalizedUrl = 'test.com'
         const testInnerHTML = `<p>some test body text</p>`

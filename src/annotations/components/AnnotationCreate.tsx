@@ -3,11 +3,11 @@ import { createRef } from 'react'
 
 import styled, { css } from 'styled-components'
 
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
     SpaceSearchSuggestion,
-} from '@worldbrain/memex-common/lib/editor'
+} from '@worldbrain/memex-common/ts/editor'
 import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { NoteResultHoverState, FocusableComponent } from './types'
@@ -15,17 +15,17 @@ import type { AnnotationFooterEventProps } from 'src/annotations/components/Anno
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
 import type { ListDetailsGetter } from '../types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { YoutubePlayer } from '@worldbrain/memex-common/ts/services/youtube/types'
 import delay from 'src/util/delay'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { sleepPromise } from 'src/util/promises'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import ListsSegment from '@worldbrain/memex-common/lib/common-ui/components/result-item-spaces-segment'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import ListsSegment from '@worldbrain/memex-common/ts/common-ui/components/result-item-spaces-segment'
 import { UnifiedList } from '../cache/types'
 
 interface State {
@@ -73,14 +73,15 @@ export interface AnnotationCreateGeneralProps {
 }
 
 export interface Props
-    extends AnnotationCreateGeneralProps,
-        AnnotationCreateEventProps {
+    extends AnnotationCreateGeneralProps, AnnotationCreateEventProps {
     loadDefaultTagSuggestions?: () => string[] | Promise<string[]>
     tagQueryEntries?: (query: string) => Promise<string[]>
 }
 
-export class AnnotationCreate extends React.Component<Props, State>
-    implements FocusableComponent {
+export class AnnotationCreate
+    extends React.Component<Props, State>
+    implements FocusableComponent
+{
     static ALT_KEY = getKeyName({ key: 'alt' })
     static MOD_KEY = getKeyName({ key: 'mod' })
     //private textAreaRef = React.createRef<HTMLTextAreaElement>()
@@ -356,8 +357,8 @@ export class AnnotationCreate extends React.Component<Props, State>
             if (this.props.comment.length) {
                 e.stopPropagation()
             }
-            this.setState({ onEditClick: false }),
-                (e.target as HTMLElement).blur()
+            ;(this.setState({ onEditClick: false }),
+                (e.target as HTMLElement).blur())
 
             this.props.onCancel()
             return
@@ -619,7 +620,12 @@ const EditorDummy = styled.div`
     overflow: hidden;
     background-color: ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     cursor: text;
     float: left;

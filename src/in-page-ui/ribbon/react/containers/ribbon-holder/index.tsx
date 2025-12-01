@@ -12,12 +12,12 @@ import type { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 import PageActivityIndicator from 'src/page-activity-indicator/ui/indicator'
 import styled, { css } from 'styled-components'
 import { TOOLTIP_HEIGHT, TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import {
     MemexTheme,
     MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+} from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 const RIBBON_HIDE_TIMEOUT = 400
 
@@ -278,20 +278,20 @@ const RibbonHolderBox = styled.div<{
             height: ${TOOLTIP_HEIGHT};
         `}
         ${(props) =>
-            props.ribbonPosition === 'centerRight' &&
-            css<{ isSidebarOpen }>`
-                right: 0px;
-                height: calc(440px);
-                width: 10px;
-            `}
+        props.ribbonPosition === 'centerRight' &&
+        css<{ isSidebarOpen }>`
+            right: 0px;
+            height: calc(440px);
+            width: 10px;
+        `}
         ${(props) =>
-            props.ribbonPosition === 'centerRight' &&
-            props.isPeeking &&
-            css<{ isSidebarOpen }>`
-                right: 0px;
-                height: fit-content;
-                width: 60px;
-            `}
+        props.ribbonPosition === 'centerRight' &&
+        props.isPeeking &&
+        css<{ isSidebarOpen }>`
+            right: 0px;
+            height: fit-content;
+            width: 60px;
+        `}
 
     ${(props) =>
         props.isSidebarOpen &&

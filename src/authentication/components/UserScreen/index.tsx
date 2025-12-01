@@ -6,11 +6,10 @@ import type { State, Event, Dependencies } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
 import { LoadingContainer } from 'src/dashboard-refactor/styled-components'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import browser, { Browser } from 'webextension-polyfill'
 
 // interface Props {
 //     initiallyShowSubscriptionModal?: boolean
@@ -22,7 +21,7 @@ export interface Props extends Dependencies {
     refreshUser?: boolean
     getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface<'caller'>
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 export default class UserScreen extends StatefulUIElement<Props, State, Event> {
@@ -124,7 +123,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                             mode,
                                         })
                                     }}
-                                    browserAPIs={browser}
+                                    browserAPIs={chrome}
                                 />
                             </SettingSection>
                         </div>
@@ -137,7 +136,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                             }}
                             getRootElement={this.props.getRootElement}
                             bgScriptBG={this.props.bgScriptBG}
-                            browserAPIs={browser}
+                            browserAPIs={chrome as typeof chrome}
                         />
                     )}
                 </>

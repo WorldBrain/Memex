@@ -2,7 +2,7 @@ import {
     StorageModule,
     StorageModuleConfig,
     StorageModuleConstructorArgs,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import { PERSISTENT_STORAGE_VERSIONS } from 'src/storage/constants'
 import { StoredContentType } from './types'
 

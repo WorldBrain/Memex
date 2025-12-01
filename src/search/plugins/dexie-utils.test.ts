@@ -1,5 +1,5 @@
 import expect from 'expect'
-import Storex from '@worldbrain/storex'
+import Storex from '@worldbrain/storex/ts'
 
 import * as DATA from './dexie-utils.test.data'
 import { DexieUtilsPlugin } from './dexie-utils'

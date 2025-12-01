@@ -1,12 +1,12 @@
 /* eslint-env jest */
 
 import { JSDOM } from 'jsdom'
-import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
+import { extractRawPageContent } from '@worldbrain/memex-common/ts/page-indexing/content-extraction/extract-page-content'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/ts/transform-page-html.service-worker'
 
 describe('Extract page content', () => {
     // beforeAll(() => {
-    //     browser.extension = {
+    //     chrome.extension = {
     //         getURL: rel => path.resolve('extension/lib', rel.substr(1)),
     //     }
     // })

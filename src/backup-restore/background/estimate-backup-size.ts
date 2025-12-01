@@ -1,7 +1,6 @@
-import Storex from '@worldbrain/storex'
+import Storex from '@worldbrain/storex/ts'
 
 import { isExcludedFromBackup } from './utils'
-import { USERS_COLL } from 'src/social-integration/constants'
 
 export interface SizeEst {
     bytesWithBlobs: number
@@ -93,14 +92,6 @@ function calcObjectSize(storeName: string, obj): SizeEst {
         const { favIcon, ...rest } = obj
         const size = JSON.stringify(rest).length + calcBlobSize(favIcon)
         return { bytesWithBlobs: size, bytesWithoutBlobs: size }
-    }
-
-    if (storeName === USERS_COLL && obj.profilePic != null) {
-        const { profilePic, ...rest } = obj
-        const bytesWithoutBlobs = JSON.stringify(rest).length
-        const bytesWithBlobs = bytesWithoutBlobs + calcBlobSize(profilePic)
-
-        return { bytesWithBlobs, bytesWithoutBlobs }
     }
 
     const bytes = JSON.stringify(obj).length

@@ -5,9 +5,9 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 
 import { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 
 export interface SearchBarProps {
     placeholder?: string

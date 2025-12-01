@@ -1,21 +1,20 @@
-import type StorageManager from '@worldbrain/storex'
+import type StorageManager from '@worldbrain/storex/ts'
 import type CustomListBackground from 'src/custom-lists/background'
 import type { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
-import { PersonalCloudClientStorageType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { PersonalCloudClientStorageType } from '@worldbrain/memex-common/ts/personal-cloud/backend/types'
 import { StoredContentType } from 'src/page-indexing/background/types'
-import { updateOrCreate } from '@worldbrain/storex/lib/utils'
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
-import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
+import { updateOrCreate } from '@worldbrain/storex/ts/utils'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/ts/transform-page-html.service-worker'
+import { transformPageText } from '@worldbrain/memex-stemmer/ts/transform-page-text'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
     shareAnnotationWithPKM,
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { isPkmSyncEnabled } from 'src/pkm-integrations/utils'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import type { ImageSupportBackground } from 'src/image-support/background'
-import type { Browser } from 'webextension-polyfill'
-import type { Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type { Annotation } from '@worldbrain/memex-common/ts/types/core-data-types/client'
 
 interface IncomingDataInfo {
     storageType: PersonalCloudClientStorageType
@@ -24,121 +23,126 @@ interface IncomingDataInfo {
     where?: { [key: string]: any }
 }
 
-export const handleIncomingData = (deps: {
-    customListsBG: CustomListBackground
-    pageActivityIndicatorBG: PageActivityIndicatorBackground
-    persistentStorageManager: StorageManager
-    storageManager: StorageManager
-    imageSupportBG: ImageSupportBackground
-    pkmSyncBG: PKMSyncBackgroundModule
-    browserAPIs: Browser
-}) => async ({
-    storageType,
-    collection,
-    updates,
-    where: _where,
-}: IncomingDataInfo): Promise<void> => {
-    let where = _where
-    const incomingStorageManager =
-        storageType === PersonalCloudClientStorageType.Persistent
-            ? deps.persistentStorageManager
-            : deps.storageManager
-
-    if (collection === 'annotations') {
-        // TODO: do something with these promises, but don't hold up sync
-        const uploadPromises = maybeReplaceAnnotCommentImages(
-            updates as Annotation,
-            deps.imageSupportBG,
-        )
-    }
-
-    // Add any newly created lists to the list suggestion cache
-    if (collection === 'customLists' && updates.id != null) {
-        const existingList = await deps.storageManager.backend.operation(
-            'findObject',
-            collection,
-            { id: updates.id },
-        )
-
-        if (existingList == null) {
-            await deps.customListsBG.updateListSuggestionsCache({
-                added: updates.id,
-            })
-        }
-    }
-
-    if (collection === 'pages') {
-        let existingPage = await deps.storageManager.backend.operation(
-            'findObject',
-            collection,
-            { url: updates.url },
-        )
-        // This covers a bug we had for a long time where any page updates would result in text being deleted
-        //  as pages coming from the translation layer never contain text. Text is fetched from a separate data source.
-        //  Thus we remove it here so it's not included in the fields that will get overwritten in the update op, and also
-        //  set the `where` clause so an update op happens instead of a create op (which overwrites everything).
-        //
-        //  See the `docContent` collection clause in this function below for how text is fetched.
-        if (existingPage) {
-            delete updates['text']
-            where = { url: updates['url'] }
-        }
-    }
-
-    // WARNING: Keep in mind this skips all storage middleware
-    await updateOrCreate({
+export const handleIncomingData =
+    (deps: {
+        customListsBG: CustomListBackground
+        pageActivityIndicatorBG: PageActivityIndicatorBackground
+        persistentStorageManager: StorageManager
+        storageManager: StorageManager
+        imageSupportBG: ImageSupportBackground
+        pkmSyncBG: PKMSyncBackgroundModule
+        browserAPIs: typeof chrome
+    }) =>
+    async ({
+        storageType,
         collection,
         updates,
-        where,
-        storageManager: incomingStorageManager,
-        executeOperation: (...args: any[]) => {
-            return (incomingStorageManager.backend.operation as any)(...args)
-        },
-    })
+        where: _where,
+    }: IncomingDataInfo): Promise<void> => {
+        let where = _where
+        const incomingStorageManager =
+            storageType === PersonalCloudClientStorageType.Persistent
+                ? deps.persistentStorageManager
+                : deps.storageManager
 
-    // For any new incoming followedList, manually pull followedListEntries
-    if (collection === 'followedList' && updates.sharedList != null) {
-        await deps.pageActivityIndicatorBG.syncFollowedListEntries({
-            forFollowedLists: [{ sharedList: updates.sharedList }],
-        })
-    }
-
-    if (collection === 'docContent') {
-        const { normalizedUrl, storedContentType } = where ?? {}
-        const { content } = updates
-        if (!normalizedUrl || !content) {
-            console.warn(
-                `Got an incoming page, but it didn't include a URL and a body`,
+        if (collection === 'annotations') {
+            // TODO: do something with these promises, but don't hold up sync
+            const uploadPromises = maybeReplaceAnnotCommentImages(
+                updates as Annotation,
+                deps.imageSupportBG,
             )
-            return
         }
 
-        const processed =
-            storedContentType === StoredContentType.HtmlBody
-                ? transformPageHTML({
-                      html: content,
-                  }).text
-                : transformPageText((content.pageTexts ?? []).join(' ')).text
-        await deps.storageManager.backend.operation(
-            'updateObjects',
-            'pages',
-            {
-                url: normalizedUrl,
-            },
-            { text: processed },
-        )
-    }
-    try {
-        await handleSyncedDataForPKMSync(
-            deps.pkmSyncBG,
+        // Add any newly created lists to the list suggestion cache
+        if (collection === 'customLists' && updates.id != null) {
+            const existingList = await deps.storageManager.backend.operation(
+                'findObject',
+                collection,
+                { id: updates.id },
+            )
+
+            if (existingList == null) {
+                await deps.customListsBG.updateListSuggestionsCache({
+                    added: updates.id,
+                })
+            }
+        }
+
+        if (collection === 'pages') {
+            let existingPage = await deps.storageManager.backend.operation(
+                'findObject',
+                collection,
+                { url: updates.url },
+            )
+            // This covers a bug we had for a long time where any page updates would result in text being deleted
+            //  as pages coming from the translation layer never contain text. Text is fetched from a separate data source.
+            //  Thus we remove it here so it's not included in the fields that will get overwritten in the update op, and also
+            //  set the `where` clause so an update op happens instead of a create op (which overwrites everything).
+            //
+            //  See the `docContent` collection clause in this function below for how text is fetched.
+            if (existingPage) {
+                delete updates['text']
+                where = { url: updates['url'] }
+            }
+        }
+
+        // WARNING: Keep in mind this skips all storage middleware
+        await updateOrCreate({
             collection,
             updates,
             where,
-            deps.storageManager,
-            deps.browserAPIs,
-        )
-    } catch (e) {}
-}
+            storageManager: incomingStorageManager,
+            executeOperation: (...args: any[]) => {
+                return (incomingStorageManager.backend.operation as any)(
+                    ...args,
+                )
+            },
+        })
+
+        // For any new incoming followedList, manually pull followedListEntries
+        if (collection === 'followedList' && updates.sharedList != null) {
+            await deps.pageActivityIndicatorBG.syncFollowedListEntries({
+                forFollowedLists: [{ sharedList: updates.sharedList }],
+            })
+        }
+
+        if (collection === 'docContent') {
+            const { normalizedUrl, storedContentType } = where ?? {}
+            const { content } = updates
+            if (!normalizedUrl || !content) {
+                console.warn(
+                    `Got an incoming page, but it didn't include a URL and a body`,
+                )
+                return
+            }
+
+            const processed =
+                storedContentType === StoredContentType.HtmlBody
+                    ? transformPageHTML({
+                          html: content,
+                      }).text
+                    : transformPageText((content.pageTexts ?? []).join(' '))
+                          .text
+            await deps.storageManager.backend.operation(
+                'updateObjects',
+                'pages',
+                {
+                    url: normalizedUrl,
+                },
+                { text: processed },
+            )
+        }
+        try {
+            await handleSyncedDataForPKMSync(
+                deps.pkmSyncBG,
+                collection,
+                updates,
+                where,
+                deps.storageManager,
+                deps.browserAPIs,
+            )
+        } catch (e) {}
+    }
 
 async function handleSyncedDataForPKMSync(
     pkmSyncBG: PKMSyncBackgroundModule,
@@ -146,7 +150,7 @@ async function handleSyncedDataForPKMSync(
     updates,
     where,
     storageManager: StorageManager,
-    browserAPIs: Browser,
+    browserAPIs: typeof chrome,
 ) {
     async function checkIfAnnotationInfilteredList({
         url,
@@ -387,7 +391,8 @@ function maybeReplaceAnnotCommentImages(
     imageSupportBG: ImageSupportBackground,
 ): Promise<void>[] {
     // Should match the data URL part of a markdown string containing something like this: "![alt text](data:image/png;base64,asdafasf)"
-    const dataUrlExtractRegexp = /!\[.*?\]\((data:image\/(?:png|jpeg|gif);base64,[\w+/=]+)\)/g
+    const dataUrlExtractRegexp =
+        /!\[.*?\]\((data:image\/(?:png|jpeg|gif);base64,[\w+/=]+)\)/g
     // Most comments should exit here
     if (!dataUrlExtractRegexp.test(annotation.comment)) {
         return []

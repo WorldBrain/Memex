@@ -8,8 +8,6 @@ import Processor from './item-processor'
 
 import * as urlLists from './url-list.test.data'
 import initData, { TestData, diff } from './state-manager.test.data'
-import browser from 'webextension-polyfill'
-import { Browser } from 'webextension-polyfill'
 
 // jest.mock('src/blacklist/background/interface')
 jest.mock('src/activity-logger')
@@ -17,151 +15,162 @@ jest.mock('src/activity-logger')
 jest.mock('./cache')
 jest.mock('./data-sources')
 
-const runSuite = (DATA: TestData, skip = false) => () => {
-    let stateManager
+const runSuite =
+    (DATA: TestData, skip = false) =>
+    () => {
+        let stateManager
 
-    beforeAll(() => {
-        // Init fake data source
-        const dataSources = new DataSources({
-            history: DATA.history as any,
-            bookmarks: DATA.bookmarks as any,
-            browserAPIs: browser as Browser,
+        beforeAll(() => {
+            // Init fake data source
+            const dataSources = new DataSources({
+                history: DATA.history as any,
+                bookmarks: DATA.bookmarks as any,
+                browserAPIs: typeof chrome as typeof chrome,
+            })
+
+            const itemCreator = new ItemCreator({
+                dataSources,
+                existingKeySource: async () => ({
+                    histKeys: new Set(),
+                    bmKeys: new Set(),
+                }),
+                browserAPIs: typeof chrome as typeof chrome,
+            })
+            stateManager = new ImportStateManager({
+                storageManager: null,
+                itemCreator,
+            })
+
+            if (DATA.allowTypes) {
+                stateManager.allowTypes = DATA.allowTypes
+            }
         })
 
-        const itemCreator = new ItemCreator({
-            dataSources,
-            existingKeySource: async () => ({
-                histKeys: new Set(),
-                bmKeys: new Set(),
-            }),
-            browserAPIs: browser as Browser,
-        })
-        stateManager = new ImportStateManager({
-            storageManager: null,
-            itemCreator,
+        beforeEach(async () => {
+            await stateManager.clearItems()
+            await stateManager.fetchEsts()
         })
 
-        if (DATA.allowTypes) {
-            stateManager.allowTypes = DATA.allowTypes
+        const testProgress = (concurrency: number) => async () => {
+            const observer = { complete: jest.fn(), next: jest.fn() }
+            const progress = new Progress({
+                stateManager,
+                pages: null,
+                tagsModule: {} as any,
+                customListsModule: {} as any,
+                bookmarks: {} as any,
+                observer,
+                concurrency,
+                Processor,
+            })
+
+            expect(progress.stopped).toBe(true)
+            const promise = progress.start()
+            expect(progress.stopped).toBe(false)
+
+            // Concurrency setting is the upper-limit for # Processor instances
+            expect(progress.processors.length).toBeLessThanOrEqual(concurrency)
+
+            await promise
+
+            // Should all be marked as finished now (we awaited the progress to complete)
+            progress.processors.forEach((proc) =>
+                expect(proc).toMatchObject({
+                    finished: true,
+                    cancelled: false,
+                }),
+            )
+
+            // Should be called # unique inputs
+            const numProcessed =
+                diff(DATA.histUrls, DATA.bmUrls).length + DATA.bmUrls.length
+
+            // Observers should have been called
+            expect(observer.next).toHaveBeenCalledTimes(numProcessed)
+            expect(observer.complete).toHaveBeenCalledTimes(1)
         }
-    })
 
-    beforeEach(async () => {
-        await stateManager.clearItems()
-        await stateManager.fetchEsts()
-    })
+        const testInterruptedProgress = (concurrency: number) => async () => {
+            const observer = { complete: jest.fn(), next: jest.fn() }
+            const progress = new Progress({
+                stateManager,
+                pages: null,
+                tagsModule: {} as any,
+                customListsModule: {} as any,
+                bookmarks: {} as any,
+                observer,
+                concurrency,
+                Processor,
+            })
 
-    const testProgress = (concurrency: number) => async () => {
-        const observer = { complete: jest.fn(), next: jest.fn() }
-        const progress = new Progress({
-            stateManager,
-            pages: null,
-            tagsModule: {} as any,
-            customListsModule: {} as any,
-            bookmarks: {} as any,
-            observer,
-            concurrency,
-            Processor,
-        })
+            const promise = progress.start()
+            progress.stop() // Immediately interrupt
+            await promise
 
-        expect(progress.stopped).toBe(true)
-        const promise = progress.start()
-        expect(progress.stopped).toBe(false)
+            // Processors should all be marked as cancelled + unfinished now
+            expect(progress.processors.length).toBeLessThanOrEqual(concurrency)
+            progress.processors.forEach((proc) =>
+                expect(proc).toMatchObject({
+                    finished: false,
+                    cancelled: true,
+                }),
+            )
 
-        // Concurrency setting is the upper-limit for # Processor instances
-        expect(progress.processors.length).toBeLessThanOrEqual(concurrency)
+            // Complete observer should not have been called
+            expect(observer.next).toHaveBeenCalledTimes(0)
+            expect(observer.complete).toHaveBeenCalledTimes(0)
+        }
 
-        await promise
+        const testRestartedProgress = (concurrency: number) => async () => {
+            const observer = { complete: jest.fn(), next: jest.fn() }
+            const progress = new Progress({
+                stateManager,
+                pages: null,
+                tagsModule: {} as any,
+                customListsModule: {} as any,
+                bookmarks: {} as any,
+                observer,
+                concurrency,
+                Processor,
+            })
 
-        // Should all be marked as finished now (we awaited the progress to complete)
-        progress.processors.forEach((proc) =>
-            expect(proc).toMatchObject({ finished: true, cancelled: false }),
-        )
+            const promise = progress.start()
+            progress.stop() // Immediately interrupt
+            await promise
+            await progress.start() // Restart and wait for completion
 
-        // Should be called # unique inputs
-        const numProcessed =
-            diff(DATA.histUrls, DATA.bmUrls).length + DATA.bmUrls.length
+            // Run all the same "full progress" tests; should all pass same as if progress wasn't interrupted
+            progress.processors.forEach((proc) =>
+                expect(proc).toMatchObject({
+                    finished: true,
+                    cancelled: false,
+                }),
+            )
+            const numProcessed =
+                diff(DATA.histUrls, DATA.bmUrls).length + DATA.bmUrls.length
+            expect(observer.next).toHaveBeenCalledTimes(numProcessed)
+            expect(observer.complete).toHaveBeenCalledTimes(1)
+        }
 
-        // Observers should have been called
-        expect(observer.next).toHaveBeenCalledTimes(numProcessed)
-        expect(observer.complete).toHaveBeenCalledTimes(1)
+        const runTest = skip ? test.skip : test
+
+        // Run some tests at diff concurrency levels
+        runTest('hist: 200+, bm:30', testProgress(1))
+        // runTest('full progress (10x conc)', testProgress(10))
+        // runTest('full progress (20x conc)', testProgress(20))
+        // runTest('interrupted progress (1x conc.)', testInterruptedProgress(1))
+        // runTest('interrupted progress (10x conc)', testInterruptedProgress(10))
+        // runTest('interrupted progress (20x conc)', testInterruptedProgress(20))
+        // runTest('restart interrupted progress (1x conc)', testRestartedProgress(1))
+        // runTest(
+        //     'restart interrupted progress (10x conc)',
+        //     testRestartedProgress(10),
+        // )
+        // runTest(
+        //     'restart interrupted progress (20x conc)',
+        //     testRestartedProgress(20),
+        // )
     }
-
-    const testInterruptedProgress = (concurrency: number) => async () => {
-        const observer = { complete: jest.fn(), next: jest.fn() }
-        const progress = new Progress({
-            stateManager,
-            pages: null,
-            tagsModule: {} as any,
-            customListsModule: {} as any,
-            bookmarks: {} as any,
-            observer,
-            concurrency,
-            Processor,
-        })
-
-        const promise = progress.start()
-        progress.stop() // Immediately interrupt
-        await promise
-
-        // Processors should all be marked as cancelled + unfinished now
-        expect(progress.processors.length).toBeLessThanOrEqual(concurrency)
-        progress.processors.forEach((proc) =>
-            expect(proc).toMatchObject({ finished: false, cancelled: true }),
-        )
-
-        // Complete observer should not have been called
-        expect(observer.next).toHaveBeenCalledTimes(0)
-        expect(observer.complete).toHaveBeenCalledTimes(0)
-    }
-
-    const testRestartedProgress = (concurrency: number) => async () => {
-        const observer = { complete: jest.fn(), next: jest.fn() }
-        const progress = new Progress({
-            stateManager,
-            pages: null,
-            tagsModule: {} as any,
-            customListsModule: {} as any,
-            bookmarks: {} as any,
-            observer,
-            concurrency,
-            Processor,
-        })
-
-        const promise = progress.start()
-        progress.stop() // Immediately interrupt
-        await promise
-        await progress.start() // Restart and wait for completion
-
-        // Run all the same "full progress" tests; should all pass same as if progress wasn't interrupted
-        progress.processors.forEach((proc) =>
-            expect(proc).toMatchObject({ finished: true, cancelled: false }),
-        )
-        const numProcessed =
-            diff(DATA.histUrls, DATA.bmUrls).length + DATA.bmUrls.length
-        expect(observer.next).toHaveBeenCalledTimes(numProcessed)
-        expect(observer.complete).toHaveBeenCalledTimes(1)
-    }
-
-    const runTest = skip ? test.skip : test
-
-    // Run some tests at diff concurrency levels
-    runTest('hist: 200+, bm:30', testProgress(1))
-    // runTest('full progress (10x conc)', testProgress(10))
-    // runTest('full progress (20x conc)', testProgress(20))
-    // runTest('interrupted progress (1x conc.)', testInterruptedProgress(1))
-    // runTest('interrupted progress (10x conc)', testInterruptedProgress(10))
-    // runTest('interrupted progress (20x conc)', testInterruptedProgress(20))
-    // runTest('restart interrupted progress (1x conc)', testRestartedProgress(1))
-    // runTest(
-    //     'restart interrupted progress (10x conc)',
-    //     testRestartedProgress(10),
-    // )
-    // runTest(
-    //     'restart interrupted progress (20x conc)',
-    //     testRestartedProgress(20),
-    // )
-}
 
 describe('Import progress manager', () => {
     describe('hist: 200+, bm:30', () =>

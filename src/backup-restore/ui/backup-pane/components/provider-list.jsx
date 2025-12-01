@@ -1,46 +1,38 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Styles from './provider-list.css'
-
-const settingsStyle = require('src/options/settings/components/settings.css')
 
 export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
     return (
         <div>
-            <form className={Styles.form}>
-                <label className={Styles.label}>
-                    <div className={Styles.option}>
+            <form>
+                <label>
+                    <div>
                         <input
                             type="radio"
                             name="backend-select"
                             onChange={() => onChange('local')}
                         />
-                        <div className={Styles.textBlock}>
-                            <p className={settingsStyle.infoText}>
+                        <div>
+                            <p>
                                 Backup your data locally and use any cloud
                                 provider with sync folders (e.g. Dropbox,
                                 Spideroak, GDrive){' '}
                             </p>
                             {backupPath !== null ? (
                                 <button
-                                    className={Styles.destination}
                                     onClick={(e) => {
                                         e.preventDefault()
                                         handleChangeBackupPath()
                                     }}
                                 >
-                                    <span className={Styles.folderIcon} />
+                                    <span />
                                     {backupPath && backupPath.length ? (
-                                        <p className={Styles.pathString}>
+                                        <p>
                                             {backupPath}{' '}
-                                            <span className={Styles.change}>
-                                                click to change path
-                                            </span>
+                                            <span>click to change path</span>
                                         </p>
                                     ) : (
-                                        <p className={Styles.select}>
-                                            SELECT DESTINATION FOLDER
-                                        </p>
+                                        <p>SELECT DESTINATION FOLDER</p>
                                     )}
                                 </button>
                             ) : null}

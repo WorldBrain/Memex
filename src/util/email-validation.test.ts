@@ -1,4 +1,4 @@
-import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
+import { isValidEmail } from '@worldbrain/memex-common/ts/utils/email-validation'
 
 describe('isValidEmail', () => {
     it('should return true for a valid email address', () => {

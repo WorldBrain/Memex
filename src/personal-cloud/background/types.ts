@@ -2,7 +2,7 @@ import type {
     PersonalCloudUpdatePushBatch,
     PersonalCloudClientInstruction,
     PersonalCloudDeviceId,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/types'
 
 export interface PersonalCloudBackgroundEvents {
     downloadStarted(): void

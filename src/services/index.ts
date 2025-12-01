@@ -1,11 +1,11 @@
 import { httpsCallable, getFunctions } from 'firebase/functions'
-import FirebaseFunctionsActivityStreamsService from '@worldbrain/memex-common/lib/activity-streams/services/firebase-functions/client'
-import MemoryStreamsService from '@worldbrain/memex-common/lib/activity-streams/services/memory'
+import FirebaseFunctionsActivityStreamsService from '@worldbrain/memex-common/ts/activity-streams/services/firebase-functions/client'
+import MemoryStreamsService from '@worldbrain/memex-common/ts/activity-streams/services/memory'
 import type { ServerStorage } from 'src/storage/types'
 import type { Services } from './types'
 import ListKeysService from './content-sharing'
 import ContentConversationsService from './content-conversations'
-import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import type { AuthService } from '@worldbrain/memex-common/ts/authentication/types'
 
 export function createServices(options: {
     authService: AuthService
@@ -31,7 +31,8 @@ export function createServices(options: {
                     users: storageModules.users,
                 },
                 getCurrentUserId: async () => {
-                    const currentUser = await options.authService.getCurrentUser()
+                    const currentUser =
+                        await options.authService.getCurrentUser()
                     return currentUser?.id ?? null
                 },
             }),

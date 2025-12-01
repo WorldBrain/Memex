@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
 import moment from 'moment'
-import chrono from 'chrono-node'
-import classnames from 'classnames'
+import * as chrono from 'chrono-node'
+
 import DatePicker from 'react-datepicker'
 import analytics from 'src/analytics'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
 import DatePickerInput from './datepicker-input'
 import styled from 'styled-components'
-import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
-import browser from 'webextension-polyfill'
+import { formatTimestamp } from '@worldbrain/memex-common/ts/utils/date-time'
 
 export interface DateRangeSelectionProps {
     env?: 'inpage' | 'overview'
@@ -25,7 +24,7 @@ export interface DateRangeSelectionProps {
     changeTooltip?: (...args) => void
 }
 
-const arrowDown = browser.runtime.getURL('/img/arrowDown.svg')
+const arrowDown = chrome.runtime.getURL('/img/arrowDown.svg')
 
 class DateRangeSelection extends Component<DateRangeSelectionProps> {
     static defaultProps: Partial<DateRangeSelectionProps> = {
@@ -70,48 +69,52 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
     /**
      * Overrides react-date-picker's clear input handler to also clear our local input value states.
      */
-    handleClearClick = ({ isStartDate }) => (event) => {
-        const stateKey = isStartDate ? 'startDateText' : 'endDateText'
-        const refKey = isStartDate ? 'startDatePicker' : 'endDatePicker'
-        const updateDateText = isStartDate
-            ? this.props.onStartDateTextChange
-            : this.props.onEndDateTextChange
-        const updateDate = isStartDate
-            ? this.props.onStartDateChange
-            : this.props.onEndDateChange
+    handleClearClick =
+        ({ isStartDate }) =>
+        (event) => {
+            const stateKey = isStartDate ? 'startDateText' : 'endDateText'
+            const refKey = isStartDate ? 'startDatePicker' : 'endDatePicker'
+            const updateDateText = isStartDate
+                ? this.props.onStartDateTextChange
+                : this.props.onEndDateTextChange
+            const updateDate = isStartDate
+                ? this.props.onStartDateChange
+                : this.props.onEndDateChange
 
-        // Update both states
-        this[refKey].props.onChange(null, event)
-        this.setState((state) => ({ ...state, [stateKey]: '' }))
-        updateDateText('')
-        updateDate('')
+            // Update both states
+            this[refKey].props.onChange(null, event)
+            this.setState((state) => ({ ...state, [stateKey]: '' }))
+            updateDateText('')
+            updateDate('')
 
-        event.preventDefault()
-    }
+            event.preventDefault()
+        }
 
     /**
      * Overrides react-date-picker's input keydown handler to search on Enter key press.
      */
-    handleKeydown = ({ isStartDate }) => (event) => {
-        if (
-            this.props.env === 'inpage' &&
-            !(event.ctrlKey || event.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
-        ) {
-            event.preventDefault()
-            event.stopPropagation()
-            this.handleRawInputChange({ isStartDate })(event)
-            return
+    handleKeydown =
+        ({ isStartDate }) =>
+        (event) => {
+            if (
+                this.props.env === 'inpage' &&
+                !(event.ctrlKey || event.metaKey) &&
+                /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
+            ) {
+                event.preventDefault()
+                event.stopPropagation()
+                this.handleRawInputChange({ isStartDate })(event)
+                return
+            }
+            if (event.key === 'Enter') {
+                // event.stopImmediatePropagation()
+                this.handleInputChange({ isStartDate })()
+            }
+            if (event.key === 'Escape') {
+                // event.stopImmediatePropagation()
+                this.props.onClickOutside(event)
+            }
         }
-        if (event.key === 'Enter') {
-            // event.stopImmediatePropagation()
-            this.handleInputChange({ isStartDate })()
-        }
-        if (event.key === 'Escape') {
-            // event.stopImmediatePropagation()
-            this.props.onClickOutside(event)
-        }
-    }
 
     /**
      * Attempts to parse the current date input value state to convert it from natural language
@@ -152,106 +155,109 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
     /**
      * Runs against text input state, to attempt to parse a date string or natural language date.
      */
-    handleInputChange = ({ isStartDate }) => () => {
-        const currentDate = isStartDate
-            ? this.props.startDate
-            : this.props.endDate
-        const dateState = isStartDate
-            ? this.state.startDateText
-            : this.state.endDateText
-        const updateDate = isStartDate
-            ? this.props.onStartDateChange
-            : this.props.onEndDateChange
+    handleInputChange =
+        ({ isStartDate }) =>
+        () => {
+            const currentDate = isStartDate
+                ? this.props.startDate
+                : this.props.endDate
+            const dateState = isStartDate
+                ? this.state.startDateText
+                : this.state.endDateText
+            const updateDate = isStartDate
+                ? this.props.onStartDateChange
+                : this.props.onEndDateChange
 
-        let dateToChange
-        const date = moment(dateState, FORMAT, true)
+            let dateToChange
+            const date = moment(dateState, FORMAT, true)
 
-        // If moment date is invalid, try the NLP parsing value
-        if (!date.isValid()) {
-            dateToChange = this.parsePlainTextDate({ isStartDate })
-        } else {
-            // If end date, we want to search back from end of day
-            if (!isStartDate && date != null) {
-                date.endOf('day')
+            // If moment date is invalid, try the NLP parsing value
+            if (!date.isValid()) {
+                dateToChange = this.parsePlainTextDate({ isStartDate })
+            } else {
+                // If end date, we want to search back from end of day
+                if (!isStartDate && date != null) {
+                    date.endOf('day')
+                }
+                dateToChange = date.valueOf()
             }
-            dateToChange = date.valueOf()
-        }
 
-        // Trigger state update only if value was parsed and there is a change from current state
-        if (
-            dateToChange != null &&
-            dateToChange !== currentDate &&
-            date.format(FORMAT) !== dateState
-        ) {
-            updateDate(dateToChange)
+            // Trigger state update only if value was parsed and there is a change from current state
+            if (
+                dateToChange != null &&
+                dateToChange !== currentDate &&
+                date.format(FORMAT) !== dateState
+            ) {
+                updateDate(dateToChange)
+            }
         }
-    }
 
     /**
      * Runs against raw text input to update value state in realtime
      */
-    handleRawInputChange = ({ isStartDate }) => (event) => {
-        const stateKey = isStartDate ? 'startDateText' : 'endDateText'
-        const input = event.target
-        this.setState((state) => ({ ...state, [stateKey]: input.value }))
-        if (event.target.value.length === 0) {
-            this.handleClearClick({ isStartDate })(event)
+    handleRawInputChange =
+        ({ isStartDate }) =>
+        (event) => {
+            const stateKey = isStartDate ? 'startDateText' : 'endDateText'
+            const input = event.target
+            this.setState((state) => ({ ...state, [stateKey]: input.value }))
+            if (event.target.value.length === 0) {
+                this.handleClearClick({ isStartDate })(event)
+            }
         }
-    }
 
     /**
      * Runs against date selected in the date dropdown component.
      */
-    handleDateChange = ({ isStartDate }) => (date) => {
-        let action
-        // tslint:disable-next-line
-        if (date) {
-            action = isStartDate
-                ? 'addStartDateFilterViaPicker'
-                : 'addEndDateFilterViaPicker'
-        } else {
-            action = isStartDate ? 'clearStartDateFilter' : 'clearEndDateFilter'
+    handleDateChange =
+        ({ isStartDate }) =>
+        (date) => {
+            let action
+            // tslint:disable-next-line
+            if (date) {
+                action = isStartDate
+                    ? 'addStartDateFilterViaPicker'
+                    : 'addEndDateFilterViaPicker'
+            } else {
+                action = isStartDate
+                    ? 'clearStartDateFilter'
+                    : 'clearEndDateFilter'
+            }
+            analytics.trackEvent({ category: 'SearchFilters', action })
+
+            const updateDate = isStartDate
+                ? this.props.onStartDateChange
+                : this.props.onEndDateChange
+
+            const updateDateText = isStartDate
+                ? this.props.onStartDateTextChange
+                : this.props.onEndDateTextChange
+
+            const stateKey = isStartDate ? 'startDateText' : 'endDateText'
+
+            let newDate = date ? date : null
+            if (!isStartDate && date != null) {
+                newDate = date.endOf('day')
+            }
+
+            updateDateText(newDate ? newDate.format(FORMAT) : '')
+
+            this.setState((state) => ({
+                ...state,
+                [stateKey]: newDate ? newDate.format(FORMAT) : null,
+            }))
+
+            // If end date, we want to search back from end of day
+
+            updateDate(newDate ? newDate.valueOf() : undefined)
+
+            // Change onboarding tooltip to more filters
+            this.props.changeTooltip()
         }
-        analytics.trackEvent({ category: 'SearchFilters', action })
-
-        const updateDate = isStartDate
-            ? this.props.onStartDateChange
-            : this.props.onEndDateChange
-
-        const updateDateText = isStartDate
-            ? this.props.onStartDateTextChange
-            : this.props.onEndDateTextChange
-
-        const stateKey = isStartDate ? 'startDateText' : 'endDateText'
-
-        let newDate = date ? date : null
-        if (!isStartDate && date != null) {
-            newDate = date.endOf('day')
-        }
-
-        updateDateText(newDate ? newDate.format(FORMAT) : '')
-
-        this.setState((state) => ({
-            ...state,
-            [stateKey]: newDate ? newDate.format(FORMAT) : null,
-        }))
-
-        // If end date, we want to search back from end of day
-
-        updateDate(newDate ? newDate.valueOf() : undefined)
-
-        // Change onboarding tooltip to more filters
-        this.props.changeTooltip()
-    }
 
     render() {
-        const {
-            startDate,
-            endDate,
-            disabled,
-            startDateText,
-            endDateText,
-        } = this.props
+        const { startDate, endDate, disabled, startDateText, endDateText } =
+            this.props
 
         return (
             <DateRangeDiv>
@@ -545,7 +551,9 @@ const DatePickerDiv = styled.div`
         justify-content: space-between;
     }
 
-    .react-datepicker__day--in-selecting-range:not(.react-datepicker__day--in-range),
+    .react-datepicker__day--in-selecting-range:not(
+        .react-datepicker__day--in-range
+    ),
     .react-datepicker__day--in-range {
         border-radius: 0 !important;
         background-color: color1 !important;
@@ -558,16 +566,24 @@ const DatePickerDiv = styled.div`
     }
 
     .react-datepicker__day--selecting-range-start,
-    .react-datepicker__day--selecting-range-start:not(.react-datepicker__day--in-range),
-    .react-datepicker__day--range-start:not(.react-datepicker__day--in-selecting-range) {
+    .react-datepicker__day--selecting-range-start:not(
+        .react-datepicker__day--in-range
+    ),
+    .react-datepicker__day--range-start:not(
+        .react-datepicker__day--in-selecting-range
+    ) {
         border-top-left-radius: 50% !important;
         border-bottom-left-radius: 50% !important;
         font-weight: bold;
     }
 
     .react-datepicker__day--selecting-range-end,
-    .react-datepicker__day--selecting-range-end:not(.react-datepicker__day--in-range),
-    .react-datepicker__day--range-end:not(.react-datepicker__day--in-selecting-range) {
+    .react-datepicker__day--selecting-range-end:not(
+        .react-datepicker__day--in-range
+    ),
+    .react-datepicker__day--range-end:not(
+        .react-datepicker__day--in-selecting-range
+    ) {
         border-top-right-radius: 50% !important;
         border-bottom-right-radius: 50% !important;
         font-weight: bold;

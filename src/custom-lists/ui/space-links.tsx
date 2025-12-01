@@ -1,17 +1,17 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { SharedListRoleID } from '@worldbrain/memex-common/ts/content-sharing/types'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { sharedListRoleIDToString } from '@worldbrain/memex-common/ts/content-sharing/ui/list-share-modal/util'
 import { __wrapClick } from './utils'
-import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
-import type { TaskState } from 'ui-logic-core/lib/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
-import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
+import type { InviteLink } from '@worldbrain/memex-common/ts/content-sharing/ui/list-share-modal/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import { trackCopyInviteLink } from '@worldbrain/memex-common/ts/analytics/events'
+import LoadingBlock from '@worldbrain/memex-common/ts/common-ui/components/loading-block'
 
 export interface Props {
     isPageLink: boolean
@@ -239,8 +239,7 @@ const LinkAndRoleBox = styled.div<{
     // z-index: ${(props) => props['zIndex']};
     height: 40px;
     margin: 0 -5px 5px -10px;
-    padding: 0px 0px 0 5px; 
-
+    padding: 0px 0px 0 5px;
 
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||
@@ -253,9 +252,8 @@ const LinkAndRoleBox = styled.div<{
         `}
 
     &:hover ${IconContainer} {
-            display: flex;
-        }
-
+        display: flex;
+    }
 `
 
 const LinkBox = styled.div<{

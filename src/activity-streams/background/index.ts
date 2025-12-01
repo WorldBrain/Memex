@@ -1,8 +1,8 @@
-import StorageManager from '@worldbrain/storex'
-import StorexActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
-import { ActivityStreamsService } from '@worldbrain/memex-common/lib/activity-streams/types'
-import FirebaseFunctionsActivityStreamsService from '@worldbrain/memex-common/lib/activity-streams/services/firebase-functions/client'
-import { ActivityStreamsStorage } from '@worldbrain/memex-common/lib/activity-streams/storage/types'
+import StorageManager from '@worldbrain/storex/ts'
+import StorexActivityStreamsStorage from '@worldbrain/memex-common/ts/activity-streams/storage'
+import { ActivityStreamsService } from '@worldbrain/memex-common/ts/activity-streams/types'
+import FirebaseFunctionsActivityStreamsService from '@worldbrain/memex-common/ts/activity-streams/services/firebase-functions/client'
+import { ActivityStreamsStorage } from '@worldbrain/memex-common/ts/activity-streams/storage/types'
 
 export default class ActivityStreamsBackground {
     backend: ActivityStreamsService

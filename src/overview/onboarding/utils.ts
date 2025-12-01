@@ -6,7 +6,6 @@ import {
     FLOWS,
 } from './constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import browser from 'webextension-polyfill'
 
 /**
  * Returns the stage of the onboarding if present, else sets it to unvisited and
@@ -36,7 +35,7 @@ export const setOnboardingStage = (flow: string, value: string) =>
 
 export const fetchAllStages = async () => {
     const keys = STORAGE_KEYS.onboardingFlows
-    const stages = await browser.storage.local.get(Object.values(keys))
+    const stages = await chrome.storage.local.get(Object.values(keys))
 
     return {
         annotationStage: stages[keys.annotation],
@@ -80,7 +79,7 @@ export const isDemoPage = (): boolean =>
  * Opens the demo page in a new tab
  */
 export const openDemoPage = () =>
-    browser.tabs.create({
+    chrome.tabs.create({
         url: ANNOTATION_DEMO_URL,
         active: true,
     })

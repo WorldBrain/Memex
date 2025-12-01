@@ -1,5 +1,5 @@
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
 import React from 'react'
 import styled from 'styled-components'
 

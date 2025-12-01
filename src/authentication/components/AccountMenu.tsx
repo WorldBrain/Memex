@@ -10,7 +10,7 @@ import { MemexLogo } from 'src/common-ui/components/MemexLogo'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { AuthContextInterface } from 'src/authentication/background/types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 const handleLoginClick = () => {

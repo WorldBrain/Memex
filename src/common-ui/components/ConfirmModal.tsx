@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
 import cx from 'classnames'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import Modal, { Props as ModalProps } from './Modal'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 import styled from 'styled-components'
 

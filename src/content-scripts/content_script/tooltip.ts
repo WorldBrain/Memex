@@ -52,5 +52,33 @@ export const main: TooltipScriptMain = async (options) => {
     })
 }
 
-const registry = globalThis['contentScriptRegistry'] as ContentScriptRegistry
-registry.registerTooltipScript(main)
+// Wait for registry
+const waitForRegistry = () => {
+    return new Promise((resolve, reject) => {
+        if (globalThis['contentScriptRegistry']) {
+            resolve(null)
+            return
+        }
+        const startTime = Date.now()
+        const interval = setInterval(() => {
+            if (globalThis['contentScriptRegistry']) {
+                clearInterval(interval)
+                resolve(null)
+            } else if (Date.now() - startTime > 5000) {
+                clearInterval(interval)
+                reject(new Error('Timeout waiting for contentScriptRegistry'))
+            }
+        }, 10)
+    })
+}
+
+waitForRegistry()
+    .then(() => {
+        const registry = globalThis[
+            'contentScriptRegistry'
+        ] as ContentScriptRegistry
+        registry.registerTooltipScript(main)
+    })
+    .catch((error) => {
+        console.error('Failed to register tooltip script:', error)
+    })

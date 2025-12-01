@@ -5,8 +5,8 @@ import {
     EMPTY_SPACE_NAME_ERR_MSG,
     NON_UNIQ_SPACE_NAME_ERR_MSG,
     BAD_CHAR_SPACE_NAME_ERR_MSG,
-} from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+} from '@worldbrain/memex-common/ts/utils/space-name-validation'
+import { normalizedStateToArray } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 
 describe('Dashboard lists sidebar logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()

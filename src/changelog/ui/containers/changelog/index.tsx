@@ -5,7 +5,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import ChangelogLogic from './logic'
 import { ChangelogState, ChangelogDependencies, ChangelogEvent } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 export interface Props extends Omit<ChangelogDependencies, 'authBG'> {}
 
 export default class Changelog extends StatefulUIElement<

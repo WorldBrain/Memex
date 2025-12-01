@@ -6,13 +6,13 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import * as Raven from 'src/util/raven'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import MarkdownIt from 'markdown-it'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import {
     defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 import debounce from 'lodash/debounce'
 
 interface State {
@@ -284,9 +284,8 @@ export default class CopyPasterContainer extends React.PureComponent<
     }
     private debouncedPreviewUpdate = debounce(async (currentTemplate) => {
         try {
-            const previewString = await this.handleTemplatePreview(
-                currentTemplate,
-            )
+            const previewString =
+                await this.handleTemplatePreview(currentTemplate)
             this.setState({ previewString: previewString })
         } catch (err) {
             this.setState({ previewString: err.message })
@@ -326,9 +325,8 @@ export default class CopyPasterContainer extends React.PureComponent<
                     if (templateType === 'originalPage') {
                         this.setState({ isPreviewLoading: 'running' })
                     }
-                    let previewString = await this.handleTemplatePreview(
-                        template,
-                    )
+                    let previewString =
+                        await this.handleTemplatePreview(template)
 
                     this.setState({
                         previewString: previewString,

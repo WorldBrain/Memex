@@ -1,6 +1,5 @@
-import type Storex from '@worldbrain/storex'
-import type { Browser, Runtime, Storage, Tabs } from 'webextension-polyfill'
-import type { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
+import type Storex from '@worldbrain/storex/ts'
+import type { URLNormalizer } from '@worldbrain/memex-common/ts/url-utils/normalize/types'
 
 import * as utils from './utils'
 import {
@@ -14,7 +13,6 @@ import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
-import chrome from 'webextension-polyfill'
 import {
     OVERVIEW_URL,
     __OLD_INSTALL_TIME_KEY,
@@ -38,9 +36,9 @@ import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 import type { BackgroundModules } from './setup'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import type { captureException } from 'src/util/raven'
-import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { checkStripePlan } from '@worldbrain/memex-common/ts/subscriptions/storage'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/ts/content-sharing/storage/constants'
 import checkBrowser from 'src/util/check-browser'
 import { ensureDataLossFlagSet } from './db-data-loss-check'
 import { checkForUpdates } from './memex-update-check'
@@ -53,10 +51,10 @@ interface Dependencies {
     urlNormalizer: URLNormalizer
     storageChangesMan: StorageChangesManager
     captureException: typeof captureException
-    storageAPI: Storage.Static
-    runtimeAPI: Runtime.Static
-    browserAPIs: Browser
-    tabsAPI: Tabs.Static
+    storageAPI: typeof chrome.storage
+    runtimeAPI: typeof chrome.runtime
+    browserAPIs: typeof chrome
+    tabsAPI: typeof chrome.tabs
     analyticsBG: AnalyticsCoreInterface
     storageManager: Storex
     bgModules: Pick<
@@ -216,7 +214,7 @@ class BackgroundScript {
                     await this.trackInstallTime()
                     break
                 case 'update':
-                    this.runQuickAndDirtyMigrations()
+                    // this.runQuickAndDirtyMigrations()
                     await checkForUpdates()
                     await this.handleUnifiedLogic()
                     await this.checkForSubscriptionStatus()
@@ -234,7 +232,8 @@ class BackgroundScript {
         await this.deps.bgModules.auth.authService
             .waitForAuthReady()
             .then(async () => {
-                let currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
+                let currentUser =
+                    await this.deps.bgModules.auth.authService.getCurrentUser()
                 if (currentUser) {
                     let emailAddresse = currentUser.email
                     checkStripePlan(emailAddresse, this.deps.browserAPIs)
@@ -360,159 +359,154 @@ class BackgroundScript {
         runtimeAPI.reload()
     }
 
-    broadcastSpaceChangeToAllTabs: RemoteBGScriptInterface<
-        'provider'
-    >['broadcastListChangeToAllTabs']['function'] = async (
-        { tab: originatingTab },
-        params,
-    ) => {
-        let { bgModules } = this.deps
-        try {
-            await bgModules.tabManagement.mapTabChunks(
-                async (tab) => {
-                    if (
-                        tab.id === originatingTab.id ||
-                        !bgModules.tabManagement.canTabRunContentScripts(tab)
-                    ) {
-                        return
-                    }
+    broadcastSpaceChangeToAllTabs: RemoteBGScriptInterface<'provider'>['broadcastListChangeToAllTabs']['function'] =
+        async ({ tab: originatingTab }, params) => {
+            let { bgModules } = this.deps
+            try {
+                await bgModules.tabManagement.mapTabChunks(
+                    async (tab) => {
+                        if (
+                            tab.id === originatingTab.id ||
+                            !bgModules.tabManagement.canTabRunContentScripts(
+                                tab,
+                            )
+                        ) {
+                            return
+                        }
 
-                    if (params.type === 'create') {
-                        await runInTab<InPageUIContentScriptRemoteInterface>(
-                            tab.id,
-                        ).addListToCache({ list: params.list })
-                    } else if (params.type === 'delete') {
-                        await runInTab<InPageUIContentScriptRemoteInterface>(
-                            tab.id,
-                        ).removeListFromCache({
-                            localListId: params.localListId,
-                        })
-                    }
-                },
-                {
-                    onError: () => {
-                        // Ignore errors
+                        if (params.type === 'create') {
+                            await runInTab<InPageUIContentScriptRemoteInterface>(
+                                tab.id,
+                            ).addListToCache({ list: params.list })
+                        } else if (params.type === 'delete') {
+                            await runInTab<InPageUIContentScriptRemoteInterface>(
+                                tab.id,
+                            ).removeListFromCache({
+                                localListId: params.localListId,
+                            })
+                        }
                     },
-                },
-            )
-        } catch (err) {
-            this.deps.captureException(err)
-        }
-    }
-
-    private chooseTabOpenFn = (params?: OpenTabParams) =>
-        params?.openInSameTab
-            ? this.deps.tabsAPI.update
-            : this.deps.tabsAPI.create
-
-    private openDashboardPage: RemoteBGScriptInterface<
-        'provider'
-    >['openOverviewTab']['function'] = async (params) => {
-        let addedQuery
-        if (params?.selectedSpace) {
-            addedQuery = `selectedSpace=${params.selectedSpace}`
-        }
-
-        const selectedSpacesString = addedQuery ?? null
-        const missingPDFString = params?.missingPdf
-            ? MISSING_PDF_QUERY_PARAM
-            : null
-
-        if (selectedSpacesString && missingPDFString) {
-            await this.chooseTabOpenFn(params)({
-                url:
-                    OVERVIEW_URL +
-                    '?' +
-                    selectedSpacesString +
-                    '&' +
-                    missingPDFString,
-            })
-        } else if (selectedSpacesString) {
-            await this.chooseTabOpenFn(params)({
-                url: OVERVIEW_URL + '?' + selectedSpacesString,
-            })
-        } else if (missingPDFString) {
-            await this.chooseTabOpenFn(params)({
-                url: OVERVIEW_URL + '?' + missingPDFString,
-            })
-        } else {
-            await this.chooseTabOpenFn(params)({
-                url: OVERVIEW_URL,
-            })
-        }
-    }
-
-    private openOptionsPage: RemoteBGScriptInterface<
-        'provider'
-    >['openOptionsTab']['function'] = async ({ query, params }) => {
-        await this.chooseTabOpenFn(params)({
-            url: `${OPTIONS_URL}#${query}`,
-        })
-    }
-
-    private createCheckoutLink: RemoteBGScriptInterface<
-        'provider'
-    >['createCheckoutLink']['function'] = async ({
-        billingPeriod,
-        selectedPremiumPlans,
-        doNotOpen,
-        removedPremiumPlans,
-    }) => {
-        const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
-        const creationTime = currentUser?.creationTime
-        const currentTime = Date.now()
-        const thirtyDaysInMilliseconds = 30 * 24 * 60 * 60 * 1000
-
-        // Check if the creation time is less than 30 days ago
-        let upgradeWithinTrial = false
-        upgradeWithinTrial =
-            creationTime &&
-            currentTime - new Date(creationTime).getTime() <
-                thirtyDaysInMilliseconds
-
-        const currentUserEmail = currentUser.email
-        const currentBillingPeriod = billingPeriod
-        const baseLink = CLOUDFLARE_WORKER_URLS[process.env.NODE_ENV]
-
-        let selectedPremiumPlansString = ''
-        let removedPremiumPlansString = ''
-        let checkoutLink = ''
-
-        if (selectedPremiumPlans.includes('lifetime')) {
-            selectedPremiumPlansString = 'lifetime'
-            removedPremiumPlansString = removedPremiumPlans.join(',')
-            checkoutLink = `${baseLink}/create-checkout?billingPeriod=lifetime&powerUps=${selectedPremiumPlansString}&removedPowerUps=${removedPremiumPlansString}&prefilled_email=${encodeURIComponent(
-                currentUserEmail,
-            )}&uwt=${upgradeWithinTrial}`
-        } else {
-            selectedPremiumPlansString = selectedPremiumPlans.join(',')
-            removedPremiumPlansString = removedPremiumPlans.join(',')
-            checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&removedPowerUps=${removedPremiumPlansString}&prefilled_email=${encodeURIComponent(
-                currentUserEmail,
-            )}&uwt=${upgradeWithinTrial}`
-        }
-
-        if (doNotOpen) {
-            try {
-                // Execute the checkout link and print the response
-                const response = await fetch(checkoutLink)
-                const responseData = await response.text() // or response.json() if the response is JSON
-
-                return JSON.parse(responseData).message
-            } catch (error) {
-                console.error('Error executing checkout link:', error)
+                    {
+                        onError: () => {
+                            // Ignore errors
+                        },
+                    },
+                )
+            } catch (err) {
+                this.deps.captureException(err)
             }
-        } else {
-            try {
-                // Use the WebExtensions API to open the URL in a new tab
-                if (chrome.tabs && chrome.tabs.create) {
-                    chrome.tabs.create({ url: checkoutLink })
+        }
+
+    private async openUrl(url: string, params?: OpenTabParams) {
+        if (params?.openInSameTab) {
+            const tabs = await this.deps.tabsAPI.query({
+                active: true,
+                currentWindow: true,
+            })
+            if (tabs.length > 0) {
+                await this.deps.tabsAPI.update(tabs[0].id!, { url })
+                return
+            }
+        }
+        await this.deps.tabsAPI.create({ url })
+    }
+
+    private openDashboardPage: RemoteBGScriptInterface<'provider'>['openOverviewTab']['function'] =
+        async (params) => {
+            let addedQuery
+            if (params?.selectedSpace) {
+                addedQuery = `selectedSpace=${params.selectedSpace}`
+            }
+
+            const selectedSpacesString = addedQuery ?? null
+            const missingPDFString = params?.missingPdf
+                ? MISSING_PDF_QUERY_PARAM
+                : null
+
+            let url = OVERVIEW_URL
+            const parts: string[] = []
+            if (selectedSpacesString) {
+                parts.push(selectedSpacesString)
+            }
+            if (missingPDFString) {
+                parts.push(missingPDFString)
+            }
+            if (parts.length > 0) {
+                url += '?' + parts.join('&')
+            }
+
+            await this.openUrl(url, params)
+        }
+
+    private openOptionsPage: RemoteBGScriptInterface<'provider'>['openOptionsTab']['function'] =
+        async ({ query, params }) => {
+            const url = `${OPTIONS_URL}#${query}`
+            await this.openUrl(url, params)
+        }
+
+    private createCheckoutLink: RemoteBGScriptInterface<'provider'>['createCheckoutLink']['function'] =
+        async ({
+            billingPeriod,
+            selectedPremiumPlans,
+            doNotOpen,
+            removedPremiumPlans,
+        }) => {
+            const currentUser =
+                await this.deps.bgModules.auth.authService.getCurrentUser()
+            const creationTime = currentUser?.creationTime
+            const currentTime = Date.now()
+            const thirtyDaysInMilliseconds = 30 * 24 * 60 * 60 * 1000
+
+            // Check if the creation time is less than 30 days ago
+            let upgradeWithinTrial = false
+            upgradeWithinTrial =
+                creationTime &&
+                currentTime - new Date(creationTime).getTime() <
+                    thirtyDaysInMilliseconds
+
+            const currentUserEmail = currentUser.email
+            const currentBillingPeriod = billingPeriod
+            const baseLink = CLOUDFLARE_WORKER_URLS[process.env.NODE_ENV]
+
+            let selectedPremiumPlansString = ''
+            let removedPremiumPlansString = ''
+            let checkoutLink = ''
+
+            if (selectedPremiumPlans.includes('lifetime')) {
+                selectedPremiumPlansString = 'lifetime'
+                removedPremiumPlansString = removedPremiumPlans.join(',')
+                checkoutLink = `${baseLink}/create-checkout?billingPeriod=lifetime&powerUps=${selectedPremiumPlansString}&removedPowerUps=${removedPremiumPlansString}&prefilled_email=${encodeURIComponent(
+                    currentUserEmail,
+                )}&uwt=${upgradeWithinTrial}`
+            } else {
+                selectedPremiumPlansString = selectedPremiumPlans.join(',')
+                removedPremiumPlansString = removedPremiumPlans.join(',')
+                checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&removedPowerUps=${removedPremiumPlansString}&prefilled_email=${encodeURIComponent(
+                    currentUserEmail,
+                )}&uwt=${upgradeWithinTrial}`
+            }
+
+            if (doNotOpen) {
+                try {
+                    // Execute the checkout link and print the response
+                    const response = await fetch(checkoutLink)
+                    const responseData = await response.text() // or response.json() if the response is JSON
+
+                    return JSON.parse(responseData).message
+                } catch (error) {
+                    console.error('Error executing checkout link:', error)
                 }
-            } catch (error) {
-                console.error('Error fetching checkout link:', error)
+            } else {
+                try {
+                    // Use the WebExtensions API to open the URL in a new tab
+                    if (chrome.tabs && chrome.tabs.create) {
+                        chrome.tabs.create({ url: checkoutLink })
+                    }
+                } catch (error) {
+                    console.error('Error fetching checkout link:', error)
+                }
             }
         }
-    }
 }
 
 export { utils }

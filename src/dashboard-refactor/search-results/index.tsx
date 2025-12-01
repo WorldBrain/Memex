@@ -1,7 +1,7 @@
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
-import Waypoint from 'react-waypoint'
-import browser from 'webextension-polyfill'
+import { Waypoint } from 'react-waypoint'
+
 // import { SketchPicker } from 'react-color'
 
 import type {
@@ -21,7 +21,7 @@ import type { RootState as ListSidebarState } from '../lists-sidebar/types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
-} from '@worldbrain/memex-common/lib/common-ui/components/search-type-switch'
+} from '@worldbrain/memex-common/ts/common-ui/components/search-type-switch'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
 import { bindFunctionalProps, formatDayGroupTime } from './util'
@@ -33,7 +33,7 @@ import {
 } from 'src/annotations/components/AnnotationCreate'
 import { sizeConstants } from '../constants'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
@@ -41,18 +41,18 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import ListDetails, {
     Props as ListDetailsProps,
 } from './components/list-details'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import type {
     AnnotationSharingStates,
     RemoteContentSharingByTabsInterface,
 } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
-import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import IconBox from '@worldbrain/memex-common/ts/common-ui/components/icon-box'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import type { YoutubeService } from '@worldbrain/memex-common/ts/services/youtube'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type {
     PageAnnotationsCacheInterface,
@@ -62,10 +62,10 @@ import type { ImageSupportInterface } from 'src/image-support/background/types'
 import PageCitations from 'src/citations/PageCitations'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
-import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { splitQueryIntoTerms } from '@worldbrain/memex-common/lib/search/terms-search'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
+import { SpaceSearchSuggestion } from '@worldbrain/memex-common/ts/editor'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
+import { splitQueryIntoTerms } from '@worldbrain/memex-common/ts/search/terms-search'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -339,247 +339,255 @@ export default class SearchResultsContainer extends React.Component<
             .map((listId) => this.props.listData.byId[listId]?.remoteId)
             .filter((listId) => listId != null)
 
-    private renderNoteResult = (
-        day: number,
-        pageResultId: string,
-        zIndex: number,
-    ) => (noteId: string) => {
-        const pageResult = this.props.results[-1].pages.byId[pageResultId]
-        const pageData = this.props.pageData.byId[pageResult.pageId]
-        const noteData = this.props.noteData.byId[noteId]
-        const interactionProps = bindFunctionalProps<
-            NoteInteractionAugdProps,
-            NoteInteractionProps
-        >(this.props.noteInteractionProps, noteId, day, pageResultId)
+    private renderNoteResult =
+        (day: number, pageResultId: string, zIndex: number) =>
+        (noteId: string) => {
+            const pageResult = this.props.results[-1].pages.byId[pageResultId]
+            const pageData = this.props.pageData.byId[pageResult.pageId]
+            const noteData = this.props.noteData.byId[noteId]
+            const interactionProps = bindFunctionalProps<
+                NoteInteractionAugdProps,
+                NoteInteractionProps
+            >(this.props.noteInteractionProps, noteId, day, pageResultId)
 
-        const dummyEvent = {} as any
+            const dummyEvent = {} as any
 
-        const cachedListIds = noteData.isShared
-            ? [
-                  ...new Set([
-                      ...pageData.lists.filter(
-                          (listId) =>
-                              this.props.listData.byId[listId].remoteId != null,
-                      ),
-                      ...noteData.lists,
-                  ]),
-              ]
-            : noteData.lists
-        const localListIds = this.getLocalListIdsForCacheIds(cachedListIds)
-        const noteColor = this.props.highlightColorSettings?.find(
-            // TODO: Figure out type mismatch here: noteData.color is an obj, while item.id is a string. Either one is not as it says, or logical bug
-            (item: any) => {
-                return item.id === noteData.color
-            },
-        )
+            const cachedListIds = noteData.isShared
+                ? [
+                      ...new Set([
+                          ...pageData.lists.filter(
+                              (listId) =>
+                                  this.props.listData.byId[listId].remoteId !=
+                                  null,
+                          ),
+                          ...noteData.lists,
+                      ]),
+                  ]
+                : noteData.lists
+            const localListIds = this.getLocalListIdsForCacheIds(cachedListIds)
+            const noteColor = this.props.highlightColorSettings?.find(
+                // TODO: Figure out type mismatch here: noteData.color is an obj, while item.id is a string. Either one is not as it says, or logical bug
+                (item: any) => {
+                    return item.id === noteData.color
+                },
+            )
 
-        return (
-            <AnnotationEditable
-                compactVersion={true}
-                imageSupport={this.props.imageSupport}
-                zIndex={zIndex}
-                key={noteId}
-                unifiedId={noteId}
-                tags={noteData.tags}
-                lists={localListIds}
-                color={noteColor ?? null}
-                body={noteData.highlight}
-                comment={noteData.comment}
-                focusLockUntilMouseStart={this.props.focusLockUntilMouseStart}
-                isShared={noteData.isShared}
-                getListDetailsById={this.props.getListDetailsById}
-                isBulkShareProtected={noteData.isBulkShareProtected}
-                createdWhen={new Date(noteData.displayTime)}
-                onGoToAnnotation={interactionProps.onGoToHighlightClick}
-                contextLocation={'dashboard'}
-                getRootElement={this.props.getRootElement}
-                lastEdited={
-                    noteData.isEdited
-                        ? new Date(noteData.displayTime)
-                        : undefined
-                }
-                openImageInPreview={this.props.openImageInPreview}
-                searchTerms={this.state.searchTerms}
-                syncSettingsBG={this.props.syncSettingsBG}
-                bulkSelectAnnotation={() => {
-                    const data = {
-                        url: noteData.url,
-                        title: noteData.highlight,
-                        type: 'note',
+            return (
+                <AnnotationEditable
+                    compactVersion={true}
+                    imageSupport={this.props.imageSupport}
+                    zIndex={zIndex}
+                    key={noteId}
+                    unifiedId={noteId}
+                    tags={noteData.tags}
+                    lists={localListIds}
+                    color={noteColor ?? null}
+                    body={noteData.highlight}
+                    comment={noteData.comment}
+                    focusLockUntilMouseStart={
+                        this.props.focusLockUntilMouseStart
                     }
+                    isShared={noteData.isShared}
+                    getListDetailsById={this.props.getListDetailsById}
+                    isBulkShareProtected={noteData.isBulkShareProtected}
+                    createdWhen={new Date(noteData.displayTime)}
+                    onGoToAnnotation={interactionProps.onGoToHighlightClick}
+                    contextLocation={'dashboard'}
+                    getRootElement={this.props.getRootElement}
+                    lastEdited={
+                        noteData.isEdited
+                            ? new Date(noteData.displayTime)
+                            : undefined
+                    }
+                    openImageInPreview={this.props.openImageInPreview}
+                    searchTerms={this.state.searchTerms}
+                    syncSettingsBG={this.props.syncSettingsBG}
+                    bulkSelectAnnotation={() => {
+                        const data = {
+                            url: noteData.url,
+                            title: noteData.highlight,
+                            type: 'note',
+                        }
 
-                    this.props.onBulkSelect(
-                        data,
-                        this.props.selectedItems?.includes(noteId),
-                    )
-                }}
-                isBulkSelected={this.props.selectedItems?.includes(noteId)}
-                shiftSelectItem={() =>
-                    this.props.shiftSelectItems(noteId, 'notes')
-                }
-                setAnnotationInFocus={this.props.setAnnotationInFocus}
-                isInFocus={noteData.isInFocus}
-                highlightColorSettings={this.props.highlightColorSettings}
-                saveHighlightColor={async (color: HighlightColor['id']) =>
-                    this.props.saveHighlightColor(noteId, color)
-                }
-                isEditing={noteData.isEditing}
-                isEditingHighlight={noteData.isBodyEditing}
-                isDeleting={false}
-                renderCopyPasterForAnnotation={() => (
-                    <PageCitations
-                        annotationUrls={[noteData.url]}
-                        copyPasterProps={{
-                            copyPasterBG: this.props.copyPasterBG,
-                            getRootElement: this.props.getRootElement,
-                            onClickOutside:
-                                interactionProps.onCopyPasterBtnClick,
-                        }}
-                        pageLinkProps={{
-                            ...this.props.spacePickerBGProps,
-                            annotationsCache: this.props.annotationsCache,
-                            contentSharingByTabsBG: this.props
-                                .contentSharingByTabsBG,
-                            copyToClipboard: this.props.onPageLinkCopy,
-                            fullPageUrl: pageData.fullUrl,
-                            getRootElement: this.props.getRootElement,
-                            showSpacesTab: this.props.showSpacesTab,
-                            fromDashboard: true,
-                        }}
-                        annotationShareProps={{
-                            isForAnnotation: true,
-                            postShareHook: interactionProps.updateShareInfo,
-                            annotationsCache: this.props.annotationsCache,
-                        }}
-                        getRootElement={this.props.getRootElement}
-                        syncSettingsBG={this.props.syncSettingsBG}
-                    />
-                )}
-                toggleAutoAdd={null}
-                copyPasterAnnotationInstanceId={null}
-                spacePickerAnnotationInstance={null}
-                shareMenuAnnotationInstanceId={null}
-                renderListsPickerForAnnotation={() => (
-                    <CollectionPicker
-                        {...this.props.spacePickerBGProps}
-                        showPageLinks
-                        annotationsCache={this.props.annotationsCache}
-                        initialSelectedListIds={() => localListIds}
-                        selectEntry={(listId) =>
-                            interactionProps.updateLists({
-                                added: listId,
-                                deleted: null,
-                                selected: [],
-                                options: {
-                                    showExternalConfirmations: true,
-                                },
-                            })
-                        }
-                        unselectEntry={(listId) =>
-                            interactionProps.updateLists({
-                                added: null,
-                                deleted: listId,
-                                selected: [],
-                                options: {
-                                    showExternalConfirmations: true,
-                                },
-                            })
-                        }
-                        normalizedPageUrlToFilterPageLinksBy={pageResultId}
-                        analyticsBG={this.props.spacePickerBGProps.analyticsBG}
-                    />
-                )}
-                renderShareMenuForAnnotation={(noteId, closePicker) => (
-                    <SingleNoteShareMenu
-                        getRemoteListIdForLocalId={(localListId) =>
-                            this.props.listData[localListId]?.remoteId ?? null
-                        }
-                        isShared={
-                            noteData.isShared || noteData.lists.length > 0
-                        }
-                        analyticsBG={this.props.spacePickerBGProps.analyticsBG}
-                        annotationData={noteData}
-                        shareImmediately={
-                            noteData.shareMenuShowStatus === 'show-n-share'
-                        }
-                        annotationUrl={noteId}
-                        copyLink={this.props.onNoteLinkCopy}
-                        postShareHook={interactionProps.updateShareInfo}
-                        spacePickerProps={{
-                            ...this.props.spacePickerBGProps,
-                            normalizedPageUrlToFilterPageLinksBy: pageResultId,
-                            annotationsCache: this.props.annotationsCache,
-                            initialSelectedListIds: () => localListIds,
-                            selectEntry: (listId, options) =>
+                        this.props.onBulkSelect(
+                            data,
+                            this.props.selectedItems?.includes(noteId),
+                        )
+                    }}
+                    isBulkSelected={this.props.selectedItems?.includes(noteId)}
+                    shiftSelectItem={() =>
+                        this.props.shiftSelectItems(noteId, 'notes')
+                    }
+                    setAnnotationInFocus={this.props.setAnnotationInFocus}
+                    isInFocus={noteData.isInFocus}
+                    highlightColorSettings={this.props.highlightColorSettings}
+                    saveHighlightColor={async (color: HighlightColor['id']) =>
+                        this.props.saveHighlightColor(noteId, color)
+                    }
+                    isEditing={noteData.isEditing}
+                    isEditingHighlight={noteData.isBodyEditing}
+                    isDeleting={false}
+                    renderCopyPasterForAnnotation={() => (
+                        <PageCitations
+                            annotationUrls={[noteData.url]}
+                            copyPasterProps={{
+                                copyPasterBG: this.props.copyPasterBG,
+                                getRootElement: this.props.getRootElement,
+                                onClickOutside:
+                                    interactionProps.onCopyPasterBtnClick,
+                            }}
+                            pageLinkProps={{
+                                ...this.props.spacePickerBGProps,
+                                annotationsCache: this.props.annotationsCache,
+                                contentSharingByTabsBG:
+                                    this.props.contentSharingByTabsBG,
+                                copyToClipboard: this.props.onPageLinkCopy,
+                                fullPageUrl: pageData.fullUrl,
+                                getRootElement: this.props.getRootElement,
+                                showSpacesTab: this.props.showSpacesTab,
+                                fromDashboard: true,
+                            }}
+                            annotationShareProps={{
+                                isForAnnotation: true,
+                                postShareHook: interactionProps.updateShareInfo,
+                                annotationsCache: this.props.annotationsCache,
+                            }}
+                            getRootElement={this.props.getRootElement}
+                            syncSettingsBG={this.props.syncSettingsBG}
+                        />
+                    )}
+                    toggleAutoAdd={null}
+                    copyPasterAnnotationInstanceId={null}
+                    spacePickerAnnotationInstance={null}
+                    shareMenuAnnotationInstanceId={null}
+                    renderListsPickerForAnnotation={() => (
+                        <CollectionPicker
+                            {...this.props.spacePickerBGProps}
+                            showPageLinks
+                            annotationsCache={this.props.annotationsCache}
+                            initialSelectedListIds={() => localListIds}
+                            selectEntry={(listId) =>
                                 interactionProps.updateLists({
                                     added: listId,
                                     deleted: null,
                                     selected: [],
-                                    options,
-                                }),
-                            unselectEntry: (listId) =>
+                                    options: {
+                                        showExternalConfirmations: true,
+                                    },
+                                })
+                            }
+                            unselectEntry={(listId) =>
                                 interactionProps.updateLists({
                                     added: null,
                                     deleted: listId,
                                     selected: [],
-                                }),
-                            closePicker: closePicker,
-                        }}
-                        getRootElement={this.props.getRootElement}
-                    />
-                )}
-                annotationEditDependencies={{
-                    comment: noteData.editNoteForm.inputValue,
-                    body: noteData.editNoteForm.bodyInputValue,
-                    copyLoadingState: noteData.copyLoadingState,
-                    onCommentChange: (content) =>
-                        interactionProps.onCommentChange(content),
-                    onEditCancel: () =>
-                        interactionProps.onEditCancel(dummyEvent),
-                    onEditConfirm: interactionProps.onEditConfirm,
-                    imageSupport: this.props.imageSupport,
-                    getRootElement: this.props.getRootElement,
-                    onBodyChange: (content) =>
-                        interactionProps.onBodyChange(content),
-                    setEditing: interactionProps.onEditBtnClick,
-                    openImageInPreview: interactionProps.openImageInPreview,
-                }}
-                annotationFooterDependencies={{
-                    onCopyPasterDefaultExecute:
-                        interactionProps.onCopyPasterDefaultExecute,
-                    onDeleteCancel: () => undefined,
-                    onDeleteConfirm: () => undefined,
-                    onDeleteIconClick: interactionProps.onTrashBtnClick,
-                    onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
-                    onEditIconClick: interactionProps.onEditBtnClick,
-                    onShareClick: interactionProps.onShareBtnClick,
-                    onEditHighlightIconClick:
-                        interactionProps.onEditHighlightBtnClick,
-                }}
-                updateSpacesSearchSuggestions={
-                    this.props.updateSpacesSearchSuggestions
-                }
-                spaceSearchSuggestions={this.props.spaceSearchSuggestions}
-                selectSpaceForEditorPicker={(listId) =>
-                    interactionProps.updateLists({
-                        added: listId,
-                        deleted: null,
-                        selected: [],
-                    })
-                }
-                removeSpaceFromEditorPicker={(listId) =>
-                    interactionProps.updateLists({
-                        added: null,
-                        deleted: listId,
-                        selected: [],
-                    })
-                }
-                addNewSpaceViaWikiLinksEditNote={
-                    interactionProps.addNewSpaceViaWikiLinksEditNote
-                }
-            />
-        )
-    }
+                                    options: {
+                                        showExternalConfirmations: true,
+                                    },
+                                })
+                            }
+                            normalizedPageUrlToFilterPageLinksBy={pageResultId}
+                            analyticsBG={
+                                this.props.spacePickerBGProps.analyticsBG
+                            }
+                        />
+                    )}
+                    renderShareMenuForAnnotation={(noteId, closePicker) => (
+                        <SingleNoteShareMenu
+                            getRemoteListIdForLocalId={(localListId) =>
+                                this.props.listData[localListId]?.remoteId ??
+                                null
+                            }
+                            isShared={
+                                noteData.isShared || noteData.lists.length > 0
+                            }
+                            analyticsBG={
+                                this.props.spacePickerBGProps.analyticsBG
+                            }
+                            annotationData={noteData}
+                            shareImmediately={
+                                noteData.shareMenuShowStatus === 'show-n-share'
+                            }
+                            annotationUrl={noteId}
+                            copyLink={this.props.onNoteLinkCopy}
+                            postShareHook={interactionProps.updateShareInfo}
+                            spacePickerProps={{
+                                ...this.props.spacePickerBGProps,
+                                normalizedPageUrlToFilterPageLinksBy:
+                                    pageResultId,
+                                annotationsCache: this.props.annotationsCache,
+                                initialSelectedListIds: () => localListIds,
+                                selectEntry: (listId, options) =>
+                                    interactionProps.updateLists({
+                                        added: listId,
+                                        deleted: null,
+                                        selected: [],
+                                        options,
+                                    }),
+                                unselectEntry: (listId) =>
+                                    interactionProps.updateLists({
+                                        added: null,
+                                        deleted: listId,
+                                        selected: [],
+                                    }),
+                                closePicker: closePicker,
+                            }}
+                            getRootElement={this.props.getRootElement}
+                        />
+                    )}
+                    annotationEditDependencies={{
+                        comment: noteData.editNoteForm.inputValue,
+                        body: noteData.editNoteForm.bodyInputValue,
+                        copyLoadingState: noteData.copyLoadingState,
+                        onCommentChange: (content) =>
+                            interactionProps.onCommentChange(content),
+                        onEditCancel: () =>
+                            interactionProps.onEditCancel(dummyEvent),
+                        onEditConfirm: interactionProps.onEditConfirm,
+                        imageSupport: this.props.imageSupport,
+                        getRootElement: this.props.getRootElement,
+                        onBodyChange: (content) =>
+                            interactionProps.onBodyChange(content),
+                        setEditing: interactionProps.onEditBtnClick,
+                        openImageInPreview: interactionProps.openImageInPreview,
+                    }}
+                    annotationFooterDependencies={{
+                        onCopyPasterDefaultExecute:
+                            interactionProps.onCopyPasterDefaultExecute,
+                        onDeleteCancel: () => undefined,
+                        onDeleteConfirm: () => undefined,
+                        onDeleteIconClick: interactionProps.onTrashBtnClick,
+                        onCopyPasterBtnClick:
+                            interactionProps.onCopyPasterBtnClick,
+                        onEditIconClick: interactionProps.onEditBtnClick,
+                        onShareClick: interactionProps.onShareBtnClick,
+                        onEditHighlightIconClick:
+                            interactionProps.onEditHighlightBtnClick,
+                    }}
+                    updateSpacesSearchSuggestions={
+                        this.props.updateSpacesSearchSuggestions
+                    }
+                    spaceSearchSuggestions={this.props.spaceSearchSuggestions}
+                    selectSpaceForEditorPicker={(listId) =>
+                        interactionProps.updateLists({
+                            added: listId,
+                            deleted: null,
+                            selected: [],
+                        })
+                    }
+                    removeSpaceFromEditorPicker={(listId) =>
+                        interactionProps.updateLists({
+                            added: null,
+                            deleted: listId,
+                            selected: [],
+                        })
+                    }
+                    addNewSpaceViaWikiLinksEditNote={
+                        interactionProps.addNewSpaceViaWikiLinksEditNote
+                    }
+                />
+            )
+        }
 
     private renderPageNotes(
         {
@@ -848,8 +856,8 @@ export default class SearchResultsContainer extends React.Component<
                             pageLinkProps={{
                                 ...this.props.spacePickerBGProps,
                                 annotationsCache: this.props.annotationsCache,
-                                contentSharingByTabsBG: this.props
-                                    .contentSharingByTabsBG,
+                                contentSharingByTabsBG:
+                                    this.props.contentSharingByTabsBG,
                                 copyToClipboard: this.props.onPageLinkCopy,
                                 fullPageUrl: page.fullUrl,
                                 getRootElement: this.props.getRootElement,
@@ -866,7 +874,7 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     private getTutorialState = async () => {
-        const tutorialStateLoaded = await browser.storage.local.get(
+        const tutorialStateLoaded = await chrome.storage.local.get(
             '@onboarding-dashboard-tutorials',
         )
         this.setState({
@@ -883,7 +891,7 @@ export default class SearchResultsContainer extends React.Component<
             tutorialState: tutorialState,
         })
 
-        await browser.storage.local.set({
+        await chrome.storage.local.set({
             '@onboarding-dashboard-tutorials': tutorialState,
         })
     }

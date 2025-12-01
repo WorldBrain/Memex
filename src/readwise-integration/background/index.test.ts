@@ -8,8 +8,8 @@ import {
     backgroundIntegrationTest,
 } from 'src/tests/integration-tests'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
-import { READWISE_API_URL } from '@worldbrain/memex-common/lib/readwise-integration/api/constants'
-import { formatReadwiseHighlightTag } from '@worldbrain/memex-common/lib/readwise-integration/utils'
+import { READWISE_API_URL } from '@worldbrain/memex-common/ts/readwise-integration/api/constants'
+import { formatReadwiseHighlightTag } from '@worldbrain/memex-common/ts/readwise-integration/utils'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Readwise Annotations',

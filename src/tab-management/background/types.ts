@@ -1,9 +1,4 @@
-import { WebNavigation, Tabs } from 'webextension-polyfill'
-import {
-    RemoteFunctionRole,
-    RemoteFunctionWithExtraArgs,
-    RemoteFunctionWithoutExtraArgs,
-} from 'src/util/webextensionRPC'
+import { RemoteFunctionRole } from 'src/util/webextensionRPC'
 import Tab from './tab-state'
 
 export interface TabManagementInterface<Role extends RemoteFunctionRole> {
@@ -11,9 +6,9 @@ export interface TabManagementInterface<Role extends RemoteFunctionRole> {
     // setTabAsIndexable: RemoteFunctionWithExtraArgs<Role, void>
 }
 
-export type NavState = Partial<WebNavigation.OnCommittedDetailsType> & {
-    type?: WebNavigation.TransitionType
-    qualifiers?: WebNavigation.TransitionQualifier
+export type NavState = Partial<typeof chrome.webNavigation.onCommitted> & {
+    type?: typeof chrome.webNavigation.TransitionType
+    qualifiers?: typeof chrome.webNavigation.TransitionQualifier
 }
 
 export interface ScrollState {

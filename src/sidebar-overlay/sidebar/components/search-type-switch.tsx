@@ -9,11 +9,8 @@ import {
 import cx from 'classnames'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
-import browser from 'webextension-polyfill'
 
-const commentAdd = browser.runtime.getURL('/img/comment_add.svg')
-
-const styles = require('./search-type-switch.css')
+const commentAdd = chrome.runtime.getURL('/img/comment_add.svg')
 
 export interface StateProps {
     annotsFolded: boolean
@@ -59,7 +56,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
             return null
         }
 
-        return <span className={styles.searchCount}>{count}</span>
+        return <span>{count}</span>
     }
 
     private handleAllBtnClick = (
@@ -104,15 +101,10 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
     render() {
         return (
             <React.Fragment>
-                <div className={styles.masterContainer}>
-                    <div className={styles.container}>
+                <div>
+                    <div>
                         <div>
                             <button
-                                className={cx(
-                                    styles.searchSwitchBtn,
-                                    styles.btn,
-                                    styles.pages,
-                                )}
                                 onClick={this.handlePagesBtnClick}
                                 disabled={this.isPageSearch}
                                 id="pages"
@@ -121,11 +113,6 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                             </button>
                             {this.props.showSocialSearch && (
                                 <button
-                                    className={cx(
-                                        styles.searchSwitchBtn,
-                                        styles.btn,
-                                        styles.pages,
-                                    )}
                                     onClick={this.handleSocialBtnClick}
                                     disabled={
                                         this.props.searchType === 'social'
@@ -136,11 +123,6 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                 </button>
                             )}
                             <button
-                                className={cx(
-                                    styles.searchSwitchBtn,
-                                    styles.btn,
-                                    styles.notesBtn,
-                                )}
                                 onClick={this.handleNotesBtnClick}
                                 disabled={this.props.searchType === 'notes'}
                             >
@@ -152,34 +134,24 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                 e.stopPropagation()
                                 this.props.handleAddCommentBtnClick()
                             }}
-                            className={styles.imgContainer}
                         >
                             <img
                                 style={{ maxWidth: '25px', maxHeight: '25px' }}
                                 src={commentAdd}
-                                className={styles.img}
                             />
                         </div>
                     </div>
-                    <div className={styles.notesBox}>
+                    <div>
                         {this.props.searchType === 'notes' && (
-                            <div className={styles.pageSwitch}>
+                            <div>
                                 <div>
                                     <button
-                                        className={cx(
-                                            styles.searchSwitchBtn,
-                                            styles.btn,
-                                        )}
                                         onClick={this.props.handlePageTypeClick}
                                         disabled={!this.isCurrentPageSearch}
                                     >
                                         This page
                                     </button>
                                     <button
-                                        className={cx(
-                                            styles.searchSwitchBtn,
-                                            styles.btn,
-                                        )}
                                         onClick={this.handleAllBtnClick}
                                         disabled={this.isCurrentPageSearch}
                                     >
@@ -189,10 +161,6 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                 <div>
                                     {this.isCurrentPageSearch && (
                                         <button
-                                            className={cx(
-                                                styles.unfoldAllBtn,
-                                                styles.btn,
-                                            )}
                                             onClick={
                                                 this.props.handleUnfoldAllClick
                                             }

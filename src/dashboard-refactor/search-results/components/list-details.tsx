@@ -1,21 +1,21 @@
 import React, { PureComponent, useState } from 'react'
 import styled, { css } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import MemexEditor, {
     MemexEditorInstance,
-} from '@worldbrain/memex-common/lib/editor'
-import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+} from '@worldbrain/memex-common/ts/editor'
+import Markdown from '@worldbrain/memex-common/ts/common-ui/components/markdown'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
+import QuickTutorial from '@worldbrain/memex-common/ts/editor/components/QuickTutorial'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
 import { sizeConstants } from '../../constants'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { sleepPromise } from 'src/util/promises'
@@ -255,8 +255,9 @@ export default class ListDetails extends PureComponent<Props, State> {
                                         value={this.state.spaceTitle}
                                         onChange={(e) =>
                                             this.setState({
-                                                spaceTitle: (e.target as HTMLInputElement)
-                                                    .value,
+                                                spaceTitle: (
+                                                    e.target as HTMLInputElement
+                                                ).value,
                                             })
                                         }
                                         onKeyDown={(e) => {

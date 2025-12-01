@@ -1,4 +1,4 @@
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import { BackgroundModules } from 'src/background-script/setup'
 
 type IntegrationTestDataCollection =

@@ -3,17 +3,17 @@ import type {
     RegistrationResult,
     LoginResult,
     AuthProviderType,
-} from '@worldbrain/memex-common/lib/authentication/types'
+} from '@worldbrain/memex-common/ts/authentication/types'
 import type {
     UserFeature,
     UserPlan,
     Claims,
     SubscriptionStatus,
-} from '@worldbrain/memex-common/lib/subscriptions/types'
+} from '@worldbrain/memex-common/ts/subscriptions/types'
 import type {
     UserReference,
     User,
-} from '@worldbrain/memex-common/lib/web-interface/types/users'
+} from '@worldbrain/memex-common/ts/web-interface/types/users'
 
 export interface AuthRemoteFunctionsInterface {
     getCurrentUser(): Promise<AuthenticatedUser | null>

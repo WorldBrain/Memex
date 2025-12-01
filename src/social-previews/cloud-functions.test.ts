@@ -1,23 +1,23 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { renderTemplate } from '@worldbrain/memex-common/lib/firebase-backend/social-previews/html-template'
-import { SocialPreviewHTMLRenderer } from '@worldbrain/memex-common/lib/firebase-backend/social-previews/html-renderer'
+import { renderTemplate } from '@worldbrain/memex-common/ts/firebase-backend/social-previews/html-template'
+import { SocialPreviewHTMLRenderer } from '@worldbrain/memex-common/ts/firebase-backend/social-previews/html-renderer'
 import {
     LIST_DESCRIPTION_FALLBACK,
     PAGE_DESCRIPTION_FALLBACK,
     PAGE_TITLE_FALLBACK,
-} from '@worldbrain/memex-common/lib/firebase-backend/social-previews/constants'
+} from '@worldbrain/memex-common/ts/firebase-backend/social-previews/constants'
 import type {
     SharedAnnotation,
     SharedList,
     SharedListEntry,
     SharedPageInfo,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import {
     generateAnnotationPreviewUrl,
     generateListPreviewUrl,
     generatePagePreviewUrl,
-} from '@worldbrain/memex-common/lib/firebase-backend/social-previews/utils'
+} from '@worldbrain/memex-common/ts/firebase-backend/social-previews/utils'
 import {
     createPageLinkListTitle,
     getListShareUrl,

@@ -1,5 +1,5 @@
-import { mapTreeTraverse } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
-import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { mapTreeTraverse } from '@worldbrain/memex-common/ts/content-sharing/tree-utils'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/ts/utils/item-ordering'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { State, Dependencies } from './types'
 

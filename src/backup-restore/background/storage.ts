@@ -1,15 +1,15 @@
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 import {
     StorageModule,
     StorageModuleConfig,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/backup-changes/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/backup-changes/constants'
 import type { ObjectChangeBatch } from './backend/types'
 import { isExcludedFromBackup } from './utils'
-import type { StorageChangePk } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { StorageChangePk } from '@worldbrain/storex-middleware-change-watcher/ts/types'
 
 export default class BackupStorage extends StorageModule {
     static BACKUP_COLL = COLLECTION_NAMES.backupChange
@@ -72,9 +72,8 @@ export default class BackupStorage extends StorageModule {
             return
         }
 
-        const collectionDefinition = this.storageManager.registry.collections[
-            collection
-        ]
+        const collectionDefinition =
+            this.storageManager.registry.collections[collection]
         if (!isExcludedFromBackup(collectionDefinition)) {
             this.registerChange({
                 collection,

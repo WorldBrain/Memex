@@ -1,1 +1,1 @@
-export type { Anchor } from '@worldbrain/memex-common/lib/annotations/types'
+export type { Anchor } from '@worldbrain/memex-common/ts/annotations/types'

@@ -1,4 +1,4 @@
-import { StorageBackendPlugin } from '@worldbrain/storex'
+import { StorageBackendPlugin } from '@worldbrain/storex/ts'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 export interface RegexpQueryArgs {
@@ -16,9 +16,7 @@ export interface GetPksProps {
     reverse?: boolean
 }
 
-export class DexieUtilsPlugin extends StorageBackendPlugin<
-    DexieStorageBackend
-> {
+export class DexieUtilsPlugin extends StorageBackendPlugin<DexieStorageBackend> {
     static FIND_BY_PK_OP = 'memex:dexie.findByPk'
     static GET_PKS_OP = 'memex:dexie.getPks'
     static NUKE_DB_OP = 'memex:dexie.recreateDatabase'

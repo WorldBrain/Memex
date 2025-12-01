@@ -1,5 +1,5 @@
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { AImodels } from '@worldbrain/memex-common/lib/summarization/types'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
+import { AImodels } from '@worldbrain/memex-common/ts/summarization/types'
 import { PromptTemplate } from 'src/common-ui/components/prompt-templates/types'
 
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'

@@ -10,8 +10,7 @@ import BlacklistRow from './components/BlacklistRow'
 import BlacklistInputRow from './components/BlacklistInputRow'
 import * as actions from './actions'
 import * as selectors from './selectors'
-import styles from './components/base.css'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
 
 class BlacklistContainer extends Component {
     static propTypes = {

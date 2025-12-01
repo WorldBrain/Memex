@@ -1,12 +1,12 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -16,13 +16,13 @@ export interface Props extends Dependencies {
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
 //  from opening when you use the context menu in the dashboard.
 //  __If you add new click handlers to this component, ensure you wrap them with this!__
-const wrapClick = (
-    handler: React.MouseEventHandler,
-): React.MouseEventHandler => (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    return handler(e)
-}
+const wrapClick =
+    (handler: React.MouseEventHandler): React.MouseEventHandler =>
+    (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        return handler(e)
+    }
 
 export default class BulkEditWidget extends StatefulUIElement<
     Props,

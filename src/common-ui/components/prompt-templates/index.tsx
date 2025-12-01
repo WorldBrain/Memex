@@ -5,20 +5,20 @@ import {
     PromptTemplatesDependencies,
     PromptTemplatesState,
 } from './types'
-import { UIElement } from 'ui-logic-react'
+import { UIElement } from 'ui-logic-react/ts'
 import {
     DragDropContext,
     Draggable,
     Droppable,
     OnDragEndResponder,
-} from 'react-beautiful-dnd'
+} from '@hello-pangea/dnd'
 import { PrimaryAction } from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import TutorialBox from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 import styled, { css } from 'styled-components'
 import Icon from '../../../../external/@worldbrain/memex-common/ts/common-ui/components/icon'
 import ReactDOM from 'react-dom'
-import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import TextArea from '@worldbrain/memex-common/ts/common-ui/components/text-area'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 
 export default class PromptTemplatesComponent extends UIElement<
     PromptTemplatesDependencies,
@@ -470,7 +470,12 @@ const SectionTitle = styled.div`
 const NoResultsBox = styled.div`
     text-align: center;
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     font-style: normal;
     font-size: 12px;
@@ -646,7 +651,12 @@ const TemplateRowTitle = styled.div<{
     text-align: left;
 
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     font-style: normal;
     font-weight: normal;

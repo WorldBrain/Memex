@@ -2,13 +2,13 @@ import type {
     AuthProviderType,
     AuthService,
     LoginHooks,
-} from '@worldbrain/memex-common/lib/authentication/types'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
-import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
-import { WorldbrainSubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/worldbrain'
+} from '@worldbrain/memex-common/ts/authentication/types'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
+import { MemoryAuthService } from '@worldbrain/memex-common/ts/authentication/memory'
+import { WorldbrainAuthService } from '@worldbrain/memex-common/ts/authentication/worldbrain'
+import { SubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/types'
+import { MemorySubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/memory'
+import { WorldbrainSubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/worldbrain'
 import { getFirebase } from 'src/util/firebase-app-initialized'
 import {
     getAuth,

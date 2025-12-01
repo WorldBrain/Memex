@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import {
     sortByCreatedTime,
     sortByPagePosition,

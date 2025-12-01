@@ -1,10 +1,10 @@
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/followed-lists/constants'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
+import { COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/ts/storage/modules/followed-lists/constants'
 import {
     StorageModule,
     StorageModuleConfig,
     StorageModuleConstructorArgs,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import type { FollowedList, FollowedListEntry } from './types'
 import { getFollowedListEntryIdentifier } from './utils'
 
@@ -202,9 +202,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
         return followedListEntries
     }
 
-    async findFollowedListEntriesForLists(
-        followedLists: string[],
-    ): Promise<{
+    async findFollowedListEntriesForLists(followedLists: string[]): Promise<{
         [followedListId: string]: FollowedListEntry[]
     }> {
         let listEntries: FollowedListEntry[] = await this.operation(

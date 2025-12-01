@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Styles from './onboarding-backup-mode.css'
 
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {
@@ -48,39 +47,33 @@ export function OnboardingBackupMode({
     isAuthorizedForAutomaticBackup,
 }) {
     return (
-        <div className={Styles.selectionDiv}>
-            <div className={Styles.selectionContainer}>
-                <label className={Styles.option}>
-                    <div className={Styles.selection}>
+        <div>
+            <div>
+                <label>
+                    <div>
                         <input
                             type="radio"
                             checked={mode === 'automatic'}
                             onChange={() => onModeChange('automatic')}
-                        />{' '}
-                        <div className={Styles.textBlock}>
-                            <div className={Styles.selectionTitle}>
-                                Automatic Backup
-                            </div>
-                            <p className={Styles.subname}>
-                                Worry-free backups every 15 minutes.
-                            </p>
+                        />
+                        <div>
+                            <div>Automatic Backup</div>
+                            <p>Worry-free backups every 15 minutes.</p>
                         </div>
                     </div>
                 </label>
             </div>
-            <div className={Styles.selectionContainer}>
-                <label className={Styles.option}>
-                    <div className={Styles.selection}>
+            <div>
+                <label>
+                    <div>
                         <input
                             type="radio"
                             checked={mode === 'manual'}
                             onChange={() => onModeChange('manual')}
-                        />{' '}
-                        <div className={Styles.textBlock}>
-                            <div className={Styles.selectionTitle}>
-                                Manual Backup
-                            </div>
-                            <p className={Styles.subname}>
+                        />
+                        <div>
+                            <div>Manual Backup</div>
+                            <p>
                                 You need to regularly remember to back up
                                 yourself.
                             </p>

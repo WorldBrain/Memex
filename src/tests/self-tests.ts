@@ -1,13 +1,12 @@
-import type { Storage } from 'webextension-polyfill'
-import type StorageManager from '@worldbrain/storex'
+import type StorageManager from '@worldbrain/storex/ts'
 import type { BackgroundModules } from 'src/background-script/setup'
 import type { ServerStorage } from 'src/storage/types'
-import type { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
-import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { WorldbrainAuthService } from '@worldbrain/memex-common/ts/authentication/worldbrain'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/ts/synced-settings/constants'
+import type { ContentIdentifier } from '@worldbrain/memex-common/ts/page-indexing/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 
 type CloudSendTest =
     | 'bookmark'
@@ -58,44 +57,43 @@ function matchTest<Test extends string>(
     return true
 }
 
-const personalCloudGetWhere = (
-    serverStorage: ServerStorage,
-    userId: AutoPk,
-) => async (collectionName: string) => {
-    if (!collectionName.startsWith('personal')) {
-        return null
-    }
-    if (
-        collectionName === 'personalBlockStats' ||
-        collectionName === 'personalCloudError' ||
-        collectionName === 'personalReadwiseAction' ||
-        collectionName === 'personalUsageEntry' ||
-        collectionName === 'personalAnalyticEvent' ||
-        collectionName === 'personalAnalyticsStats'
-    ) {
-        return null
-    }
-    const objects = (await serverStorage.manager
-        .collection(collectionName)
-        .findObjects({
+const personalCloudGetWhere =
+    (serverStorage: ServerStorage, userId: AutoPk) =>
+    async (collectionName: string) => {
+        if (!collectionName.startsWith('personal')) {
+            return null
+        }
+        if (
+            collectionName === 'personalBlockStats' ||
+            collectionName === 'personalCloudError' ||
+            collectionName === 'personalReadwiseAction' ||
+            collectionName === 'personalUsageEntry' ||
+            collectionName === 'personalAnalyticEvent' ||
+            collectionName === 'personalAnalyticsStats'
+        ) {
+            return null
+        }
+        const objects = (await serverStorage.manager
+            .collection(collectionName)
+            .findObjects({
+                user: userId,
+            })) as any[]
+        if (!objects.length) {
+            return null
+        }
+        const where = {
             user: userId,
-        })) as any[]
-    if (!objects.length) {
-        return null
+            id: { $in: objects.map((object) => object.id) },
+        }
+        return where
     }
-    const where = {
-        user: userId,
-        id: { $in: objects.map((object) => object.id) },
-    }
-    return where
-}
 
 export function createSelfTests(options: {
     backgroundModules: BackgroundModules
     storageManager: StorageManager
     persistentStorageManager: StorageManager
     serverStorage: ServerStorage
-    localStorage: Storage.LocalStorageArea
+    localStorage: chrome.storage.local
 }) {
     const { backgroundModules } = options
     const { personalCloud } = backgroundModules
@@ -197,33 +195,35 @@ export function createSelfTests(options: {
                 }
                 let publicAnnotationUrl: string
                 if (shouldTest('note.private') || shouldTest('share.note')) {
-                    publicAnnotationUrl = await backgroundModules.directLinking.createAnnotation(
-                        {
-                            tab: {} as any,
-                        },
-                        {
-                            pageUrl: testPageUrl,
-                            comment: 'Hi, this is a test comment',
-                            title: testPageTitle,
-                            createdWhen: new Date(),
-                        },
-                        { skipPageIndexing: true },
-                    )
+                    publicAnnotationUrl =
+                        await backgroundModules.directLinking.createAnnotation(
+                            {
+                                tab: {} as any,
+                            },
+                            {
+                                pageUrl: testPageUrl,
+                                comment: 'Hi, this is a test comment',
+                                title: testPageTitle,
+                                createdWhen: new Date(),
+                            },
+                            { skipPageIndexing: true },
+                        )
                     console.log(`Added private note to '${testPageUrl}'`)
                 }
                 if (shouldTest('note.protected')) {
-                    const publicAnnotation2 = await backgroundModules.directLinking.createAnnotation(
-                        {
-                            tab: {} as any,
-                        },
-                        {
-                            pageUrl: testPageUrl,
-                            comment: `Yet another test comment! This one's protected`,
-                            title: testPageTitle,
-                            createdWhen: new Date('2021-07-21'),
-                        },
-                        { skipPageIndexing: true },
-                    )
+                    const publicAnnotation2 =
+                        await backgroundModules.directLinking.createAnnotation(
+                            {
+                                tab: {} as any,
+                            },
+                            {
+                                pageUrl: testPageUrl,
+                                comment: `Yet another test comment! This one's protected`,
+                                title: testPageTitle,
+                                createdWhen: new Date('2021-07-21'),
+                            },
+                            { skipPageIndexing: true },
+                        )
                     await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
                         {
                             annotationUrl: publicAnnotation2,
@@ -233,18 +233,19 @@ export function createSelfTests(options: {
                     console.log(`Added protected note to '${testPageUrl}'`)
                 }
                 if (shouldTest('errors.upload')) {
-                    const publicAnnotation3 = await backgroundModules.directLinking.createAnnotation(
-                        {
-                            tab: {} as any,
-                        },
-                        {
-                            pageUrl: testPageUrl,
-                            comment: `*memex-debug*: upload error`,
-                            title: testPageTitle,
-                            createdWhen: new Date('2021-07-21'),
-                        },
-                        { skipPageIndexing: true },
-                    )
+                    const publicAnnotation3 =
+                        await backgroundModules.directLinking.createAnnotation(
+                            {
+                                tab: {} as any,
+                            },
+                            {
+                                pageUrl: testPageUrl,
+                                comment: `*memex-debug*: upload error`,
+                                title: testPageTitle,
+                                createdWhen: new Date('2021-07-21'),
+                            },
+                            { skipPageIndexing: true },
+                        )
                     await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
                         {
                             annotationUrl: publicAnnotation3,
@@ -256,18 +257,19 @@ export function createSelfTests(options: {
                     )
                 }
                 if (shouldTest('errors.download')) {
-                    const publicAnnotation4 = await backgroundModules.directLinking.createAnnotation(
-                        {
-                            tab: {} as any,
-                        },
-                        {
-                            pageUrl: testPageUrl,
-                            comment: `*memex-debug*: download error`,
-                            title: testPageTitle,
-                            createdWhen: new Date('2021-07-21'),
-                        },
-                        { skipPageIndexing: true },
-                    )
+                    const publicAnnotation4 =
+                        await backgroundModules.directLinking.createAnnotation(
+                            {
+                                tab: {} as any,
+                            },
+                            {
+                                pageUrl: testPageUrl,
+                                comment: `*memex-debug*: download error`,
+                                title: testPageTitle,
+                                createdWhen: new Date('2021-07-21'),
+                            },
+                            { skipPageIndexing: true },
+                        )
                     await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
                         {
                             annotationUrl: publicAnnotation4,
@@ -286,18 +288,16 @@ export function createSelfTests(options: {
                     shouldTest('share') ||
                     shouldTest('pdf.online.share')
                 ) {
-                    const res1 = await backgroundModules.customLists.createCustomList(
-                        {
+                    const res1 =
+                        await backgroundModules.customLists.createCustomList({
                             name: 'My test list #1',
                             id: Date.now(),
-                        },
-                    )
-                    const res2 = await backgroundModules.customLists.createCustomList(
-                        {
+                        })
+                    const res2 =
+                        await backgroundModules.customLists.createCustomList({
                             name: 'My test list #2',
                             id: Date.now(),
-                        },
-                    )
+                        })
                     testListId1 = res1.localListId
                     testListId2 = res2.localListId
                     await backgroundModules.customLists.insertPageToList({
@@ -337,13 +337,12 @@ export function createSelfTests(options: {
                         remoteListId1,
                     )
 
-                    const {
-                        remoteListId: remoteListId2,
-                    } = await backgroundModules.contentSharing.scheduleListShare(
-                        {
-                            localListId: testListId2,
-                        },
-                    )
+                    const { remoteListId: remoteListId2 } =
+                        await backgroundModules.contentSharing.scheduleListShare(
+                            {
+                                localListId: testListId2,
+                            },
+                        )
                     console.log(
                         'Shared test list #2, remote ID:',
                         remoteListId2,
@@ -480,14 +479,15 @@ export function createSelfTests(options: {
                 console.log('Waited for sync to cloud from this device')
 
                 if (shouldTest('share.incoming.note')) {
-                    const sharedAnnotationEntries = await options.serverStorage.modules.contentSharing.getAnnotationListEntries(
-                        {
-                            listReference: {
-                                type: 'shared-list-reference',
-                                id: remoteListId1,
+                    const sharedAnnotationEntries =
+                        await options.serverStorage.modules.contentSharing.getAnnotationListEntries(
+                            {
+                                listReference: {
+                                    type: 'shared-list-reference',
+                                    id: remoteListId1,
+                                },
                             },
-                        },
-                    )
+                        )
                     console.log('Incoming note', { sharedAnnotationEntries })
                 }
 

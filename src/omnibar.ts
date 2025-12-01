@@ -2,7 +2,6 @@ import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
 import urlRegex from 'url-regex'
 import qs from 'query-string'
-import type { Browser } from 'webextension-polyfill'
 import shortUrl from 'src/util/short-url'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
@@ -11,11 +10,11 @@ import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
 import {
     diffTimestamp,
     formatTimestamp,
-} from '@worldbrain/memex-common/lib/utils/date-time'
+} from '@worldbrain/memex-common/ts/utils/date-time'
 import type { BackgroundModules } from './background-script/setup'
 
 export interface OmnibarDeps {
-    browserAPIs: Pick<Browser, 'tabs' | 'omnibox'>
+    browserAPIs: Pick<typeof chrome, 'tabs' | 'omnibox'>
     bgModules: Pick<BackgroundModules, 'search'>
 }
 

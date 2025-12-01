@@ -5,15 +5,14 @@ import { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 import { RootState } from './types'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { ColorThemeKeys } from '@worldbrain/memex-common/ts/common-ui/styles/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import {
     diffTimestamp,
     formatTimestamp,
-} from '@worldbrain/memex-common/lib/utils/date-time'
+} from '@worldbrain/memex-common/ts/utils/date-time'
 import checkBrowser from 'src/util/check-browser'
-import { Browser } from 'webextension-polyfill'
 
 export const timeSinceNowToString = (date: Date | null): string => {
     if (date === null) {
@@ -68,7 +67,7 @@ export interface SyncStatusMenuProps extends RootState {
     getRootElement: () => HTMLElement
     onToggleDisplayState?: () => void
     syncNow: (preventUpdateStats: boolean) => void
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
@@ -89,9 +88,10 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
     async componentDidMount(): Promise<void> {
         if (checkBrowser() === 'brave') {
-            const cachedSetting = await this.props.browserAPIs.storage.local.get(
-                'ShowBraveSyncNotif',
-            )
+            const cachedSetting =
+                await this.props.browserAPIs.storage.local.get(
+                    'ShowBraveSyncNotif',
+                )
             const cachedValue = cachedSetting['ShowBraveSyncNotif']
             let showNotif = true
 
@@ -286,49 +286,54 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         </HelpTextBlockLink>
                     </ReportProblemRow>
                 </BottomRow>
-                {checkBrowser() === 'brave' && this.state.ShowBraveSyncNotif && (
-                    <>
-                        <Separator />
-                        <BraveBlockInfo>
-                            <strong>
-                                (Near)-live-sync disabled by default on Brave
-                            </strong>
-                            Falls back to sync ever 60min
-                            <br />
-                            1. Go to{' '}
-                            <BraveBlockInfoLink
-                                onClick={() =>
-                                    this.props.browserAPIs.tabs.create({
-                                        url: 'brave://settings/privacy',
-                                    })
-                                }
-                            >
-                                brave://settings/privacy{' '}
-                            </BraveBlockInfoLink>
-                            <br />
-                            2. enable "Use Google services for push messaging"
-                            <br />
-                            3. Create new sync update on other devices
-                        </BraveBlockInfo>
-                        <RemoveButtonContainer>
-                            <PrimaryAction
-                                type={'glass'}
-                                icon={'removeX'}
-                                size="small"
-                                onClick={async () => {
-                                    this.setState({ ShowBraveSyncNotif: false })
-                                    await this.props.browserAPIs.storage.local.set(
-                                        {
+                {checkBrowser() === 'brave' &&
+                    this.state.ShowBraveSyncNotif && (
+                        <>
+                            <Separator />
+                            <BraveBlockInfo>
+                                <strong>
+                                    (Near)-live-sync disabled by default on
+                                    Brave
+                                </strong>
+                                Falls back to sync ever 60min
+                                <br />
+                                1. Go to{' '}
+                                <BraveBlockInfoLink
+                                    onClick={() =>
+                                        this.props.browserAPIs.tabs.create({
+                                            url: 'brave://settings/privacy',
+                                        })
+                                    }
+                                >
+                                    brave://settings/privacy{' '}
+                                </BraveBlockInfoLink>
+                                <br />
+                                2. enable "Use Google services for push
+                                messaging"
+                                <br />
+                                3. Create new sync update on other devices
+                            </BraveBlockInfo>
+                            <RemoveButtonContainer>
+                                <PrimaryAction
+                                    type={'glass'}
+                                    icon={'removeX'}
+                                    size="small"
+                                    onClick={async () => {
+                                        this.setState({
                                             ShowBraveSyncNotif: false,
-                                        },
-                                    )
-                                }}
-                                width="fill-available"
-                                label="Remove Notice"
-                            />
-                        </RemoveButtonContainer>
-                    </>
-                )}
+                                        })
+                                        await this.props.browserAPIs.storage.local.set(
+                                            {
+                                                ShowBraveSyncNotif: false,
+                                            },
+                                        )
+                                    }}
+                                    width="fill-available"
+                                    label="Remove Notice"
+                                />
+                            </RemoveButtonContainer>
+                        </>
+                    )}
             </Container>
         )
     }

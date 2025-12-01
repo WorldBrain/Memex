@@ -3,12 +3,12 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interactions'
 import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import type { KeyboardShortcuts, Shortcut } from '../types'
-import type { AnnotationFunctions } from '@worldbrain/memex-common/lib/in-page-ui/types'
+import type { AnnotationFunctions } from '@worldbrain/memex-common/ts/in-page-ui/types'
 import { RpcError, runInBackground } from 'src/util/webextensionRPC'
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
-import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
+import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/ts/annotations/utils'
 import { sleepPromise } from 'src/util/promises'
-import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
+import { isUrlYTVideo } from '@worldbrain/memex-common/ts/utils/youtube-url'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => Promise<void>

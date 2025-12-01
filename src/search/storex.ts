@@ -1,8 +1,8 @@
-import Storex from '@worldbrain/storex'
+import Storex from '@worldbrain/storex/ts'
 import {
     DexieStorageBackend,
     IndexedDbImplementation,
-} from '@worldbrain/storex-backend-dexie'
+} from '@worldbrain/storex-backend-dexie/ts'
 
 import schemaPatcher from './storage/dexie-schema'
 import stemmerSelector from './stemmers'

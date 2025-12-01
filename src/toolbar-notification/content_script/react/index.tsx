@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 // import retargetEvents from 'react-shadow-dom-retarget-events'
 import ToolbarNotification from './container'
 
@@ -18,19 +18,19 @@ export function setupUIContainer(
     },
 ) {
     // retargetEvents(shadow)
-    return new Promise<void>(async (resolve) => {
-        ReactDOM.render(
+    return new Promise<void>((resolve) => {
+        const root = createRoot(target)
+        root.render(
             <ToolbarNotification
                 type={type}
                 onCloseRequested={onCloseRequested}
                 {...extraProps}
             />,
-            target,
         )
         resolve()
     })
 }
 
 export function destroyUIContainer(target) {
-    ReactDOM.unmountComponentAtNode(target)
+    // unmount handled by container removal or caller
 }

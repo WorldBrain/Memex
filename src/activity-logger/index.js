@@ -21,7 +21,7 @@ export function isLoggable({ url }) {
 }
 
 export const getPauseState = async () => {
-    const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[
+    const state = (await chrome.storage.local.get(PAUSE_STORAGE_KEY))[
         PAUSE_STORAGE_KEY
     ]
 

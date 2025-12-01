@@ -17,8 +17,8 @@ import {
 import {
     SPECIAL_LIST_IDS,
     SPECIAL_LIST_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+} from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 
 const contentSharing = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.contentSharing
@@ -45,9 +45,7 @@ function testSetupFactory() {
 
 const createAnnotationStep = (args?: {
     protectAnnotation?: boolean
-    postCheck?: IntegrationTestStep<
-        BackgroundIntegrationTestContext
-    >['postCheck']
+    postCheck?: IntegrationTestStep<BackgroundIntegrationTestContext>['postCheck']
 }): IntegrationTestStep<BackgroundIntegrationTestContext> => ({
     execute: async ({ setup }) => {
         annotUrl = await directLinking(setup).createAnnotation(

@@ -2,7 +2,7 @@ import {
     diffTimestamp,
     formatTimestamp,
     normalizeTimestamp,
-} from '@worldbrain/memex-common/lib/utils/date-time'
+} from '@worldbrain/memex-common/ts/utils/date-time'
 
 export function formatTime(timestamp, showTime) {
     timestamp = normalizeTimestamp(timestamp)

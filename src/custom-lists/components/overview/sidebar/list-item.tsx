@@ -1,13 +1,11 @@
 import React, { Component, DragEventHandler } from 'react'
 import cx from 'classnames'
-import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { UserPlan } from '@worldbrain/memex-common/ts/subscriptions/types'
 
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
-
-const styles = require('./list-item.css')
 
 export interface Props {
     listName: string
@@ -78,12 +76,12 @@ class ListItem extends Component<Props, State> {
 
     get mainClass() {
         return cx(
-            styles.pageList,
+            'pageList',
             {
-                [styles.pageListDrag]: this.state.isDragInside,
+                ['pageListDrag']: this.state.isDragInside,
             },
             {
-                [styles.filtered]: this.props.isFiltered,
+                ['filtered']: this.props.isFiltered,
             },
         )
     }
@@ -164,29 +162,23 @@ class ListItem extends Component<Props, State> {
                 onDragEnter={this.handleDragOver}
                 onDragLeave={this.handleDragLeave}
             >
-                <div className={styles.listName}>{this.props.listName}</div>
-                <div className={styles.buttonContainer}>
+                <div className="listName">{this.props.listName}</div>
+                <div className="buttonContainer">
                     {this.state.isMouseInside && (
                         <React.Fragment>
                             <button
-                                className={cx(styles.editButton, styles.button)}
+                                className={cx('editButton', 'button')}
                                 onClick={this.handleEditBtnClick}
                                 title={'Edit'}
                             />
                             <button
-                                className={cx(
-                                    styles.deleteButton,
-                                    styles.button,
-                                )}
+                                className={cx('deleteButton', 'button')}
                                 onClick={this.handleCrossBtnClick}
                                 title={'Delete'}
                             />
                             {!this.state.isShared && (
                                 <button
-                                    className={cx(
-                                        styles.shareButton,
-                                        styles.button,
-                                    )}
+                                    className={cx('shareButton', 'button')}
                                     onClick={this.handleShareBtnClick}
                                     title={'Share'}
                                 />
@@ -196,15 +188,15 @@ class ListItem extends Component<Props, State> {
                     {this.state.isShared && (
                         <button
                             className={cx(
-                                styles.shareButton,
-                                styles.button,
+                                'shareButton',
+                                'button',
                                 {
-                                    [styles.shareButtonPermanent]: this.state
-                                        .isShared,
+                                    ['shareButtonPermanent']:
+                                        this.state.isShared,
                                 },
                                 {
-                                    [styles.shareButtonPermanentHover]: this
-                                        .state.isMouseInside,
+                                    ['shareButtonPermanentHover']:
+                                        this.state.isMouseInside,
                                 },
                             )}
                             onClick={this.handleShareBtnClick}

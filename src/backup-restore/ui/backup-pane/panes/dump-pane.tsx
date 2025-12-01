@@ -1,10 +1,7 @@
 import React, { PureComponent } from 'react'
 import classNames from 'classnames'
 
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-
-const settingsStyle = require('src/options/settings/components/settings.css')
-const localStyles = require('./overview.css')
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 
 export interface Props {
     onDumpClick: React.MouseEventHandler
@@ -13,16 +10,11 @@ export interface Props {
 export class DumpPane extends PureComponent<Props> {
     render() {
         return (
-            <div className={settingsStyle.section}>
-                <div className={settingsStyle.sectionTitle}>Backup Status</div>
-                <div className={localStyles.statusLine}>
+            <div className="section">
+                <div className="sectionTitle">Backup Status</div>
+                <div className="statusLine">
                     <div>
-                        <p
-                            className={classNames(
-                                settingsStyle.subname,
-                                localStyles.limitWidth,
-                            )}
-                        >
+                        <p className={classNames('subname', 'limitWidth')}>
                             Create a database dump of current state. Not
                             restoreable in other extensions.
                         </p>

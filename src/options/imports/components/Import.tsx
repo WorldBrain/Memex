@@ -1,23 +1,20 @@
 import React from 'react'
-import browser from 'webextension-polyfill'
 
 import { IMPORT_TYPE } from '../constants'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import ReadwiseSettings from 'src/readwise-integration/ui/containers/readwise-settings'
 
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import styled from 'styled-components'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 import { getFolder } from 'src/pkm-integrations/utils'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import Checkbox from 'src/common-ui/components/Checkbox'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
-import { downloadMemexDesktop } from '@worldbrain/memex-common/lib/subscriptions/storage'
-
-const localStyles = require('./Import.css')
+import { downloadMemexDesktop } from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 const customSyncTagDefault = 'Memex Sync'
 
@@ -32,14 +29,14 @@ interface Props {
 }
 
 const Warning = ({ children }) => (
-    <div className={localStyles.warning}>
+    <div className="warning">
         <Icon
             icon={'warning'}
             heightAndWidth="24px"
             color="greyScale1"
             hoverOff
         />
-        <p className={localStyles.warningText}>{children}</p>
+        <p className="warningText">{children}</p>
     </div>
 )
 
@@ -83,9 +80,8 @@ class Import extends React.PureComponent<Props> {
         })
         // Check local storage for saved paths when the component mounts
 
-        const foldersStorage = await browser.storage.local.get(
-            'PKMSYNCpkmFolders',
-        )
+        const foldersStorage =
+            await chrome.storage.local.get('PKMSYNCpkmFolders')
         const folders = foldersStorage.PKMSYNCpkmFolders
 
         if (folders) {
@@ -97,7 +93,7 @@ class Import extends React.PureComponent<Props> {
 
         this.serverOnline = await new MemexLocalBackend({
             url: this.serverToTalkTo,
-            storageAPI: browser.storage,
+            storageAPI: chrome.storage,
         }).isReachable()
 
         this.setState({
@@ -108,7 +104,7 @@ class Import extends React.PureComponent<Props> {
         setInterval(async () => {
             const serverOnline = await new MemexLocalBackend({
                 url: this.serverToTalkTo,
-                storageAPI: browser.storage,
+                storageAPI: chrome.storage,
             }).isReachable()
 
             this.setState({
@@ -116,7 +112,7 @@ class Import extends React.PureComponent<Props> {
             })
         }, 3000)
 
-        const bufferMaxReached = await browser.storage.local.get(
+        const bufferMaxReached = await chrome.storage.local.get(
             'PKMSYNCbufferMaxReached',
         )
         if (bufferMaxReached.PKMSYNCbufferMaxReached) {
@@ -124,7 +120,7 @@ class Import extends React.PureComponent<Props> {
                 bufferLimitReached: true,
             })
         }
-        const syncWasSetupBefore = await browser.storage.local.get(
+        const syncWasSetupBefore = await chrome.storage.local.get(
             'PKMSYNCsyncWasSetupBefore',
         )
 
@@ -138,17 +134,18 @@ class Import extends React.PureComponent<Props> {
             })
         }
 
-        let PKMSYNCtitleformatLogseq = await browser.storage.local.get(
+        let PKMSYNCtitleformatLogseq = await chrome.storage.local.get(
             'PKMSYNCtitleformatLogseq',
         )
-        let PKMSYNCtitleformatObsidian = await browser.storage.local.get(
+        let PKMSYNCtitleformatObsidian = await chrome.storage.local.get(
             'PKMSYNCtitleformatObsidian',
         )
 
         // Store the current state of the dateformatLogseq to the local storage if it returns null
         if (PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq == null) {
-            PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq = this.state.titleformatLogseq
-            await browser.storage.local.set({
+            PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq =
+                this.state.titleformatLogseq
+            await chrome.storage.local.set({
                 PKMSYNCtitleformatLogseq:
                     PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq,
             })
@@ -156,24 +153,26 @@ class Import extends React.PureComponent<Props> {
 
         // Store the current state of the dateformatObsidian to the local storage if it returns null
         if (PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian == null) {
-            PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian = this.state.titleformatObsidian
-            await browser.storage.local.set({
+            PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian =
+                this.state.titleformatObsidian
+            await chrome.storage.local.set({
                 PKMSYNCtitleformatObsidian:
                     PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian,
             })
         }
 
-        let PKMSYNCdateformatLogseq = await browser.storage.local.get(
+        let PKMSYNCdateformatLogseq = await chrome.storage.local.get(
             'PKMSYNCdateformatLogseq',
         )
-        let PKMSYNCdateformatObsidian = await browser.storage.local.get(
+        let PKMSYNCdateformatObsidian = await chrome.storage.local.get(
             'PKMSYNCdateformatObsidian',
         )
 
         // Store the current state of the dateformatLogseq to the local storage if it returns null
         if (PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq == null) {
-            PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq = this.state.dateformatLogseq
-            await browser.storage.local.set({
+            PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq =
+                this.state.dateformatLogseq
+            await chrome.storage.local.set({
                 PKMSYNCdateformatLogseq:
                     PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
             })
@@ -181,8 +180,9 @@ class Import extends React.PureComponent<Props> {
 
         // Store the current state of the dateformatObsidian to the local storage if it returns null
         if (PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian == null) {
-            PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian = this.state.dateformatObsidian
-            await browser.storage.local.set({
+            PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian =
+                this.state.dateformatObsidian
+            await chrome.storage.local.set({
                 PKMSYNCdateformatObsidian:
                     PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
             })
@@ -190,69 +190,71 @@ class Import extends React.PureComponent<Props> {
 
         // fetch and store filter tags
 
-        const filterTagsObsidian = await browser.storage.local.get(
+        const filterTagsObsidian = await chrome.storage.local.get(
             'PKMSYNCfilterTagsObsidian',
         )
-        const filterTagsLogseq = await browser.storage.local.get(
+        const filterTagsLogseq = await chrome.storage.local.get(
             'PKMSYNCfilterTagsLogseq',
         )
 
-        let PKMSYNCfilterTagsLogseq = await browser.storage.local.get(
+        let PKMSYNCfilterTagsLogseq = await chrome.storage.local.get(
             'PKMSYNCfilterTagsLogseq',
         )
-        let PKMSYNCfilterTagsObsidian = await browser.storage.local.get(
+        let PKMSYNCfilterTagsObsidian = await chrome.storage.local.get(
             'PKMSYNCfilterTagsObsidian',
         )
 
         if (PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq == null) {
-            PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq = this.state.filterTagsLogseq
-            await browser.storage.local.set({
+            PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq =
+                this.state.filterTagsLogseq
+            await chrome.storage.local.set({
                 PKMSYNCfilterTagsLogseq: this.state.filterTagsLogseq,
             })
         }
 
         // Store the current state of the customTagsObsidian to the local storage if it returns null
         if (PKMSYNCfilterTagsObsidian.PKMSYNCfilterTagsObsidian == null) {
-            PKMSYNCfilterTagsObsidian.PKMSYNCfilterTagsObsidian = this.state.filterTagsObsidian
-            await browser.storage.local.set({
+            PKMSYNCfilterTagsObsidian.PKMSYNCfilterTagsObsidian =
+                this.state.filterTagsObsidian
+            await chrome.storage.local.set({
                 PKMSYNCfilterTagsObsidian:
                     PKMSYNCfilterTagsObsidian.PKMSYNCfilterTagsObsidian,
             })
         }
 
         // fetch and store customSync Tags
-        const customTagsObsidian = await browser.storage.local.get(
+        const customTagsObsidian = await chrome.storage.local.get(
             'PKMSYNCcustomTagsObsidian',
         )
-        const customTagsLogseq = await browser.storage.local.get(
+        const customTagsLogseq = await chrome.storage.local.get(
             'PKMSYNCcustomTagsLogseq',
         )
 
-        let PKMSYNCcustomTagsLogseq = await browser.storage.local.get(
+        let PKMSYNCcustomTagsLogseq = await chrome.storage.local.get(
             'PKMSYNCcustomTagsLogseq',
         )
-        let PKMSYNCcustomTagsObsidian = await browser.storage.local.get(
+        let PKMSYNCcustomTagsObsidian = await chrome.storage.local.get(
             'PKMSYNCcustomTagsObsidian',
         )
 
         if (PKMSYNCcustomTagsLogseq.PKMSYNCcustomTagsLogseq == null) {
-            await browser.storage.local.set({
+            await chrome.storage.local.set({
                 PKMSYNCcustomTagsLogseq: customSyncTagDefault,
             })
         }
-        let PKMSYNCremovewarning = await browser.storage.local.get(
+        let PKMSYNCremovewarning = await chrome.storage.local.get(
             'PKMSYNCremovewarning',
         )
 
         if (PKMSYNCremovewarning.PKMSYNCremovewarning == null) {
-            await browser.storage.local.set({
+            await chrome.storage.local.set({
                 PKMSYNCremovewarning: false,
             })
         }
 
         // Store the current state of the customTagsObsidian to the local storage if it returns null
         if (PKMSYNCcustomTagsObsidian.PKMSYNCcustomTagsObsidian == null) {
-            await browser.storage.local.set({
+            await chrome.storage.local.set({
                 PKMSYNCcustomTagsObsidian: customSyncTagDefault,
             })
         }
@@ -296,7 +298,7 @@ class Import extends React.PureComponent<Props> {
     getSystemArchAndOS = async () => {
         let os
         let arch
-        await browser.runtime.getPlatformInfo().then(function (info) {
+        await chrome.runtime.getPlatformInfo().then(function (info) {
             os = info.os
             arch = info.arch
         })
@@ -315,7 +317,7 @@ class Import extends React.PureComponent<Props> {
     }
 
     private async getPathsFromLocalStorage() {
-        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const data = await chrome.storage.local.get('PKMSYNCpkmFolders')
 
         if (data.PKMSYNCpkmFolders) {
             this.setState({
@@ -326,7 +328,7 @@ class Import extends React.PureComponent<Props> {
     }
 
     private async setFolderForPKM(pkmToSync: string) {
-        const data = await getFolder(pkmToSync, { storageAPI: browser.storage })
+        const data = await getFolder(pkmToSync, { storageAPI: chrome.storage })
 
         this.setState({
             logSeqFolder: data.logSeqFolder || null,
@@ -343,7 +345,7 @@ class Import extends React.PureComponent<Props> {
         }
 
         // Update local storage by getting the current folders first, then updating them
-        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const data = await chrome.storage.local.get('PKMSYNCpkmFolders')
         const currentFolders = data.PKMSYNCpkmFolders || {}
 
         if (pkmToUnsync === 'logseq') {
@@ -352,7 +354,7 @@ class Import extends React.PureComponent<Props> {
             currentFolders.obsidianFolder = null
         }
 
-        await browser.storage.local.set({ PKMSYNCpkmFolders: currentFolders })
+        await chrome.storage.local.set({ PKMSYNCpkmFolders: currentFolders })
     }
 
     private renderLogSeqIntegration() {
@@ -513,13 +515,16 @@ class Import extends React.PureComponent<Props> {
                                                     }
                                                     onChange={(event) => {
                                                         this.setState({
-                                                            titleformatLogseq: (event.target as HTMLInputElement)
-                                                                .value,
+                                                            titleformatLogseq: (
+                                                                event.target as HTMLInputElement
+                                                            ).value,
                                                         })
-                                                        browser.storage.local.set(
+                                                        chrome.storage.local.set(
                                                             {
-                                                                PKMSYNCtitleformatLogseq: (event.target as HTMLInputElement)
-                                                                    .value,
+                                                                PKMSYNCtitleformatLogseq:
+                                                                    (
+                                                                        event.target as HTMLInputElement
+                                                                    ).value,
                                                             },
                                                         )
                                                     }}
@@ -531,7 +536,8 @@ class Import extends React.PureComponent<Props> {
                                             <SettingsLabel>
                                                 Only sync pages & annotations
                                                 that have these Spaces (separate
-                                                by comma, can include spaces){' '}
+                                                by comma, can include
+                                                spaces){' '}
                                             </SettingsLabel>
                                             <SettingsValueBox>
                                                 <TextField
@@ -541,13 +547,16 @@ class Import extends React.PureComponent<Props> {
                                                     }
                                                     onChange={(event) => {
                                                         this.setState({
-                                                            filterTagsLogseq: (event.target as HTMLInputElement)
-                                                                .value,
+                                                            filterTagsLogseq: (
+                                                                event.target as HTMLInputElement
+                                                            ).value,
                                                         })
-                                                        browser.storage.local.set(
+                                                        chrome.storage.local.set(
                                                             {
-                                                                PKMSYNCfilterTagsLogseq: (event.target as HTMLInputElement)
-                                                                    .value,
+                                                                PKMSYNCfilterTagsLogseq:
+                                                                    (
+                                                                        event.target as HTMLInputElement
+                                                                    ).value,
                                                             },
                                                         )
                                                     }}
@@ -573,13 +582,16 @@ class Import extends React.PureComponent<Props> {
                                                     }
                                                     onChange={(event) => {
                                                         this.setState({
-                                                            dateformatLogseq: (event.target as HTMLInputElement)
-                                                                .value,
+                                                            dateformatLogseq: (
+                                                                event.target as HTMLInputElement
+                                                            ).value,
                                                         })
-                                                        browser.storage.local.set(
+                                                        chrome.storage.local.set(
                                                             {
-                                                                PKMSYNCdateformatLogseq: (event.target as HTMLInputElement)
-                                                                    .value,
+                                                                PKMSYNCdateformatLogseq:
+                                                                    (
+                                                                        event.target as HTMLInputElement
+                                                                    ).value,
                                                             },
                                                         )
                                                     }}
@@ -617,13 +629,17 @@ class Import extends React.PureComponent<Props> {
                                                         }
                                                         onChange={(event) => {
                                                             this.setState({
-                                                                customTagsLogseq: (event.target as HTMLInputElement)
-                                                                    .value,
+                                                                customTagsLogseq:
+                                                                    (
+                                                                        event.target as HTMLInputElement
+                                                                    ).value,
                                                             })
-                                                            browser.storage.local.set(
+                                                            chrome.storage.local.set(
                                                                 {
-                                                                    PKMSYNCcustomTagsLogseq: (event.target as HTMLInputElement)
-                                                                        .value,
+                                                                    PKMSYNCcustomTagsLogseq:
+                                                                        (
+                                                                            event.target as HTMLInputElement
+                                                                        ).value,
                                                                 },
                                                             )
                                                         }}
@@ -641,12 +657,14 @@ class Import extends React.PureComponent<Props> {
                                                 }
                                                 handleChange={async (event) => {
                                                     this.setState({
-                                                        PKMSYNCremovewarning: !(event.target as HTMLInputElement)
-                                                            .checked,
+                                                        PKMSYNCremovewarning: !(
+                                                            event.target as HTMLInputElement
+                                                        ).checked,
                                                     })
-                                                    browser.storage.local.set({
-                                                        PKMSYNCremovewarning: !(event.target as HTMLInputElement)
-                                                            .checked,
+                                                    chrome.storage.local.set({
+                                                        PKMSYNCremovewarning: !(
+                                                            event.target as HTMLInputElement
+                                                        ).checked,
                                                     })
                                                 }}
                                             />
@@ -682,9 +700,10 @@ class Import extends React.PureComponent<Props> {
                                     <PrimaryAction
                                         label={'Download Sync Helper'}
                                         onClick={async (event) => {
-                                            const url = await downloadMemexDesktop(
-                                                await this.getSystemArchAndOS(),
-                                            )
+                                            const url =
+                                                await downloadMemexDesktop(
+                                                    await this.getSystemArchAndOS(),
+                                                )
 
                                             window.open(url, '_blank')
                                         }}
@@ -859,13 +878,17 @@ class Import extends React.PureComponent<Props> {
                                                     }
                                                     onChange={(event) => {
                                                         this.setState({
-                                                            titleformatObsidian: (event.target as HTMLInputElement)
-                                                                .value,
+                                                            titleformatObsidian:
+                                                                (
+                                                                    event.target as HTMLInputElement
+                                                                ).value,
                                                         })
-                                                        browser.storage.local.set(
+                                                        chrome.storage.local.set(
                                                             {
-                                                                PKMSYNCtitleformatObsidian: (event.target as HTMLInputElement)
-                                                                    .value,
+                                                                PKMSYNCtitleformatObsidian:
+                                                                    (
+                                                                        event.target as HTMLInputElement
+                                                                    ).value,
                                                             },
                                                         )
                                                     }}
@@ -891,13 +914,17 @@ class Import extends React.PureComponent<Props> {
                                                     }
                                                     onChange={(event) => {
                                                         this.setState({
-                                                            dateformatObsidian: (event.target as HTMLInputElement)
-                                                                .value,
+                                                            dateformatObsidian:
+                                                                (
+                                                                    event.target as HTMLInputElement
+                                                                ).value,
                                                         })
-                                                        browser.storage.local.set(
+                                                        chrome.storage.local.set(
                                                             {
-                                                                PKMSYNCdateformatObsidian: (event.target as HTMLInputElement)
-                                                                    .value,
+                                                                PKMSYNCdateformatObsidian:
+                                                                    (
+                                                                        event.target as HTMLInputElement
+                                                                    ).value,
                                                             },
                                                         )
                                                     }}
@@ -909,7 +936,8 @@ class Import extends React.PureComponent<Props> {
                                             <SettingsLabel>
                                                 Only sync pages & annotations
                                                 that have these Spaces (separate
-                                                by comma, can include spaces){' '}
+                                                by comma, can include
+                                                spaces){' '}
                                             </SettingsLabel>
                                             <SettingsValueBox>
                                                 <TextField
@@ -919,13 +947,17 @@ class Import extends React.PureComponent<Props> {
                                                     }
                                                     onChange={(event) => {
                                                         this.setState({
-                                                            filterTagsObsidian: (event.target as HTMLInputElement)
-                                                                .value,
+                                                            filterTagsObsidian:
+                                                                (
+                                                                    event.target as HTMLInputElement
+                                                                ).value,
                                                         })
-                                                        browser.storage.local.set(
+                                                        chrome.storage.local.set(
                                                             {
-                                                                PKMSYNCfilterTagsObsidian: (event.target as HTMLInputElement)
-                                                                    .value,
+                                                                PKMSYNCfilterTagsObsidian:
+                                                                    (
+                                                                        event.target as HTMLInputElement
+                                                                    ).value,
                                                             },
                                                         )
                                                     }}
@@ -962,13 +994,17 @@ class Import extends React.PureComponent<Props> {
                                                         }
                                                         onChange={(event) => {
                                                             this.setState({
-                                                                customTagsObsidian: (event.target as HTMLInputElement)
-                                                                    .value,
+                                                                customTagsObsidian:
+                                                                    (
+                                                                        event.target as HTMLInputElement
+                                                                    ).value,
                                                             })
-                                                            browser.storage.local.set(
+                                                            chrome.storage.local.set(
                                                                 {
-                                                                    PKMSYNCcustomTagsObsidian: (event.target as HTMLInputElement)
-                                                                        .value,
+                                                                    PKMSYNCcustomTagsObsidian:
+                                                                        (
+                                                                            event.target as HTMLInputElement
+                                                                        ).value,
                                                                 },
                                                             )
                                                         }}
@@ -986,12 +1022,14 @@ class Import extends React.PureComponent<Props> {
                                                 }
                                                 handleChange={async (event) => {
                                                     this.setState({
-                                                        PKMSYNCremovewarning: (event.target as HTMLInputElement)
-                                                            .checked,
+                                                        PKMSYNCremovewarning: (
+                                                            event.target as HTMLInputElement
+                                                        ).checked,
                                                     })
-                                                    browser.storage.local.set({
-                                                        PKMSYNCremovewarning: (event.target as HTMLInputElement)
-                                                            .checked,
+                                                    chrome.storage.local.set({
+                                                        PKMSYNCremovewarning: (
+                                                            event.target as HTMLInputElement
+                                                        ).checked,
                                                     })
                                                 }}
                                             />
@@ -1029,9 +1067,10 @@ class Import extends React.PureComponent<Props> {
                                     <PrimaryAction
                                         label={'Download Sync Helper'}
                                         onClick={async (event) => {
-                                            const url = await downloadMemexDesktop(
-                                                await this.getSystemArchAndOS(),
-                                            )
+                                            const url =
+                                                await downloadMemexDesktop(
+                                                    await this.getSystemArchAndOS(),
+                                                )
 
                                             window.open(url, '_blank')
                                         }}
@@ -1173,7 +1212,7 @@ class Import extends React.PureComponent<Props> {
                 <>
                     The import may freeze because of a browser setting. Go to{' '}
                     <a
-                        className={localStyles.link}
+                        className="link"
                         target="_blank"
                         href="https://links.memex.garden/import_bug"
                     >
@@ -1194,13 +1233,8 @@ class Import extends React.PureComponent<Props> {
     }
 
     render() {
-        const {
-            isLoading,
-            loadingMsg,
-            isStopped,
-            children,
-            allowTypes,
-        } = this.props
+        const { isLoading, loadingMsg, isStopped, children, allowTypes } =
+            this.props
 
         return (
             <div>
@@ -1209,16 +1243,17 @@ class Import extends React.PureComponent<Props> {
                     description={this.renderSectionDescription()}
                     icon={this.renderSectionIcon()}
                 >
-                    <div className={localStyles.mainContainer}>
-                        <div className={localStyles.importTableContainer}>
+                    <div className="mainContainer">
+                        <div className="importTableContainer">
                             {children}
                             {/* {this.renderSettings()} */}
                         </div>
-                        {isLoading && !allowTypes[IMPORT_TYPE.OTHERS].length && (
-                            <LoadingBlocker>
-                                <LoadingIndicator />
-                            </LoadingBlocker>
-                        )}
+                        {isLoading &&
+                            !allowTypes[IMPORT_TYPE.OTHERS].length && (
+                                <LoadingBlocker>
+                                    <LoadingIndicator />
+                                </LoadingBlocker>
+                            )}
                     </div>
                 </SettingSection>
                 {this.renderObsidianIntegration()}
@@ -1289,10 +1324,8 @@ const ServerOnline = styled.div`
     border-radius: 5px;
     /* border: 1px solid ${(props) => props.theme.colors.greyScale3}; */
     font-size: 14px;
-
 `
 const SyncStatusContent = styled.div`
-
     color: ${(props) => props.theme.colors.greyScale6};
     display: flex;
     align-items: center;
@@ -1300,7 +1333,6 @@ const SyncStatusContent = styled.div`
     border-radius: 5px;
     /* border: 1px solid ${(props) => props.theme.colors.greyScale3}; */
     font-size: 14px;
-
 `
 
 const WatchVideoButton = styled.div`

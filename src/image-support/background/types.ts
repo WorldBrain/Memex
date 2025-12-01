@@ -3,7 +3,7 @@ import {
     GetImageUrlParams,
     GetImageUrlResult,
     UploadImageResult,
-} from '@worldbrain/memex-common/lib/image-support/types'
+} from '@worldbrain/memex-common/ts/image-support/types'
 import {
     RemoteFunctionRole,
     RemoteFunctionWithoutExtraArgs,

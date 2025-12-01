@@ -1,4 +1,4 @@
-import { SyncReturnValue } from '@worldbrain/storex-sync/lib/index'
+import { SyncReturnValue } from '@worldbrain/storex-sync/ts/index'
 import { SyncDevice } from '../components/types'
 
 export interface PublicSyncInterface {

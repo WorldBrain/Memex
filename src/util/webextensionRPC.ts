@@ -18,17 +18,16 @@
 // const myRemoteFunc = remoteFunction('myFunc')
 // myRemoteFunc(21).then(result => { ... result is 42! ... })
 
-import mapValues from 'lodash/fp/mapValues'
-import browser, { Browser } from 'webextension-polyfill'
+import mapValues from 'lodash/mapValues'
 import { EventEmitter } from 'events'
 import { EventBasedRPCManager } from 'src/util/rpc/event-rpc-manager'
 import type { RpcSideName, RpcRole, RPCManager } from './rpc/types'
 import type { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
-import type { Arguments, default as TypedEventEmitter } from 'typed-emitter'
 import type { AuthRemoteEvents } from 'src/authentication/background/types'
 import type { ContentSharingEvents } from 'src/content-sharing/background/types'
 import type { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
 import type { PageSummaryBackgroundEvents } from 'src/summarization-llm/background/types'
+import type { default as TypedEventEmitter } from 'typed-emitter'
 
 export class RpcError extends Error {
     constructor(err: Error) {
@@ -36,7 +35,6 @@ export class RpcError extends Error {
         this.name = this.constructor.name
         this.message = err.message
         this.stack = err.stack
-        this.cause = err.cause
     }
 }
 
@@ -44,21 +42,21 @@ export type RemoteFunctionRole = 'provider' | 'caller'
 export type RemoteFunction<
     Role extends RemoteFunctionRole,
     Params,
-    Returns = void
+    Returns = void,
 > = Role extends 'provider'
     ? (info: { tab: { id: number } }, params: Params) => Promise<Returns>
     : (params: Params) => Promise<Returns>
 export type RemotePositionalFunction<
     Role extends RemoteFunctionRole,
     Params extends Array<any>,
-    Returns = void
+    Returns = void,
 > = Role extends 'provider'
     ? (info: { tab: { id: number } }, ...params: Params) => Promise<Returns>
     : (...params: Params) => Promise<Returns>
 export type RemoteFunctionWithExtraArgs<
     Role extends RemoteFunctionRole,
     Params,
-    Returns = void
+    Returns = void,
 > = Role extends 'provider'
     ? {
           withExtraArgs: true
@@ -68,7 +66,7 @@ export type RemoteFunctionWithExtraArgs<
 export type RemoteFunctionWithoutExtraArgs<
     Role extends RemoteFunctionRole,
     Params,
-    Returns = void
+    Returns = void,
 > = Role extends 'provider'
     ? {
           withExtraArgs: false
@@ -85,13 +83,11 @@ export function remoteFunctionWithoutExtraArgs<Params, Returns = void>(
 ): RemoteFunctionWithoutExtraArgs<'provider', Params, Returns> {
     return { withExtraArgs: false, function: f }
 }
-export function registerRemoteFunctions<Functions>(
-    functions: {
-        [Name in keyof Functions]:
-            | RemoteFunctionWithExtraArgs<'provider', any, any>
-            | RemoteFunctionWithoutExtraArgs<'provider', any, any>
-    },
-) {
+export function registerRemoteFunctions<Functions>(functions: {
+    [Name in keyof Functions]:
+        | RemoteFunctionWithExtraArgs<'provider', any, any>
+        | RemoteFunctionWithoutExtraArgs<'provider', any, any>
+}) {
     for (const [name, metadata] of Object.entries(functions)) {
         const typedMetadata = metadata as
             | RemoteFunctionWithExtraArgs<'provider', any, any>
@@ -230,11 +226,15 @@ export function makeRemotelyCallable<T>(
     if (!insertExtraArg) {
         // Replace each func with...
         // @ts-ignore
-        const wrapFunctions = mapValues((func) =>
-            // ...a function that calls func, but hides the inserted argument.
-            // @ts-ignore
-            (extraArg, ...args) => func(...args),
-        )
+        const wrapFunctions = (obj) =>
+            mapValues(
+                obj,
+                (func) =>
+                    // ...a function that calls func, but hides the inserted argument.
+                    // @ts-ignore
+                    (extraArg, ...args) =>
+                        func(...args),
+            )
         // @ts-ignore
         functions = wrapFunctions(functions)
     }
@@ -280,11 +280,11 @@ export interface RemoteEventEmitter<T extends keyof RemoteEvents> {
     emitToTab<EventName extends keyof RemoteEvents[T]>(
         eventName: EventName,
         tabId: number,
-        ...args: Arguments<RemoteEvents[T][EventName]>
+        ...args: Parameters<RemoteEvents[T][EventName]>
     ): Promise<void>
     emit<EventName extends keyof RemoteEvents[T]>(
         eventName: EventName,
-        ...args: Arguments<RemoteEvents[T][EventName]>
+        ...args: any[]
     ): Promise<void>
 }
 export const __REMOTE_EMITTER_EVENT__ = '__REMOTE_EVENT__'
@@ -303,10 +303,10 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
 
     const emit: RemoteEventEmitter<ModuleName>['emit'] = broadcastToTabs
         ? async (eventName, ...args) => {
-              const tabs = (await browser.tabs.query({})) ?? []
+              const tabs = (await chrome.tabs.query({})) ?? []
               for (const { id: tabId } of tabs) {
                   try {
-                      await browser.tabs.sendMessage(tabId, {
+                      await chrome.tabs.sendMessage(tabId, {
                           ...message,
                           [__REMOTE_EVENT_NAME__]: eventName,
                           data: args[0],
@@ -326,7 +326,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
           }
         : async (eventName, ...args) => {
               try {
-                  await browser.runtime.sendMessage({
+                  await chrome.runtime.sendMessage({
                       ...message,
                       [__REMOTE_EVENT_NAME__]: eventName,
                       data: args[0],
@@ -358,7 +358,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
         emit,
         emitToTab: async (eventName, tabId, ...args) => {
             try {
-                await browser.tabs.sendMessage(tabId, {
+                await chrome.tabs.sendMessage(tabId, {
                     ...message,
                     [__REMOTE_EVENT_NAME__]: eventName,
                     data: args[0],
@@ -375,13 +375,8 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
 }
 
 // Receiving Side (e.g. content script, options page, etc)
-const remoteEventEmitters: RemoteEventEmitters = {}
-type RemoteEventEmitters = {
-    [K in keyof RemoteEvents]?: TypedRemoteEventEmitter<K>
-}
-export type TypedRemoteEventEmitter<
-    T extends keyof RemoteEvents
-> = TypedEventEmitter<RemoteEvents[T]>
+const remoteEventEmitters: Partial<Record<keyof RemoteEvents, EventEmitter>> =
+    {}
 
 // Statically defined types for now, move this to a registry
 export interface RemoteEvents {
@@ -392,10 +387,10 @@ export interface RemoteEvents {
 }
 
 function registerRemoteEventForwarder() {
-    if (browser.runtime.onMessage.hasListener(remoteEventForwarder as any)) {
+    if (chrome.runtime.onMessage.hasListener(remoteEventForwarder as any)) {
         return
     }
-    browser.runtime.onMessage.addListener(remoteEventForwarder as any)
+    chrome.runtime.onMessage.addListener(remoteEventForwarder as any)
 }
 
 const remoteEventForwarder = (message, _) => {
@@ -407,9 +402,7 @@ const remoteEventForwarder = (message, _) => {
     }
 
     const emitterType = message[__REMOTE_EVENT_TYPE__]
-    const emitter = remoteEventEmitters[emitterType] as TypedRemoteEventEmitter<
-        any
-    >
+    const emitter = remoteEventEmitters[emitterType] as TypedEventEmitter<any>
     if (emitter == null) {
         return false
     }
@@ -419,14 +412,14 @@ const remoteEventForwarder = (message, _) => {
 
 export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
     eventType: EventType,
-): RemoteEventEmitters[EventType] {
+): TypedRemoteEventEmitter<EventType> {
     const existingEmitter = remoteEventEmitters[eventType]
     if (existingEmitter) {
-        return existingEmitter
+        return existingEmitter as TypedRemoteEventEmitter<EventType>
     }
 
-    const newEmitter = new EventEmitter()
-    remoteEventEmitters[eventType] = newEmitter
+    const newEmitter = new EventEmitter() as TypedRemoteEventEmitter<EventType>
+    ;(remoteEventEmitters as any)[eventType] = newEmitter
     registerRemoteEventForwarder()
     return newEmitter
 }
@@ -436,7 +429,7 @@ let rpcConnection: RPCManager
 export const setupRpcConnection = (options: {
     sideName: RpcSideName
     role: RpcRole
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     paused?: boolean
 }) => {
     rpcConnection = new EventBasedRPCManager({

@@ -1,14 +1,14 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
 import type { DashboardDependencies } from 'src/dashboard-refactor/types'
 import { DashboardContainer } from 'src/dashboard-refactor'
-import { InPageSearchModal } from '@worldbrain/memex-common/lib/common-ui/components/inPage-search-modal'
+import { InPageSearchModal } from '@worldbrain/memex-common/ts/common-ui/components/inPage-search-modal'
 import {
     createInPageUI,
     destroyInPageUI,
@@ -82,8 +82,8 @@ export type SearchDisplayProps = Omit<
 
 export const renderSearchDisplay = (props: SearchDisplayProps): void => {
     const { rootElement, shadowRoot } = createInPageUI('search-display')
-    ReactDOM.render(
+    const root = createRoot(rootElement)
+    root.render(
         <Root rootEl={rootElement} shadowRoot={shadowRoot} {...props} />,
-        rootElement,
     )
 }

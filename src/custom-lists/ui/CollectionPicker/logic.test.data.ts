@@ -3,10 +3,10 @@ import type {
     FollowedList,
     FollowedListEntry,
 } from 'src/page-activity-indicator/background/types'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { SharedCollectionType } from '@worldbrain/memex-common/ts/content-sharing/storage/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
 
@@ -210,11 +210,12 @@ const testListToSuggestion = (
     pathLocalIds: extra.pathLocalIds ?? [],
 })
 
-export const TEST_USER_LIST_SUGGESTIONS = TEST_LISTS.slice(
-    0,
-    6,
-).map((list, i) =>
-    testListToSuggestion(list, { unifiedId: i.toString(), type: 'user-list' }),
+export const TEST_USER_LIST_SUGGESTIONS = TEST_LISTS.slice(0, 6).map(
+    (list, i) =>
+        testListToSuggestion(list, {
+            unifiedId: i.toString(),
+            type: 'user-list',
+        }),
 )
 
 export const TEST_PAGE_LINK_SUGGESTIONS = [

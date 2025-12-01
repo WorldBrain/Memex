@@ -2,11 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
 
-const styles = require('./notifications.css')
-
 export default function OnboardingSelectOption({ onCloseRequested }) {
     return (
-        <div className={styles.title}>
+        <div>
             <NotificationLayout
                 title={'STEP 2: SELECT OPTION IN TOOLTIP'}
                 onCloseRequested={onCloseRequested}

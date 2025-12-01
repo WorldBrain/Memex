@@ -1,7 +1,5 @@
 import React, { SFC } from 'react'
 
-const styles = require('./tooltip.css')
-
 export interface Position {
     top: number | string
     left: number | string
@@ -21,17 +19,13 @@ const tooltip: SFC<Props> = ({
     previousTooltip,
     nextTooltip,
 }) => (
-    <div className={styles.container} style={position}>
-        <div className={styles.navigationBox}>
-            {previousTooltip ? (
-                <span className={styles.prev} onClick={previousTooltip} />
-            ) : null}
-            {nextTooltip ? (
-                <span className={styles.next} onClick={nextTooltip} />
-            ) : null}
-            <span className={styles.close} onClick={closeTooltip} />
+    <div style={position}>
+        <div>
+            {previousTooltip ? <span onClick={previousTooltip} /> : null}
+            {nextTooltip ? <span onClick={nextTooltip} /> : null}
+            <span onClick={closeTooltip} />
         </div>
-        <div className={styles.text}>{children}</div>
+        <div>{children}</div>
     </div>
 )
 

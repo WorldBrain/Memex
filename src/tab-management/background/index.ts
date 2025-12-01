@@ -1,4 +1,3 @@
-import type { Tabs, Browser } from 'webextension-polyfill'
 import { EventEmitter } from 'events'
 import type TypedEventEmitter from 'typed-emitter'
 
@@ -11,11 +10,11 @@ import { isLoggable } from 'src/activity-logger'
 import { captureException } from 'src/util/raven'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { isBrowserPageTab, isExtensionTab } from '../utils'
-import type { RawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
+import type { RawPageContent } from '@worldbrain/memex-common/ts/page-indexing/content-extraction/types'
 import { isUrlSupported } from 'src/page-indexing/utils'
 
 const SCROLL_UPDATE_FN = 'updateScrollState'
-const CONTENT_SCRIPTS = ['/lib/browser-polyfill.js', '/content_script.js']
+const CONTENT_SCRIPTS = ['/content_script.js']
 
 export interface TabManagementEvents {
     tabRemoved(event: { tabId: number }): void
@@ -35,15 +34,7 @@ export default class TabManagementBackground {
     constructor(
         private options: {
             manifestVersion: '2' | '3'
-            browserAPIs: Pick<
-                Browser,
-                | 'tabs'
-                | 'runtime'
-                | 'webNavigation'
-                | 'storage'
-                | 'windows'
-                | 'scripting'
-            >
+            browserAPIs: typeof chrome
         },
     ) {
         this.remoteFunctions = {
@@ -80,15 +71,17 @@ export default class TabManagementBackground {
         //  TODO: Solve the core issue - likely something in the RPC wrapper logic
         let content: RawPageContent
         try {
-            content = await runInTab<InPageUIContentScriptRemoteInterface>(
-                tabId,
-            ).extractRawPageContent()
+            content =
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).extractRawPageContent()
         } catch (err) {
             const tab = await this.options.browserAPIs.tabs.get(tabId)
             await this.injectContentScripts(tab)
-            content = await runInTab<InPageUIContentScriptRemoteInterface>(
-                tabId,
-            ).extractRawPageContent()
+            content =
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).extractRawPageContent()
         }
         return content
     }
@@ -187,11 +180,10 @@ export default class TabManagementBackground {
         }
     }
 
-    private handleContentScriptInjectionError = (tab: Tabs.Tab) => (
-        err: Error,
-    ) => {
-        const message = `Cannot inject content-scripts into page "${tab.url}" - reason: ${err.message}`
-        captureException(new Error(message))
-        console.error(message)
-    }
+    private handleContentScriptInjectionError =
+        (tab: Tabs.Tab) => (err: Error) => {
+            const message = `Cannot inject content-scripts into page "${tab.url}" - reason: ${err.message}`
+            captureException(new Error(message))
+            console.error(message)
+        }
 }

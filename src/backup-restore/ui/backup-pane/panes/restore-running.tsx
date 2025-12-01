@@ -3,10 +3,6 @@ import RunningProcess from './running-process'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from 'src/backup-restore/background/types'
 
-const settingsStyle = require('src/options/settings/components/settings.css')
-
-const styles = require('../../styles.css')
-
 export default function RestoreRunning({
     onFinish,
     localBackupSettings,
@@ -16,7 +12,7 @@ export default function RestoreRunning({
 }) {
     return (
         <div>
-            <div className={styles.background}>
+            <div>
                 <RunningProcess
                     functionNames={{
                         info: 'getRestoreInfo',
@@ -38,21 +34,17 @@ export default function RestoreRunning({
 }
 
 function renderHeader() {
-    return (
-        <p className={settingsStyle.sectionTitle}>
-            Restore in Progress: Don't leave this page
-        </p>
-    )
+    return <p>Restore in Progress: Don't leave this page</p>
 }
 
 function renderFailMessage() {
     return (
         <React.Fragment>
-            <div className={styles.messageBox}>
-                <div className={settingsStyle.sectionTitle}>
+            <div>
+                <div>
                     <strong>⚠️ Restore Failed! ⚠️ </strong>
                 </div>
-                <div className={settingsStyle.infoText}>
+                <div>
                     You can retry the restore anytime.
                     <br />
                     If you still encounter issues please{' '}
@@ -66,11 +58,11 @@ function renderFailMessage() {
 function renderSuccessMessage() {
     return (
         <React.Fragment>
-            <div className={styles.messageBox}>
-                <div className={settingsStyle.sectionTitle}>
+            <div>
+                <div>
                     <strong>Restore Successful! 🎉 </strong>
                 </div>
-                <div className={settingsStyle.infoText}>
+                <div>
                     Return to <a href="#/overview">the dashboard</a> to search,
                     organise and annotate.
                 </div>

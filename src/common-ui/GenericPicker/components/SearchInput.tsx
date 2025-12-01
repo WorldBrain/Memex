@@ -3,9 +3,9 @@ import styled, { css } from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { KeyEvent } from '../types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 
 interface Props {
     onChange: (value: string) => void
@@ -56,8 +56,8 @@ export class PickerSearchInput extends React.Component<Props, State> {
                 value={this.props.value}
                 onChange={this.onChange}
                 onKeyDown={(e) => {
-                    this.props.onKeyPress(e.key as KeyEvent),
-                        e.stopPropagation()
+                    ;(this.props.onKeyPress(e.key as KeyEvent),
+                        e.stopPropagation())
                 }}
                 type={'input'}
                 componentRef={this.props.searchInputRef}
@@ -78,7 +78,12 @@ const SearchInput = styled(TextField)`
     flex: 1;
     color: ${(props) => props.theme.colors.white};
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     font-size: 14px;
     height: fill-available;

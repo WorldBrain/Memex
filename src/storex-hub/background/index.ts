@@ -1,17 +1,16 @@
 import io from 'socket.io-client'
-import StorageManager from '@worldbrain/storex'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import { createStorexHubSocketClient } from '@worldbrain/storex-hub/lib/client'
+import StorageManager from '@worldbrain/storex/ts'
+import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/ts/types'
+import { createStorexHubSocketClient } from '@worldbrain/storex-hub/ts/client'
 import {
     StorexHubApi_v0,
     StorexHubCallbacks_v0,
     HandleRemoteCallResult_v0,
-} from '@worldbrain/storex-hub/lib/public-api'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+} from '@worldbrain/storex-hub/ts/public-api'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import type { PageContent } from 'src/page-analysis/background/types'
 import { IndexPageArgs } from './types'
 import { PipelineRes } from 'src/search'
-import { Storage } from 'webextension-polyfill'
 
 const APP_NAME = 'io.worldbrain.memex'
 
@@ -28,7 +27,7 @@ export class StorexHubBackground {
         private dependencies: {
             storageManager: StorageManager
             storePageContent: (content: PageContent) => Promise<void>
-            localBrowserStorage: Storage.LocalStorageArea
+            localBrowserStorage: typeof chrome.storage.local
             addVisit: (visit: {
                 normalizedUrl: string
                 fullUrl: string

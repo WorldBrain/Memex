@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import * as constants from './constants'
@@ -28,7 +27,7 @@ export const setSidebarState = async (enabled: boolean) =>
     setLocalStorage(constants.SIDEBAR_STORAGE_NAME, enabled)
 
 export const getExtUrl = (location: string) =>
-    browser.runtime ? browser.runtime.getURL(location) : location
+    chrome.runtime ? chrome.runtime.getURL(location) : location
 
 // TODO: Perhaps move RPC calls to some sort of a manager.
 const openOptionsTabRPC = remoteFunction('openOptionsTab')

@@ -1,7 +1,5 @@
 import * as React from 'react'
 
-const styles = require('./IndexDropdown.css')
-
 export interface Props {
     value: any
 }
@@ -10,21 +8,19 @@ class IndexDropdownUserRow extends React.PureComponent<Props> {
     render() {
         const { name, username, profilePic, isVerified } = this.props.value
         return (
-            <div className={styles.socialContainer}>
-                <div className={styles.userGroup}>
-                    {profilePic && (
-                        <img className={styles.avatar} src={profilePic} />
-                    )}
-                    <div className={styles.accountGroup}>
-                        <span className={styles.fullName}>
+            <div>
+                <div>
+                    {profilePic && <img src={profilePic} />}
+                    <div>
+                        <span>
                             <span>{name}</span>
                             {isVerified && (
                                 <React.Fragment>
-                                    <span className={styles.verified} />
+                                    <span />
                                 </React.Fragment>
                             )}
                         </span>
-                        <span className={styles.username}>@{username}</span>
+                        <span>@{username}</span>
                     </div>
                 </div>
             </div>

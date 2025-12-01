@@ -1,12 +1,11 @@
-import { Runtime, Storage } from 'webextension-polyfill'
 import { indexRSSfeed } from './utils'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export function injectSubstackButtons(
     pkmSyncBG: PkmSyncInterface,
-    storageAPI: Storage.Static,
+    storageAPI: typeof chrome.storage,
     openSidebarInRabbitHole: () => void,
-    runtimeAPI: Runtime.Static,
+    runtimeAPI: typeof chrome.runtime,
 ) {
     const existingMemexButtons = document.getElementById('memexButtons')
     if (existingMemexButtons) {

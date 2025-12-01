@@ -25,7 +25,7 @@ function injectContentScripts(content) {
         content.toString().replace(
             `</body>`,
             `
-        <script src="../lib/browser-polyfill.js"></script>
+        <script src="../ts/browser-polyfill.js"></script>
         <script src="../content_script_pdfjs.js"></script>
         </body>
     `,
@@ -91,8 +91,7 @@ export const copyPatterns = [
         to: 'fonts/Satoshi/[name].[ext]',
     },
     {
-        from:
-            'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}',
+        from: 'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}',
         to: 'fonts/material-icons/[name].[ext]',
         toType: 'template',
     },

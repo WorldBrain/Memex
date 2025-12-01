@@ -1,12 +1,13 @@
-import type StorageManager from '@worldbrain/storex'
-import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
+import type StorageManager from '@worldbrain/storex/ts'
+import type { StorageMiddleware } from '@worldbrain/storex/ts/types/middleware'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
 import { initializeTestEnvironment } from '@firebase/rules-unit-testing'
 import { documentId, Timestamp, serverTimestamp } from '@firebase/firestore'
 import type { ServerStorage } from './types'
 import { createStorageManager, createServerStorage } from './server'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import inMemory from '@worldbrain/storex-backend-dexie/ts/in-memory'
+import fs from 'node:fs/promises'
 
 async function createFirestoreEmulatorStorageBackend(options: {
     firebaseProjectId?: string
@@ -14,7 +15,6 @@ async function createFirestoreEmulatorStorageBackend(options: {
     firestoreEmulatorConf?: { host: string; port: number }
     // superuser?: boolean
 }): Promise<FirestoreStorageBackend> {
-    const fs = require('node:fs/promises')
     const userId = options.withTestUser
         ? options.withTestUser === true
             ? 'default-user'

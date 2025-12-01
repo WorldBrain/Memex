@@ -1,14 +1,14 @@
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import type {
     ReadwiseAPI,
     ReadwiseHighlight,
-} from '@worldbrain/memex-common/lib/readwise-integration/api/types'
-import { HTTPReadwiseAPI } from '@worldbrain/memex-common/lib/readwise-integration/api'
+} from '@worldbrain/memex-common/ts/readwise-integration/api/types'
+import { HTTPReadwiseAPI } from '@worldbrain/memex-common/ts/readwise-integration/api'
 import {
     formatReadwiseHighlightNote,
     formatReadwiseHighlightTime,
     formatReadwiseHighlightLocation,
-} from '@worldbrain/memex-common/lib/readwise-integration/utils'
+} from '@worldbrain/memex-common/ts/readwise-integration/utils'
 import * as Raven from 'src/util/raven'
 import type { ReadwiseSettings } from './types/settings'
 import type { BrowserSettingsStore } from 'src/util/settings'
@@ -24,7 +24,7 @@ import type CustomListBackground from 'src/custom-lists/background'
 import { htmlToMarkdown } from 'src/background-script/html-to-markdown'
 
 type ReadwiseInterfaceMethod<
-    Method extends keyof ReadwiseInterface<'provider'>
+    Method extends keyof ReadwiseInterface<'provider'>,
 > = ReadwiseInterface<'provider'>[Method]['function']
 
 type PageData = Pick<Page, 'fullTitle' | 'fullUrl' | 'url'>
@@ -74,9 +74,10 @@ export class ReadwiseBackground {
     private getAnnotationTags = async (
         annotationId: string,
     ): Promise<string[]> => {
-        const tags = await this.options.annotationsBG.annotationStorage.getTagsByAnnotationUrl(
-            annotationId,
-        )
+        const tags =
+            await this.options.annotationsBG.annotationStorage.getTagsByAnnotationUrl(
+                annotationId,
+            )
         return tags.map((tag) => tag.name)
     }
 
@@ -114,22 +115,23 @@ export class ReadwiseBackground {
         await this.options.settingsStore.set('apiKey', validatedKey)
         this._apiKey = validatedKey
     }
-    setOnlyHighlightsSetting: ReadwiseInterfaceMethod<
-        'setOnlyHighlightsSetting'
-    > = async ({ setting }) => {
-        await this.options.settingsStore.set('onlyHighlightsSetting', setting)
-        this._syncOnlyHighlights = setting
-    }
+    setOnlyHighlightsSetting: ReadwiseInterfaceMethod<'setOnlyHighlightsSetting'> =
+        async ({ setting }) => {
+            await this.options.settingsStore.set(
+                'onlyHighlightsSetting',
+                setting,
+            )
+            this._syncOnlyHighlights = setting
+        }
 
-    getOnlyHighlightsSetting: ReadwiseInterfaceMethod<
-        'getOnlyHighlightsSetting'
-    > = async () => {
-        const onlyHighlightSetting = await this.options.settingsStore.get(
-            'onlyHighlightsSetting',
-        )
-        this._syncOnlyHighlights = onlyHighlightSetting ?? false
-        return onlyHighlightSetting
-    }
+    getOnlyHighlightsSetting: ReadwiseInterfaceMethod<'getOnlyHighlightsSetting'> =
+        async () => {
+            const onlyHighlightSetting = await this.options.settingsStore.get(
+                'onlyHighlightsSetting',
+            )
+            this._syncOnlyHighlights = onlyHighlightSetting ?? false
+            return onlyHighlightSetting
+        }
 
     private async *streamAnnotations(): AsyncIterableIterator<Annotation> {
         yield* await this.options.storageManager.operation(
@@ -139,72 +141,70 @@ export class ReadwiseBackground {
     }
 
     // NOTE: if you need to update this, likely you also need to update the storage hook which reuploads annotations on update (see @memex-common:readwise-integration/storage)
-    uploadAllAnnotations: ReadwiseInterfaceMethod<
-        'uploadAllAnnotations'
-    > = async ({ annotationFilter }) => {
-        const getFullPageUrl = makePageDataCache({
-            getPageData: this.options.getPageData,
-        })
-
-        const apiKey = this._apiKey ?? (await this.getAPIKey())
-        if (!apiKey) {
-            throw new Error(
-                'Attempted readwise highlight upload without API key set',
-            )
-        }
-
-        const annotationBatch: Array<Annotation & { listNames: string[] }> = []
-        for await (const annotation of this.streamAnnotations()) {
-            if (annotationFilter != null && !annotationFilter(annotation)) {
-                continue
-            }
-            const [tags, listNames] = await Promise.all([
-                this.getAnnotationTags(annotation.url),
-                this.getAnnotationLists(annotation.url),
-            ])
-            annotationBatch.push({
-                ...annotation,
-                listNames,
-                tags,
+    uploadAllAnnotations: ReadwiseInterfaceMethod<'uploadAllAnnotations'> =
+        async ({ annotationFilter }) => {
+            const getFullPageUrl = makePageDataCache({
+                getPageData: this.options.getPageData,
             })
-        }
 
-        const highlights = (
-            await Promise.all(
-                annotationBatch.map(async (annotation) => {
-                    try {
-                        const pageData = await getFullPageUrl(
-                            annotation.pageUrl,
-                        )
+            const apiKey = this._apiKey ?? (await this.getAPIKey())
+            if (!apiKey) {
+                throw new Error(
+                    'Attempted readwise highlight upload without API key set',
+                )
+            }
 
-                        if (
-                            !annotation.body &&
-                            (await this.getOnlyHighlightsSetting())
-                        ) {
+            const annotationBatch: Array<Annotation & { listNames: string[] }> =
+                []
+            for await (const annotation of this.streamAnnotations()) {
+                if (annotationFilter != null && !annotationFilter(annotation)) {
+                    continue
+                }
+                const [tags, listNames] = await Promise.all([
+                    this.getAnnotationTags(annotation.url),
+                    this.getAnnotationLists(annotation.url),
+                ])
+                annotationBatch.push({
+                    ...annotation,
+                    listNames,
+                    tags,
+                })
+            }
+
+            const highlights = (
+                await Promise.all(
+                    annotationBatch.map(async (annotation) => {
+                        try {
+                            const pageData = await getFullPageUrl(
+                                annotation.pageUrl,
+                            )
+
+                            if (
+                                !annotation.body &&
+                                (await this.getOnlyHighlightsSetting())
+                            ) {
+                                return null
+                            }
+
+                            const annotationForReadWise =
+                                await annotationToReadwise(annotation, {
+                                    pageData,
+                                })
+
+                            return annotationForReadWise
+                        } catch (e) {
+                            console.error(e)
+                            Raven.captureException(e)
                             return null
                         }
+                    }),
+                )
+            ).filter((highlight) => !!highlight)
 
-                        const annotationForReadWise = await annotationToReadwise(
-                            annotation,
-                            {
-                                pageData,
-                            },
-                        )
-
-                        return annotationForReadWise
-                    } catch (e) {
-                        console.error(e)
-                        Raven.captureException(e)
-                        return null
-                    }
-                }),
-            )
-        ).filter((highlight) => !!highlight)
-
-        if (highlights.length) {
-            await this.readwiseAPI.postHighlights(apiKey, highlights)
+            if (highlights.length) {
+                await this.readwiseAPI.postHighlights(apiKey, highlights)
+            }
         }
-    }
 }
 
 async function annotationToReadwise(

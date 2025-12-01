@@ -1,7 +1,7 @@
-import { getPageLinkPath } from '@worldbrain/memex-common/lib/content-sharing/utils'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { getPageLinkPath } from '@worldbrain/memex-common/ts/content-sharing/utils'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 
-export * from '@worldbrain/memex-common/lib/content-sharing/utils'
+export * from '@worldbrain/memex-common/ts/content-sharing/utils'
 
 /** NOTE: Only for use in Memex extension, as it assumes env is on process.env.NODE_ENV */
 export function getPageLinkUrl(options: {

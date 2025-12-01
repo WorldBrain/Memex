@@ -1,24 +1,24 @@
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
-import { SummarizationService } from '@worldbrain/memex-common/lib/summarization/index'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/ts/content-sharing/storage/constants'
+import { SummarizationService } from '@worldbrain/memex-common/ts/summarization/index'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
-import { trackQueryAI } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { trackQueryAI } from '@worldbrain/memex-common/ts/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import {
     AImodels,
     PromptData,
-} from '@worldbrain/memex-common/lib/summarization/types'
+} from '@worldbrain/memex-common/ts/summarization/types'
 import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
-import browser, { Browser } from 'webextension-polyfill'
-import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/lib/subscriptions/constants'
+
+import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/ts/subscriptions/constants'
 import {
     AIActionAllowed,
     updateTabAISessions,
-} from '@worldbrain/memex-common/lib/subscriptions/storage'
+} from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -52,7 +52,7 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
 
 export interface summarizePageBackgroundOptions {
     remoteEventEmitter: RemoteEventEmitter<'pageSummary'>
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     analyticsBG?: AnalyticsCoreInterface
 }
 
@@ -68,9 +68,9 @@ export default class SummarizeBackground {
 
     constructor(public options: summarizePageBackgroundOptions) {
         this.remoteFunctions = {
-            startPageSummaryStream: this.startPageSummaryStream,
-            isApiKeyValid: this.isApiKeyValid,
-            setActiveSidebarTab: this.setActiveSidebarTab,
+            startPageSummaryStream: this.startPageSummaryStream.bind(this),
+            isApiKeyValid: this.isApiKeyValid.bind(this),
+            setActiveSidebarTab: this.setActiveSidebarTab.bind(this),
         }
     }
 
@@ -101,90 +101,99 @@ export default class SummarizeBackground {
         updateTabAISessions(this.options.browserAPIs, tabId)
     }
 
-    startPageSummaryStream: SummarizationInterface<
-        'provider'
-    >['startPageSummaryStream'] = async (
-        { tab },
-        {
-            fullPageUrl,
-            textToProcess,
-            queryPrompt,
-            apiKey,
-            outputLocation,
-            chapterSummaryIndex,
-            AImodel,
-            promptData,
-        },
-    ) => {
-        let isAllowed = await this.saveActiveTabId(apiKey?.length > 0, AImodel)
-
-        if (!isAllowed) {
-            return
-        }
-
-        // this is here to not scam our users that have the full subscription and add a key only for using GPT-4.
-        let apiKeyToUse = apiKey ?? ''
-        if (apiKeyToUse?.length > 0 && AImodel === 'gpt-3') {
-            const subscriptionStorage = await this.options.browserAPIs.storage.local.get(
-                COUNTER_STORAGE_KEY,
+    startPageSummaryStream: SummarizationInterface<'provider'>['startPageSummaryStream'] =
+        async (
+            { tab },
+            {
+                fullPageUrl,
+                textToProcess,
+                queryPrompt,
+                apiKey,
+                outputLocation,
+                chapterSummaryIndex,
+                AImodel,
+                promptData,
+            },
+        ) => {
+            let isAllowed = await this.saveActiveTabId(
+                apiKey?.length > 0,
+                AImodel,
             )
-            const subscriptionData = subscriptionStorage[COUNTER_STORAGE_KEY]
-            const subscriptions = subscriptionData?.pU
-            if (subscriptions && subscriptions?.AIpowerup) {
-                apiKeyToUse = null
+
+            if (!isAllowed) {
+                return
             }
-        }
 
-        this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
-
-        if (this.options.analyticsBG) {
-            try {
-                await trackQueryAI(this.options.analyticsBG)
-            } catch (error) {
-                console.error(`Error tracking space create event', ${error}`)
+            // this is here to not scam our users that have the full subscription and add a key only for using GPT-4.
+            let apiKeyToUse = apiKey ?? ''
+            if (apiKeyToUse?.length > 0 && AImodel === 'gpt-3') {
+                const subscriptionStorage =
+                    await this.options.browserAPIs.storage.local.get(
+                        COUNTER_STORAGE_KEY,
+                    )
+                const subscriptionData =
+                    subscriptionStorage[COUNTER_STORAGE_KEY]
+                const subscriptions = subscriptionData?.pU
+                if (subscriptions && subscriptions?.AIpowerup) {
+                    apiKeyToUse = null
+                }
             }
-        }
 
-        for await (const result of this.summarizationService.queryAI(
-            fullPageUrl,
-            textToProcess,
-            queryPrompt,
-            apiKey,
-            undefined,
-            AImodel,
-            promptData,
-        )) {
-            const token = result?.t
-            if (token?.length > 0) {
-                if (outputLocation === 'editor') {
-                    this.options.remoteEventEmitter.emitToTab(
-                        'newSummaryTokenEditor',
-                        tab.id,
-                        {
-                            token: token,
-                        },
-                    )
-                } else if (outputLocation === 'chapterSummary') {
-                    this.options.remoteEventEmitter.emitToTab(
-                        'newChapterSummaryToken',
-                        tab.id,
-                        {
-                            token: token,
-                            chapterSummaryIndex: chapterSummaryIndex,
-                        },
-                    )
-                } else {
-                    this.options.remoteEventEmitter.emitToTab(
-                        'newSummaryToken',
-                        tab.id,
-                        {
-                            token: token,
-                        },
+            this.options.remoteEventEmitter.emitToTab(
+                'startSummaryStream',
+                tab.id,
+            )
+
+            if (this.options.analyticsBG) {
+                try {
+                    await trackQueryAI(this.options.analyticsBG)
+                } catch (error) {
+                    console.error(
+                        `Error tracking space create event', ${error}`,
                     )
                 }
             }
+
+            for await (const result of this.summarizationService.queryAI(
+                fullPageUrl,
+                textToProcess,
+                queryPrompt,
+                apiKey,
+                undefined,
+                AImodel,
+                promptData,
+            )) {
+                const token = result?.t
+                if (token?.length > 0) {
+                    if (outputLocation === 'editor') {
+                        this.options.remoteEventEmitter.emitToTab(
+                            'newSummaryTokenEditor',
+                            tab.id,
+                            {
+                                token: token,
+                            },
+                        )
+                    } else if (outputLocation === 'chapterSummary') {
+                        this.options.remoteEventEmitter.emitToTab(
+                            'newChapterSummaryToken',
+                            tab.id,
+                            {
+                                token: token,
+                                chapterSummaryIndex: chapterSummaryIndex,
+                            },
+                        )
+                    } else {
+                        this.options.remoteEventEmitter.emitToTab(
+                            'newSummaryToken',
+                            tab.id,
+                            {
+                                token: token,
+                            },
+                        )
+                    }
+                }
+            }
         }
-    }
 
     isApiKeyValid: SummarizationInterface<'provider'>['isApiKeyValid'] = async (
         { tab },
@@ -195,15 +204,14 @@ export default class SummarizeBackground {
         return { isValid }
     }
 
-    setActiveSidebarTab: SummarizationInterface<
-        'provider'
-    >['setActiveSidebarTab'] = async ({ tab }, { activeTab }) => {
-        this.options.remoteEventEmitter.emitToTab(
-            'setActiveSidebarTab',
-            tab.id,
-            {
-                activeTab: activeTab,
-            },
-        )
-    }
+    setActiveSidebarTab: SummarizationInterface<'provider'>['setActiveSidebarTab'] =
+        async ({ tab }, { activeTab }) => {
+            this.options.remoteEventEmitter.emitToTab(
+                'setActiveSidebarTab',
+                tab.id,
+                {
+                    activeTab: activeTab,
+                },
+            )
+        }
 }

@@ -11,8 +11,6 @@ import { selectors as results } from 'src/overview/results'
 
 import cx from 'classnames'
 
-const styles = require('./tags-filter.css')
-
 interface StateProps {
     tagFilterDropdown: boolean
     hashtagsInc: string[]
@@ -72,7 +70,7 @@ class HashtagsFilter extends PureComponent<Props, State> {
                     <Tooltip
                         position={this.props.tooltipPosition}
                         itemClass={cx({
-                            [styles.tooltip]: this.props.env === 'overview',
+                            tooltip: this.props.env === 'overview',
                         })}
                     >
                         <IndexDropdown

@@ -2,10 +2,10 @@ import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { fonts } from 'src/dashboard-refactor/styles'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import type { TaskState } from 'ui-logic-core/lib/types'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import type { TaskState } from 'ui-logic-core/ts/types'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 
 export interface Props {
     title: string

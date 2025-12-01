@@ -1,5 +1,5 @@
-import Storex from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import Storex from '@worldbrain/storex/ts'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import generateTemplateDocs, {
@@ -10,9 +10,9 @@ import generateTemplateDocs, {
 import { abbreviateName, analyzeTemplate } from './utils'
 import * as DATA from './template-doc-generation.test.data'
 import { getTemplateDataFetchers } from './background/template-data-fetchers'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import { createPageLinkListTitle, isShareUrl } from 'src/content-sharing/utils'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 
 async function insertTestData(storageManager: Storex) {
     await storageManager.collection('pages').createObject(DATA.testPageA)
@@ -209,11 +209,8 @@ async function insertTestData(storageManager: Storex) {
 }
 
 async function setupTest() {
-    const {
-        backgroundModules,
-        storageManager,
-        authService,
-    } = await setupBackgroundIntegrationTest()
+    const { backgroundModules, storageManager, authService } =
+        await setupBackgroundIntegrationTest()
 
     authService.setUser(TEST_USER)
     await insertTestData(storageManager)
@@ -235,8 +232,7 @@ describe('Content template doc generation', () => {
         expect(
             await generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({
-                    code:
-                        '{{{PageTitle}}} {{{PageUrl}}} {{{PageTags}}} {{{PageSpaces}}} {{{PageDOI}}} {{{PageMetaTitle}}} {{{PageAnnotation}}} {{{PageSourceName}}} {{{PageJournalName}}} {{{PageJournalPage}}} {{{PageJournalIssue}}} {{{PageJournalVolume}}} {{{PageReleaseDate}}} {{{PageAccessDate}}} {{#PageEntities}} {{EntityName}} {{/PageEntities}}',
+                    code: '{{{PageTitle}}} {{{PageUrl}}} {{{PageTags}}} {{{PageSpaces}}} {{{PageDOI}}} {{{PageMetaTitle}}} {{{PageAnnotation}}} {{{PageSourceName}}} {{{PageJournalName}}} {{{PageJournalPage}}} {{{PageJournalIssue}}} {{{PageJournalVolume}}} {{{PageReleaseDate}}} {{{PageAccessDate}}} {{#PageEntities}} {{EntityName}} {{/PageEntities}}',
                 }),
                 normalizedPageUrls: [DATA.testPageC.url],
                 annotationUrls: [],
@@ -278,8 +274,7 @@ describe('Content template doc generation', () => {
         expect(
             await generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({
-                    code:
-                        '{{{PageTitle}}} {{#Notes}} {{{NoteHighlight}}} {{{NoteTags}}} {{{NoteSpaces}}} {{/Notes}}',
+                    code: '{{{PageTitle}}} {{#Notes}} {{{NoteHighlight}}} {{{NoteTags}}} {{{NoteSpaces}}} {{/Notes}}',
                 }),
                 normalizedPageUrls: [DATA.testPageC.url],
                 annotationUrls: [],
@@ -405,8 +400,7 @@ describe('Content template doc generation', () => {
         expect(
             await generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({
-                    code:
-                        '{{{PageTitle}}} {{{PageLink}}} {{{PageTags}}} {{{PageCreatedAt}}}',
+                    code: '{{{PageTitle}}} {{{PageLink}}} {{{PageTags}}} {{{PageCreatedAt}}}',
                 }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [],
@@ -1147,8 +1141,10 @@ describe('Content template doc generation', () => {
                         HasNotes: true,
                         Notes: [
                             {
-                                NoteCreatedAt: DATA.testAnnotationACreatedAt.valueOf(),
-                                PageCreatedAt: DATA.testPageACreatedAt.valueOf(),
+                                NoteCreatedAt:
+                                    DATA.testAnnotationACreatedAt.valueOf(),
+                                PageCreatedAt:
+                                    DATA.testPageACreatedAt.valueOf(),
                                 NoteText: DATA.testAnnotationAText,
                                 NoteLink: expect.any(String),
                                 PageTitle: DATA.testPageA.fullTitle,
@@ -1161,8 +1157,10 @@ describe('Content template doc generation', () => {
                                 url: DATA.testPageAUrl,
                             },
                             {
-                                NoteCreatedAt: DATA.testAnnotationBCreatedAt.valueOf(),
-                                PageCreatedAt: DATA.testPageACreatedAt.valueOf(),
+                                NoteCreatedAt:
+                                    DATA.testAnnotationBCreatedAt.valueOf(),
+                                PageCreatedAt:
+                                    DATA.testPageACreatedAt.valueOf(),
                                 NoteHighlight: DATA.testAnnotationBHighlight,
                                 PageTitle: DATA.testPageA.fullTitle,
                                 PageTags: joinTags(DATA.testPageATags),
@@ -1192,8 +1190,10 @@ describe('Content template doc generation', () => {
                         HasNotes: true,
                         Notes: [
                             {
-                                NoteCreatedAt: DATA.testAnnotationCCreatedAt.valueOf(),
-                                PageCreatedAt: DATA.testPageBCreatedAt.valueOf(),
+                                NoteCreatedAt:
+                                    DATA.testAnnotationCCreatedAt.valueOf(),
+                                PageCreatedAt:
+                                    DATA.testPageBCreatedAt.valueOf(),
                                 PageSourceName:
                                     DATA.testPageBMetadata.sourceName,
                                 PageAccessDate:
@@ -1923,8 +1923,7 @@ describe('Content template doc generation', () => {
         expect(
             await generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({
-                    code:
-                        '{{{PageTitle}}} {{{PageTags}}} {{{PageLink}}} {{{PageCreatedAt}}}',
+                    code: '{{{PageTitle}}} {{{PageTags}}} {{{PageLink}}} {{{PageCreatedAt}}}',
                 }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
@@ -2121,8 +2120,7 @@ describe('Content template doc generation', () => {
         expect(
             await generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({
-                    code:
-                        '{{#Notes}}{{{NoteText}}} {{{NoteTags}}} {{{NoteSpaces}}} {{{NoteCreatedAt}}}{{/Notes}}',
+                    code: '{{#Notes}}{{{NoteText}}} {{{NoteTags}}} {{{NoteSpaces}}} {{{NoteCreatedAt}}}{{/Notes}}',
                 }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
@@ -2227,8 +2225,7 @@ describe('Content template doc generation', () => {
         expect(
             await generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({
-                    code:
-                        '{{{PageTitle}}} {{{PageTags}}} {{{PageLink}}} {{{PageCreatedAt}}}',
+                    code: '{{{PageTitle}}} {{{PageTags}}} {{{PageLink}}} {{{PageCreatedAt}}}',
                 }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [

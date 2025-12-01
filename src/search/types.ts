@@ -1,5 +1,5 @@
-import Storex, { FindManyOptions } from '@worldbrain/storex'
-export * from '@worldbrain/memex-common/lib/page-indexing/types'
+import Storex, { FindManyOptions } from '@worldbrain/storex/ts'
+export * from '@worldbrain/memex-common/ts/page-indexing/types'
 
 export type DBGet = () => Promise<Storex>
 

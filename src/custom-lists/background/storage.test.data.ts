@@ -1,7 +1,7 @@
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 
 export const LIST_1 = {
     id: 0,

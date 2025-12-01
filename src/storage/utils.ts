@@ -1,4 +1,4 @@
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import { DexieUtilsPlugin } from 'src/search/plugins'
 
 export const dangerousPleaseBeSureDeleteAndRecreateDatabase = async (

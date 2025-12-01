@@ -1,5 +1,4 @@
 import type { ErrorObject } from 'serialize-error'
-import type { Browser } from 'webextension-polyfill'
 
 export interface RPCManager {
     postMessageRequestToContentScript<Input = any, Output = any>(
@@ -25,7 +24,7 @@ export interface RPCManager {
 export interface RPCManagerDependencies {
     role: RpcRole
     sideName: RpcSideName
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     initPaused?: boolean
     debug?: boolean
     getRegisteredRemoteFunction: (

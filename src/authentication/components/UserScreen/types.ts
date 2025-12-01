@@ -1,17 +1,16 @@
-import type { UIEvent } from 'ui-logic-core'
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { UIEvent } from 'ui-logic-core/ts'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import { Browser } from 'webextension-polyfill'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
     personalCloudBG: PersonalCloudRemoteInterface
     navToDashboard: () => void
     navToGuidedTutorial: () => void
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 export interface State {

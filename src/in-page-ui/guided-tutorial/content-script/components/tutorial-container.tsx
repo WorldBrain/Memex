@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 
 import styled, { css } from 'styled-components'
 import { TutorialCardContent } from './tutorial-cards-content'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 
 // card container (hold cycling logic)
 // card component (holds card content, isEndOfCycle, isStartOfCycle)
@@ -235,7 +235,12 @@ const TutorialCardContainer = styled.div<{
     grid-gap: 30px;
 
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     box-shadow: 0px 4px 15px 5px rgb(0 0 0 / 5%);
     border: 2px solid ${(props) => props.theme.colors.greyScale3};

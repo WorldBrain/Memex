@@ -3,9 +3,9 @@ import styled, { css } from 'styled-components'
 import ReactDOM from 'react-dom'
 
 import { resolvablePromise } from 'src/util/resolvable'
-import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/types'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import type {
     SharedInPageUIEvents,
     SidebarActionOptions,
@@ -28,7 +28,7 @@ import type {
 } from 'src/annotations/cache/types'
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import { sleepPromise } from 'src/util/promises'
-import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
+import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/constants'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -670,7 +670,9 @@ const TogglePillHoverSmallText = styled.div<{ pillVisibility: string }>`
     visibility: hidden;
     opacity: 0;
     top: 20px;
-    transition: top 0.05s ease-in-out, opacity 0.05s ease-in-out;
+    transition:
+        top 0.05s ease-in-out,
+        opacity 0.05s ease-in-out;
 
     ${(props) =>
         props.pillVisibility === 'hover' &&

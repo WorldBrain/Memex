@@ -3,9 +3,7 @@ import classNames from 'classnames'
 import { BackupUIState } from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/StatusOverlay'
 import { BackupTimes } from 'src/backup-restore/types'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-
-const styles = require('./StatusBar.css')
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 
 interface Props {
     backupTimes: BackupTimes
@@ -35,31 +33,21 @@ const StatusBar = (props: Props, state: State) => {
         nextBackup: props.backupTimes.nextBackup as BackupTimes['nextBackup'],
     }
     return (
-        <div className={styles.TopContainer}>
-            <div className={styles.container} onMouseLeave={props.onMouseLeave}>
-                <div className={styles.headerBox} onClick={props.onMouseEnter}>
-                    <div className={styles.header}>Sync Status</div>
-                    <div className={styles.IconBox}>
+        <div className="TopContainer">
+            <div className="container" onMouseLeave={props.onMouseLeave}>
+                <div className="headerBox" onClick={props.onMouseEnter}>
+                    <div className="header">Sync Status</div>
+                    <div className="IconBox">
                         {(props.backupUIState.state === 'fail' &&
                             props.isAutomaticBackupEnabled) ||
                         state.syncError ? (
-                            <span
-                                className={classNames(
-                                    styles.failIcon,
-                                    styles.icon,
-                                )}
-                            />
+                            <span className={classNames('failIcon', 'icon')} />
                         ) : (
-                            <span
-                                className={classNames(
-                                    styles.syncIcon,
-                                    styles.icon,
-                                )}
-                            />
+                            <span className={classNames('syncIcon', 'icon')} />
                         )}
                     </div>
                 </div>
-                <div className={styles.backupOverlay}>
+                <div className="backupOverlay">
                     {props.hover && (
                         <div>
                             {props.backupUIState.state === 'success' && (

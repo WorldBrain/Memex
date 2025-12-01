@@ -3,14 +3,12 @@ import React, {
     ReactEventHandler,
     KeyboardEventHandler,
 } from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import cx from 'classnames'
 
 import { OVERVIEW_URL } from 'src/constants'
 import SearchFilters from 'src/search-filters'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-
-const styles = require('./Header.css')
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 export interface Props {
     searchPlaceholder?: string
@@ -56,28 +54,28 @@ class Header extends PureComponent<Props> {
     render() {
         return (
             <React.Fragment>
-                <div className={styles.navbar}>
-                    <div className={styles.collectionsPlaceholder} />
+                <div className="navbar">
+                    <div className="collectionsPlaceholder" />
                     <div
-                        className={cx(styles.backtosearch, {
-                            [styles.hideContainer]: !this.props.showInbox,
+                        className={cx('backtosearch', {
+                            ['hideContainer']: !this.props.showInbox,
                         })}
                     ></div>
                     <div
-                        className={cx(styles.container, {
-                            [styles.hideContainer]: this.props.showInbox,
+                        className={cx('container', {
+                            ['hideContainer']: this.props.showInbox,
                         })}
                     >
-                        <div className={styles.searchField}>
-                            <span className={styles.searchIconContainer}>
+                        <div className="searchField">
+                            <span className="searchIconContainer">
                                 <img
                                     src="/img/search.svg"
-                                    className={styles.searchIconImg}
+                                    className="searchIconImg"
                                 />
                             </span>
                             <input
                                 id="query-search-bar"
-                                className={styles.query}
+                                className="query"
                                 onChange={this.props.onQueryChange}
                                 placeholder={this.props.searchPlaceholder}
                                 value={this.props.query}
@@ -88,9 +86,9 @@ class Header extends PureComponent<Props> {
                             />
                         </div>
                         <div
-                            className={cx(styles.button, {
-                                [styles.activeButton]: this.props
-                                    .showClearFiltersBtn,
+                            className={cx('button', {
+                                ['activeButton']:
+                                    this.props.showClearFiltersBtn,
                             })}
                             onClick={this.props.toggleFilterBar}
                         >
@@ -102,14 +100,14 @@ class Header extends PureComponent<Props> {
                                     getPortalRoot={null}
                                 >
                                     <span
-                                        className={styles.clearFilters}
+                                        className="clearFilters"
                                         onClick={this.props.clearFilters}
                                     />
                                 </TooltipBox>
                             )}
                         </div>
                     </div>
-                    <div className={styles.links}>
+                    <div className="links">
                         {/* <BackupStatus localBackupSettings={} /> */}
                         {/*<InboxButton
                             toggleInbox={this.props.toggleInbox}
@@ -118,10 +116,10 @@ class Header extends PureComponent<Props> {
                             showUnreadCount={this.props.showUnreadCount}
                         />*/}
                         <Link to={this.props.settingsRoute}>
-                            <div className={styles.settingsBox}>
+                            <div className="settingsBox">
                                 <span
                                     title="Settings"
-                                    className={styles.settingsIcon}
+                                    className="settingsIcon"
                                 />
                             </div>
                         </Link>

@@ -1,4 +1,4 @@
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 
 import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'

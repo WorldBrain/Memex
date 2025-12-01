@@ -1,5 +1,3 @@
-import browser, { Notifications } from 'webextension-polyfill'
-
 import {
     CreateNotification,
     NotifOpts,
@@ -12,7 +10,7 @@ export const DEF_ICON_URL = '/img/worldbrain-logo-narrow.png'
 export const DEF_TYPE = 'basic'
 
 export interface Props {
-    notificationsAPI: Notifications.Static
+    notificationsAPI: typeof chrome.notifications
     browser: BrowserName
 }
 
@@ -68,7 +66,7 @@ export class Creator implements NotificationCreator {
 }
 
 const instance = new Creator({
-    notificationsAPI: browser.notifications,
+    notificationsAPI: chrome.notifications,
     browser: checkBrowser(),
 })
 

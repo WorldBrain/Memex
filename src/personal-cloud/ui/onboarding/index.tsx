@@ -1,6 +1,6 @@
 import React from 'react'
-import { UIElement } from '@worldbrain/memex-common/lib/main-ui/classes'
-import Overlay from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
+import { UIElement } from '@worldbrain/memex-common/ts/main-ui/classes'
+import Overlay from '@worldbrain/memex-common/ts/main-ui/containers/overlay'
 
 import CloudOnboardingModalLogic from './logic'
 import type { Dependencies, State, Event } from './types'
@@ -15,12 +15,12 @@ import {
     Container,
 } from '../components/shared-components'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SUPPORT_EMAIL } from 'src/constants'
 import checkBrowser from 'src/util/check-browser'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 export interface Props extends Dependencies {
     supportLink: string

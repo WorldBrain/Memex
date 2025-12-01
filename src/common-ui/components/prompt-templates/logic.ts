@@ -8,7 +8,7 @@ import {
     PromptTemplatesState,
     PromptTemplate,
 } from './types'
-import { UIEventHandler, UILogic } from 'ui-logic-core'
+import { UIEventHandler, UILogic } from 'ui-logic-core/ts'
 import { AI_PROMPT_DEFAULTS } from 'src/sidebar/annotations-sidebar/constants'
 import { marked } from 'marked'
 

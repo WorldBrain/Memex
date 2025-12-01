@@ -1,17 +1,16 @@
-import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { checkStripePlan } from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 import {
     PromptTemplatesEvent,
     PromptTemplatesDependencies,
     PromptTemplatesState,
 } from './types'
-import { UIEventHandler, UILogic } from 'ui-logic-core'
-import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
-import { enforceTrialPeriod } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { UIEventHandler, UILogic } from 'ui-logic-core/ts'
+import { PremiumPlans } from '@worldbrain/memex-common/ts/subscriptions/availablePowerups'
+import { enforceTrialPeriod } from '@worldbrain/memex-common/ts/subscriptions/storage'
 import stateManagerTestData from 'src/imports/background/state-manager.test.data'
-type EventHandler<
-    EventName extends keyof PromptTemplatesEvent
-> = UIEventHandler<PromptTemplatesState, PromptTemplatesEvent, EventName>
+type EventHandler<EventName extends keyof PromptTemplatesEvent> =
+    UIEventHandler<PromptTemplatesState, PromptTemplatesEvent, EventName>
 
 export default class PromptTemplatesLogic extends UILogic<
     PromptTemplatesState,

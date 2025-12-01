@@ -1,8 +1,7 @@
-import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core/ts'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
-import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import type { CollectionsSettings } from 'src/custom-lists/background/types'
-import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
+import { validateSpaceName } from '@worldbrain/memex-common/ts/utils/space-name-validation'
 import type {
     PageAnnotationsCacheEvents,
     UnifiedList,
@@ -12,15 +11,14 @@ import {
     NormalizedState,
     initNormalizedState,
     normalizedStateToArray,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import { BrowserSettingsStore } from 'src/util/settings'
 import {
     extractUnifiedIdsFromRenderedId,
     generateRenderedListEntryId,
     getEntriesForCurrentPickerTab,
-    isRenderedListEntryIdForTreeNode,
 } from './utils'
 import type {
     SpacePickerState,
@@ -28,7 +26,7 @@ import type {
     SpacePickerDependencies,
 } from './types'
 import { getListShareUrl, getPageLinkUrl } from 'src/content-sharing/utils'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import type { ListTrees } from '../list-trees'
 import { getVisibleTreeNodesInOrder } from '../list-trees/util'
 import type EntryRow from './components/EntryRow'

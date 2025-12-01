@@ -1,7 +1,7 @@
 import type {
     PageEntity,
     PageMetadata,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 import type {
     TemplateDataFetchers,
     PageTemplateData,
@@ -11,7 +11,7 @@ import type {
     TemplateDoc,
 } from './types'
 import fromPairs from 'lodash/fromPairs'
-import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/ts/utils/item-ordering'
 import { abbreviateName } from './utils'
 
 interface GeneratorInput {

@@ -47,7 +47,7 @@ export const checkServerStatus = async ({ storageAPI }) => {
 
 export const fetchBackupPath = async () => {
     try {
-        const storage = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const storage = await chrome.storage.local.get('PKMSYNCpkmFolders')
         const backupPath = storage.PKMSYNCpkmFolders.backupFolder
         // const syncKey = await getPkmSyncKey()
         // const body = {

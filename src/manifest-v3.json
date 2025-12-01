@@ -5,9 +5,9 @@
     "description": "Search, annotate and organize what you've read online.",
     "manifest_version": 3,
     "icons": {
-        "16": "./img/browserIcons/logo-16.png",
-        "48": "./img/browserIcons/logo-48.png",
-        "128": "./img/browserIcons/logo-128.png"
+        "16": "img/browserIcons/logo-16.png",
+        "48": "img/browserIcons/logo-48.png",
+        "128": "img/browserIcons/logo-128.png"
     },
     "externally_connectable": {
         "matches": [
@@ -17,33 +17,33 @@
         ]
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "src/background-mv3.ts"
     },
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["lib/browser-polyfill.js", "content_script.js"],
+            "js": ["./src/content-scripts/content_script/global_webpage.ts"],
             "css": [],
             "run_at": "document_end"
         }
     ],
     "options_ui": {
-        "page": "./options.html#/settings"
+        "page": "options.html"
     },
     "action": {
-        "default_popup": "./popup.html",
+        "default_popup": "popup.html",
         "default_title": "Memex",
         "default_icon": {
-            "16": "./img/browserIcons/logo-16.png",
-            "48": "./img/browserIcons/logo-48.png",
-            "128": "./img/browserIcons/logo-128.png"
+            "16": "img/browserIcons/logo-16.png",
+            "48": "img/browserIcons/logo-48.png",
+            "128": "img/browserIcons/logo-128.png"
         }
     },
     "omnibox": {
         "keyword": "m"
     },
     "content_security_policy": {
-        "extension_pages": "script-src 'self'; object-src 'self'; connect-src http: https: data: blob: wss: file:"
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src http: https: data: blob: wss: ws: file:"
     },
     "permissions": [
         "alarms",
@@ -61,7 +61,6 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "/lib/pdf.worker.min.js",
                 "/img/*",
                 "/content_script*.css",
                 "/fonts/*",

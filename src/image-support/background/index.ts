@@ -1,12 +1,12 @@
-import type StorageManager from '@worldbrain/storex'
-import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
-import { ImageSupportClientStorage } from '@worldbrain/memex-common/lib/image-support/client-storage'
+import type StorageManager from '@worldbrain/storex/ts'
+import { ImageSupportBackend } from '@worldbrain/memex-common/ts/image-support/types'
+import { ImageSupportClientStorage } from '@worldbrain/memex-common/ts/image-support/client-storage'
 import {
     registerRemoteFunctions,
     remoteFunctionWithoutExtraArgs,
 } from 'src/util/webextensionRPC'
 import { ImageSupportInterface } from './types'
-import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
+import { dataUrlToBlob } from '@worldbrain/memex-common/ts/utils/blob-to-data-url'
 
 export class ImageSupportBackground {
     remoteFunctions: ImageSupportInterface<'provider'>
@@ -44,27 +44,28 @@ export class ImageSupportBackground {
         return this.options.generateImageId()
     }
 
-    uploadImage: ImageSupportInterface<
-        'provider'
-    >['uploadImage']['function'] = async (params) => {
-        await this.storage.storeImage({
-            id: params.id,
-            createdWhen: Date.now(),
-            normalizedPageUrl: params.normalizedPageUrl,
-            annotationUrl: params.annotationUrl,
-        })
+    uploadImage: ImageSupportInterface<'provider'>['uploadImage']['function'] =
+        async (params) => {
+            await this.storage.storeImage({
+                id: params.id,
+                createdWhen: Date.now(),
+                normalizedPageUrl: params.normalizedPageUrl,
+                annotationUrl: params.annotationUrl,
+            })
 
-        const blob =
-            params.image instanceof Blob
-                ? params.image
-                : dataUrlToBlob(params.image)
+            const blob =
+                params.image instanceof Blob
+                    ? params.image
+                    : dataUrlToBlob(params.image)
 
-        await this.options.backend.uploadImage({ image: blob, id: params.id })
-    }
+            await this.options.backend.uploadImage({
+                image: blob,
+                id: params.id,
+            })
+        }
 
-    getImageUrl: ImageSupportInterface<
-        'provider'
-    >['getImageUrl']['function'] = async (params) => {
-        return this.options.backend.getImageUrl(params)
-    }
+    getImageUrl: ImageSupportInterface<'provider'>['getImageUrl']['function'] =
+        async (params) => {
+            return this.options.backend.getImageUrl(params)
+        }
 }

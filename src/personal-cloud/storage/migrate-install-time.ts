@@ -1,4 +1,4 @@
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import { Visit } from 'src/search'
 
 export async function migrateInstallTime({

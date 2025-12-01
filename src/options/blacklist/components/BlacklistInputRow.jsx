@@ -2,10 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import styled from 'styled-components'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-
-import styles from './BlacklistInputRow.css'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 
 const BlacklistInputRow = ({
     value,
@@ -39,7 +37,6 @@ const BlacklistInputRow = ({
         {renderError && renderError}
         <input
             value={value}
-            className={styles.input}
             type="text"
             placeholder="Enter any text or domain or path to ignore matching URLs"
             ref={inputRef}

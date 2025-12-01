@@ -5,8 +5,7 @@
 **This assumes a basic knowledge of `git`, `npm` and usage of the `command line`.**
 
 **Please ensure you are running on an environment using [a v10.x release of Node](https://nodejs.org/en/).** As of writing, this is currently Node [v10.17.0](https://nodejs.org/download/release/v10.17.0/).
-
-Newer versions could result in a failing `yarn install` as they haven't been assessed just yet.
+Newer versions could result in a failing `npm install` as they haven't been assessed just yet.
 
 ### First steps:
 
@@ -16,17 +15,12 @@ Newer versions could result in a failing `yarn install` as they haven't been ass
 $ git clone https://github.com/WorldBrain/Memex
 ```
 
-**Install yarn:**
+**Run `npm install` to install dependencies**
 
-We recommend intalling the latest stable version of Yarn by following the instructions specific to your operating system on the [Yarn
-installation page](https://yarnpkg.com/en/docs/install).
-
-**Run `yarn` to install dependencies**
-
-in the cloned folder Memex run `yarn`, This could take a while....
+in the cloned folder Memex run `npm install`, This could take a while....
 
 ```sh
-$ yarn
+$ npm install
 ```
 
 **Clone [Storex](https://github.com/WorldBrain/storex) submodules that we depend on**
@@ -35,23 +29,23 @@ $ yarn
 git submodule update --init --recursive
 ```
 
-**Now run `yarn watch` to compile incremental builds**
+**Now run `npm run watch` to compile incremental builds**
 
 ```sh
-$ yarn watch
+$ npm run watch
 ```
 
 **You can also enable optional OS build notifications in watch mode**
 
 ```sh
-$ yarn watch:notif
+$ npm run watch:notif
 ```
 
 Subsequent development builds are sped up via use of caching. If any odd side-effects are encountered
 between builds, you can clear the cache to ensure your next build is completely fresh.
 
 ```sh
-$ yarn cache:clean
+$ npm run cache:clean
 ```
 
 ## Running The Extension
@@ -88,7 +82,7 @@ _Chrome:_
 3.  At this point, it is recommended to bookmark `Extensions` for ease of use in development
 4.  Check `developer mode` box
 5.  Click `Load unpacked extension...`
-6.  Now navigate to the folder where you cloned the repo and there should be a new folder named extension (this was created by [`yarn watch`]) go into this folder then click `select this folder`
+6.  Now navigate to the folder where you cloned the repo and there should be a new folder named extension (this was created by [`npm run watch`]) go into this folder then click `select this folder`
 7.  Everything should be all loaded! 😃
 8.  To view developer tools go to the [Extension Page](chrome://extensions/) and under _inspect views:_ click `background page`
 
@@ -99,9 +93,7 @@ _Firefox:_
 1.  Enter [about:debugging](about:debugging) into the address bar
 2.  Check the `Enable add-on debugging` box
 3.  Click `Load Temporary Add-on`
-4.  Now navigate to the folder where you cloned the repo and there should be a new folder named extension (this was created by [`yarn watch`]) go into this folder select the `manifest.json` file and then click `open`
-5.  Everything should be all loaded! 😃
-6.  To view the developer tools simply click `Debug` under the Worldbrain Extension in [about:debugging](about:debugging)
+4.  Now navigate to the folder where you cloned the repo and there should be a new folder named extension (this was created by [`npm run watch`]) go into this folder select the `manifest.json` file and then click `open`
 
 ## Creating your own branches to work on
 
@@ -204,21 +196,17 @@ This will automatically format all the styling for the code every time a commit 
 
 A web extension consists of a number of different scripts:
 
--   `background.js` always runs, in an 'empty invisible tab', listening for
-    messages and events.
--   `content_script.js` is loaded into every web page that is visited. It is
-    invisible from that web page's own scripts, and can talk to the background script.
--   **User Interfaces**, The UI's are set up and declared in the `src/manifest.json` file. At the moment these consist of the popup and options scripts.
+- `background.js` always runs, in an 'empty invisible tab', listening for
+  messages and events.
+- `content_script.js` is loaded into every web page that is visited. It is
+  invisible from that web page's own scripts, and can talk to the background script.
+- **User Interfaces**, The UI's are set up and declared in the `src/manifest.json` file. At the moment these consist of the popup and options scripts.
 
 Certain modules in the source code will end up in each of these scripts after
 being output from the build process, depending on the `import` trails throughout
 different modules. Each script is completely distinct from any other script. The main thing this means is you **should not** `import` from a module in the one script from any module in another script, or you end up duplicating the all the modules specific to one script in multiple other scripts in the build output. This is the main reason for our [`util/webextensionRPC`](./src/util/webextensionRPC.ts) module:
 
 We can setup remote functions (we sometimes call them "endpoints") with the `makeRemotelyCallable` export, then be able to remotely call them from other scripts with that `remoteFunction` export. This wraps around the WebExt [`runtime.sendMessage`](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/sendMessage) and related messaging APIs which afford interscript communication. Generally we setup endpoints via `makeRemotelyCallable` from the BG script and call them from UI scripts via `remoteFunction`, although there's nothing stopping you from doing it the other way. It just generally makes a more sense to contain a lot of the business logic in the BG script (it acts somewhat like our "backend server", being the only place the DB is ever interacted with), and keep the UI scripts concerned solely with managing UI state and rendering views.
-
-Besides these parts:
-[`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
-provides support for the `WebExtension/BrowserExt API` in order to make the same code run in different browsers (and to structure the callback mess).
 
 This API is available in Chrome/Chromium by default (under `window.chrome`) but is meant to be developed and standardized as it's own thing.
 
@@ -264,10 +252,10 @@ This allows users to import their whole browser history, however, due to slow sp
 
 This shows the settings page of the extension which includes (for the time being)
 
--   Blacklist
--   Acknowledgements
--   Privacy
--   Help Me Please
+- Blacklist
+- Acknowledgements
+- Privacy
+- Help Me Please
 
 #### **[src/overview/](./src/overview/)**: overview
 
@@ -279,10 +267,10 @@ See [The Docs](./src/overview/Readme.md) for more details.
 
 This extracts and stores information about the page in a given tab, such as:
 
--   The plain text of the page, mainly for the full-text
-    search index.
--   Metadata, such as its author, publication date, etc...
--   A screenshot for visual recognition.
+- The plain text of the page, mainly for the full-text
+  search index.
+- Metadata, such as its author, publication date, etc...
+- A screenshot for visual recognition.
 
 See [The Docs](./src/page-analysis/Readme.md) for more details.
 
@@ -290,10 +278,10 @@ See [The Docs](./src/page-analysis/Readme.md) for more details.
 
 The `popup` is a mini UI that pops up when you click on the worldbrain. It contains
 
--   search
--   pause
--   settings
--   feedback
+- search
+- pause
+- settings
+- feedback
 
 See [The Docs](./src/popup/Readme.md) for more details.
 
@@ -331,7 +319,7 @@ This initializes the user database using [PouchDB](https://pouchdb.com/)
 
 ## Dependencies
 
--   [react](https://reactjs.org/) - A Javascript component-based 'framework' (it's actually a library) used for the User Interface
--   [react-redux](https://github.com/reactjs/react-redux) - A global state handler that syncs with react to create a nice workflow.
--   [babel](https://babeljs.io/)
--   [webpack](https://webpack.js.org/)
+- [react](https://reactjs.org/) - A Javascript component-based 'framework' (it's actually a library) used for the User Interface
+- [react-redux](https://github.com/reactjs/react-redux) - A global state handler that syncs with react to create a nice workflow.
+- [babel](https://babeljs.io/)
+- [webpack](https://webpack.js.org/)

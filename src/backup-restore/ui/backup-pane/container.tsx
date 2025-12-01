@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import browser from 'webextension-polyfill'
+
 import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
 import { default as Overview } from './panes/overview'
@@ -7,15 +7,13 @@ import { default as RunningBackup } from './panes/running-backup'
 import { default as OnboardingWhere } from './panes/setup-location'
 import OnboardingHow from './panes/setup-manual-or-automatic'
 import { default as OnboardingSize } from './panes/setup-size'
-import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
+import LoadingBlock from '@worldbrain/memex-common/ts/common-ui/components/loading-block'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import RestoreWhere from 'src/backup-restore/ui/backup-pane/panes/restore-where'
 import RestoreRunning from 'src/backup-restore/ui/backup-pane/panes/restore-running'
 import type { UIServices } from 'src/services/ui/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from 'src/backup-restore/background/types'
-
-const styles = require('../styles.css')
 
 export const SCREENS = {
     overview: {
@@ -84,7 +82,7 @@ export default class BackupSettingsContainer extends Component<Props> {
         super(props)
 
         this.localBackupSettings = new BrowserSettingsStore(
-            browser.storage.local,
+            chrome.storage.local,
             { prefix: 'localBackup.' },
         )
     }

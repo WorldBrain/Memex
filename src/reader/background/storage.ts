@@ -2,14 +2,14 @@ import {
     StorageModule,
     StorageModuleConfig,
     StorageModuleConstructorArgs,
-} from '@worldbrain/storex-pattern-modules'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+} from '@worldbrain/storex-pattern-modules/ts'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import { ReadableData } from 'src/reader/types'
 // import Readability from 'readability/Readability'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/reader/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/reader/constants'
 
 export default class ReaderStorage extends StorageModule {
     static READER_COLL = COLLECTION_NAMES.readablePage

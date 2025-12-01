@@ -4,7 +4,7 @@ import {
     KEYBOARDSHORTCUTS_STORAGE_NAME,
 } from './constants'
 import { setLocalStorage } from 'src/util/storage'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 
 export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
     const defaults = KEYBOARDSHORTCUTS_DEFAULT_STATE
@@ -46,14 +46,14 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
                 key === 'createAnnotation'
                     ? 'createSharedAnnotation'
                     : key === 'createHighlight'
-                    ? 'createSharedHighlight'
-                    : key === 'addToCollection'
-                    ? 'createSharedAnnotationAndAddToCollection'
-                    : key === 'openDashboard'
-                    ? 'openDashboardInNewTab'
-                    : key === 'askAI'
-                    ? 'instaSummarize'
-                    : undefined,
+                      ? 'createSharedHighlight'
+                      : key === 'addToCollection'
+                        ? 'createSharedAnnotationAndAddToCollection'
+                        : key === 'openDashboard'
+                          ? 'openDashboardInNewTab'
+                          : key === 'askAI'
+                            ? 'instaSummarize'
+                            : undefined,
         }
     }
     return shortcuts as BaseKeyboardShortcuts

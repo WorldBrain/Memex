@@ -13,7 +13,7 @@ let analytics: Analytics
 //     !appKey ||
 //     !url ||
 //     (process.env.NODE_ENV === 'development' &&
-//         process.env.DEV_ANALYTICS !== 'true')
+//         import.meta.env.VITE_DEV_ANALYTICS !== 'true')
 // ) {
 analytics = new FakeAnalytics()
 // } else {

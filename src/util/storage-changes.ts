@@ -1,25 +1,28 @@
-import { Storage } from 'webextension-polyfill'
-
 export interface StorageChanges {
-    [key: string]: Storage.StorageChange
+    [key: string]: typeof chrome.storage.onChanged
 }
 
 export type StorageAreaName = 'sync' | 'local' | 'managed'
-export type StorageKeyListener = (vals: Storage.StorageChange) => void
+export type StorageKeyListener = (vals: typeof chrome.storage.onChanged) => void
 
 export interface Props {
-    storage: Storage.Static
+    storage: typeof chrome.storage
 }
 
 export class StorageChangesManager {
     private listeners: Map<StorageAreaName, Map<string, StorageKeyListener>>
-    private storage: Storage.Static
+    private storage: typeof chrome.storage
 
     constructor({ storage }: Props) {
         this.resetListeners()
         this.storage = storage
 
-        this.storage.onChanged.addListener(this.handleChanges)
+        this.storage.onChanged.addListener((changes) =>
+            this.handleChanges(
+                changes as StorageChanges,
+                'local' as StorageAreaName,
+            ),
+        )
     }
 
     /**

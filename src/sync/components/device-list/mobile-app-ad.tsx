@@ -1,18 +1,14 @@
 import React from 'react'
-
-const settingsStyle = require('src/options/settings/components/settings.css')
-const styles = require('./mobile-app-ad.css')
 import styled from 'styled-components'
 
 export interface Props {}
 
-const MobileAppAd: React.StatelessComponent<Props> = (props) => (
+const MobileAppAd: React.FC<Props> = (props) => (
     <StoreSection>
         <StoreImage
             onClick={() => {
                 window.open('https://apps.apple.com/app/id1471860331')
             }}
-            className={styles.downloadImg}
             src={'img/appStore.png'}
         />
         <StoreImage
@@ -21,7 +17,6 @@ const MobileAppAd: React.StatelessComponent<Props> = (props) => (
                     'https://play.google.com/store/apps/details?id=io.worldbrain',
                 )
             }}
-            className={styles.downloadImg}
             src={'img/googlePlay.png'}
         />
     </StoreSection>

@@ -1,7 +1,7 @@
 import expect from 'expect'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { getDexieHistory } from '@worldbrain/storex-backend-dexie/lib/schema'
-import { DexieSchema } from '@worldbrain/storex-backend-dexie/lib/types'
+import { getDexieHistory } from '@worldbrain/storex-backend-dexie/ts/schema'
+import { DexieSchema } from '@worldbrain/storex-backend-dexie/ts/types'
 import patchDirectLinksSchema from 'src/search/storage/dexie-schema'
 import { STORAGE_VERSIONS } from './constants'
 
@@ -35,8 +35,7 @@ describe('Storage initialization', () => {
             normalizeDexieHistory([
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -47,8 +46,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -60,8 +58,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -74,8 +71,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -91,8 +87,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -109,8 +104,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -127,8 +121,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -146,8 +139,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -167,8 +159,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -189,8 +180,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -212,8 +202,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -236,8 +225,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -260,8 +248,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -287,8 +274,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -315,8 +301,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -345,8 +330,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -375,8 +359,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -405,8 +388,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -435,8 +417,7 @@ describe('Storage initialization', () => {
                 },
                 {
                     schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
                         bookmarks: 'url, time',
                         favIcons: 'hostname',
@@ -486,8 +467,7 @@ describe('Storage initialization', () => {
                         notifications: 'id',
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         socialBookmarks: '++id, createdAt, postId',
                         socialPostListEntries: '++id, listId, postId',
                         socialPosts:
@@ -524,8 +504,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         sharedListMetadata: 'localId',
                         socialBookmarks: '++id, createdAt, postId',
@@ -564,8 +543,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         sharedAnnotationMetadata: 'localId, remoteId',
                         sharedListMetadata: 'localId',
@@ -605,8 +583,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
                         sharedAnnotationMetadata: 'localId, remoteId',
@@ -647,8 +624,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
                         sharedAnnotationMetadata: 'localId, remoteId',
@@ -690,8 +666,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
                         sharedAnnotationMetadata: 'localId, remoteId',
@@ -733,8 +708,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -779,8 +753,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -828,8 +801,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -877,8 +849,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -926,8 +897,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -975,8 +945,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1027,8 +996,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1077,8 +1045,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1127,8 +1094,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1177,8 +1143,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1227,8 +1192,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1279,8 +1243,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1331,8 +1294,7 @@ describe('Storage initialization', () => {
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1385,8 +1347,7 @@ describe('Storage initialization', () => {
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         pageListEntryDescriptions: '[listId+pageUrl]',
                         pageMetadata: '++id, normalizedPageUrl',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
@@ -1441,8 +1402,7 @@ describe('Storage initialization', () => {
                             '[listId+pageUrl], listId, pageUrl, createdAt',
                         pageListEntryDescriptions: '[listId+pageUrl]',
                         pageMetadata: '++id, normalizedPageUrl',
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',

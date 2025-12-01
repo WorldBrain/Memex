@@ -1,1 +1,1 @@
-export * from '@worldbrain/memex-common/lib/browser-extension/keyboard-shortcuts/data'
+export * from '@worldbrain/memex-common/ts/browser-extension/keyboard-shortcuts/data'

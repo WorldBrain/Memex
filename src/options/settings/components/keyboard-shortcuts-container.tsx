@@ -17,8 +17,8 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
 
 async function writeShortcutState(state: State) {
     await setKeyboardShortcutsState(state)
@@ -109,7 +109,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         if (['Escape', 'Backspace'].includes(e.key)) {
             this.setState(
                 (state) =>
-                    ({ [name]: { ...state[name], shortcut: '' } } as any),
+                    ({ [name]: { ...state[name], shortcut: '' } }) as any,
                 () => writeShortcutState({ ...this.state }),
             )
             return
@@ -122,7 +122,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         }
 
         this.setState(
-            (state) => ({ [name]: { ...state[name], shortcut } } as any),
+            (state) => ({ [name]: { ...state[name], shortcut } }) as any,
             () => writeShortcutState({ ...this.state }),
         )
     }

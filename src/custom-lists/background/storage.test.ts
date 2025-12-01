@@ -1,12 +1,12 @@
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import type { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import { buildMaterializedPath } from 'src/content-sharing/utils'
 
 async function insertTestData({
@@ -53,12 +53,10 @@ async function insertTestData({
 }
 
 async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
-    const {
-        backgroundModules,
-        storageManager,
-    } = await setupBackgroundIntegrationTest({
-        // includePostSyncProcessor: true,
-    })
+    const { backgroundModules, storageManager } =
+        await setupBackgroundIntegrationTest({
+            // includePostSyncProcessor: true,
+        })
     const customLists = backgroundModules.customLists
 
     // NOTE: Each test starts creating lists at ID `1`
@@ -337,14 +335,10 @@ describe('Custom List Integrations', () => {
         })
 
         test('should not be able to create inbox list entries for pages once already read', async () => {
-            const {
-                tags,
-                bookmarks,
-                customLists,
-                directLinking,
-            } = await setupTest({
-                skipTestData: true,
-            })
+            const { tags, bookmarks, customLists, directLinking } =
+                await setupTest({
+                    skipTestData: true,
+                })
             const url1 = 'https://test.com'
             const url2 = 'https://test.com/sub'
             const url3 = 'https://worldbrain.com/sub'
@@ -436,9 +430,8 @@ describe('Custom List Integrations', () => {
             setMockFetchPage(url4)
             await checkInboxEntry(url3, { shouldExist: false })
             await checkInboxEntry(url4, { shouldExist: false })
-            const {
-                localListId: testListId,
-            } = await customLists.createCustomList(DATA.LIST_1)
+            const { localListId: testListId } =
+                await customLists.createCustomList(DATA.LIST_1)
             await customLists.insertPageToList({ id: testListId, url: url4 })
             await checkInboxEntry(url4, { shouldExist: true })
             await customLists.removePageFromList({

@@ -1,5 +1,5 @@
-import StorageManager from '@worldbrain/storex'
-import type { Storage } from 'webextension-polyfill'
+import StorageManager from '@worldbrain/storex/ts'
+
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import type { SyncSettingValue, RemoteSyncSettingsInterface } from './types'
 import SyncSettingsStorage from './storage'
@@ -9,7 +9,7 @@ import { SETTING_NAMES } from './constants'
 
 export interface Dependencies {
     storageManager: StorageManager
-    localBrowserStorage: Storage.LocalStorageArea
+    localBrowserStorage: chrome.storage.local
 }
 
 export class SyncSettingsBackground implements LimitedBrowserStorage {
@@ -50,6 +50,7 @@ export class SyncSettingsBackground implements LimitedBrowserStorage {
     }
 
     get: LimitedBrowserStorage['get'] = async (names) => {
+        console.log('storage', this.storage)
         if (typeof names === 'string') {
             const value = await this.storage.getSetting(names)
 

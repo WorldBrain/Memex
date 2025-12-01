@@ -1,15 +1,10 @@
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 import { EventEmitter } from 'events'
 
 import BackupStorage from '../../storage'
 import type { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
-import {
-    USERS_COLL,
-    POSTS_COLL,
-    BMS_COLL,
-} from 'src/social-integration/constants'
 import decodeBlob from 'src/util/decode-blob'
 import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/storage/utils'
 import * as Raven from 'src/util/raven'
@@ -66,13 +61,11 @@ export class BackupRestoreProcedure {
                 await this._clearDatabase()
                 await this._blockDatabase()
 
-                const [
-                    changeSetTimestamps,
-                    imageTimestamps,
-                ] = await Promise.all([
-                    this._listBackupCollection('change-sets'),
-                    this._listBackupCollection('images'),
-                ])
+                const [changeSetTimestamps, imageTimestamps] =
+                    await Promise.all([
+                        this._listBackupCollection('change-sets'),
+                        this._listBackupCollection('images'),
+                    ])
 
                 /* Backup file not found */
                 if (!changeSetTimestamps.length) {
@@ -254,9 +247,8 @@ export class BackupRestoreProcedure {
 
     _getChangeWhere(change: ObjectChange) {
         // TODO: What if none of these are true?
-        const collectionDef = this.storageManager.registry.collections[
-            change.collection
-        ]
+        const collectionDef =
+            this.storageManager.registry.collections[change.collection]
         const pkIndex = collectionDef.pkIndex
         if (pkIndex instanceof Array) {
             return zipObject(

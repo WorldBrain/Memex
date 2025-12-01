@@ -2,35 +2,26 @@
 DOM manipulation helper functions
 */
 import React from 'react'
-import ReactDOM from 'react-dom'
 import styled, { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
-import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
-import { Browser, runtime } from 'webextension-polyfill'
-import YoutubeButtonMenu from './components/youtubeActionBar'
-import { sleepPromise } from 'src/util/promises'
-import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import {
-    SyncSettingsStore,
-    createSyncSettingsStore,
-} from 'src/sync-settings/util'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
+import { SyncSettingsStore } from 'src/sync-settings/util'
 import * as constants from './constants'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { blobToDataURL } from 'src/util/blob-utils'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { createRoot } from 'react-dom/client'
 
 interface RootProps {
     rootEl: HTMLElement
     syncSettings: SyncSettingsStore<'betaFeatures'>
     annotationsFunctions: any
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     contentScriptsBG: ContentScriptsInterface<'caller'>
     imageUrl: string
     imageData: string
@@ -146,7 +137,7 @@ class Root extends React.Component<RootProps, RootState> {
 export const handleRenderImgActionButtons = async (
     syncSettings: SyncSettingsStore<'betaFeatures'>,
     annotationsFunctions: any,
-    browserAPIs: Browser,
+    browserAPIs: typeof chrome,
     imageElements: HTMLCollectionOf<HTMLImageElement>,
     contentScriptsBG: ContentScriptsInterface<'caller'>,
 ) => {
@@ -191,6 +182,8 @@ export const handleRenderImgActionButtons = async (
         )
         wrapperSpan.appendChild(target)
     }
+
+    let roots = new Map<number, ReturnType<typeof createRoot>>()
 
     for (let i = 0; i < imageElements.length; i++) {
         const target = document.createElement('span')
@@ -269,7 +262,9 @@ export const handleRenderImgActionButtons = async (
         element.onmouseenter = () => {
             if (shouldShow) {
                 renderTimeout = setTimeout(() => {
-                    ReactDOM.render(
+                    const root = createRoot(target)
+                    roots.set(i, root)
+                    root.render(
                         <RootPosContainer
                             top={elementTopRightY}
                             right={windowWidth - elementTopRightX}
@@ -283,11 +278,11 @@ export const handleRenderImgActionButtons = async (
                                 imageUrl={imageUrl}
                                 imageData={imageData}
                                 removeElement={() => {
-                                    ReactDOM.unmountComponentAtNode(target)
+                                    root.unmount()
                                     shouldShow = false
                                 }}
                                 disableImageInjection={async () => {
-                                    ReactDOM.unmountComponentAtNode(target)
+                                    root.unmount()
                                     await syncSettings.betaFeatures.set(
                                         'imageOverlay',
                                         false,
@@ -306,7 +301,11 @@ export const handleRenderImgActionButtons = async (
             clearTimeout(renderTimeout) // Cancel the scheduled rendering
             // Check if the related target is a descendant of the main target
             if (!target.contains(event.relatedTarget as Node)) {
-                ReactDOM.unmountComponentAtNode(target)
+                const root = roots.get(i)
+                if (root) {
+                    root.unmount()
+                    roots.delete(i)
+                }
             }
         }
     }

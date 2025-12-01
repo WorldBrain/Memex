@@ -15,7 +15,7 @@ import type {
     AnnotationInstanceRefs,
 } from './types'
 import ConfirmModal from 'src/common-ui/components/ConfirmModal'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import {
@@ -24,11 +24,11 @@ import {
 } from 'src/annotations/components/AnnotationEdit'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
 import { Rnd } from 'react-rnd'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import type { Props as SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
@@ -47,14 +47,14 @@ import type {
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { generateAnnotationCardInstanceId } from './utils'
 import type { AnnotationCardInstanceLocation } from '../types'
-import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
-import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
-import ImagePreviewModal from '@worldbrain/memex-common/lib/common-ui/image-preview-modal'
-import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import type { YoutubeService } from '@worldbrain/memex-common/ts/services/youtube'
+import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/ts/common-ui/components/block-content'
+import ImagePreviewModal from '@worldbrain/memex-common/ts/common-ui/image-preview-modal'
+import type { YoutubePlayer } from '@worldbrain/memex-common/ts/services/youtube/types'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
@@ -63,9 +63,9 @@ import PageCitations from 'src/citations/PageCitations'
 import {
     ChatHistoryItem,
     PromptData,
-} from '@worldbrain/memex-common/lib/summarization/types'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+} from '@worldbrain/memex-common/ts/summarization/types'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
+import { HighlightRendererInterface } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -85,7 +85,7 @@ export interface Props extends SidebarContainerOptions {
 }
 
 export class AnnotationsSidebarContainer<
-    P extends Props = Props
+    P extends Props = Props,
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
     protected sidebarRef = React.createRef<AnnotationsSidebarComponent>()
     private annotationInstanceRefs: {
@@ -101,15 +101,16 @@ export class AnnotationsSidebarContainer<
                 copyToClipboard,
                 copyPasterBG: props.copyPasterBG,
                 focusCreateForm: () => {
-                    ;(this.sidebarRef
-                        ?.current as AnnotationsSidebarComponent)?.focusCreateForm()
+                    ;(
+                        this.sidebarRef?.current as AnnotationsSidebarComponent
+                    )?.focusCreateForm()
                 },
                 focusEditNoteForm: (annotationId) => {
-                    ;(this.sidebarRef?.current[
-                        'instanceRef'
-                    ] as AnnotationsSidebarComponent)?.focusEditNoteForm(
-                        annotationId,
-                    )
+                    ;(
+                        this.sidebarRef?.current[
+                            'instanceRef'
+                        ] as AnnotationsSidebarComponent
+                    )?.focusEditNoteForm(annotationId)
                 },
                 imageSupportBG: props.imageSupport,
                 bgScriptBG: props.bgScriptBG,
@@ -277,9 +278,8 @@ export class AnnotationsSidebarContainer<
             annotation,
             instanceLocation,
         )
-        const annotationCardInstance = this.state.annotationCardInstances[
-            cardId
-        ]
+        const annotationCardInstance =
+            this.state.annotationCardInstances[cardId]
         const unifiedAnnotationId = annotation.unifiedId
         return {
             onEditIconClick: () =>
@@ -355,9 +355,8 @@ export class AnnotationsSidebarContainer<
             annotation,
             instanceLocation,
         )
-        const annotationCardInstance = this.state.annotationCardInstances[
-            cardId
-        ]
+        const annotationCardInstance =
+            this.state.annotationCardInstances[cardId]
         const unifiedAnnotationId = annotation.unifiedId
 
         return {
@@ -378,29 +377,28 @@ export class AnnotationsSidebarContainer<
                     body,
                     annotation,
                 }),
-            onEditConfirm: (showExternalConfirmations) => (
-                shouldShare,
-                isProtected,
-                opts,
-            ) => {
-                const showConfirmation =
-                    showExternalConfirmations &&
-                    annotation.privacyLevel >= AnnotationPrivacyLevels.SHARED &&
-                    !shouldShare
-                return this.processEvent(
-                    showConfirmation
-                        ? 'setPrivatizeNoteConfirmArgs'
-                        : 'editAnnotation',
-                    {
-                        instanceLocation,
-                        unifiedAnnotationId,
-                        shouldShare,
-                        isProtected,
-                        mainBtnPressed: opts?.mainBtnPressed,
-                        keepListsIfUnsharing: opts?.keepListsIfUnsharing,
-                    },
-                )
-            },
+            onEditConfirm:
+                (showExternalConfirmations) =>
+                (shouldShare, isProtected, opts) => {
+                    const showConfirmation =
+                        showExternalConfirmations &&
+                        annotation.privacyLevel >=
+                            AnnotationPrivacyLevels.SHARED &&
+                        !shouldShare
+                    return this.processEvent(
+                        showConfirmation
+                            ? 'setPrivatizeNoteConfirmArgs'
+                            : 'editAnnotation',
+                        {
+                            instanceLocation,
+                            unifiedAnnotationId,
+                            shouldShare,
+                            isProtected,
+                            mainBtnPressed: opts?.mainBtnPressed,
+                            keepListsIfUnsharing: opts?.keepListsIfUnsharing,
+                        },
+                    )
+                },
             setEditing: () => {
                 this.processEvent('setAnnotationEditMode', {
                     instanceLocation,
@@ -459,9 +457,10 @@ export class AnnotationsSidebarContainer<
                     )}
                     bgScriptBG={this.props.bgScriptBG}
                     onListFocus={(listId: UnifiedList['localId']) => {
-                        const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
-                            listId,
-                        ).unifiedId
+                        const unifiedListId: UnifiedList['unifiedId'] =
+                            this.props.annotationsCache.getListByLocalId(
+                                listId,
+                            ).unifiedId
 
                         this.processEvent('setSelectedList', { unifiedListId })
                     }}
@@ -612,86 +611,79 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    private renderCopyPasterManagerForAnnotation = (
-        instanceLocation: AnnotationCardInstanceLocation,
-    ) => (unifiedId: UnifiedAnnotation['unifiedId']) => {
-        const annotation = this.props.annotationsCache.annotations.byId[
-            unifiedId
-        ]
-        if (!annotation.localId) {
-            return
+    private renderCopyPasterManagerForAnnotation =
+        (instanceLocation: AnnotationCardInstanceLocation) =>
+        (unifiedId: UnifiedAnnotation['unifiedId']) => {
+            const annotation =
+                this.props.annotationsCache.annotations.byId[unifiedId]
+            if (!annotation.localId) {
+                return
+            }
+            return (
+                <>
+                    <PageCitations
+                        annotationUrls={[annotation.localId]}
+                        copyPasterProps={{
+                            copyPasterBG: this.props.copyPasterBG,
+                            getRootElement: this.props.getRootElement,
+                        }}
+                        pageLinkProps={{
+                            authBG: this.props.authBG,
+                            analyticsBG: this.props.analyticsBG,
+                            annotationsCache: this.props.annotationsCache,
+                            contentSharingBG: this.props.contentSharingBG,
+                            contentSharingByTabsBG:
+                                this.props.contentSharingByTabsBG,
+                            copyToClipboard: this.props.copyToClipboard,
+                            fullPageUrl: this.state.fullPageUrl,
+                            getRootElement: this.props.getRootElement,
+                        }}
+                        annotationShareProps={{
+                            isForAnnotation: true,
+                            postShareHook: (state, opts) =>
+                                this.processEvent('updateAnnotationShareInfo', {
+                                    privacyLevel: state.privacyLevel,
+                                    unifiedAnnotationId: annotation.unifiedId,
+                                    keepListsIfUnsharing: true,
+                                }),
+                            annotationsCache: this.props.annotationsCache,
+                        }}
+                        getRootElement={this.props.getRootElement}
+                        syncSettingsBG={this.props.syncSettingsBG}
+                    />
+                </>
+            )
         }
-        return (
-            <>
-                <PageCitations
-                    annotationUrls={[annotation.localId]}
-                    copyPasterProps={{
-                        copyPasterBG: this.props.copyPasterBG,
-                        getRootElement: this.props.getRootElement,
-                    }}
-                    pageLinkProps={{
-                        authBG: this.props.authBG,
-                        analyticsBG: this.props.analyticsBG,
-                        annotationsCache: this.props.annotationsCache,
-                        contentSharingBG: this.props.contentSharingBG,
-                        contentSharingByTabsBG: this.props
-                            .contentSharingByTabsBG,
-                        copyToClipboard: this.props.copyToClipboard,
-                        fullPageUrl: this.state.fullPageUrl,
-                        getRootElement: this.props.getRootElement,
-                    }}
-                    annotationShareProps={{
-                        isForAnnotation: true,
-                        postShareHook: (state, opts) =>
-                            this.processEvent('updateAnnotationShareInfo', {
-                                privacyLevel: state.privacyLevel,
-                                unifiedAnnotationId: annotation.unifiedId,
-                                keepListsIfUnsharing: true,
-                            }),
-                        annotationsCache: this.props.annotationsCache,
+
+    private renderListPickerForAnnotation =
+        (instanceLocation: AnnotationCardInstanceLocation) =>
+        (
+            unifiedId: UnifiedAnnotation['unifiedId'],
+            closePicker: () => void,
+        ) => {
+            const annotation =
+                this.props.annotationsCache.annotations.byId[unifiedId]
+
+            return (
+                <CollectionPicker
+                    {...this.getSpacePickerPropsForAnnot({
+                        annotation,
+                    })}
+                    bgScriptBG={this.props.bgScriptBG}
+                    closePicker={closePicker}
+                    onListFocus={(listId: UnifiedList['localId']) => {
+                        const unifiedListId: UnifiedList['unifiedId'] =
+                            this.props.annotationsCache.getListByLocalId(
+                                listId,
+                            ).unifiedId
+
+                        this.processEvent('setSelectedList', { unifiedListId })
+                        closePicker()
                     }}
                     getRootElement={this.props.getRootElement}
-                    syncSettingsBG={this.props.syncSettingsBG}
                 />
-                {/* <PageNotesCopyPaster
-                    copyPasterBG={this.props.copyPaster}
-                    annotationUrls={[annotation.localId]}
-                    normalizedPageUrls={[normalizeUrl(this.state.fullPageUrl)]}
-                    getRootElement={this.props.getRootElement}
-                /> */}
-            </>
-        )
-    }
-
-    private renderListPickerForAnnotation = (
-        instanceLocation: AnnotationCardInstanceLocation,
-    ) => (
-        unifiedId: UnifiedAnnotation['unifiedId'],
-        closePicker: () => void,
-    ) => {
-        const annotation = this.props.annotationsCache.annotations.byId[
-            unifiedId
-        ]
-
-        return (
-            <CollectionPicker
-                {...this.getSpacePickerPropsForAnnot({
-                    annotation,
-                })}
-                bgScriptBG={this.props.bgScriptBG}
-                closePicker={closePicker}
-                onListFocus={(listId: UnifiedList['localId']) => {
-                    const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
-                        listId,
-                    ).unifiedId
-
-                    this.processEvent('setSelectedList', { unifiedListId })
-                    closePicker()
-                }}
-                getRootElement={this.props.getRootElement}
-            />
-        )
-    }
+            )
+        }
     private renderListPickerForBulkEdit = () => {
         return (
             <CollectionPicker
@@ -717,9 +709,10 @@ export class AnnotationsSidebarContainer<
                     })
                 }
                 onListFocus={(listId: UnifiedList['localId']) => {
-                    const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
-                        listId,
-                    ).unifiedId
+                    const unifiedListId: UnifiedList['unifiedId'] =
+                        this.props.annotationsCache.getListByLocalId(
+                            listId,
+                        ).unifiedId
 
                     this.processEvent('setSelectedList', { unifiedListId })
                 }}
@@ -736,56 +729,57 @@ export class AnnotationsSidebarContainer<
             )
             .filter((listId) => listId != null)
 
-    private renderShareMenuForAnnotation = () => (
-        unifiedId: UnifiedAnnotation['unifiedId'],
-    ) => {
-        const annotation = this.props.annotationsCache.annotations.byId[
-            unifiedId
-        ]
-        if (!annotation.localId) {
-            return
-        }
+    private renderShareMenuForAnnotation =
+        () => (unifiedId: UnifiedAnnotation['unifiedId']) => {
+            const annotation =
+                this.props.annotationsCache.annotations.byId[unifiedId]
+            if (!annotation.localId) {
+                return
+            }
 
-        return (
-            <SingleNoteShareMenu
-                getRemoteListIdForLocalId={(localListId) =>
-                    this.props.annotationsCache.getListByLocalId(localListId)
-                        ?.remoteId ?? null
-                }
-                isShared={[
-                    AnnotationPrivacyLevels.SHARED,
-                    AnnotationPrivacyLevels.SHARED_PROTECTED,
-                ].includes(annotation.privacyLevel)}
-                shareImmediately={this.state.immediatelyShareNotes}
-                contentSharingBG={this.props.contentSharingBG}
-                annotationData={annotation}
-                analyticsBG={this.props.analyticsBG}
-                annotationsBG={this.props.annotationsBG}
-                copyLink={(link) => this.processEvent('copyNoteLink', { link })}
-                annotationUrl={annotation.localId}
-                postShareHook={(state, opts) =>
-                    this.processEvent('updateAnnotationShareInfo', {
-                        privacyLevel: state.privacyLevel,
-                        unifiedAnnotationId: annotation.unifiedId,
-                        keepListsIfUnsharing: true,
-                    })
-                }
-                syncSettingsBG={this.props.syncSettingsBG}
-                spacePickerProps={this.getSpacePickerPropsForAnnot({
-                    annotation,
-                })}
-                showLink={
-                    [
+            return (
+                <SingleNoteShareMenu
+                    getRemoteListIdForLocalId={(localListId) =>
+                        this.props.annotationsCache.getListByLocalId(
+                            localListId,
+                        )?.remoteId ?? null
+                    }
+                    isShared={[
                         AnnotationPrivacyLevels.SHARED,
                         AnnotationPrivacyLevels.SHARED_PROTECTED,
-                    ].includes(annotation.privacyLevel) ||
-                    this.getRemoteIdsForCacheIds(annotation.unifiedListIds)
-                        .length !== null
-                }
-                getRootElement={this.props.getRootElement}
-            />
-        )
-    }
+                    ].includes(annotation.privacyLevel)}
+                    shareImmediately={this.state.immediatelyShareNotes}
+                    contentSharingBG={this.props.contentSharingBG}
+                    annotationData={annotation}
+                    analyticsBG={this.props.analyticsBG}
+                    annotationsBG={this.props.annotationsBG}
+                    copyLink={(link) =>
+                        this.processEvent('copyNoteLink', { link })
+                    }
+                    annotationUrl={annotation.localId}
+                    postShareHook={(state, opts) =>
+                        this.processEvent('updateAnnotationShareInfo', {
+                            privacyLevel: state.privacyLevel,
+                            unifiedAnnotationId: annotation.unifiedId,
+                            keepListsIfUnsharing: true,
+                        })
+                    }
+                    syncSettingsBG={this.props.syncSettingsBG}
+                    spacePickerProps={this.getSpacePickerPropsForAnnot({
+                        annotation,
+                    })}
+                    showLink={
+                        [
+                            AnnotationPrivacyLevels.SHARED,
+                            AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        ].includes(annotation.privacyLevel) ||
+                        this.getRemoteIdsForCacheIds(annotation.unifiedListIds)
+                            .length !== null
+                    }
+                    getRootElement={this.props.getRootElement}
+                />
+            )
+        }
 
     protected renderModals() {
         const {
@@ -817,7 +811,8 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('editAnnotation', {
                                     ...confirmPrivatizeNoteArgs,
                                     keepListsIfUnsharing: !affirmative,
-                                })}
+                                })
+                            }
                         />
                     </ConfirmModal>
                 )}
@@ -843,7 +838,8 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('updateListsForAnnotation', {
                                     ...confirmSelectNoteSpaceArgs,
                                     options: { protectAnnotation: affirmative },
-                                })}
+                                })
+                            }
                         />
                     </ConfirmModal>
                 )}
@@ -975,6 +971,7 @@ export class AnnotationsSidebarContainer<
             left: 'unset',
             zIndex: 3,
         } as const
+
 
         return (
             <ThemeProvider theme={this.props.theme}>
@@ -1177,7 +1174,8 @@ export class AnnotationsSidebarContainer<
                                         {
                                             added: null,
                                             deleted: spaceId,
-                                            unifiedAnnotationId: unifiedAnnotationId,
+                                            unifiedAnnotationId:
+                                                unifiedAnnotationId,
                                         },
                                     )
                                 }
@@ -1190,7 +1188,8 @@ export class AnnotationsSidebarContainer<
                                     'addNewSpaceViaWikiLinksEditNote',
                                     {
                                         spaceName: spaceName,
-                                        unifiedAnnotationId: unifiedAnnotationId,
+                                        unifiedAnnotationId:
+                                            unifiedAnnotationId,
                                     },
                                 )
                             }}
@@ -1198,114 +1197,120 @@ export class AnnotationsSidebarContainer<
                                 this.state.spaceSearchSuggestions
                             }
                             highlightColorSettings={this.state.highlightColors}
-                            initGetReplyEditProps={(sharedListReference) => (
-                                replyReference,
-                                annotationReference,
-                            ) => ({
-                                imageSupport: this.props.imageSupport,
-                                isDeleting: this.state.replyDeleteStates[
-                                    replyReference.id
-                                ]?.isDeleting,
-                                isEditing: this.state.replyEditStates[
-                                    replyReference.id
-                                ]?.isEditing,
-                                isHovering: this.state.replyHoverStates[
-                                    replyReference.id
-                                ]?.isHovering,
-                                isOwner:
-                                    this.state.conversations[
-                                        (this
-                                            .logic as SidebarContainerLogic).buildConversationId(
-                                            annotationReference.id,
-                                            sharedListReference,
+                            initGetReplyEditProps={(sharedListReference) =>
+                                (replyReference, annotationReference) => ({
+                                    imageSupport: this.props.imageSupport,
+                                    isDeleting:
+                                        this.state.replyDeleteStates[
+                                            replyReference.id
+                                        ]?.isDeleting,
+                                    isEditing:
+                                        this.state.replyEditStates[
+                                            replyReference.id
+                                        ]?.isEditing,
+                                    isHovering:
+                                        this.state.replyHoverStates[
+                                            replyReference.id
+                                        ]?.isHovering,
+                                    isOwner:
+                                        this.state.conversations[
+                                            (
+                                                this
+                                                    .logic as SidebarContainerLogic
+                                            ).buildConversationId(
+                                                annotationReference.id,
+                                                sharedListReference,
+                                            )
+                                        ].replies.find(
+                                            (reply) =>
+                                                reply.reference.id ===
+                                                replyReference.id,
+                                        )?.userReference?.id ===
+                                        this.state.currentUserId,
+                                    comment:
+                                        this.state.replyEditStates[
+                                            replyReference.id
+                                        ]?.text ?? '',
+                                    setAnnotationDeleting:
+                                        (isDeleting) => (event) =>
+                                            this.processEvent(
+                                                'setReplyToAnnotationDeleting',
+                                                {
+                                                    isDeleting,
+                                                    replyReference,
+                                                },
+                                            ),
+                                    setAnnotationEditing: () => {
+                                        const isEditingState =
+                                            !this.state.replyEditStates[
+                                                replyReference.id
+                                            ]?.isEditing
+                                        this.processEvent(
+                                            'setReplyToAnnotationEditing',
+                                            {
+                                                isEditing: isEditingState,
+                                                replyReference,
+                                            },
                                         )
-                                    ].replies.find(
-                                        (reply) =>
-                                            reply.reference.id ===
-                                            replyReference.id,
-                                    )?.userReference?.id ===
-                                    this.state.currentUserId,
-                                comment:
-                                    this.state.replyEditStates[
-                                        replyReference.id
-                                    ]?.text ?? '',
-                                setAnnotationDeleting: (isDeleting) => (
-                                    event,
-                                ) =>
-                                    this.processEvent(
-                                        'setReplyToAnnotationDeleting',
-                                        {
-                                            isDeleting,
-                                            replyReference,
+                                    },
+                                    setEditing: () => {
+                                        const isEditingState =
+                                            !this.state.replyEditStates[
+                                                replyReference.id
+                                            ]?.isEditing
+                                        this.processEvent(
+                                            'setReplyToAnnotationEditing',
+                                            {
+                                                isEditing: isEditingState,
+                                                replyReference,
+                                            },
+                                        )
+                                    },
+                                    setAnnotationHovering:
+                                        (isHovering) => (event) => {
+                                            this.processEvent(
+                                                'setReplyToAnnotationHovering',
+                                                {
+                                                    isHovering,
+                                                    replyReference,
+                                                },
+                                            )
                                         },
-                                    ),
-                                setAnnotationEditing: () => {
-                                    const isEditingState = !this.state
-                                        .replyEditStates[replyReference.id]
-                                        ?.isEditing
-                                    this.processEvent(
-                                        'setReplyToAnnotationEditing',
-                                        {
-                                            isEditing: isEditingState,
-                                            replyReference,
-                                        },
-                                    )
-                                },
-                                setEditing: () => {
-                                    const isEditingState = !this.state
-                                        .replyEditStates[replyReference.id]
-                                        ?.isEditing
-                                    this.processEvent(
-                                        'setReplyToAnnotationEditing',
-                                        {
-                                            isEditing: isEditingState,
-                                            replyReference,
-                                        },
-                                    )
-                                },
-                                setAnnotationHovering: (isHovering) => (
-                                    event,
-                                ) => {
-                                    this.processEvent(
-                                        'setReplyToAnnotationHovering',
-                                        {
-                                            isHovering,
-                                            replyReference,
-                                        },
-                                    )
-                                },
-                                onCommentChange: (comment) =>
-                                    this.processEvent('editReplyToAnnotation', {
-                                        replyText: comment,
-                                        replyReference,
-                                    }),
-                                onDeleteConfim: () =>
-                                    this.processEvent(
-                                        'confirmDeleteReplyToAnnotation',
-                                        {
-                                            replyReference,
-                                            annotationReference,
-                                            sharedListReference,
-                                        },
-                                    ),
-                                onEditConfirm: () => () =>
-                                    this.processEvent(
-                                        'confirmEditReplyToAnnotation',
-                                        {
-                                            replyReference,
-                                            annotationReference,
-                                            sharedListReference,
-                                        },
-                                    ),
-                                onEditCancel: () =>
-                                    this.processEvent(
-                                        'setReplyToAnnotationEditing',
-                                        {
-                                            isEditing: false,
-                                            replyReference,
-                                        },
-                                    ),
-                            })}
+                                    onCommentChange: (comment) =>
+                                        this.processEvent(
+                                            'editReplyToAnnotation',
+                                            {
+                                                replyText: comment,
+                                                replyReference,
+                                            },
+                                        ),
+                                    onDeleteConfim: () =>
+                                        this.processEvent(
+                                            'confirmDeleteReplyToAnnotation',
+                                            {
+                                                replyReference,
+                                                annotationReference,
+                                                sharedListReference,
+                                            },
+                                        ),
+                                    onEditConfirm: () => () =>
+                                        this.processEvent(
+                                            'confirmEditReplyToAnnotation',
+                                            {
+                                                replyReference,
+                                                annotationReference,
+                                                sharedListReference,
+                                            },
+                                        ),
+                                    onEditCancel: () =>
+                                        this.processEvent(
+                                            'setReplyToAnnotationEditing',
+                                            {
+                                                isEditing: false,
+                                                replyReference,
+                                            },
+                                        ),
+                                })}
                             events={this.props.events}
                             youtubeTranscriptSummary={
                                 this.state.youtubeTranscriptSummary
@@ -1344,9 +1349,10 @@ export class AnnotationsSidebarContainer<
                                 })
                             }
                             onLocalListSelect={async (localListId) => {
-                                const unifiedList = this.props.annotationsCache.getListByLocalId(
-                                    localListId,
-                                )
+                                const unifiedList =
+                                    this.props.annotationsCache.getListByLocalId(
+                                        localListId,
+                                    )
                                 if (unifiedList != null) {
                                     await this.processEvent('setSelectedList', {
                                         unifiedListId: unifiedList.unifiedId,
@@ -1498,14 +1504,15 @@ export class AnnotationsSidebarContainer<
                                 this.state.secondarySearchState === 'running'
                             }
                             setActiveAnnotation={(
-                                unifiedAnnotationId,
-                                source,
-                            ) => () => {
-                                this.processEvent('setActiveAnnotation', {
                                     unifiedAnnotationId,
-                                    source: source,
-                                })
-                            }}
+                                    source,
+                                ) =>
+                                () => {
+                                    this.processEvent('setActiveAnnotation', {
+                                        unifiedAnnotationId,
+                                        source: source,
+                                    })
+                                }}
                             setPopoutsActive={(isActive) => {
                                 this.processEvent('setPopoutsActive', isActive)
                             }}
@@ -1897,7 +1904,13 @@ const ContainerStyled = styled.div<{
             : props.theme.colors.black};
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
+        'liga' off;
     box-sizing: content-box;
     right: ${(props) =>
         props.rightPosition ? props.rightPosition + 'px' : TOOLTIP_WIDTH};
@@ -1941,7 +1954,6 @@ const ContainerStyled = styled.div<{
                 ${(props) =>
                     props.theme.borderStyles.borderLineColorBigElements};
         `};
-
 
     scrollbar-width: none;
     ${(props) =>

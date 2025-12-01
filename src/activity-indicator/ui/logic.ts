@@ -1,4 +1,4 @@
-import { UILogic, UIEventHandler, UIEvent } from 'ui-logic-core'
+import { UILogic, UIEventHandler, UIEvent } from 'ui-logic-core/ts'
 import type { ActivityIndicatorInterface } from '../background'
 
 export interface Dependencies {
@@ -41,7 +41,8 @@ export default class Logic extends UILogic<State, Events> {
     ///// FOR THE INSTANCE OF THE SIDEBAR, DON'T FORGET TO UPDATE IT TOO!
 
     init: EventHandler<'init'> = async () => {
-        const activityStatus = await this.dependencies.activityIndicatorBG.checkActivityStatus()
+        const activityStatus =
+            await this.dependencies.activityIndicatorBG.checkActivityStatus()
 
         this.emitMutation({
             hasFeedActivity: { $set: activityStatus === 'has-unseen' },

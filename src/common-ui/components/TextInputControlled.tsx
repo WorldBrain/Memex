@@ -21,7 +21,7 @@
 // of HTML elements that this event should come from. (real event is on shadow root, but path will
 // indicate the intended element)
 import * as React from 'react'
-const matchAll = require('string.prototype.matchall')
+import matchAll from 'string.prototype.matchall'
 
 type ReTargetedTextElementEvent = React.KeyboardEvent<
     HTMLTextAreaElement & HTMLInputElement
@@ -157,7 +157,7 @@ class TextInputControlled extends React.Component<
             start: this.textElement.selectionStart,
             end: this.textElement.selectionEnd,
             direction: this.textElement.selectionDirection,
-        } as Selection)
+        }) as Selection
 
     getStateFromDom = () => ({
         selection: this.getSelectionFromDom(),
@@ -493,10 +493,8 @@ export class SelectionModifiers {
     }
 
     static moveSelectionForward(current: SelectionState): Selection {
-        const {
-            newSelection,
-            cursorToMove,
-        } = SelectionModifiers._selectionToMoveForForwardMovements(current)
+        const { newSelection, cursorToMove } =
+            SelectionModifiers._selectionToMoveForForwardMovements(current)
         newSelection[cursorToMove] = SelectionModifiers._addBounded(
             current,
             +1,
@@ -506,10 +504,8 @@ export class SelectionModifiers {
     }
 
     static moveSelectionBackward(current: SelectionState): Selection {
-        const {
-            newSelection,
-            cursorToMove,
-        } = SelectionModifiers._selectionToMoveForBackwardMovements(current)
+        const { newSelection, cursorToMove } =
+            SelectionModifiers._selectionToMoveForBackwardMovements(current)
         newSelection[cursorToMove] = SelectionModifiers._addBounded(
             current,
             -1,
@@ -547,10 +543,8 @@ export class SelectionModifiers {
     }
 
     static moveSelectionBackwardByWhitespace(current: SelectionState) {
-        const {
-            newSelection,
-            cursorToMove,
-        } = SelectionModifiers._selectionToMoveForBackwardMovements(current)
+        const { newSelection, cursorToMove } =
+            SelectionModifiers._selectionToMoveForBackwardMovements(current)
         newSelection[cursorToMove] = SelectionModifiers._lastWhitespace(
             current,
             cursorToMove,
@@ -559,10 +553,8 @@ export class SelectionModifiers {
     }
 
     static moveSelectionForwardByWhitespace(current: SelectionState) {
-        const {
-            newSelection,
-            cursorToMove,
-        } = SelectionModifiers._selectionToMoveForForwardMovements(current)
+        const { newSelection, cursorToMove } =
+            SelectionModifiers._selectionToMoveForForwardMovements(current)
         newSelection[cursorToMove] = SelectionModifiers._nextWhitespace(
             current,
             cursorToMove,
@@ -573,10 +565,8 @@ export class SelectionModifiers {
     static jumpSingleCursorBackwardByWhitespace(
         current: SelectionState,
     ): Selection {
-        const {
-            newSelection,
-            cursorToMove,
-        } = SelectionModifiers._selectionToMoveForBackwardMovements(current)
+        const { newSelection, cursorToMove } =
+            SelectionModifiers._selectionToMoveForBackwardMovements(current)
 
         if (current.selection.start !== current.selection.end) {
             newSelection.end = current.selection.start
@@ -595,10 +585,8 @@ export class SelectionModifiers {
     static jumpSingleCursorForwardByWhitespace(
         current: SelectionState,
     ): Selection {
-        const {
-            newSelection,
-            cursorToMove,
-        } = SelectionModifiers._selectionToMoveForForwardMovements(current)
+        const { newSelection, cursorToMove } =
+            SelectionModifiers._selectionToMoveForForwardMovements(current)
 
         if (current.selection.start !== current.selection.end) {
             newSelection.start = current.selection.end
@@ -646,9 +634,7 @@ export class SelectionModifiers {
         return nextNewLine === -1 ? current.text.length : nextNewLine + 1
     }
 
-    static _newlineIndexes(
-        text: string,
-    ): {
+    static _newlineIndexes(text: string): {
         start: number
         text: string
         newline: string

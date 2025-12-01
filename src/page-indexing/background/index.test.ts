@@ -5,20 +5,17 @@ import {
     ContentLocatorType,
     FingerprintSchemeType,
     ContentLocatorFormat,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { extractUrlParts } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { extractUrlParts } from '@worldbrain/memex-common/ts/url-utils/extract-parts'
 
 describe('Page indexing background', () => {
     it.skip('should generate and remember normalized URLs for local PDFs', async () => {
         const setup = await setupBackgroundIntegrationTest()
         const url = 'file:///home/bla/test.pdf'
         const tabId = 1
-        const {
-            identifier,
-            contentSize,
-            fingerprints,
-        } = await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
+        const { identifier, contentSize, fingerprints } =
+            await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
 
         const commonLocator = {
             contentSize,
@@ -132,11 +129,8 @@ describe('Page indexing background', () => {
         const fullUrlB =
             'blob:chrome-extension://bchcdcdmibkfclblifbckgodmbbdjfff/ce6ee4e9-7156-4d0d-a349-ded7d3f3c84c'
         const tabId = 1
-        const {
-            identifier,
-            contentSize,
-            fingerprints,
-        } = await indexTestFingerprintedPdf(setup, { fullUrl: fullUrlA, tabId })
+        const { identifier, contentSize, fingerprints } =
+            await indexTestFingerprintedPdf(setup, { fullUrl: fullUrlA, tabId })
 
         const masterLocatorUrl = `memex.cloud/ct/${fingerprints[0].fingerprint}.pdf`
         const urlParts = extractUrlParts(masterLocatorUrl)
@@ -258,11 +252,8 @@ describe('Page indexing background', () => {
         const url = 'https://home.com/bla/test.pdf'
         const urlParts = extractUrlParts(url)
         const tabId = 1
-        const {
-            identifier,
-            contentSize,
-            fingerprints,
-        } = await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
+        const { identifier, contentSize, fingerprints } =
+            await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
 
         const commonLocator = {
             contentSize,

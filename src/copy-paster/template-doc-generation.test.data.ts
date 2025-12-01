@@ -1,10 +1,10 @@
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import {
     FingerprintSchemeType,
     ContentLocatorFormat,
     LocationSchemeType,
     ContentLocatorType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 
 export const testPageAUrl = 'https://test.com'
 export const testPageATags = ['a', 'b', 'c']

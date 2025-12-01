@@ -3,8 +3,6 @@ import * as React from 'react'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { RibbonSearchProps } from './types'
 
-const styles = require('./ribbon.css')
-
 export interface Props extends RibbonSearchProps {
     onSearchEnterPress: React.KeyboardEventHandler
     onOutsideClick: () => void
@@ -18,9 +16,8 @@ class SearchBox extends React.Component<Props> {
     render() {
         return (
             <form>
-                <span className={styles.search} />
+                <span />
                 <TextInputControlled
-                    className={styles.searchInput}
                     type="input"
                     name="query"
                     placeholder="Search your Memex"

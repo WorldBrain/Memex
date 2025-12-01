@@ -1,11 +1,11 @@
 import React, { PureComponent, createRef } from 'react'
 import styled, { css } from 'styled-components'
-import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
+import ItemBox from '@worldbrain/memex-common/ts/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
-} from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
+} from '@worldbrain/memex-common/ts/common-ui/components/item-box-bottom'
 
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type {
     PageData,
@@ -13,30 +13,28 @@ import type {
     PageResult,
     SearchType,
 } from '../types'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { ListDetailsGetter } from 'src/annotations/types'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
-import browser from 'webextension-polyfill'
-import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
-import { TaskState } from 'ui-logic-core/lib/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
-import { keyframes } from 'styled-components'
-import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
-import { sleepPromise } from 'src/util/promises'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
+import BlockContent from '@worldbrain/memex-common/ts/common-ui/components/block-content'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { YoutubeService } from '@worldbrain/memex-common/ts/services/youtube'
 
-const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
+import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
+import { TaskState } from 'ui-logic-core/ts/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
+import { keyframes } from 'styled-components'
+import CreationInfo from '@worldbrain/memex-common/ts/common-ui/components/creation-info'
+import { sleepPromise } from 'src/util/promises'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
+
+const MemexIcon = chrome.runtime.getURL('img/memex-icon.svg')
 
 export interface Props
-    extends Omit<PageData, 'lists'>,
-        PageResult,
-        PageInteractionProps {
+    extends Omit<PageData, 'lists'>, PageResult, PageInteractionProps {
     getListDetailsById: ListDetailsGetter
     isSearchFilteredByList: boolean
     filteredbyListID?: number

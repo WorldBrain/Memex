@@ -1,10 +1,10 @@
 import React, { ChangeEventHandler, PureComponent } from 'react'
 import styled from 'styled-components'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import type { TaskState } from 'ui-logic-core/lib/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import type { TaskState } from 'ui-logic-core/ts/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 
 export interface Props {
     refreshUserInfoOnInit?: boolean

@@ -9,15 +9,13 @@ import cx from 'classnames'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import AnnotationList from './annotation-list'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { SocialPage } from 'src/social-integration/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+
 import PageResultItem from './page-result-item'
 import SocialResultItem from './social-result-item'
 import SemiCircularRibbon from './semi-circular-ribbon'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
-
-const styles = require('./result-item.css')
 
 // TODO (sidebar-refactor): I'm simply setting this up and passing this down
 //  to the baby comps to save time, but all these components need to be sorted sometime
@@ -134,24 +132,23 @@ class ResultItem extends PureComponent<Props> {
     render() {
         return (
             <li
-                className={cx(styles.listItem, styles.resultBox, {
-                    [styles.isDeleting]: this.props.isDeleting,
+                className={cx('listItem', 'resultBox', {
+                    ['isDeleting']: this.props.isDeleting,
                 })}
             >
-                <div className={styles.resultBoxItem}>
+                <div className="resultBoxItem">
                     {this.props.isDeleting && <LoadingIndicator />}
                     {this.props.tagManager}
                     {this.props.listManager}
                     {this.props.copyPasterManager}
                     <div
                         className={cx(
-                            styles.rootContainer,
-                            styles.rootContainerOverview,
+                            'rootContainer',
+                            'rootContainerOverview',
                             {
-                                [styles.tweetRootContainer]: this.props
-                                    .isSocial,
-                                [styles.isSidebarOpen]: this.props
-                                    .isResponsibleForSidebar,
+                                ['tweetRootContainer']: this.props.isSocial,
+                                ['isSidebarOpen']:
+                                    this.props.isResponsibleForSidebar,
                             },
                         )}
                     >
@@ -159,23 +156,19 @@ class ResultItem extends PureComponent<Props> {
                             onClick={this.handleClick}
                             onDragStart={this.dragStart}
                             onDragEnd={this.props.resetUrlDragged}
-                            className={cx(styles.root, styles.rootOverview)}
+                            className={cx('root', 'rootOverview')}
                             draggable
                             href={this.hrefToPage}
                             target="_blank"
                         >
-                            {this.props.isSocial ? (
-                                <SocialResultItem {...this.props} />
-                            ) : (
-                                <PageResultItem {...this.props} />
-                            )}
+                            <PageResultItem {...this.props} />
                         </a>
                     </div>
                     {this.renderAnnotsList()}
                 </div>
 
                 {this.props.isListFilterActive && (
-                    <div className={styles.removeCollectionItemBox}>
+                    <div className="removeCollectionItemBox">
                         <SemiCircularRibbon
                             onClick={this.props.handleCrossRibbonClick}
                         />

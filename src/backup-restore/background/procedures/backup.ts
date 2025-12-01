@@ -1,5 +1,5 @@
 // tslint:disable:no-console
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 import * as Raven from 'src/util/raven'
 import { EventEmitter } from 'events'
 
@@ -8,22 +8,17 @@ import { BackupBackend, MemexLocalBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
 import { DexieUtilsPlugin, BackupPlugin } from 'src/search/plugins'
-import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
+import { getCurrentSchemaVersion } from '@worldbrain/memex-common/ts/storage/utils'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from '../types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
-import type { Storage } from 'webextension-polyfill'
 
-const pickBy = require('lodash/pickBy')
+import { pickBy } from 'lodash'
 
 export interface BackupProgressInfo {
     state: 'preparing' | 'synching' | 'paused' | 'cancelled'
     totalChanges: number
     processedChanges: number
-    // currentCollection: string
-    // collections: {
-    //     [name: string]: { totalObjects: number; processedObjects: number }
-    // }
 }
 
 export default class BackupProcedure {
@@ -64,9 +59,8 @@ export default class BackupProcedure {
             url: LOCAL_SERVER_ROOT,
             storageAPI,
         })
-        this.currentSchemaVersion = getCurrentSchemaVersion(
-            storageManager,
-        ).getTime()
+        this.currentSchemaVersion =
+            getCurrentSchemaVersion(storageManager).getTime()
         this.reset()
     }
 
@@ -125,9 +119,8 @@ export default class BackupProcedure {
         })
 
         const procedure = async () => {
-            const lastBackupTime = await this.localBackupSettings.get(
-                'lastBackup',
-            )
+            const lastBackupTime =
+                await this.localBackupSettings.get('lastBackup')
 
             await this.backend.startBackup({ events: this.events })
             if (!lastBackupTime) {
@@ -192,9 +185,8 @@ export default class BackupProcedure {
                     console.error(e.stack)
 
                     // Set backup status for notification in search bar
-                    const backupStatus = await this.localBackupSettings.get(
-                        'backupStatus',
-                    )
+                    const backupStatus =
+                        await this.localBackupSettings.get('backupStatus')
 
                     if (
                         backupStatus === 'success' ||
@@ -276,9 +268,8 @@ export default class BackupProcedure {
         if (process.env.MOCK_BACKUP_BACKEND === 'true') {
             await new Promise((resolve) => setTimeout(resolve, 500))
         } else {
-            const shouldStoreBlobs = !!(await this.localBackupSettings.get(
-                'saveBlobs',
-            ))
+            const shouldStoreBlobs =
+                !!(await this.localBackupSettings.get('saveBlobs'))
 
             await this.pkmBackend.backupChanges({
                 changes: batch.changes,

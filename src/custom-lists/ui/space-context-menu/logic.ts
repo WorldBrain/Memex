@@ -1,12 +1,12 @@
-import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core/ts'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import type { InviteLink } from '@worldbrain/memex-common/ts/content-sharing/ui/list-share-modal/types'
 import { getListShareUrl, getPageLinkUrl } from 'src/content-sharing/utils'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { SharedListRoleID } from '@worldbrain/memex-common/ts/content-sharing/types'
 
 export interface Dependencies {
     analyticsBG: AnalyticsCoreInterface

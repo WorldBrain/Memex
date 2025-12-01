@@ -1,9 +1,9 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
-import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
+import Markdown from '@worldbrain/memex-common/ts/common-ui/components/markdown'
 
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
@@ -69,14 +69,13 @@ export class MarkdownPreview extends React.Component<Props, State> {
         return { showPreview: this.state.showPreview }
     }
 
-    private handleSecretInputKeyDown: React.KeyboardEventHandler<
-        HTMLInputElement
-    > = (e) => {
-        if (this.state.showPreview) {
-            this.handleToggleKBShortcut(e)
-            return this.props.onKeyDown?.(e)
+    private handleSecretInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> =
+        (e) => {
+            if (this.state.showPreview) {
+                this.handleToggleKBShortcut(e)
+                return this.props.onKeyDown?.(e)
+            }
         }
-    }
 
     private handleMainInputKeyDown: React.KeyboardEventHandler = (e) => {
         this.handleToggleKBShortcut(e)

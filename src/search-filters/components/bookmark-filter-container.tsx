@@ -6,8 +6,6 @@ import { actions, selectors } from 'src/search-filters'
 
 import cx from 'classnames'
 
-const styles = require('./bookmark-filter.css')
-
 interface StateProps {
     bookmarkFilter: boolean
 }
@@ -24,9 +22,9 @@ class BookmarkFilter extends PureComponent<Props> {
     render() {
         return (
             <div
-                className={cx(styles.button, {
-                    [styles.bookmark]: this.props.bookmarkFilter,
-                    [styles.notBookmark]: !this.props.bookmarkFilter,
+                className={cx({
+                    bookmark: this.props.bookmarkFilter,
+                    notBookmark: !this.props.bookmarkFilter,
                 })}
                 onClick={this.props.onShowOnlyBookmarksChange}
             />

@@ -4,15 +4,15 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { Anchor } from 'src/highlighting/types'
 import { copyToClipboard } from './content_script/utils'
 import { shareOptsToPrivacyLvl } from './utils'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { RGBAColor } from './cache/types'
-import type { AnnotationSharingState } from '@worldbrain/memex-common/lib/content-sharing/service/types'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import type { AnnotationSharingState } from '@worldbrain/memex-common/ts/content-sharing/service/types'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -39,7 +39,7 @@ interface AnnotationUpdateData {
 }
 
 export interface SaveAnnotationParams<
-    T extends AnnotationCreateData | AnnotationUpdateData
+    T extends AnnotationCreateData | AnnotationUpdateData,
 > {
     annotationData: T
     annotationsBG: AnnotationInterface<'caller'>
@@ -87,10 +87,9 @@ export async function createAnnotation({
     skipListExistenceCheck,
     privacyLevelOverride,
     shareOpts,
-}: SaveAnnotationParams<AnnotationCreateData>): Promise<
-    SaveAnnotationReturnValue
-> {
-    const remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
+}: SaveAnnotationParams<AnnotationCreateData>): Promise<SaveAnnotationReturnValue> {
+    const remoteAnnotationId =
+        await contentSharingBG.generateRemoteAnnotationId()
     return {
         remoteAnnotationId,
         savePromise: (async () => {
@@ -116,13 +115,12 @@ export async function createAnnotation({
             )
 
             if (annotationData.localListIds?.length) {
-                const {
-                    sharingState,
-                } = await contentSharingBG.shareAnnotationToSomeLists({
-                    annotationUrl,
-                    skipListExistenceCheck,
-                    localListIds: annotationData.localListIds,
-                })
+                const { sharingState } =
+                    await contentSharingBG.shareAnnotationToSomeLists({
+                        annotationUrl,
+                        skipListExistenceCheck,
+                        localListIds: annotationData.localListIds,
+                    })
             }
 
             let shareData: AnnotationSharingState = null
@@ -195,14 +193,13 @@ export async function updateAnnotation({
     contentSharingBG,
     shareOpts,
     keepListsIfUnsharing,
-}: SaveAnnotationParams<AnnotationUpdateData>): Promise<
-    SaveAnnotationReturnValue
-> {
+}: SaveAnnotationParams<AnnotationUpdateData>): Promise<SaveAnnotationReturnValue> {
     let remoteAnnotationId: string = null
     if (shareOpts?.shouldShare) {
-        const remoteAnnotMetadata = await contentSharingBG.getRemoteAnnotationMetadata(
-            { annotationUrls: [annotationData.localId] },
-        )
+        const remoteAnnotMetadata =
+            await contentSharingBG.getRemoteAnnotationMetadata({
+                annotationUrls: [annotationData.localId],
+            })
 
         remoteAnnotationId =
             (remoteAnnotMetadata[annotationData.localId]?.remoteId as string) ??

@@ -5,8 +5,7 @@ import type { PkmSyncInterface } from './types'
 import type { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 import { htmlToMarkdown } from 'src/background-script/html-to-markdown'
-import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-src-with-cloud-address.service-worker'
-import type { Browser } from 'webextension-polyfill'
+import resolveImgSrc from '@worldbrain/memex-common/ts/annotations/replace-img-src-with-cloud-address.service-worker'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -17,7 +16,10 @@ export class PKMSyncBackgroundModule {
     serverToTalkTo = LOCAL_SERVER_ROOT
     constructor(
         private deps: {
-            browserAPIs: Pick<Browser, 'runtime' | 'storage'>
+            browserAPIs: {
+                runtime: typeof chrome.runtime
+                storage: typeof chrome.storage
+            }
         },
     ) {
         this.backendNew = new MemexLocalBackend({
@@ -222,9 +224,10 @@ export class PKMSyncBackgroundModule {
         if (await this.backendNew.isConnected()) {
             const bufferedItems = await this.getBufferedItems()
             bufferedItems.push(item)
-            const PKMSYNCremovewarning = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCremovewarning',
-            )
+            const PKMSYNCremovewarning =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCremovewarning',
+                )
 
             this.PKMSYNCremovewarning =
                 PKMSYNCremovewarning.PKMSYNCremovewarning
@@ -240,9 +243,10 @@ export class PKMSyncBackgroundModule {
     async applySyncFilters(pkmType, item, checkForFilteredSpaces) {
         const spaces = item.data.annotationSpaces || item.data.pageSpaces
         if (pkmType === 'obsidian') {
-            const filterTagsObsidian = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCfilterTagsObsidian',
-            )
+            const filterTagsObsidian =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCfilterTagsObsidian',
+                )
             if (
                 spaces &&
                 filterTagsObsidian.PKMSYNCfilterTagsObsidian?.includes(spaces)
@@ -272,9 +276,10 @@ export class PKMSyncBackgroundModule {
         }
 
         if (pkmType === 'logseq') {
-            const filterTagsLogseq = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCfilterTagsLogseq',
-            )
+            const filterTagsLogseq =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCfilterTagsLogseq',
+                )
 
             if (
                 spaces &&
@@ -307,7 +312,7 @@ export class PKMSyncBackgroundModule {
     }
 
     async bufferPKMSyncItems(itemToBuffer) {
-        // Get the current buffer from browser.storage.local
+        // Get the current buffer from chrome.storage.local
         const data = await this.deps.browserAPIs.storage.local.get(
             'PKMSYNCbufferedItems',
         )
@@ -323,7 +328,7 @@ export class PKMSyncBackgroundModule {
         // Append the new item to the buffer
         currentBuffer.push(itemToBuffer)
 
-        // Save the updated buffer back to browser.storage.local
+        // Save the updated buffer back to chrome.storage.local
         await this.deps.browserAPIs.storage.local.set({
             PKMSYNCbufferedItems: currentBuffer,
         })
@@ -343,9 +348,8 @@ export class PKMSyncBackgroundModule {
     }
 
     private async getValidFolders() {
-        const data = await this.deps.browserAPIs.storage.local.get(
-            'PKMSYNCpkmFolders',
-        )
+        const data =
+            await this.deps.browserAPIs.storage.local.get('PKMSYNCpkmFolders')
         const folders = data.PKMSYNCpkmFolders || {}
 
         const validFolders = {
@@ -370,19 +374,22 @@ export class PKMSyncBackgroundModule {
             ) {
                 return
             }
-            // let syncOnlyAnnotatedPagesLogseq = await browser.storage.local.get(
+            // let syncOnlyAnnotatedPagesLogseq = await chrome.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
             // )
 
-            const PKMSYNCtitleformatLogseq = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCtitleformatLogseq',
-            )
-            const PKMSYNCdateformatLogseq = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCdateformatLogseq',
-            )
-            const customTagsLogseq = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCcustomTagsLogseq',
-            )
+            const PKMSYNCtitleformatLogseq =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCtitleformatLogseq',
+                )
+            const PKMSYNCdateformatLogseq =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCdateformatLogseq',
+                )
+            const customTagsLogseq =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCcustomTagsLogseq',
+                )
 
             item.data.pageTitle = this.cleanFileName(
                 item.data.pageTitle,
@@ -416,18 +423,21 @@ export class PKMSyncBackgroundModule {
             ) {
                 return
             }
-            // let syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
+            // let syncOnlyAnnotatedPagesObsidian = await chrome.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
             // )
-            const PKMSYNCtitleformatObsidian = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCtitleformatObsidian',
-            )
-            const PKMSYNCdateformatObsidian = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCdateformatObsidian',
-            )
-            const customTagsObsidian = await this.deps.browserAPIs.storage.local.get(
-                'PKMSYNCcustomTagsObsidian',
-            )
+            const PKMSYNCtitleformatObsidian =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCtitleformatObsidian',
+                )
+            const PKMSYNCdateformatObsidian =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCdateformatObsidian',
+                )
+            const customTagsObsidian =
+                await this.deps.browserAPIs.storage.local.get(
+                    'PKMSYNCcustomTagsObsidian',
+                )
 
             item.data.pageTitle = this.cleanFileName(
                 item.data.pageTitle,
@@ -619,9 +629,8 @@ export class PKMSyncBackgroundModule {
         if (pkmType === 'obsidian' && annotationsSection != null) {
             const annotationStartLine = `<span class="annotationStartLine" id="${item.data.annotationId}"></span>\n`
             const annotationEndLine = `<span class="annotationEndLine" id="${item.data.annotationId}"> --- </span>\n`
-            annotationStartIndex = annotationsSection.indexOf(
-                annotationStartLine,
-            )
+            annotationStartIndex =
+                annotationsSection.indexOf(annotationStartLine)
             if (annotationStartIndex !== -1) {
                 const annotationEndIndex = annotationsSection.indexOf(
                     annotationEndLine,
@@ -633,17 +642,18 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
-                    annotationContent,
-                    item.data.annotationId,
-                    item.data.body,
-                    item.data.comment,
-                    item.data.annotationSpaces,
-                    item.data.createdWhen,
-                    item.data.type,
-                    pkmType,
-                    syncDateFormat,
-                )
+                const newAnnotationContent =
+                    await this.extractAndUpdateAnnotationData(
+                        annotationContent,
+                        item.data.annotationId,
+                        item.data.body,
+                        item.data.comment,
+                        item.data.annotationSpaces,
+                        item.data.createdWhen,
+                        item.data.type,
+                        pkmType,
+                        syncDateFormat,
+                    )
 
                 return (
                     annotationsSection.slice(0, annotationStartIndex) +
@@ -657,9 +667,8 @@ export class PKMSyncBackgroundModule {
         if (pkmType === 'logseq' && annotationsSection != null) {
             let annotationStartLine = `- <!-- NoteStartLine ${item.data.annotationId} -->---\n`
             const annotationEndLine = ` <!-- NoteEndLine ${item.data.annotationId} -->\n\n`
-            annotationStartIndex = annotationsSection.indexOf(
-                annotationStartLine,
-            )
+            annotationStartIndex =
+                annotationsSection.indexOf(annotationStartLine)
             annotationEndIndex = annotationsSection.indexOf(annotationEndLine)
 
             if (annotationEndIndex !== -1 && annotationStartIndex !== -1) {
@@ -668,17 +677,18 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
-                    annotationContent,
-                    item.data.annotationId,
-                    item.data.body,
-                    item.data.comment,
-                    item.data.annotationSpaces,
-                    item.data.createdWhen,
-                    item.data.type,
-                    pkmType,
-                    syncDateFormat,
-                )
+                const newAnnotationContent =
+                    await this.extractAndUpdateAnnotationData(
+                        annotationContent,
+                        item.data.annotationId,
+                        item.data.body,
+                        item.data.comment,
+                        item.data.annotationSpaces,
+                        item.data.createdWhen,
+                        item.data.type,
+                        pkmType,
+                        syncDateFormat,
+                    )
 
                 return (
                     annotationsSection.slice(0, annotationStartIndex) +

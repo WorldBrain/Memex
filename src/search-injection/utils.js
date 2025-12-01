@@ -1,6 +1,6 @@
 import { SEARCH_ENGINES, UNWANTED_GOOGLE_SEARCH_TYPES } from './constants'
 
-export const matchURL = url => {
+export const matchURL = (url) => {
     // url: (string) location.href
     // match url against search engines regexs
     // returns: the search engine it matches to or false
@@ -27,9 +27,9 @@ export const matchURL = url => {
     return false
 }
 
-const getUrlSearchParams = url => new URL(url).searchParams
+const getUrlSearchParams = (url) => new URL(url).searchParams
 
-export const fetchQuery = url => {
+export const fetchQuery = (url) => {
     // url: (string) location.href
     // creates a new URL object
     // and fetches the query param from the url
@@ -46,7 +46,7 @@ export const getLocalStorage = async (KEY, defVal) => {
     // gets the value, or if undefined stores it
     // returns: fetched value
 
-    const { [KEY]: value } = await browser.storage.local.get(KEY)
+    const { [KEY]: value } = await chrome.storage.local.get(KEY)
 
     if (value === undefined && defVal) {
         return setLocalStorage(KEY, defVal)
@@ -60,7 +60,7 @@ export const setLocalStorage = async (KEY, value) => {
     // adds the key, value pair to the storage.local
     // returns: value
 
-    await browser.storage.local.set({
+    await chrome.storage.local.set({
         [KEY]: value,
     })
     return value

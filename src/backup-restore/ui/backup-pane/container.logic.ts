@@ -1,5 +1,5 @@
 import React from 'react'
-const mapValues = require('lodash/mapValues')
+import { mapValues } from 'lodash'
 import { redirectToGDriveLogin } from 'src/backup-restore/ui/utils'
 import type { Analytics } from 'src/analytics/types'
 import type { BrowserSettingsStore } from 'src/util/settings'
@@ -20,9 +20,8 @@ export async function getInitialState({
 
     const runningRestore = await localBackupSettings.get('runningRestore')
     const runningBackup = await localBackupSettings.get('runningBackup')
-    const progressSuccess = !!(await localBackupSettings.get(
-        'progressSuccessful',
-    ))
+    const progressSuccess =
+        !!(await localBackupSettings.get('progressSuccessful'))
     const backendLocation = await remoteFunction('getBackendLocation')()
     const hasInitialBackup = !!(await remoteFunction('hasInitialBackup')())
     const driveAuthenticated = !!(await localBackupSettings.get('accessToken'))
@@ -188,15 +187,12 @@ export async function processEvent({
             },
             onBackupRequested: async () => {
                 const changeBackupRequested = event.changeBackupRequested
-                const [
-                    hasInitialBackup,
-                    backupInfo,
-                    backendLocation,
-                ] = await Promise.all([
-                    remoteFunction('hasInitialBackup')(),
-                    remoteFunction('getBackupInfo')(),
-                    remoteFunction('getBackendLocation')(),
-                ])
+                const [hasInitialBackup, backupInfo, backendLocation] =
+                    await Promise.all([
+                        remoteFunction('hasInitialBackup')(),
+                        remoteFunction('getBackupInfo')(),
+                        remoteFunction('getBackendLocation')(),
+                    ])
                 /* Show onboarding screen if there is no initial backup or if the
                     user is trying to change the backend location */
                 const needsOnBoarding = !hasInitialBackup && !backupInfo
@@ -204,9 +200,8 @@ export async function processEvent({
                     return triggerOnboarding()
                 }
 
-                const driveAuthenticated = await localBackupSettings.get(
-                    'accessToken',
-                )
+                const driveAuthenticated =
+                    await localBackupSettings.get('accessToken')
 
                 if (hasInitialBackup) {
                     await localBackupSettings.set('runningBackup', true)

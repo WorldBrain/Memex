@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
+import { transformPageText } from '@worldbrain/memex-stemmer/ts/transform-page-text'
 
 describe('Transform page text', () => {
     test.skip('it should be able to tokenize a text', async () => {

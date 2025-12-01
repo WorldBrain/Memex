@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'styled-components'
 
@@ -10,30 +10,26 @@ import {
     theme,
 } from 'src/common-ui/components/design-library/theme'
 import configureStore from './store'
-import Router from './router'
+import Router from './router.jsx'
 import routes from './routes'
 import { ModalsContainer } from '../overview/modals/components/ModalsContainer'
 import { AuthContextProvider } from 'src/authentication/components/AuthContextProvider'
-import { OverlayContainer } from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
+import { OverlayContainer } from '@worldbrain/memex-common/ts/main-ui/containers/overlay'
 import { setupRpcConnection } from 'src/util/webextensionRPC'
 import { createUIServices } from 'src/services/ui'
 import { UIServices } from 'src/services/ui/types'
 import {
     MemexTheme,
     MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import browser from 'webextension-polyfill'
+} from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 // Include development tools if we are not building for production
 
 async function main() {
     const ReduxDevTools = undefined
-    // process.env.NODE_ENV !== 'production'
-    //     ? require('src/dev/redux-devtools-component').default
-    //     : undefined
 
     setupRpcConnection({
-        browserAPIs: browser,
+        browserAPIs: chrome,
         sideName: 'extension-page-options',
         role: 'content',
     })
@@ -46,13 +42,13 @@ async function main() {
         services: createUIServices(),
     }
 
-    ReactDOM.render(
+    const root = createRoot(document.getElementById('app')!)
+    root.render(
         <Root
             store={store}
             routeData={routeData}
             ReduxDevTools={ReduxDevTools}
         />,
-        document.getElementById('app'),
     )
 }
 
@@ -77,15 +73,14 @@ class Root extends React.Component<RootProps, RootState> {
             themeVariant: await loadThemeVariant(),
         })
 
-        browser.storage.onChanged.addListener(async (changes, areaName) => {
+        chrome.storage.onChanged.addListener(async (changes, areaName) => {
             if (areaName !== 'local') {
                 return
             }
 
             if (changes.themeVariant) {
-                const { themeVariant } = await browser.storage.local.get(
-                    'themeVariant',
-                )
+                const { themeVariant } =
+                    await chrome.storage.local.get('themeVariant')
 
                 this.setState({
                     themeVariant,

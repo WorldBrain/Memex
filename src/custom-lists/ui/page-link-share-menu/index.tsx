@@ -1,18 +1,18 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import SpaceEmailInvites from '../space-email-invites'
 import SpaceLinks from '../space-links'
 import { helpIcon } from 'src/common-ui/components/design-library/icons'
-import { TaskState } from 'ui-logic-core/lib/types'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import { TaskState } from 'ui-logic-core/ts/types'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 
 export interface Props extends Dependencies {
     showSpacesTab?: (pageUrl) => void
@@ -349,7 +349,12 @@ const SectionTitle = styled.div`
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on;
     font-family: 'Satoshi', sans-serif;
 `
 
@@ -410,7 +415,6 @@ const LinkAndRoleBox = styled.div<{
         cursor: pointer;
     }
 
-
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||
             props.viewportBreakpoint === 'mobile') &&
@@ -422,16 +426,15 @@ const LinkAndRoleBox = styled.div<{
         `}
 
     &:hover ${IconContainer} {
-            height: fit-content;
-            width: fit-content;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            grid-gap: 5px;
-            grid-auto-flow: row;
-            border-radius: 6px;
-        }
-
+        height: fit-content;
+        width: fit-content;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        grid-gap: 5px;
+        grid-auto-flow: row;
+        border-radius: 6px;
+    }
 `
 
 const LinkBox = styled(Margin)`

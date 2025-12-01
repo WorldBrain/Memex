@@ -1,5 +1,5 @@
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { cloneNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { cloneNormalizedState } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import { PageAnnotationCacheDeps, PageAnnotationsCache } from '.'
 import * as TEST_DATA from './index.test.data'
 import type {

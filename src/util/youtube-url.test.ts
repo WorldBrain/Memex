@@ -2,7 +2,7 @@ import expect from 'expect'
 import {
     extractIdFromUrl,
     isUrlYTVideo,
-} from '@worldbrain/memex-common/lib/utils/youtube-url'
+} from '@worldbrain/memex-common/ts/utils/youtube-url'
 
 interface TestCase {
     id?: string
@@ -12,8 +12,7 @@ interface TestCase {
 
 const TEST_CASES: TestCase[] = [
     {
-        url:
-            'http://www.youtube.com/watch?v=vJG698U2Mvo&feature=feedrec_grec_index',
+        url: 'http://www.youtube.com/watch?v=vJG698U2Mvo&feature=feedrec_grec_index',
         isYTVideo: true,
         id: 'vJG698U2Mvo',
     },
@@ -23,8 +22,7 @@ const TEST_CASES: TestCase[] = [
         id: 'vJG698U2Mvo',
     },
     {
-        url:
-            'https://www.youtube.com/v/vJG698U2Mvo?fs=1&amp;hl=en_US&amp;rel=0',
+        url: 'https://www.youtube.com/v/vJG698U2Mvo?fs=1&amp;hl=en_US&amp;rel=0',
         isYTVideo: true,
         id: 'vJG698U2Mvo',
     },

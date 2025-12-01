@@ -5,7 +5,6 @@ import type {
 } from '../../../external/@worldbrain/memex-common/ts/main-ui/classes/logic'
 import type { PremiumPlans } from '../../../external/@worldbrain/memex-common/ts/subscriptions/availablePowerups'
 import type { AuthRemoteFunctionsInterface } from '../background/types'
-import type { Browser } from 'webextension-polyfill'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface PromptTemplatesDependencies {
@@ -16,7 +15,7 @@ export interface PromptTemplatesDependencies {
     getRootElement?: () => HTMLElement
     closeComponent?: () => void
     authBG: AuthRemoteFunctionsInterface
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 export interface PromptTemplatesState {

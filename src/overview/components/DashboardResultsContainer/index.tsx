@@ -16,12 +16,11 @@ import { ThemeProvider } from 'styled-components'
 import {
     MemexTheme,
     MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+} from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
-import browser from 'webextension-polyfill'
 
 interface RootState extends DashboardResultsState {
     themeVariant?: MemexThemeVariant
@@ -45,16 +44,15 @@ export default class DashboardResultsContainer extends StatefulUIElement<
         }
         this.setState({ themeVariant, theme: theme({ variant: themeVariant }) })
 
-        await browser.storage.onChanged.addListener(
+        await chrome.storage.onChanged.addListener(
             async (changes, areaName) => {
                 if (areaName !== 'local') {
                     return
                 }
 
                 if (changes.themeVariant) {
-                    const { themeVariant } = await browser.storage.local.get(
-                        'themeVariant',
-                    )
+                    const { themeVariant } =
+                        await chrome.storage.local.get('themeVariant')
 
                     this.setState({
                         themeVariant,

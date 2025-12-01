@@ -1,6 +1,6 @@
-import { DeviceServiceInterface } from '@worldbrain/memex-common/lib/services/device/types'
-import LogicRegistryService from '@worldbrain/memex-common/lib/services/logic-registry'
-import OverlayService from '@worldbrain/memex-common/lib/services/overlay'
+import { DeviceServiceInterface } from '@worldbrain/memex-common/ts/services/device/types'
+import LogicRegistryService from '@worldbrain/memex-common/ts/services/logic-registry'
+import OverlayService from '@worldbrain/memex-common/ts/services/overlay'
 
 import type { UIServices } from './types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'

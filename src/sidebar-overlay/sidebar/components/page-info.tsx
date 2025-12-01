@@ -1,10 +1,8 @@
 import * as React from 'react'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import { Page } from '../types'
-import browser from 'webextension-polyfill'
-import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 
-const styles = require('./page-info.css')
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 
 interface Props {
     page: Page
@@ -30,22 +28,22 @@ class PageInfo extends React.Component<Props> {
 
     render() {
         const { url, title } = this.props.page
-        const backImg = browser.runtime.getURL('/img/back.svg')
+        const backImg = chrome.runtime.getURL('/img/back.svg')
         return (
             <React.Fragment>
                 {this.showPageInfo && (
-                    <div className={styles.pageInfoDiv}>
+                    <div className="pageInfoDiv">
                         <div
-                            className={styles.goBackBtn}
+                            className="goBackBtn"
                             onClick={this.props.resetPage}
                         >
-                            <img src={backImg} className={styles.backButton} />
+                            <img src={backImg} className="backButton" />
                         </div>
-                        <div className={styles.pageInfo}>
+                        <div className="pageInfo">
                             <a
                                 target="_blank"
                                 href={this.hrefToPage}
-                                className={styles.title}
+                                className="title"
                                 title={title}
                             >
                                 {title}
@@ -53,7 +51,7 @@ class PageInfo extends React.Component<Props> {
                             <a
                                 target="_blank"
                                 href={this.hrefToPage}
-                                className={styles.url}
+                                className="url"
                                 title={url}
                             >
                                 {url}

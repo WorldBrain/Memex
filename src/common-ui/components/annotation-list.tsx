@@ -3,7 +3,7 @@ import cx from 'classnames'
 
 import analytics from 'src/analytics'
 import { Annotation as AnnotationFlawed } from 'src/annotations/types'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
@@ -24,9 +24,7 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { linkStreams } from 'openpgp'
-import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
-
-const styles = require('./annotation-list.css')
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/ts/content-sharing/utils'
 
 // TODO (sidebar-refactor): somewhere this type regressed and `isBookmarked` got
 //  changed to `hasBookmark`
@@ -253,7 +251,7 @@ class AnnotationList extends Component<Props, State> {
     //     }
 
     //     return (
-    //         <div className={styles.hoverBoxWrapper}>
+    //         <div className="hoverBoxWrapper">
     //             <HoverBox>
     //                 {/* <TagPicker
     //                     onUpdateEntrySelection={(args) =>
@@ -277,7 +275,7 @@ class AnnotationList extends Component<Props, State> {
     //     }
 
     //     return (
-    //         <div className={styles.hoverBoxWrapper}>
+    //         <div className="hoverBoxWrapper">
     //             <HoverBox>
     //                 {/* <CollectionPicker
     //                     onUpdateEntrySelection={async (args) => {
@@ -317,7 +315,7 @@ class AnnotationList extends Component<Props, State> {
     //     }
 
     //     return (
-    //         <div className={styles.hoverBoxWrapper}>
+    //         <div className="hoverBoxWrapper">
     //             <HoverBox>
     //                 <PageNotesCopyPaster
     //                     copyPaster={this.props.copyPaster}
@@ -340,7 +338,7 @@ class AnnotationList extends Component<Props, State> {
     //     }
 
     //     return (
-    //         <div className={styles.hoverBoxWrapper}>
+    //         <div className="hoverBoxWrapper">
     //             <HoverBox>
     //                 {/* <SingleNoteShareMenu
     //                     contentSharingBG={this.props.contentSharing}
@@ -403,7 +401,7 @@ class AnnotationList extends Component<Props, State> {
         //         {...annot}
         //         body={annot.body}
         //         comment={annot.comment}
-        //         className={styles.annotation}
+        //         className="annotation"
         //         createdWhen={annot.createdWhen!}
         //         isShared={false}
         //         isBulkShareProtected={false}
@@ -467,27 +465,27 @@ class AnnotationList extends Component<Props, State> {
         return undefined
         // <div
         //     className={cx({
-        //         [styles.parentExpanded]: isExpanded,
+        //         ["parentExpanded"]: isExpanded,
         //     })}
         // >
         //     {/* Annotation count text and toggle arrow */}
         //     <div
-        //         className={cx(styles.resultCount, {
-        //             [styles.expandedCount]: this.state.isExpanded,
+        //         className={cx("resultCount", {
+        //             ["expandedCount"]: this.state.isExpanded,
         //         })}
         //         onClick={this.toggleIsExpanded}
         //     >
         //         <b>{this.props.annotations.length}</b>{' '}
-        //         <span className={styles.resultsText}>results</span>
+        //         <span className="resultsText">results</span>
         //         <span
-        //             className={cx(styles.icon, {
-        //                 [styles.inverted]: this.state.isExpanded,
+        //             className={cx("icon", {
+        //                 ["inverted"]: this.state.isExpanded,
         //             })}
         //         />
         //     </div>
 
         //     {/* Container for displaying AnnotationBox */}
-        //     <div className={styles.annotationList}>
+        //     <div className="annotationList">
         //         {isExpanded ? this.renderAnnotations() : null}
         //     </div>
         // </div>

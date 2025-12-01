@@ -1,4 +1,4 @@
-import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { normalizedStateToArray } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from './logic.test.util'
 

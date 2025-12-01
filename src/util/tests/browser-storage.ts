@@ -1,5 +1,3 @@
-import { Browser } from 'webextension-polyfill'
-
 export interface LimitedBrowserStorage {
     set: Browser['storage']['local']['set']
     get: Browser['storage']['local']['get']

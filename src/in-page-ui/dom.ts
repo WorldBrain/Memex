@@ -1,5 +1,4 @@
 import { injectCSS } from 'src/util/content-injection'
-import { runtime } from 'webextension-polyfill'
 import type { InPageUIRootMount } from './types'
 
 export function createInPageUIRoot({
@@ -59,7 +58,7 @@ export function createShadowRootIfSupported(
          * More info: https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#Parameters
          */
         shadow = container.attachShadow({ mode: 'open' })
-        const fontFile = runtime.getURL('/fonts/Satoshi/satoshi.css')
+        const fontFile = chrome.runtime.getURL('/fonts/Satoshi/satoshi.css')
         const style = document.createElement('style')
         style.dataset.description = 'memex-satoshi-font-faces'
 
@@ -87,7 +86,7 @@ export function createShadowRootIfSupported(
     return { rootElement, shadow }
 }
 
-const rootDirectory = runtime.getURL('/fonts/Satoshi/')
+const rootDirectory = chrome.runtime.getURL('/fonts/Satoshi/')
 
 const styles = `
 @font-face {

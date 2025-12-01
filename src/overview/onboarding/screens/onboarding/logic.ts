@@ -3,10 +3,10 @@ import {
     loadInitial,
     executeUITask,
     UIEventHandler,
-} from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+} from '@worldbrain/memex-common/ts/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
 import delay from 'src/util/delay'
-import browser from 'webextension-polyfill'
+
 import {
     TypedRemoteEventEmitter,
     getRemoteEventEmitter,
@@ -126,10 +126,10 @@ export default class Logic extends UILogic<State, Event> {
         let maxRetries = 20
 
         while (!linkAvailable && retries !== maxRetries + 1) {
-            const linkToOpen = await browser.storage.local.get('@URL_TO_OPEN')
+            const linkToOpen = await chrome.storage.local.get('@URL_TO_OPEN')
             if (linkToOpen['@URL_TO_OPEN'] != null) {
                 payLoad = linkToOpen['@URL_TO_OPEN']
-                await browser.storage.local.remove('@URL_TO_OPEN')
+                await chrome.storage.local.remove('@URL_TO_OPEN')
                 if (payLoad.type === 'pageToOpen') {
                     await this.dependencies.contentScriptsBG.openPageWithSidebarInSelectedListMode(
                         {
@@ -139,13 +139,13 @@ export default class Logic extends UILogic<State, Event> {
                     )
                 }
                 if (payLoad.type === 'returnToFollowedSpace') {
-                    await browser.tabs
+                    await chrome.tabs
                         .query({
                             url: payLoad.originalPageUrl,
                             currentWindow: true,
                         })
                         .then((tab) => {
-                            browser.tabs.update(tab[0].id, { active: true })
+                            chrome.tabs.update(tab[0].id, { active: true })
                         })
                 }
                 return true
@@ -165,7 +165,7 @@ export default class Logic extends UILogic<State, Event> {
         let maxRetries = 8
 
         while (!linkAvailable && retries !== maxRetries + 1) {
-            const linkToOpen = await browser.storage.local.get('@URL_TO_OPEN')
+            const linkToOpen = await chrome.storage.local.get('@URL_TO_OPEN')
             if (linkToOpen['@URL_TO_OPEN'] != null) {
                 this.hasLinkToOpen = true
                 this.emitMutation({
@@ -183,7 +183,7 @@ export default class Logic extends UILogic<State, Event> {
     }
 
     private checkIfMemexSocialTabOpen = async () => {
-        const tabsFromExtApi = browser.tabs
+        const tabsFromExtApi = chrome.tabs
         const tabs = await tabsFromExtApi.query({
             url: ['https://*.memex.social/*', 'http://localhost:3000/*'],
         })
@@ -342,7 +342,7 @@ export default class Logic extends UILogic<State, Event> {
         this.emitMutation({
             enableNudges: { $set: !previousState.enableNudges },
         })
-        browser.storage.local.set({
+        chrome.storage.local.set({
             enableNudges: !previousState.enableNudges,
         })
     }

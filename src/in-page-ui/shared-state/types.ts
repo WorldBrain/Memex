@@ -12,7 +12,7 @@ import type {
 } from 'src/search-injection/types'
 import type { ContentScriptComponent } from 'src/content-scripts/types'
 import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
-import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
+import { PseudoSelection } from '@worldbrain/memex-common/ts/in-page-ui/types'
 
 export type InPageUISidebarAction =
     | 'comment'

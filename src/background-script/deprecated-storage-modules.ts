@@ -1,5 +1,5 @@
-import type Storex from '@worldbrain/storex'
-import { ActionQueueStorage } from '@worldbrain/memex-common/lib/action-queue/storage'
+import type Storex from '@worldbrain/storex/ts'
+import { ActionQueueStorage } from '@worldbrain/memex-common/ts/action-queue/storage'
 import { PageFetchBacklogStorage } from 'src/page-fetch-backlog/background/storage'
 import {
     MemexExtClientSyncLogStorage,

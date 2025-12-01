@@ -10,8 +10,6 @@ import { RootState } from 'src/options/types'
 import ContentTypes from './content-types'
 import FilterButton from './filter-button'
 
-const styles = require('./content-types.css')
-
 export interface StateProps {
     showFilteredTypes?: boolean
     websitesFilter: boolean
@@ -41,15 +39,12 @@ interface State {}
 
 class ContentTypeContainer extends PureComponent<Props, State> {
     renderDisplayFilters = () => {
-        const filterNodes: JSX.Element[] = []
+        const filterNodes: React.ReactNode[] = []
         if (this.props.notesFilter) {
             filterNodes.push(
                 <span key="notes">
                     Notes
-                    <span
-                        className={styles.clearFilters}
-                        onClick={this.props.toggleNotesFilter}
-                    />
+                    <span onClick={this.props.toggleNotesFilter} />
                 </span>,
             )
         }
@@ -58,10 +53,7 @@ class ContentTypeContainer extends PureComponent<Props, State> {
             filterNodes.push(
                 <span key="highlights">
                     Highlights
-                    <span
-                        className={styles.clearFilters}
-                        onClick={this.props.toggleHighlightsFilter}
-                    />
+                    <span onClick={this.props.toggleHighlightsFilter} />
                 </span>,
             )
         }
@@ -115,7 +107,7 @@ class ContentTypeContainer extends PureComponent<Props, State> {
                 togglePopup={this.togglePopup}
                 showPopup={this.props.setFilterTypes}
                 clearFilters={this.props.clearFilterTypes}
-                displayFilters={this.renderDisplayFilters}
+                displayFilters={() => this.renderDisplayFilters()}
                 disableOnClickOutside={this.props.env === 'inpage'}
                 getRootElement={null}
             >

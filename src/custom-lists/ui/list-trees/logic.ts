@@ -1,9 +1,9 @@
-import { UILogic, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEventHandler } from 'ui-logic-core/ts'
 import type { Dependencies, State, Events } from './types'
 import {
     initNormalizedState,
     normalizedStateToArray,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
@@ -11,7 +11,7 @@ import {
 import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
 import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
@@ -48,71 +48,72 @@ export class ListTreesLogic extends UILogic<State, Events> {
         )
     }
 
-    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
-        nextLists,
-    ) => {
-        this.emitMutation({
-            listTrees: {
-                $apply: (prev) => {
-                    let ancestorsOfListsToDisplayUnfolded = new Set<string>()
-                    let nextState = initNormalizedState({
-                        getId: (state) => state.unifiedId,
-                        seedData: normalizedStateToArray(nextLists).map(
-                            (list) => {
-                                let prevState = prev.byId[list.unifiedId]
-                                let areChildrenShown =
-                                    prevState?.areChildrenShown
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] =
+        (nextLists) => {
+            this.emitMutation({
+                listTrees: {
+                    $apply: (prev) => {
+                        let ancestorsOfListsToDisplayUnfolded =
+                            new Set<string>()
+                        let nextState = initNormalizedState({
+                            getId: (state) => state.unifiedId,
+                            seedData: normalizedStateToArray(nextLists).map(
+                                (list) => {
+                                    let prevState = prev.byId[list.unifiedId]
+                                    let areChildrenShown =
+                                        prevState?.areChildrenShown
 
-                                // This should only occur on initial render - re-renders should keep their state from `prevState`
-                                if (areChildrenShown == null) {
-                                    areChildrenShown =
-                                        this.deps
-                                            .initListToDisplayNewChildInput ===
-                                            list.unifiedId || false
-                                    if (
-                                        this.deps.initListsToDisplayUnfolded?.includes(
-                                            list.unifiedId,
-                                        )
-                                    ) {
-                                        list.pathUnifiedIds.forEach((listId) =>
-                                            ancestorsOfListsToDisplayUnfolded.add(
-                                                listId,
-                                            ),
-                                        )
+                                    // This should only occur on initial render - re-renders should keep their state from `prevState`
+                                    if (areChildrenShown == null) {
+                                        areChildrenShown =
+                                            this.deps
+                                                .initListToDisplayNewChildInput ===
+                                                list.unifiedId || false
+                                        if (
+                                            this.deps.initListsToDisplayUnfolded?.includes(
+                                                list.unifiedId,
+                                            )
+                                        ) {
+                                            list.pathUnifiedIds.forEach(
+                                                (listId) =>
+                                                    ancestorsOfListsToDisplayUnfolded.add(
+                                                        listId,
+                                                    ),
+                                            )
+                                        }
                                     }
-                                }
-                                return {
-                                    areChildrenShown,
-                                    unifiedId: list.unifiedId,
-                                    wasListDropped: false,
-                                    isNewChildInputShown:
-                                        prevState?.isNewChildInputShown ??
-                                        (this.deps
-                                            .initListToDisplayNewChildInput ===
-                                            list.unifiedId ||
-                                            false),
-                                    newChildListCreateState:
-                                        prevState?.newChildListCreateState ??
-                                        'pristine',
-                                    hasChildren:
-                                        this.deps.cache.getListsByParentId(
-                                            list.unifiedId,
-                                        ).length > 0,
-                                }
-                            },
-                        ),
-                    })
+                                    return {
+                                        areChildrenShown,
+                                        unifiedId: list.unifiedId,
+                                        wasListDropped: false,
+                                        isNewChildInputShown:
+                                            prevState?.isNewChildInputShown ??
+                                            (this.deps
+                                                .initListToDisplayNewChildInput ===
+                                                list.unifiedId ||
+                                                false),
+                                        newChildListCreateState:
+                                            prevState?.newChildListCreateState ??
+                                            'pristine',
+                                        hasChildren:
+                                            this.deps.cache.getListsByParentId(
+                                                list.unifiedId,
+                                            ).length > 0,
+                                    }
+                                },
+                            ),
+                        })
 
-                    // Toggle open any ancestors of the lists to display unfolded as specified via `deps.initListsToDisplayUnfolded`
-                    for (let listId of ancestorsOfListsToDisplayUnfolded) {
-                        nextState.byId[listId].areChildrenShown = true
-                    }
+                        // Toggle open any ancestors of the lists to display unfolded as specified via `deps.initListsToDisplayUnfolded`
+                        for (let listId of ancestorsOfListsToDisplayUnfolded) {
+                            nextState.byId[listId].areChildrenShown = true
+                        }
 
-                    return nextState
+                        return nextState
+                    },
                 },
-            },
-        })
-    }
+            })
+        }
 
     createNewChildList: EventHandler<'createNewChildList'> = async ({
         event,
@@ -124,14 +125,11 @@ export class ListTreesLogic extends UILogic<State, Events> {
             return
         }
 
-        let {
-            localListId,
-            remoteListId,
-            collabKey,
-        } = await this.deps.listsBG.createCustomList({
-            name: newListName,
-            parentListId: parentList.localId!,
-        })
+        let { localListId, remoteListId, collabKey } =
+            await this.deps.listsBG.createCustomList({
+                name: newListName,
+                parentListId: parentList.localId!,
+            })
         let user = await this.deps.authBG.getCurrentUser()
         this.deps.cache.addList({
             type: 'user-list',

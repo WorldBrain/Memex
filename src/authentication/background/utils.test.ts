@@ -1,5 +1,5 @@
 import expect from 'expect'
-import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { UserPlan } from '@worldbrain/memex-common/ts/subscriptions/types'
 import { createAuthDependencies } from './setup'
 import { checkValidPlan } from './utils'
 

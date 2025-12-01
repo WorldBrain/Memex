@@ -1,4 +1,4 @@
-import { TaskState } from 'ui-logic-core/lib/types'
+import { TaskState } from 'ui-logic-core/ts/types'
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
@@ -8,9 +8,9 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { runInBackground } from 'src/util/webextensionRPC'

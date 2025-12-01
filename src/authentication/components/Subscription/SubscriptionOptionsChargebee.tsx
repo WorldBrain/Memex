@@ -2,8 +2,8 @@ import * as React from 'react'
 import {
     SubscriptionCheckoutOptions,
     UserPlan,
-} from '@worldbrain/memex-common/lib/subscriptions/types'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+} from '@worldbrain/memex-common/ts/subscriptions/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 import { auth, subscription } from 'src/util/remote-functions-background'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import SubscriptionInnerOptions from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
@@ -11,7 +11,7 @@ import {
     CenterText,
     WhiteSpacer10,
 } from 'src/common-ui/components/design-library/typography'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
 

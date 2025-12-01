@@ -1,6 +1,5 @@
-import type { Browser } from 'webextension-polyfill'
-import type { UIEvent } from 'ui-logic-core'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { UIEvent } from 'ui-logic-core/ts'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import type {
     RootState as SearchResultsState,
     Events as SearchResultEvents,
@@ -30,7 +29,7 @@ import type { SearchFiltersState, SearchFilterEvents } from './header/types'
 import type { UIServices } from 'src/services/ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
@@ -41,16 +40,16 @@ import type {
     UnifiedAnnotation,
 } from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type {
     MemexTheme,
     MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+} from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/ts/editor'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 import type { BulkEditCollection } from 'src/bulk-edit/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { DragEventHandler } from 'react'
@@ -121,10 +120,13 @@ export type DashboardDependencies = {
     summarizeBG: SummarizationInterface<'caller'>
     pdfViewerBG: PDFRemoteInterface
     copyToClipboard: (text: string) => Promise<boolean>
-    localStorage: Browser['storage']['local']
-    runtimeAPI: Browser['runtime']
-    browserAPIs: Browser
-    tabsAPI: Browser['tabs']
+    localStorage: {
+        get: typeof chrome.storage.local.get
+        set: typeof chrome.storage.local.set
+    }
+    runtimeAPI: typeof chrome.runtime
+    browserAPIs: typeof chrome
+    tabsAPI: typeof chrome.tabs
     openSpaceInWebUI: (remoteCollectionId: string) => void
     services: Pick<
         UIServices,

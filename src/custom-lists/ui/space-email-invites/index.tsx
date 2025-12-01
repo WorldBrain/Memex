@@ -3,15 +3,15 @@ import styled from 'styled-components'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic, { Dependencies, State, Event } from './logic'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import { SharedListRoleID } from '@worldbrain/memex-common/ts/content-sharing/types'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { normalizedStateToArray } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import { sharedListRoleIDToString } from '@worldbrain/memex-common/ts/content-sharing/ui/list-share-modal/util'
 import { __wrapClick } from '../utils'
-import { TaskState } from 'ui-logic-core/lib/types'
-import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { TaskState } from 'ui-logic-core/ts/types'
+import LoadingBlock from '@worldbrain/memex-common/ts/common-ui/components/loading-block'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -53,12 +53,11 @@ export default class SpaceEmailInvites extends StatefulUIElement<
         return true
     }
 
-    private handleInviteInputChange: React.ChangeEventHandler<
-        HTMLInputElement
-    > = async (event) => {
-        const value = (event.target as HTMLInputElement).value
-        await this.processEvent('updateEmailInviteInputValue', { value })
-    }
+    private handleInviteInputChange: React.ChangeEventHandler<HTMLInputElement> =
+        async (event) => {
+            const value = (event.target as HTMLInputElement).value
+            await this.processEvent('updateEmailInviteInputValue', { value })
+        }
 
     private handleAddInviteInputKeyDown: React.KeyboardEventHandler = async (
         e,
@@ -173,8 +172,9 @@ export default class SpaceEmailInvites extends StatefulUIElement<
                                                 'inviteViaEmail',
                                                 {
                                                     state: this.state,
-                                                    remoteId: this.props
-                                                        .listData.remoteId,
+                                                    remoteId:
+                                                        this.props.listData
+                                                            .remoteId,
                                                 },
                                             )
                                         }
@@ -222,8 +222,7 @@ export default class SpaceEmailInvites extends StatefulUIElement<
                                                         this.processEvent(
                                                             'deleteEmailInvite',
                                                             {
-                                                                key:
-                                                                    invite?.email,
+                                                                key: invite?.email,
                                                             },
                                                         )
                                                     }

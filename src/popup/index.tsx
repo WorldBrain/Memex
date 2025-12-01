@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'styled-components'
-import browser from 'webextension-polyfill'
+
 import {
     loadThemeVariant,
     theme,
@@ -12,9 +12,8 @@ import RuntimeError from 'src/common-ui/components/RuntimeError'
 import Popup from './container'
 import configureStore from './store'
 import { setupRpcConnection } from 'src/util/webextensionRPC'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { EventEmitter } from 'events'
+import { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
+import { createRoot } from 'react-dom/client'
 
 interface RootProps {
     store: ReturnType<typeof configureStore>
@@ -56,21 +55,21 @@ class Root extends React.Component<RootProps, RootState> {
 
 function main() {
     setupRpcConnection({
-        browserAPIs: browser,
+        browserAPIs: typeof chrome,
         sideName: 'content-script-popup',
         role: 'content',
     })
 
     const store = configureStore()
 
-    document.getElementById('loader').remove()
+    document.getElementById('loader')!.remove()
 
-    ReactDOM.render(
+    const root = createRoot(document.getElementById('app')!)
+    root.render(
         <Root
             getRootElement={() => document.getElementById('body')}
             store={store}
         />,
-        document.getElementById('app'),
     )
 }
 

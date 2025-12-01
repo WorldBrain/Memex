@@ -1,4 +1,4 @@
-import { StorageBackendPlugin } from '@worldbrain/storex'
+import { StorageBackendPlugin } from '@worldbrain/storex/ts'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 import { SuggestOptions, SuggestResult } from '../types'
@@ -80,9 +80,8 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
     }) {
         const db = this.backend.dexieInstance
         // Grab first entry from the filter query; ignore rest for now
-        const [[indexName, searchQuery], ...fields] = Object.entries<string>(
-            query,
-        )
+        const [[indexName, searchQuery], ...fields] =
+            Object.entries<string>(query)
 
         if (fields.length > 1) {
             throw new UnimplementedError(

@@ -1,16 +1,13 @@
 import React from 'react'
-import browser from 'webextension-polyfill'
+
 // import PropTypes from 'prop-types'
 // import classNames from 'classnames'
 import * as logic from './restore-where.logic'
 import { ProviderList } from 'src/backup-restore/ui/backup-pane/components/provider-list'
 import { DownloadOverlay } from '../components/overlays'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { getFolder } from 'src/pkm-integrations/utils'
-
-const settingsStyle = require('src/options/settings/components/settings.css')
-const STYLES = require('../../styles.css')
 
 interface Props {
     onChoice: () => void
@@ -27,7 +24,7 @@ export default class RestoreWhere extends React.Component<Props> {
     private proceedIfServerIsRunning = async () => {
         let overlay = null
         let backupPath = null
-        const status = await checkServerStatus({ storageAPI: browser.storage })
+        const status = await checkServerStatus({ storageAPI: chrome.storage })
         if (status) {
             backupPath = await fetchBackupPath()
         } else {
@@ -45,7 +42,7 @@ export default class RestoreWhere extends React.Component<Props> {
 
     private handleChangeBackupPath = async () => {
         const backupPath = await getFolder('backup', {
-            storageAPI: browser.storage,
+            storageAPI: chrome.storage,
         })
         if (backupPath) {
             this.handleEvent({
@@ -59,12 +56,12 @@ export default class RestoreWhere extends React.Component<Props> {
 
     render() {
         return (
-            <div className={settingsStyle.section}>
-                <div className={settingsStyle.sectionTitle}>
+            <div>
+                <div>
                     <strong>STEP 1/2: </strong>
                     FROM WHERE?
                 </div>
-                <div className={settingsStyle.subname}>
+                <div>
                     <strong>Important:</strong> To restore, pick the parent
                     folder of '/backup'
                 </div>
@@ -100,7 +97,7 @@ export default class RestoreWhere extends React.Component<Props> {
                         }
                     }}
                 />
-                <div className={settingsStyle.buttonArea}>
+                <div>
                     <div />
                     <PrimaryAction
                         disabled={!this.state.valid}

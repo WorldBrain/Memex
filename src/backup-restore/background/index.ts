@@ -1,5 +1,5 @@
 // tslint:disable:no-console
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 import Queue, { Options as QueueOpts } from 'queue'
 
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
@@ -16,8 +16,7 @@ import * as Raven from 'src/util/raven'
 import type { BackupInterface, LocalBackupSettings } from './types'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { checkServerStatus } from '../../backup-restore/ui/utils'
-import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import type { Browser } from 'webextension-polyfill'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/ts/types'
 import { keepWorkerAlive } from 'src/util/service-worker-utils'
 import { AUTOMATED_BACKUP_ALARM_NAME } from './constants'
 
@@ -35,9 +34,8 @@ export class BackupBackgroundModule {
     backupUiCommunication = new ProcedureUiCommunication('backup-event')
     remoteFunctions: BackupInterface<'provider'>
     restoreProcedure: BackupRestoreProcedure
-    restoreUiCommunication: ProcedureUiCommunication = new ProcedureUiCommunication(
-        'restore-event',
-    )
+    restoreUiCommunication: ProcedureUiCommunication =
+        new ProcedureUiCommunication('restore-event')
 
     uiTabId?: any
     automaticBackupTimeout: number | null = null
@@ -49,18 +47,22 @@ export class BackupBackgroundModule {
     constructor(
         private options: {
             storageManager: Storex
-            createQueue?: typeof Queue
+            createQueue?: (opts: QueueOpts) => Queue // Updated type to factory function
             queueOpts?: QueueOpts
             notifications: NotificationBackground
-            browserAPIs: Pick<Browser, 'runtime' | 'storage' | 'alarms'>
+            browserAPIs: Pick<typeof chrome, 'runtime' | 'storage' | 'alarms'>
             localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
             checkAuthorizedForAutoBackup: () => Promise<boolean>
         },
     ) {
-        options.createQueue = options.createQueue || Queue
         options.queueOpts = options.queueOpts || {
             autostart: true,
             concurrency: 1,
+        }
+
+        // Ensure createQueue is a factory function
+        if (!options.createQueue) {
+            options.createQueue = (opts) => new Queue(opts)
         }
 
         this.backendSelect = new BackendSelect({
@@ -162,20 +164,23 @@ export class BackupBackgroundModule {
                     ) {
                         this.backendLocation = location
                         await this.backendSelect.saveBackendLocation(location)
-                        this.backend = await this.backendSelect.initGDriveBackend()
+                        this.backend =
+                            await this.backendSelect.initGDriveBackend()
                     } else if (
                         location === 'local' &&
                         this.backendLocation !== location
                     ) {
                         this.backendLocation = location
                         await this.backendSelect.saveBackendLocation(location)
-                        this.backend = await this.backendSelect.initLocalBackend()
+                        this.backend =
+                            await this.backendSelect.initLocalBackend()
                     }
                     // this.setupRequestInterceptor()
                     this.initBackendDependants()
                 },
                 getBackendLocation: async (info) => {
-                    this.backendLocation = await this.backendSelect.restoreBackendLocation()
+                    this.backendLocation =
+                        await this.backendSelect.restoreBackendLocation()
                     return this.backendLocation
                 },
                 isBackupBackendAuthenticated: async () => {
@@ -193,11 +198,12 @@ export class BackupBackgroundModule {
                     }
                 },
                 sendNotification: async (id: string) => {
-                    const errorId = await this.backend.sendNotificationOnFailure(
-                        id,
-                        this.notifications,
-                        () => this.estimateInitialBackupSize(),
-                    )
+                    const errorId =
+                        await this.backend.sendNotificationOnFailure(
+                            id,
+                            this.notifications,
+                            () => this.estimateInitialBackupSize(),
+                        )
                     return errorId
                 },
                 estimateInitialBackupSize: () => {
@@ -343,9 +349,8 @@ export class BackupBackgroundModule {
     }
 
     async getBackupTimes() {
-        const lastBackup = await this.localBackupSettings.get(
-            'lastBackupFinished',
-        )
+        const lastBackup =
+            await this.localBackupSettings.get('lastBackupFinished')
 
         let nextBackup = null
         if (this.backupProcedure?.running) {
@@ -374,9 +379,8 @@ export class BackupBackgroundModule {
     async maybeShowBackupProblemNotif(
         notifId: 'incremental_backup_down' | 'backup_error',
     ) {
-        const lastBackup = await this.localBackupSettings.get(
-            'lastBackupFinished',
-        )
+        const lastBackup =
+            await this.localBackupSettings.get('lastBackupFinished')
         if (!lastBackup) {
             return
         }

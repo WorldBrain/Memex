@@ -1,5 +1,4 @@
-import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
-import { runtime } from 'webextension-polyfill'
+import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/ts/editor/utils'
 
 export function loadYoutubeButtons(annotationsFunctions) {
     const below = document.querySelector('#below')
@@ -64,9 +63,8 @@ export function loadYoutubeButtons(annotationsFunctions) {
                                         .startsWith(videoPath)
                                 ) {
                                     const selector2 = `#description-inline-expander .yt-core-attributed-string__link[href^="${videoPath}"]`
-                                    const chapterTimestamps = document.querySelectorAll(
-                                        selector2,
-                                    )
+                                    const chapterTimestamps =
+                                        document.querySelectorAll(selector2)
                                     const chapterBlocks = []
                                     hasChapterContainer = true
                                     Array.from(chapterTimestamps).forEach(
@@ -79,13 +77,12 @@ export function loadYoutubeButtons(annotationsFunctions) {
 
                                     const firstBlock = chapterBlocks[0]
 
-                                    const buttonIcon = runtime.getURL(
+                                    const buttonIcon = chrome.runtime.getURL(
                                         '/img/memex-icon.svg',
                                     )
 
-                                    const newBlock = document.createElement(
-                                        'div',
-                                    )
+                                    const newBlock =
+                                        document.createElement('div')
                                     newBlock.style.display = 'flex'
                                     newBlock.style.alignItems = 'center'
                                     newBlock.style.marginTop = '10px'
@@ -133,7 +130,7 @@ export function loadYoutubeButtons(annotationsFunctions) {
 
 export function injectYoutubeContextMenu(annotationsFunctions: any) {
     const config = { attributes: true, childList: true, subtree: true }
-    const icon = runtime.getURL('/img/memex-icon.svg')
+    const icon = chrome.runtime.getURL('/img/memex-icon.svg')
 
     const observer = new MutationObserver((mutation) => {
         const targetObject = mutation[0]
@@ -329,9 +326,8 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const textFieldNote = document.createElement('input')
     textFieldNote.id = 'secondsInPastFieldNote'
 
-    const noteSecondsStorage = await globalThis['browser'].storage.local.get(
-        'noteSecondsStorage',
-    )
+    const noteSecondsStorage =
+        await globalThis['browser'].storage.local.get('noteSecondsStorage')
 
     const noteSeconds = noteSecondsStorage.noteSecondsStorage
 
@@ -407,13 +403,15 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     })
 
     // Rewind Icon
-    const rewindIcon = runtime.getURL('/img/historyYoutubeInjection.svg')
+    const rewindIcon = chrome.runtime.getURL('/img/historyYoutubeInjection.svg')
     const rewindIconEl = document.createElement('img')
     rewindIconEl.src = rewindIcon
     rewindIconEl.style.height = '18px'
     rewindIconEl.style.margin = '0 10px 0 10px'
     // Rewind Icon
-    const rewindIcon2 = runtime.getURL('/img/historyYoutubeInjection.svg')
+    const rewindIcon2 = chrome.runtime.getURL(
+        '/img/historyYoutubeInjection.svg',
+    )
     const rewindIconEl2 = document.createElement('img')
     rewindIconEl2.src = rewindIcon2
     rewindIconEl2.style.height = '18px'
@@ -490,7 +488,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     annotateButton.appendChild(textFieldContainerNote)
 
     // dDisplay
-    const memexIcon = runtime.getURL('/img/memex-icon.svg')
+    const memexIcon = chrome.runtime.getURL('/img/memex-icon.svg')
     const memexIconEl = document.createElement('img')
     memexIconEl.src = memexIcon
     memexButtons.appendChild(memexIconEl)
@@ -498,14 +496,16 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexIconEl.style.height = '20px'
 
     // TimestampIcon
-    const timestampIcon = runtime.getURL('/img/clockForYoutubeInjection.svg')
+    const timestampIcon = chrome.runtime.getURL(
+        '/img/clockForYoutubeInjection.svg',
+    )
     const timeStampEl = document.createElement('img')
     timeStampEl.src = timestampIcon
     timeStampEl.style.height = '20px'
     timeStampEl.style.margin = '0 10px 0 10px'
     annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
     // TimestampIcon
-    const cameraIcon = runtime.getURL('/img/cameraIcon.svg')
+    const cameraIcon = chrome.runtime.getURL('/img/cameraIcon.svg')
     const cameraIconEl = document.createElement('img')
     cameraIconEl.src = cameraIcon
     cameraIconEl.style.height = '20px'
@@ -513,7 +513,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     screenshotButton.insertBefore(cameraIconEl, screenshotButton.firstChild)
 
     // AI timestamp icon
-    const AItimestampIcon = runtime.getURL('/img/starsYoutube.svg')
+    const AItimestampIcon = chrome.runtime.getURL('/img/starsYoutube.svg')
     const AItimestampIconEl = document.createElement('img')
     AItimestampIconEl.src = AItimestampIcon
     AItimestampIconEl.style.height = '20px'
@@ -524,7 +524,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     )
 
     // SummarizeIcon
-    const summarizeIcon = runtime.getURL(
+    const summarizeIcon = chrome.runtime.getURL(
         '/img/summarizeIconForYoutubeInjection.svg',
     )
     const summarizeIconEl = document.createElement('img')

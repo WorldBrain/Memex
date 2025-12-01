@@ -3,11 +3,10 @@ import {
     loadInitial,
     executeUITask,
     UIEventHandler,
-} from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+} from '@worldbrain/memex-common/ts/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
-import { checkStripePlan } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { checkStripePlan } from '@worldbrain/memex-common/ts/subscriptions/storage'
 import checkBrowser from 'src/util/check-browser'
-import browser from 'webextension-polyfill'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -95,7 +94,7 @@ export default class Logic extends UILogic<State, Event> {
                     } else {
                         memexSocialUrl = 'https://staging.memex.social/'
                     }
-                    await browser.tabs.create({
+                    await chrome.tabs.create({
                         url: `${memexSocialUrl}auth`,
                     })
                 }
@@ -122,15 +121,14 @@ export default class Logic extends UILogic<State, Event> {
             loadState: { $set: 'success' },
         })
     }
-    toggleGenerateTokenSystemSelectMenu: EventHandler<
-        'toggleGenerateTokenSystemSelectMenu'
-    > = ({ event, previousState }) => {
-        this.emitMutation({
-            systemSelectMenuState: {
-                $set: !previousState.systemSelectMenuState,
-            },
-        })
-    }
+    toggleGenerateTokenSystemSelectMenu: EventHandler<'toggleGenerateTokenSystemSelectMenu'> =
+        ({ event, previousState }) => {
+            this.emitMutation({
+                systemSelectMenuState: {
+                    $set: !previousState.systemSelectMenuState,
+                },
+            })
+        }
     copyCodeToClipboard: EventHandler<'copyCodeToClipboard'> = ({
         previousState,
     }) => {

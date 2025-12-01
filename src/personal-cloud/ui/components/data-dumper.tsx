@@ -1,11 +1,11 @@
 import React from 'react'
 
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import { Container, BtnBox, Header, Text } from './shared-components'
-import { UIElement } from '@worldbrain/memex-common/lib/main-ui/classes'
+import { UIElement } from '@worldbrain/memex-common/ts/main-ui/classes'
 import Logic, { Dependencies, State, Event } from './data-dumper.logic'
 import type { UIServices } from 'src/services/ui/types'
 

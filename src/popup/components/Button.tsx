@@ -1,8 +1,6 @@
 import React, { HTMLProps } from 'react'
 import classNames from 'classnames'
 
-const styles = require('./Button.css')
-
 export interface Props extends HTMLProps<HTMLButtonElement> {
     children?: React.ReactNode
     btnClass?: string
@@ -17,22 +15,12 @@ class Button extends React.PureComponent<Props> {
         return (
             // @ts-ignore
             <button
-                className={classNames(
-                    styles.item,
-                    styles.itemBtn,
-                    this.props.itemClass,
-                    {
-                        [styles.disabled]: this.props.disabled,
-                    },
-                )}
+                className={classNames(this.props.itemClass, {
+                    disabled: this.props.disabled,
+                })}
                 {...btnProps}
             >
-                <div
-                    className={classNames(
-                        styles.customIcon,
-                        this.props.btnClass,
-                    )}
-                />
+                <div className={classNames(this.props.btnClass)} />
                 {children}
             </button>
         )

@@ -1,13 +1,13 @@
 import type Dexie from 'dexie'
-import type StorageManager from '@worldbrain/storex'
-import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
-import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type StorageManager from '@worldbrain/storex/ts'
+import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/ts/utils'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/ts/types'
 import {
     getCurrentSchemaVersion,
     isTermsField,
-} from '@worldbrain/memex-common/lib/storage/utils'
-import { AsyncMutex } from '@worldbrain/memex-common/lib/utils/async-mutex'
-import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
+} from '@worldbrain/memex-common/ts/storage/utils'
+import { AsyncMutex } from '@worldbrain/memex-common/ts/utils/async-mutex'
+import ActionQueue from '@worldbrain/memex-common/ts/action-queue'
 import {
     PersonalCloudBackend,
     PersonalCloudUpdateType,
@@ -20,9 +20,9 @@ import {
     PersonalCloudMediaBackend,
     PersonalCloudListTreeMoveUpdate,
     PersonalCloudListTreeDeleteUpdate,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/types'
+import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
+import { preprocessPulledObject } from '@worldbrain/memex-common/ts/personal-cloud/utils'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
@@ -37,7 +37,7 @@ import {
 import type {
     ActionExecutor,
     ActionPreprocessor,
-} from '@worldbrain/memex-common/lib/action-queue/types'
+} from '@worldbrain/memex-common/ts/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { wipePassiveData } from 'src/personal-cloud/storage/passive-data-wipe'
 import type { SettingStore } from 'src/util/settings'
@@ -46,17 +46,16 @@ import * as Raven from 'src/util/raven'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
-import type { Alarms, Browser } from 'webextension-polyfill'
 import { CLOUD_SYNC_RETRY_UL_ALARM_NAME } from './constants'
-import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/types'
-import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
+import type { AuthChange } from '@worldbrain/memex-common/ts/authentication/types'
+import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/ts/content-sharing/storage/list-tree-middleware'
 import { keepWorkerAlive } from 'src/util/service-worker-utils'
-import { COLLECTION_NAMES as PAGE_COLLS } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
+import { COLLECTION_NAMES as PAGE_COLLS } from '@worldbrain/memex-common/ts/storage/modules/pages/constants'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
     mediaBackend: PersonalCloudMediaBackend
-    webExtAPIs: Pick<Browser, 'alarms' | 'runtime'>
+    webExtAPIs: { alarms: typeof chrome.alarms; runtime: typeof chrome.runtime }
     storageManager: StorageManager
     syncSettingsStore: SyncSettingsStore<'dashboard'>
     persistentStorageManager: StorageManager
@@ -122,12 +121,15 @@ export class PersonalCloudBackground {
         this.setupEventListeners()
 
         this.remoteFunctions = {
-            runDataMigration: this.waitForSync,
-            isCloudSyncEnabled: this.isCloudSyncEnabled,
-            invokeSyncDownload: this.invokeSyncDownload,
-            countPendingSyncDownloads: this.countPendingSyncDownloads,
-            enableCloudSyncForNewInstall: this.enableSyncForNewInstall,
-            isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
+            runDataMigration: this.waitForSync.bind(this),
+            isCloudSyncEnabled: this.isCloudSyncEnabled.bind(this),
+            invokeSyncDownload: this.invokeSyncDownload.bind(this),
+            countPendingSyncDownloads:
+                this.countPendingSyncDownloads.bind(this),
+            enableCloudSyncForNewInstall:
+                this.enableSyncForNewInstall.bind(this),
+            isPassiveDataRemovalNeeded:
+                this.isPassiveDataRemovalNeeded.bind(this),
             runPassiveDataClean: () =>
                 wipePassiveData({ db: this.dexie, visitLimit: 20 }),
         }
@@ -160,16 +162,16 @@ export class PersonalCloudBackground {
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
 
-    countPendingSyncDownloads: PersonalCloudRemoteInterface['countPendingSyncDownloads'] = async () => {
-        const pendingDownloads = await this.options.backend.countPendingUpdates(
-            {},
-        )
+    countPendingSyncDownloads: PersonalCloudRemoteInterface['countPendingSyncDownloads'] =
+        async () => {
+            const pendingDownloads =
+                await this.options.backend.countPendingUpdates({})
 
-        this.stats.pendingDownloads = pendingDownloads ?? 0
+            this.stats.pendingDownloads = pendingDownloads ?? 0
 
-        const pendingStats = pendingDownloads
-        return pendingStats
-    }
+            const pendingStats = pendingDownloads
+            return pendingStats
+        }
 
     invokeSyncDownload = async () => {
         this.options.backend.triggerSyncContinuation()
@@ -225,7 +227,8 @@ export class PersonalCloudBackground {
         }
 
         if (!this.pendingActionsExecuting) {
-            this.pendingActionsExecuting = this.actionQueue.executePendingActions()
+            this.pendingActionsExecuting =
+                this.actionQueue.executePendingActions()
         }
         // These will never return, so don't await for it
         if (!this.authChangesObserved) {
@@ -446,11 +449,10 @@ export class PersonalCloudBackground {
         await Promise.all(
             Object.entries(update.media).map(
                 async ([fieldName, { path, type }]) => {
-                    let fieldValue:
-                        | Blob
-                        | string = await this.options.mediaBackend.downloadFromMedia(
-                        { path },
-                    )
+                    let fieldValue: Blob | string =
+                        await this.options.mediaBackend.downloadFromMedia({
+                            path,
+                        })
                     if (type === 'text' || type === 'json') {
                         if (fieldValue instanceof Blob) {
                             fieldValue = await blobToString(fieldValue)
@@ -629,24 +631,23 @@ export class PersonalCloudBackground {
             action.type === PersonalCloudActionType.PushObject &&
             action.updates.length > 0
         ) {
-            const {
-                clientInstructions,
-            } = await this.options.backend.pushUpdates(
-                action.updates.map((update) => {
-                    // This covers a bug where we'd store NaN in one of the pageMetadata coll values, which would cause a JSON serialization error on sending to FB
-                    if (
-                        update.type === PersonalCloudUpdateType.Overwrite &&
-                        update.collection === PAGE_COLLS.pageMetadata &&
-                        isNaN(update.object['releaseDate'])
-                    ) {
-                        update.object['releaseDate'] = undefined
-                    }
-                    return {
-                        ...update,
-                        deviceId: update.deviceId ?? this.deviceId,
-                    }
-                }),
-            )
+            const { clientInstructions } =
+                await this.options.backend.pushUpdates(
+                    action.updates.map((update) => {
+                        // This covers a bug where we'd store NaN in one of the pageMetadata coll values, which would cause a JSON serialization error on sending to FB
+                        if (
+                            update.type === PersonalCloudUpdateType.Overwrite &&
+                            update.collection === PAGE_COLLS.pageMetadata &&
+                            isNaN(update.object['releaseDate'])
+                        ) {
+                            update.object['releaseDate'] = undefined
+                        }
+                        return {
+                            ...update,
+                            deviceId: update.deviceId ?? this.deviceId,
+                        }
+                    }),
+                )
             if (clientInstructions.length) {
                 await this.actionQueue.scheduleAction(
                     {

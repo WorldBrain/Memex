@@ -6,15 +6,13 @@ import {
     TypographySubTextNormal,
 } from 'src/common-ui/components/design-library/typography'
 import styled from 'styled-components'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 
 interface ShareNonPioneerInfoProps {
     onClickUpgrade: () => void
 }
 
-export default class ShareNonPioneerInfo extends PureComponent<
-    ShareNonPioneerInfoProps
-> {
+export default class ShareNonPioneerInfo extends PureComponent<ShareNonPioneerInfoProps> {
     render() {
         return (
             <ModalBox>

@@ -1,8 +1,6 @@
 import React, { PureComponent } from 'react'
 import cx from 'classnames'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-
-const styles = require('./search-filters.css')
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 interface Props {
     tagFilter: React.ReactNode
@@ -21,14 +19,13 @@ interface State {}
 class SearchFilters extends PureComponent<Props, State> {
     render() {
         return (
-            <div className={styles.filterBar}>
-                <div className={styles.innerContainer}>
-                    <div className={styles.filters}>
+            <div className="filterBar">
+                <div className="innerContainer">
+                    <div className="filters">
                         {this.props.bookmarkFilter}
                         {this.props.dateFilter}
                         {this.props.tagFilter}
                         {this.props.domainFilter}
-                        {this.props.userFilter}
                         {this.props.hashtagsFilter}
                         {this.props.contentFilter}
                     </div>
@@ -38,7 +35,7 @@ class SearchFilters extends PureComponent<Props, State> {
                         getPortalRoot={this.props.getRootElement}
                     >
                         <div
-                            className={cx(styles.button, styles.arrow)}
+                            className={cx('button', 'arrow')}
                             onClick={() => this.props.toggleFilterBar()}
                         />
                     </TooltipBox>

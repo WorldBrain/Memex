@@ -1,6 +1,6 @@
 import type { BulkError, default as Dexie } from 'dexie'
-import { isUrlForAnnotation } from '@worldbrain/memex-common/lib/annotations/utils'
-import { listNameStemmer } from '@worldbrain/memex-stemmer'
+import { isUrlForAnnotation } from '@worldbrain/memex-common/ts/annotations/utils'
+import { listNameStemmer } from '@worldbrain/memex-stemmer/ts'
 import type { PageListEntry } from 'src/custom-lists/background/types'
 import type { AnnotListEntry } from 'src/annotations/types'
 import * as Raven from 'src/util/raven'
@@ -14,17 +14,19 @@ interface Dependencies {
     chunkSize?: number
 }
 
-const handleBulkAddError = (
-    totalDocCount: number,
-    docType: 'spaces' | 'page entries' | 'annotation entries',
-) => (e: BulkError) =>
-    console.warn(
-        `${
-            Object.values(e.failures).length
-        } ${docType} failed to be created. However, ${
-            totalDocCount - Object.values(e.failures).length
-        } ${docType} were created successfully.`,
-    )
+const handleBulkAddError =
+    (
+        totalDocCount: number,
+        docType: 'spaces' | 'page entries' | 'annotation entries',
+    ) =>
+    (e: BulkError) =>
+        console.warn(
+            `${
+                Object.values(e.failures).length
+            } ${docType} failed to be created. However, ${
+                totalDocCount - Object.values(e.failures).length
+            } ${docType} were created successfully.`,
+        )
 
 export async function migrateTagsToSpaces({
     dexie,

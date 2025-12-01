@@ -1,8 +1,8 @@
-import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
-import type { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
-import type { ActivityStreamsService } from '@worldbrain/memex-common/lib/activity-streams/types'
-import type { ListKeysServiceInterface } from '@worldbrain/memex-common/lib/content-sharing/service/types'
-import type { ContentConversationsServiceInterface } from '@worldbrain/memex-common/lib/content-conversations/service/types'
+import type { AuthService } from '@worldbrain/memex-common/ts/authentication/types'
+import type { SubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/types'
+import type { ActivityStreamsService } from '@worldbrain/memex-common/ts/activity-streams/types'
+import type { ListKeysServiceInterface } from '@worldbrain/memex-common/ts/content-sharing/service/types'
+import type { ContentConversationsServiceInterface } from '@worldbrain/memex-common/ts/content-conversations/service/types'
 
 export interface Services {
     activityStreams: ActivityStreamsService

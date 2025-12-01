@@ -1,4 +1,4 @@
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 const protocolUrls = [
     'http://test.com',

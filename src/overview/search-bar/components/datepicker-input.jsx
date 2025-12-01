@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 class DatePickerInput extends PureComponent {
     static propTypes = {

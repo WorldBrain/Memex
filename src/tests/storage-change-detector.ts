@@ -1,6 +1,6 @@
 import { detailedDiff } from 'deep-object-diff'
-import StorageManager from '@worldbrain/storex'
-import { getObjectPk } from '@worldbrain/storex-sync/lib/utils'
+import StorageManager from '@worldbrain/storex/ts'
+import { getObjectPk } from '@worldbrain/storex-sync/ts/utils'
 
 export interface StorageDiff {
     [collection: string]: StorageCollectionDiff

@@ -3,29 +3,28 @@ import type {
     TermsSearchOpts,
     UnifiedSearchPaginationParams,
     UnifiedSearchParams,
-} from '@worldbrain/memex-common/lib/search/types'
+} from '@worldbrain/memex-common/ts/search/types'
 import type {
     PageAnnotationsCacheInterface,
     UnifiedList,
 } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
-import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import { deriveListOwnershipStatus } from 'src/annotations/cache/utils'
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 
-export const updatePickerValues = (event: {
-    added?: string
-    deleted?: string
-}) => (prevState: string[]): string[] => {
-    if (event.added) {
-        return [...new Set([...prevState, event.added])]
-    }
-    if (event.deleted) {
-        return prevState.filter((tag) => tag !== event.deleted)
-    }
+export const updatePickerValues =
+    (event: { added?: string; deleted?: string }) =>
+    (prevState: string[]): string[] => {
+        if (event.added) {
+            return [...new Set([...prevState, event.added])]
+        }
+        if (event.deleted) {
+            return prevState.filter((tag) => tag !== event.deleted)
+        }
 
-    return prevState
-}
+        return prevState
+    }
 
 export const areSearchFiltersEmpty = ({
     listsSidebar,

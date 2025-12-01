@@ -2,7 +2,7 @@ import expect from 'expect'
 import {
     signToken,
     verifyToken,
-} from '@worldbrain/memex-common/lib/utils/secure-tokens'
+} from '@worldbrain/memex-common/ts/utils/secure-tokens'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 describe('PDF uploads', () => {

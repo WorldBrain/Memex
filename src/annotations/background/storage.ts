@@ -1,26 +1,25 @@
-import Storex from '@worldbrain/storex'
+import Storex from '@worldbrain/storex/ts'
 import {
     StorageModule,
     StorageModuleConfig,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/annotations/constants'
-import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
-import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
-import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/annotations/constants'
+import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-common/ts/storage/modules/pages/constants'
+import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-common/ts/storage/modules/tags/constants'
+import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 
 import type { Tag } from 'src/search'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import type { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import type { Annotation, AnnotListEntry } from 'src/annotations/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { shareAnnotationWithPKM } from 'src/pkm-integrations/background/backend/utils'
 import { isPkmSyncEnabled } from 'src/pkm-integrations/utils'
-import type { Storage } from 'webextension-polyfill'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page

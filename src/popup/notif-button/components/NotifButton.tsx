@@ -7,8 +7,6 @@ import * as constants from '../../../constants'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 
-const styles = require('./NotifButton.css')
-
 export interface OwnProps {
     href?: string
 }
@@ -37,14 +35,14 @@ class NotificationContainer extends PureComponent<Props> {
             <ButtonIcon
                 icon="notification"
                 href={this.props.href}
-                btnClass={styles.notification}
+                btnClass="notification"
                 badgeCount={this.props.unreadNotifCount}
             />
         )
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     unreadNotifCount: selectors.notifCount(state),
 })
 

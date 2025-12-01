@@ -8,26 +8,20 @@ To comply with the [anatomy of a WebExtension](https://developer.mozilla.org/en-
 this extension consists of the following parts (found in
 `extension/` after compilation):
 
--   `background.js` always runs, in an 'empty invisible tab', listening for
-    messages and events.
--   `content_script.js` is loaded into every web page that is visited. It is
-    invisible from that web page's own scripts, and can talk to the background
-    script.
--   `options.html` (plus resources) is a technically separate application
-    that provides the settings page + overview.
--   `popup.html` (plus resources) is a technically separate application
-    that provides the extension popup.
+- `background.js` always runs, in an 'empty invisible tab', listening for
+  messages and events.
+- `content_script.js` is loaded into every web page that is visited. It is
+  invisible from that web page's own scripts, and can talk to the background
+  script.
+- `options.html` (plus resources) is a technically separate application
+  that provides the settings page + overview.
+- `popup.html` (plus resources) is a technically separate application
+  that provides the extension popup.
 
 The parts communicate in two ways:
 
--   Messaging through `browser.sendMessage`, usually done implicitly by using a
-    remote procedure call ([`util/webextensionRPC.js`](src/util/webextensionRPC.js)).
-
-Besides these parts,
-[`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
-provides the promise-based `browser` API, that simply wraps Chromium/Chrome's
-callback-based `chrome` API, in order to make the same code run in different
-browsers (and to structure the callback mess).
+- Messaging through `chrome.sendMessage`, usually done implicitly by using a
+  remote procedure call ([`util/webextensionRPC.js`](src/util/webextensionRPC.js)).
 
 ## Source organisation
 

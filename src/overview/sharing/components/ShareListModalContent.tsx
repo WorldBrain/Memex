@@ -2,15 +2,15 @@ import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
 import analytics from 'src/analytics'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import {
     TypographyTextNormal,
     TypographyHeadingBigger,
     TypographyHeadingNormal,
     TypographyHeadingSmall,
 } from 'src/common-ui/components/design-library/typography'
-import { TaskState } from 'ui-logic-core/lib/types'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { TaskState } from 'ui-logic-core/ts/types'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import Modal from 'src/common-ui/components/Modal'
 
@@ -95,7 +95,8 @@ const BetaInfoContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+    box-shadow:
+        rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 2px 4px;
     border-radius: 3px;
     padding: 20px;

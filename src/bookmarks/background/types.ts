@@ -1,4 +1,4 @@
-import type { Bookmark } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
+import type { Bookmark } from '@worldbrain/memex-common/ts/storage/modules/mobile-app/features/overview/types'
 
 export interface BookmarksInterface {
     addPageBookmark(args: {

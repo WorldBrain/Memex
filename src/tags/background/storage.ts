@@ -1,13 +1,13 @@
 import {
     StorageModule,
     StorageModuleConfig,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/tags/constants'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/ts/storage/constants'
 
 export default class TagStorage extends StorageModule {
     static TAGS_COLL = COLLECTION_NAMES.tag

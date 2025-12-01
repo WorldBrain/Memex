@@ -7,14 +7,12 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import AuthDialog from 'src/authentication/components/AuthDialog'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { Browser } from 'webextension-polyfill'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 
-export interface Props
-    extends Pick<
-        ModalProps,
-        'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
-    > {
+export interface Props extends Pick<
+    ModalProps,
+    'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
+> {
     contentScriptBG?: ContentScriptsInterface<'caller'>
     contentSharingBG?: ContentSharingInterface
     authBG?: AuthRemoteFunctionsInterface
@@ -22,7 +20,7 @@ export interface Props
     onSuccess?(isNewUser?: boolean): void
     onFail?(): void
     redirectTo?: string
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 export default class LoginModal extends React.PureComponent<Props> {

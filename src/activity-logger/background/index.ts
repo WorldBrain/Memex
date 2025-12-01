@@ -1,5 +1,3 @@
-import { Tabs } from 'webextension-polyfill'
-
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 // import initPauser, { getState as getPauseState } from './pause-logging'
 import { ActivityLoggerInterface } from './types'
@@ -16,8 +14,8 @@ export default class ActivityLoggerBackground {
             toggleLoggingPause: () => {},
         }
     }
-
-    static isTabLoaded = (tab: Tabs.Tab) => tab.status === 'complete'
+    static isTabLoaded = (tab: typeof chrome.tabs.Tab) =>
+        tab.status === 'complete'
 
     setupRemoteFunctions() {
         makeRemotelyCallableType<ActivityLoggerInterface>(this.remoteFunctions)

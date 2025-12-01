@@ -1,6 +1,6 @@
 import * as icons from 'src/common-ui/components/design-library/icons'
 import React from 'react'
-import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { IconKeys } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 export function getShareButtonData(
     isShared: boolean,

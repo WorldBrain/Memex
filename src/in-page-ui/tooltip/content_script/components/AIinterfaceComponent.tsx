@@ -1,8 +1,8 @@
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 import React from 'react'
 import styled, { css } from 'styled-components'
 

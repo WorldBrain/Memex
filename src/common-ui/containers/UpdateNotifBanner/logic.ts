@@ -1,5 +1,5 @@
-import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core/ts'
+import { TaskState } from 'ui-logic-core/ts/types'
 
 import { loadInitial } from 'src/util/ui-logic'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'

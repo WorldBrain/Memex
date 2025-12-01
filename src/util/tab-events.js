@@ -1,20 +1,20 @@
 import eventToPromise from './event-to-promise'
 
-const tabChangedEvents = tabId => [
+const tabChangedEvents = (tabId) => [
     {
-        event: browser.webNavigation.onCommitted,
-        filter: details => details.tabId === tabId && details.frameId === 0,
+        event: chrome.webNavigation.onCommitted,
+        filter: (details) => details.tabId === tabId && details.frameId === 0,
         reason: { message: 'Tab URL changed before event occurred.' },
     },
     // TODO Handle history state updates more carefully. Ignoring these events for now.
     // {
-    //     event: browser.webNavigation.onHistoryStateUpdated,
+    //     event: chrome.webNavigation.onHistoryStateUpdated,
     //     filter: details => (details.tabId === tabId && details.frameId === 0),
     //     reason: {message: 'Tab URL changed before event occurred.'},
     // },
     {
-        event: browser.tabs.onRemoved,
-        filter: closedTabId => closedTabId === tabId,
+        event: chrome.tabs.onRemoved,
+        filter: (closedTabId) => closedTabId === tabId,
         reason: { message: 'Tab was closed before event occurred.' },
     },
 ]
@@ -26,7 +26,7 @@ export function whenPageDOMLoaded({ tabId }) {
     return new Promise((resolve, reject) => {
         // Using executeScript at document_end here as a workaround, as there is
         // no tab.status==='interactive'; it is either 'loading' or 'complete'.
-        browser.tabs
+        chrome.tabs
             .executeScript(tabId, {
                 code: 'undefined',
                 runAt: 'document_end',
@@ -44,7 +44,7 @@ export function whenPageDOMLoaded({ tabId }) {
 // Resolve if or when the page is completely loaded.
 // Rejects if it is closed before that.
 export async function whenPageLoadComplete({ tabId }) {
-    const tab = await browser.tabs.get(tabId)
+    const tab = await chrome.tabs.get(tabId)
 
     if (tab.status === 'complete') {
         return
@@ -52,7 +52,7 @@ export async function whenPageLoadComplete({ tabId }) {
 
     return eventToPromise({
         resolve: {
-            event: browser.tabs.onUpdated,
+            event: chrome.tabs.onUpdated,
             filter: (changedTabId, { status }) =>
                 changedTabId === tabId && status === 'complete',
         },
@@ -63,8 +63,8 @@ export async function whenPageLoadComplete({ tabId }) {
 // Resolve if or when the tab is active.
 // Rejects if it is closed before that.
 export async function whenTabActive({ tabId }) {
-    const activeTabs = await browser.tabs.query({ active: true })
-    const isActive = activeTabs.map(t => t.id).indexOf(tabId) > -1
+    const activeTabs = await chrome.tabs.query({ active: true })
+    const isActive = activeTabs.map((t) => t.id).indexOf(tabId) > -1
 
     if (isActive) {
         return
@@ -72,7 +72,7 @@ export async function whenTabActive({ tabId }) {
 
     return eventToPromise({
         resolve: {
-            event: browser.tabs.onActivated,
+            event: chrome.tabs.onActivated,
             filter: ({ tabId: activatedTabId }) => activatedTabId === tabId,
         },
         reject: tabChangedEvents(tabId),
@@ -84,7 +84,7 @@ export async function whenTabActive({ tabId }) {
 export const whenTabTitleUpdates = ({ tabId }) =>
     eventToPromise({
         resolve: {
-            event: browser.tabs.onUpdated,
+            event: chrome.tabs.onUpdated,
             filter: (updatedTabId, changeInfo) =>
                 updatedTabId === tabId && changeInfo.title != null,
         },

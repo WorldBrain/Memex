@@ -1,8 +1,8 @@
 import merge from 'lodash/merge'
 import fromPairs from 'lodash/fromPairs'
-import { UILogic, UIMutation } from 'ui-logic-core'
-import { TaskState as UITaskState } from 'ui-logic-core/lib/types'
-import { UIElement } from 'ui-logic-react'
+import { UILogic, UIMutation } from 'ui-logic-core/ts'
+import { TaskState as UITaskState } from 'ui-logic-core/ts/types'
+import { UIElement } from 'ui-logic-react/ts'
 
 export type EventProcessor<Dependencies> = (
     args: EventProcessorArgs<Dependencies>,
@@ -161,7 +161,7 @@ export abstract class StatefulUIElement<Props, State, Event> extends UIElement<
 export abstract class NavigationScreen<
     Props,
     State,
-    Event
+    Event,
 > extends StatefulUIElement<Props, State, Event> {
     constructor(props: Props, options: { logic: UILogic<State, Event> }) {
         super(props, options.logic)

@@ -2,9 +2,9 @@ import mapValues from 'lodash/mapValues'
 import { URL } from 'whatwg-url'
 import expect from 'expect'
 import fetchMock from 'fetch-mock'
-import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { StorageMiddleware } from '@worldbrain/storex/ts/types/middleware'
+import { MemoryAuthService } from '@worldbrain/memex-common/ts/authentication/memory'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import {
     createBackgroundModules,
     registerBackgroundModuleCollections,
@@ -19,39 +19,39 @@ import { StorageChangeDetector } from './storage-change-detector'
 import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'
 import { registerSyncBackgroundIntegrationTests } from 'src/personal-cloud/background/index.tests'
-import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
+import { MemorySubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/memory'
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
 import { createMemoryServerStorage } from 'src/storage/server.tests'
 import { ServerStorage } from 'src/storage/types'
-import { Browser } from 'webextension-polyfill'
+
 import { createServices } from 'src/services'
 import {
     PersonalCloudBackend,
     PersonalCloudMediaBackend,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/types'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
-import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
-import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import inMemory from '@worldbrain/storex-backend-dexie/ts/in-memory'
+import { ContentSharingBackend } from '@worldbrain/memex-common/ts/content-sharing/backend'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
     StorexPersonalCloudMediaBackend,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/storex'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
 import { AuthServices, Services } from 'src/services/types'
-import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { PersonalDeviceType } from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import { createAuthServices } from 'src/services/local-services'
 import { MockPushMessagingService } from './push-messaging'
-import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
+import type { PageDataResult } from '@worldbrain/memex-common/ts/page-indexing/fetch-page-data/types'
 import type { ExtractedPDFData } from 'src/search'
-import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
+import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/ts/image-support/backend'
 import type {
     ExceptionCapturer,
     FunctionsConfigGetter,
-} from '@worldbrain/memex-common/lib/firebase-backend/types'
+} from '@worldbrain/memex-common/ts/firebase-backend/types'
 
 export const DEF_PAGE = {
     url: 'test.com',
@@ -123,7 +123,7 @@ export async function setupBackgroundIntegrationTest(
             authService: authServices.auth,
         })
 
-    const browserAPIs = ({
+    const browserAPIs = {
         webNavigation: {
             onHistoryStateUpdated: { addListener: () => {} },
         },
@@ -168,7 +168,7 @@ export async function setupBackgroundIntegrationTest(
                 addListener: () => {},
             },
         },
-    } as any) as Browser
+    } as any as typeof chrome
 
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),
@@ -351,7 +351,8 @@ export async function setupBackgroundIntegrationTest(
         storageOperationLogger,
         storageChangeDetector,
         authService: authServices.auth as MemoryAuthService,
-        subscriptionService: authServices.subscriptions as MemorySubscriptionsService,
+        subscriptionService:
+            authServices.subscriptions as MemorySubscriptionsService,
         serverStorage,
         browserAPIs,
         injectTime: (injected) => (getTime = injected),

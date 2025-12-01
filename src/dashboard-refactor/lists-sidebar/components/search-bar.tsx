@@ -5,7 +5,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import colors from 'src/dashboard-refactor/colors'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
 
 const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;

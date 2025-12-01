@@ -1,6 +1,6 @@
 import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { serializeError, deserializeError } from 'serialize-error'
-import type { Runtime } from 'webextension-polyfill'
+
 import { resolveTabUrl } from 'src/util/uri-utils'
 import { sleepPromise } from '../promises'
 import { RpcError } from '../webextensionRPC'
@@ -13,7 +13,7 @@ interface PendingRequest {
 }
 
 export class PortBasedRPCManager implements RPCManager {
-    private ports = new Map<string, Runtime.Port>()
+    private ports = new Map<string, chrome.runtime.Port>()
     private pendingRequests = new Map<string, PendingRequest>()
 
     constructor(private deps: RPCManagerDependencies) {
@@ -25,7 +25,7 @@ export class PortBasedRPCManager implements RPCManager {
     getPortIdForExtBg = () => `${this.deps.sideName}-background`
     getPortIdForTab = (tabId: number) => `content-script-background|t:${tabId}`
 
-    getPortId = (port: Runtime.Port) => {
+    getPortId = (port: chrome.runtime.Port) => {
         if (port.sender?.tab) {
             return this.getPortIdForTab(port.sender.tab.id)
         }
@@ -144,7 +144,7 @@ export class PortBasedRPCManager implements RPCManager {
     }
 
     private registerListenerForIncomingConnections() {
-        const connected = (port: Runtime.Port) => {
+        const connected = (port: chrome.runtime.Port) => {
             this.log(
                 `RPC::onConnect::Side:${
                     this.deps.sideName
@@ -160,57 +160,50 @@ export class PortBasedRPCManager implements RPCManager {
         this.deps.browserAPIs.runtime.onConnect.addListener(connected)
     }
 
-    postMessageRequestToBackground: RPCManager['postMessageRequestToBackground'] = async (
-        name,
-        payload,
-        options,
-    ) => {
-        if (!options?.skipEnsure) {
-            if (this._ensuredFirstConnection) {
-                // await this._ensuringFirstConnection
-                await this.ensureConnectionToBackground({
-                    timeout: 1000,
-                    reconnectOnTimeout: true,
-                })
-            } else {
-                // this._ensuringFirstConnection = createResolvable()
-                await this.ensureConnectionToBackground({
-                    timeout: 300,
-                    reconnectOnTimeout: false,
-                })
-                // this._ensuringFirstConnection.resolve()
+    postMessageRequestToBackground: RPCManager['postMessageRequestToBackground'] =
+        async (name, payload, options) => {
+            if (!options?.skipEnsure) {
+                if (this._ensuredFirstConnection) {
+                    // await this._ensuringFirstConnection
+                    await this.ensureConnectionToBackground({
+                        timeout: 1000,
+                        reconnectOnTimeout: true,
+                    })
+                } else {
+                    // this._ensuringFirstConnection = createResolvable()
+                    await this.ensureConnectionToBackground({
+                        timeout: 300,
+                        reconnectOnTimeout: false,
+                    })
+                    // this._ensuringFirstConnection.resolve()
+                }
             }
+            const port = this.getExtensionPort(name)
+            const request = createRPCRequestObject(
+                {
+                    name,
+                    originSide: this.deps.sideName,
+                    recipientSide: 'background',
+                },
+                payload,
+            )
+            return this.postMessageRequestToRPC(request, port, name)
         }
-        const port = this.getExtensionPort(name)
-        const request = createRPCRequestObject(
-            {
-                name,
-                originSide: this.deps.sideName,
-                recipientSide: 'background',
-            },
-            payload,
-        )
-        return this.postMessageRequestToRPC(request, port, name)
-    }
 
-    postMessageRequestToContentScript: RPCManager['postMessageRequestToContentScript'] = (
-        tabId,
-        name,
-        payload,
-        options,
-    ) => {
-        const port = this.getTabPort(tabId, name, options?.quietConsole)
-        const request = createRPCRequestObject(
-            {
-                name,
-                tabId,
-                originSide: this.deps.sideName,
-                recipientSide: 'content-script-global',
-            },
-            payload,
-        )
-        return this.postMessageRequestToRPC(request, port, name)
-    }
+    postMessageRequestToContentScript: RPCManager['postMessageRequestToContentScript'] =
+        (tabId, name, payload, options) => {
+            const port = this.getTabPort(tabId, name, options?.quietConsole)
+            const request = createRPCRequestObject(
+                {
+                    name,
+                    tabId,
+                    originSide: this.deps.sideName,
+                    recipientSide: 'content-script-global',
+                },
+                payload,
+            )
+            return this.postMessageRequestToRPC(request, port, name)
+        }
 
     // Since only the background script maintains a connection to all the other
     // content scripts and pages. To send a message from say the popup, to a tab,
@@ -263,7 +256,7 @@ export class PortBasedRPCManager implements RPCManager {
 
     private async postMessageRequestToRPC(
         request: RPCRequest,
-        port: Runtime.Port,
+        port: chrome.runtime.Port,
         name: string,
     ) {
         // Return the promise for to await for and allow the promise to be resolved by
@@ -296,7 +289,7 @@ export class PortBasedRPCManager implements RPCManager {
 
     private messageResponder = async (
         request: RPCRequest,
-        port: Runtime.Port,
+        port: chrome.runtime.Port,
     ) => {
         await this._paused
 

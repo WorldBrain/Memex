@@ -3,9 +3,9 @@ import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import ItemCreator from './item-creator'
 import ImportCache from './cache'
 import { DexieUtilsPlugin } from 'src/search/plugins'
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import { initErrHandler } from 'src/search/storage'
-import { Browser } from 'webextension-polyfill'
+
 import CustomListBackground from 'src/custom-lists/background'
 
 /**
@@ -72,7 +72,7 @@ export class ImportStateManager {
         this._itemCreator =
             itemCreator ||
             new ItemCreator({
-                browserAPIs: browserAPIs,
+                browserAPIs: typeof chromeAPIs,
                 existingKeySource: () => grabExistingKeys(storageManager),
             })
 

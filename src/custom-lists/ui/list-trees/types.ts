@@ -1,13 +1,13 @@
 import type { DragEventHandler } from 'react'
-import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import type { NormalizedState } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import type {
     PageAnnotationsCacheInterface,
     UnifiedList,
 } from 'src/annotations/cache/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import type { UIEvent } from 'ui-logic-core'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { UIEvent } from 'ui-logic-core/ts'
+import type { TaskState } from 'ui-logic-core/ts/types'
 
 export interface ListTreeState {
     unifiedId: UnifiedList['unifiedId']

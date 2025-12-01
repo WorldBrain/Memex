@@ -1,5 +1,5 @@
 import { getPkmSyncKey } from 'src/pkm-integrations/utils'
-import type { Storage } from 'webextension-polyfill'
+
 import type { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export class MemexLocalBackend {
@@ -70,7 +70,7 @@ export class MemexLocalBackend {
     }
 
     async bufferPKMSyncItems(itemToBuffer) {
-        // Get the current buffer from browser.storage.local
+        // Get the current buffer from chrome.storage.local
         const data = await this.deps.storageAPI.local.get(
             'PKMSYNCbufferedItems',
         )
@@ -86,14 +86,14 @@ export class MemexLocalBackend {
         // Append the new item to the buffer
         currentBuffer.push(itemToBuffer)
 
-        // Save the updated buffer back to browser.storage.local
+        // Save the updated buffer back to chrome.storage.local
         await this.deps.storageAPI.local.set({
             PKMSYNCbufferedItems: currentBuffer,
         })
     }
 
     async getBufferedItems() {
-        // Check for buffered items in browser.storage.local
+        // Check for buffered items in chrome.storage.local
         const data = await this.deps.storageAPI.local.get(
             'PKMSYNCbufferedItems',
         )

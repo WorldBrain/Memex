@@ -1,12 +1,11 @@
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import type { ContentConversationsServiceInterface } from '@worldbrain/memex-common/lib/content-conversations/service/types'
-import type { ConversationReplyReference } from '@worldbrain/memex-common/lib/content-conversations/types'
-import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
+import type { ContentConversationsServiceInterface } from '@worldbrain/memex-common/ts/content-conversations/service/types'
+import type { ConversationReplyReference } from '@worldbrain/memex-common/ts/content-conversations/types'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/ts/content-sharing/types'
 import type { ServerStorageModules } from 'src/storage/types'
 import type { AuthServices } from '../types'
 
-export default class ContentConversationsService
-    implements ContentConversationsServiceInterface {
+export default class ContentConversationsService implements ContentConversationsServiceInterface {
     constructor(
         private options: {
             storage: Pick<ServerStorageModules, 'contentConversations'>
@@ -44,15 +43,14 @@ export default class ContentConversationsService
         }
 
         try {
-            const {
-                reference: replyReference,
-            } = await storage.contentConversations.createReply({
-                userReference: {
-                    id: user.id,
-                    type: 'user-reference',
-                },
-                ...params,
-            })
+            const { reference: replyReference } =
+                await storage.contentConversations.createReply({
+                    userReference: {
+                        id: user.id,
+                        type: 'user-reference',
+                    },
+                    ...params,
+                })
 
             return { status: 'success', replyReference }
         } catch (error) {

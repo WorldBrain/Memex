@@ -2,35 +2,27 @@
 DOM manipulation helper functions
 */
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import styled, { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
-import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
-import { Browser, runtime } from 'webextension-polyfill'
-import YoutubeButtonMenu from './components/youtubeActionBar'
-import { sleepPromise } from 'src/util/promises'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import {
-    SyncSettingsStore,
-    createSyncSettingsStore,
-} from 'src/sync-settings/util'
+import { SyncSettingsStore } from 'src/sync-settings/util'
 import * as constants from './constants'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 interface RootProps {
     rootEl: HTMLElement
     syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<'openAI'>
     annotationsFunctions: any
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pdfOriginalUrl: string
     buttonBarHeight: string
@@ -105,7 +97,7 @@ export const handleRenderPDFOpenButton = async (
     syncSettings: SyncSettingsStore<'openAI'>,
     syncSettingsBG: RemoteSyncSettingsInterface,
     annotationsFunctions: any,
-    browserAPIs: Browser,
+    browserAPIs: typeof chrome,
     embedElements: HTMLCollectionOf<HTMLEmbedElement>,
     contentScriptsBG: ContentScriptsInterface<'caller'>,
 ) => {
@@ -153,7 +145,8 @@ export const handleRenderPDFOpenButton = async (
             pdfOriginalUrl = null
         }
 
-        ReactDOM.render(
+        const root = createRoot(target)
+        root.render(
             <Root
                 rootEl={target}
                 syncSettings={syncSettings}
@@ -166,7 +159,7 @@ export const handleRenderPDFOpenButton = async (
                 disableImageInjection={async () => {
                     element.style.top = '0px'
                     element.style.height = `100%`
-                    ReactDOM.unmountComponentAtNode(target)
+                    root.unmount()
                 }}
             />,
             target,

@@ -1,8 +1,6 @@
 import React from 'react'
 import cx from 'classnames'
 
-const styles = require('./next-step-button.css')
-
 export interface Props {
     onClick: () => void
     color: 'green' | 'mint' | 'blue' | 'prime1'
@@ -17,7 +15,7 @@ export default class OnboardingStep extends React.PureComponent<Props> {
         return (
             <div>
                 <a
-                    className={cx([styles.main, styles[this.props.color]])}
+                    className={cx(['main', this.props.color])}
                     onClick={this.props.onClick}
                 >
                     {this.props.children}

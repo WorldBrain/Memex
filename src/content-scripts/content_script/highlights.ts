@@ -1,5 +1,5 @@
 import type { HighlightDependencies, HighlightsScriptMain } from './types'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 // import { bodyLoader } from 'src/util/loader'
 
 export const main: HighlightsScriptMain = async (options) => {

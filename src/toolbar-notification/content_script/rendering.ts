@@ -1,5 +1,3 @@
-import browser from 'webextension-polyfill'
-
 import { injectCSS } from 'src/util/content-injection'
 
 const CONTAINER_CLASS = 'memex-tooltip-notification'
@@ -8,7 +6,7 @@ export function createRootElement() {
     const container = document.createElement('div')
     container.classList.add(CONTAINER_CLASS)
 
-    const cssFile = browser.runtime.getURL('/content_script.css')
+    const cssFile = chrome.runtime.getURL('/content_script.css')
     const { rootElement, shadow } = createShadowRootIfSupported(
         container,
         cssFile,

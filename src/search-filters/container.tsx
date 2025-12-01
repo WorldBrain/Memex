@@ -9,7 +9,6 @@ import {
     TagsFilter,
     DomainsFilter,
     DatesFilter,
-    UsersFilter,
     ContentTypeContainer,
     HashtagsFilter,
 } from './components'
@@ -63,14 +62,6 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
         <DatesFilter tooltipPosition="tooltipDate" env="overview" />
     )
 
-    renderUsersFilter = () => (
-        <UsersFilter
-            getRootElement={null}
-            tooltipPosition="bottom"
-            env="overview"
-        />
-    )
-
     renderHashtagsFilter = () => (
         <HashtagsFilter tooltipPosition="bottom" env="overview" />
     )
@@ -84,7 +75,6 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
                 hashtagsFilter={this.renderHashtagsFilter()}
                 domainFilter={this.renderDomainFilter()}
                 contentFilter={this.renderContentFilter()}
-                userFilter={this.renderUsersFilter()}
                 toggleFilterBar={this.props.toggleFilterBar}
                 getRootElement={null}
             />

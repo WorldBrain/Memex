@@ -3,8 +3,8 @@ import {
     createAuthDependencies,
     DevAuthState,
 } from 'src/authentication/background/setup'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
+import { MemoryAuthService } from '@worldbrain/memex-common/ts/authentication/memory'
+import { MemorySubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/memory'
 
 export function createAuthServices(options: {
     backend: 'firebase' | 'memory'

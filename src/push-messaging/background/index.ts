@@ -1,4 +1,4 @@
-import type { PushMessagePayload } from '@worldbrain/memex-common/lib/push-messaging/types'
+import type { PushMessagePayload } from '@worldbrain/memex-common/ts/push-messaging/types'
 import type { BackgroundModules } from 'src/background-script/setup'
 
 export default class PushMessagingClient {

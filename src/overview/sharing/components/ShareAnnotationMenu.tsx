@@ -1,12 +1,12 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { TaskState } from 'ui-logic-core/ts/types'
 
 import { executeReactStateUITask } from 'src/util/ui-logic'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import Checkbox from 'src/common-ui/components/Checkbox'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import {
     AnnotationSharingState,
     ContentSharingInterface,
@@ -19,7 +19,7 @@ import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 
 const COPY_TIMEOUT = 2000
 
@@ -103,11 +103,10 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         this.setState({ linkLoadState: 'running' })
         const { annotationUrl, contentSharingBG, annotationsCache } = this.props
 
-        const currentSharingLevel = await contentSharingBG.getAnnotationSharingState(
-            {
+        const currentSharingLevel =
+            await contentSharingBG.getAnnotationSharingState({
                 annotationUrl,
-            },
-        )
+            })
 
         let sharingState = await contentSharingBG.shareAnnotation({
             annotationUrl,
@@ -284,8 +283,8 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                         copyState === 'running'
                             ? null
                             : copyState === 'success'
-                            ? 'copy'
-                            : 'link'
+                              ? 'copy'
+                              : 'link'
                     }
                     type="forth"
                     size="medium"

@@ -9,15 +9,15 @@ import {
     RibbonLogicOptions,
 } from './logic'
 import { Annotation } from 'src/annotations/types'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { FakeAnalytics } from 'src/analytics/mock'
 import * as DATA from './logic.test.data'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import { runInBackground } from 'src/util/webextensionRPC'
 
 describe('Ribbon logic', () => {
@@ -170,12 +170,14 @@ describe('Ribbon logic', () => {
 
             // TODO: Once we make page indexing more testable, fully test down to the DB level
             let hasBookmark = false
-            device.backgroundModules.bookmarks.remoteFunctions.addPageBookmark = async () => {
-                hasBookmark = true
-            }
-            device.backgroundModules.bookmarks.remoteFunctions.delPageBookmark = async () => {
-                hasBookmark = false
-            }
+            device.backgroundModules.bookmarks.remoteFunctions.addPageBookmark =
+                async () => {
+                    hasBookmark = true
+                }
+            device.backgroundModules.bookmarks.remoteFunctions.delPageBookmark =
+                async () => {
+                    hasBookmark = false
+                }
             await ribbon.init()
 
             expect(ribbon.state.bookmark.isBookmarked).toBe(false)

@@ -8,16 +8,14 @@ import {
     TrialInfo,
 } from 'src/authentication/components/Subscription/pricing.style'
 import styled from 'styled-components'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import SubscriptionOptionsChargebee from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-
-const styles = require('../styles.css')
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 const PioneerPlanContainer = styled.div`
     display: flex;
@@ -137,17 +135,16 @@ class Subscribe extends React.Component<Props, State> {
     }
 
     renderLoading = () => (
-        <div className={styles.loadingBox}>
+        <div>
             <LoadingIndicator />
         </div>
     )
 
     renderLogin = () => (
-        <div className={styles.section}>
-            <div className={styles.instructionsTitle}>
-                {' Login or Create an Account'}
-            </div>
-            <div className={styles.instructions}>
+        <div>
+            <div> {' Login or Create an Account'}</div>
+            <div>
+                {' '}
                 {' To create an account just type in a new email address'}
             </div>
             {/* <SignInScreen /> */}
@@ -155,20 +152,16 @@ class Subscribe extends React.Component<Props, State> {
     )
 
     renderSubscribed = () => (
-        <div className={styles.PriceBox}>
-            <PricingPlanTitle className={''}>
-                💫 You successfully subscribed!
-            </PricingPlanTitle>
+        <div>
+            <PricingPlanTitle>💫 You successfully subscribed!</PricingPlanTitle>
         </div>
     )
 
     renderPlans = () => (
-        <div className={styles.PriceBox}>
+        <div>
             <PioneerPlanBanner />
 
-            <PricingPlanTitle className={''}>
-                ⭐️ Upgrade your Memex
-            </PricingPlanTitle>
+            <PricingPlanTitle>⭐️ Upgrade your Memex</PricingPlanTitle>
             <TrialInfo>30 days free trial</TrialInfo>
 
             {/*<PricingPlanItem className={''}>*/}

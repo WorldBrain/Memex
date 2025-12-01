@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 
 import Modal, { Props as ModalProps } from 'src/common-ui/components/Modal'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import {
     TypographyTextNormal,
@@ -12,11 +12,10 @@ import {
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 
-export interface Props
-    extends Pick<
-        ModalProps,
-        'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
-    > {
+export interface Props extends Pick<
+    ModalProps,
+    'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
+> {
     onClose: () => void
     onClickLetUsKnow: () => void
     onClickViewRoadmap: () => void
@@ -63,7 +62,8 @@ const BetaInfoContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+    box-shadow:
+        rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 2px 4px;
     border-radius: 3px;
     padding: 20px;

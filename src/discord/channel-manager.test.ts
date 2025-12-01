@@ -1,12 +1,12 @@
 import { makeId, setupDiscordTestContext } from './event-processor.test-setup'
-import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/chat-bots/constants'
+import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/ts/chat-bots/constants'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import type { DiscordList } from '@worldbrain/memex-common/lib/discord/types'
+import type { DiscordList } from '@worldbrain/memex-common/ts/discord/types'
 import type {
     SharedListKey,
     SharedListReference,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 
 const missingGuildId = makeId('gld', 99)
 const missingGuildName = 'test guild'
@@ -73,20 +73,16 @@ describe('Discord channel management module', () => {
     })
 
     it('should set discordList as enabled when enabling a channel that already exists in the DB, returing memex.social link to the associated sharedList', async () => {
-        const {
-            serverStorage,
-            channelManager,
-            defaultListDetails,
-        } = await setupDiscordTestContext({ withDefaultList: true })
+        const { serverStorage, channelManager, defaultListDetails } =
+            await setupDiscordTestContext({ withDefaultList: true })
 
         const discordLists: DiscordList[] = await serverStorage.manager
             .collection('discordList')
             .findAllObjects({})
-        const sharedListKeys: Array<
-            SharedListKey & { id: AutoPk }
-        > = await serverStorage.manager
-            .collection('sharedListKey')
-            .findAllObjects({})
+        const sharedListKeys: Array<SharedListKey & { id: AutoPk }> =
+            await serverStorage.manager
+                .collection('sharedListKey')
+                .findAllObjects({})
         const memexSocialLink = getListShareUrl({
             remoteListId: discordLists[0].sharedList.toString(),
             collaborationKey: sharedListKeys[0].id.toString(),
@@ -154,10 +150,9 @@ describe('Discord channel management module', () => {
     })
 
     it('should generate a collaborative link for an already enabled discordList when enabling it for a second time - prev collab keys were not auto-created on list enable', async () => {
-        const {
-            serverStorage,
-            channelManager,
-        } = await setupDiscordTestContext({ withDefaultList: false })
+        const { serverStorage, channelManager } = await setupDiscordTestContext(
+            { withDefaultList: false },
+        )
 
         // Seed discordList data to simulate a discord list created prior to when collab keys were auto-created
         const testDiscordList: DiscordList = {
@@ -190,11 +185,10 @@ describe('Discord channel management module', () => {
             guildId: testDiscordList.guildId,
         })
 
-        const [
-            collabKey,
-        ] = await serverStorage.modules.contentSharing.getListKeys({
-            listReference,
-        })
+        const [collabKey] =
+            await serverStorage.modules.contentSharing.getListKeys({
+                listReference,
+            })
         const memexSocialLink = getListShareUrl({
             remoteListId: testDiscordList.sharedList.toString(),
             collaborationKey: collabKey.reference.id.toString(),
@@ -217,14 +211,11 @@ describe('Discord channel management module', () => {
     })
 
     it('should set discordList as disabled when disabling a channel that already exists in the DB', async () => {
-        const {
-            serverStorage,
-            channelManager,
-            defaultListDetails,
-        } = await setupDiscordTestContext({
-            withDefaultList: true,
-            defaultListEnabled: true,
-        })
+        const { serverStorage, channelManager, defaultListDetails } =
+            await setupDiscordTestContext({
+                withDefaultList: true,
+                defaultListEnabled: true,
+            })
 
         const discordLists: DiscordList[] = await serverStorage.manager
             .collection('discordList')
@@ -348,14 +339,13 @@ describe('Discord channel management module', () => {
             channelIdxToLink.set(i, memexSocialLink)
         }
 
-        const {
-            memexSocialLink: guildBSocialLink,
-        } = await channelManager.enableChannel({
-            guildId: guildIdB,
-            guildName: 'test guild 2',
-            channelId: makeId('chl', 999),
-            channelName: 'test channel guild 2',
-        })
+        const { memexSocialLink: guildBSocialLink } =
+            await channelManager.enableChannel({
+                guildId: guildIdB,
+                guildName: 'test guild 2',
+                channelId: makeId('chl', 999),
+                channelName: 'test channel guild 2',
+            })
 
         expect(
             await channelManager.listEnabledChannels({ guildId: guildIdA }),

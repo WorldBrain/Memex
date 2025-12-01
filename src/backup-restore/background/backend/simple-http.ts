@@ -10,7 +10,6 @@ import {
     shouldWriteImages,
 } from 'src/backup-restore/background/backend/utils'
 import { getPkmSyncKey } from 'src/pkm-integrations/utils'
-import type { Storage } from 'webextension-polyfill'
 
 export class MemexLocalBackend extends BackupBackend {
     constructor(
@@ -76,9 +75,8 @@ export class MemexLocalBackend extends BackupBackend {
 
     async _writeToPath(url: string, body: string) {
         const syncKey = await getPkmSyncKey(this.deps)
-        const backupFolder = await this.deps.storageAPI.local.get(
-            'PKMSYNCpkmFolders',
-        )
+        const backupFolder =
+            await this.deps.storageAPI.local.get('PKMSYNCpkmFolders')
         const backupFolderPath = backupFolder.PKMSYNCpkmFolders.backupFolder
         let bodyJSON = JSON.parse(body)
         bodyJSON.syncKey = syncKey
@@ -127,9 +125,8 @@ export class MemexLocalBackend extends BackupBackend {
         options: { storeBlobs: boolean }
     }) {
         const stringify = (obj) => JSON.stringify(obj, null, 4)
-        const { images, changes } = await separateDataFromImageChanges(
-            unprocessedChanges,
-        )
+        const { images, changes } =
+            await separateDataFromImageChanges(unprocessedChanges)
 
         const timestamp = Date.now()
 

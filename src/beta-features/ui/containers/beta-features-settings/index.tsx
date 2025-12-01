@@ -8,13 +8,13 @@ import {
     BetaFeaturesSettingsEvent,
     BetaFeaturesSettingsState,
 } from './types'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AuthContextInterface } from 'src/authentication/background/types'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
 import { SyncSettingsStoreInterface } from 'src/sync-settings/types'
 import { SyncSettingsByFeature } from 'src/sync-settings/background/types'
 
@@ -29,8 +29,10 @@ const BetaFeaturesData = [
     },
 ]
 
-export interface Props
-    extends Omit<BetaFeaturesSettingsDependencies, 'syncSettingsBG'> {}
+export interface Props extends Omit<
+    BetaFeaturesSettingsDependencies,
+    'syncSettingsBG'
+> {}
 
 export default class BetaFeaturesSettings extends StatefulUIElement<
     Props,

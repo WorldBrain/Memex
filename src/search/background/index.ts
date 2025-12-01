@@ -1,4 +1,4 @@
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 import groupBy from 'lodash/groupBy'
 import fromPairs from 'lodash/fromPairs'
 import partition from 'lodash/partition'
@@ -15,26 +15,26 @@ import type {
     UnifiedSearchParams,
     IntermediarySearchResult,
     UnifiedSearchPaginationParams,
-} from '@worldbrain/memex-common/lib/search/types'
+} from '@worldbrain/memex-common/ts/search/types'
 import {
     needToFilterSearchByUrl,
     sortSearchResult,
-} from '@worldbrain/memex-common/lib/search/utils'
+} from '@worldbrain/memex-common/ts/search/utils'
 import {
     splitQueryIntoTerms,
     unifiedTermsSearch,
-} from '@worldbrain/memex-common/lib/search/terms-search'
+} from '@worldbrain/memex-common/ts/search/terms-search'
 import { SearchError, BadTermError } from './errors'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import {
     isMemexPageAPdf,
     pickBestLocator,
-} from '@worldbrain/memex-common/lib/page-indexing/utils'
+} from '@worldbrain/memex-common/ts/page-indexing/utils'
 import {
     ContentLocatorType,
     LocationSchemeType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type {
     Annotation,
     AnnotationListEntry,
@@ -45,24 +45,24 @@ import type {
     PageListEntry,
     Visit,
     FavIcon,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 import { queryAnnotationsByTerms, queryPagesByTerms } from './utils'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import {
     VIDEO_PROVIDER_URLS,
     YOUTUBE_URLS,
     isUrlMemexSupportedVideo,
-} from '@worldbrain/memex-common/lib/utils/youtube-url'
-import { isUrlATweet } from '@worldbrain/memex-common/lib/twitter-integration/utils'
-import { isUrlAnEventPage } from '@worldbrain/memex-common/lib/unified-search/utils'
+} from '@worldbrain/memex-common/ts/utils/youtube-url'
+import { isUrlATweet } from '@worldbrain/memex-common/ts/twitter-integration/utils'
+import { isUrlAnEventPage } from '@worldbrain/memex-common/ts/unified-search/utils'
 import type Dexie from 'dexie'
 import { blobToDataURL } from 'src/util/blob-utils'
 import { intersectSets } from 'src/util/map-set-helpers'
-import { PDF_PAGE_URL_PREFIX } from '@worldbrain/memex-common/lib/page-indexing/constants'
-import { EVENT_PROVIDER_URLS } from '@worldbrain/memex-common/lib/constants'
-import { TWITTER_URLS } from '@worldbrain/memex-common/lib/twitter-integration/constants'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { PDF_PAGE_URL_PREFIX } from '@worldbrain/memex-common/ts/page-indexing/constants'
+import { EVENT_PROVIDER_URLS } from '@worldbrain/memex-common/ts/constants'
+import { TWITTER_URLS } from '@worldbrain/memex-common/ts/twitter-integration/constants'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import type { captureException } from 'src/util/raven'
 
 export default class SearchBackground {
@@ -373,14 +373,13 @@ export default class SearchBackground {
             privacyLevels.map((p) => [p.annotation, p.privacyLevel]),
         )
 
-        let [
-            selectivelySharedAnnotIds,
-            autoSharedAnnotIds,
-        ] = partition(allAnnotIds, (id) =>
-            [
-                AnnotationPrivacyLevels.PROTECTED,
-                AnnotationPrivacyLevels.PRIVATE,
-            ].includes(privacyLevelsByAnnotId[id]),
+        let [selectivelySharedAnnotIds, autoSharedAnnotIds] = partition(
+            allAnnotIds,
+            (id) =>
+                [
+                    AnnotationPrivacyLevels.PROTECTED,
+                    AnnotationPrivacyLevels.PRIVATE,
+                ].includes(privacyLevelsByAnnotId[id]),
         )
 
         const hasEntriesForAllFilteredLists = (
@@ -644,9 +643,10 @@ export default class SearchBackground {
                 annotations: descOrderedAnnots,
                 // These get overwritten in the next loop by the latest/oldest visit/bookmark time (if exist in this results "page")
                 latestPageTimestamp: descOrderedAnnots[0].lastEdited.valueOf(),
-                oldestTimestamp: descOrderedAnnots[
-                    descOrderedAnnots.length - 1
-                ].lastEdited.valueOf(),
+                oldestTimestamp:
+                    descOrderedAnnots[
+                        descOrderedAnnots.length - 1
+                    ].lastEdited.valueOf(),
             })
         }
 
@@ -693,10 +693,8 @@ export default class SearchBackground {
                 return this.unifiedBlankListsSearch(params)
             } else {
                 let result: IntermediarySearchResult
-                let [
-                    lowestTimeBound,
-                    highestTimeBound,
-                ] = await this.calcBlankSearchTimeBoundEdges(params)
+                let [lowestTimeBound, highestTimeBound] =
+                    await this.calcBlankSearchTimeBoundEdges(params)
                 // Increase the lowest time bound if there's a specified lower time bound which beats it
                 if (lowestTimeBound < params.fromWhen) {
                     lowestTimeBound = params.fromWhen
@@ -783,9 +781,9 @@ export default class SearchBackground {
         resultDataByPage: ResultDataByPage,
     ): Promise<UnifiedSearchLookupData> {
         const pageIds = [...resultDataByPage.keys()]
-        const annotIds = [
-            ...resultDataByPage.values(),
-        ].flatMap(({ annotations }) => annotations.map((a) => a.url))
+        const annotIds = [...resultDataByPage.values()].flatMap(
+            ({ annotations }) => annotations.map((a) => a.url),
+        )
 
         const dexie = this.options.storageManager.backend['dexie'] as Dexie
         const [

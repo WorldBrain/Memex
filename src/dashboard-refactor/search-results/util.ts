@@ -3,7 +3,7 @@ import type {
     SearchResultPage,
     SearchResultAnnotation,
 } from 'src/search/background/types'
-import type { UnifiedSearchPaginationParams } from '@worldbrain/memex-common/lib/search/types'
+import type { UnifiedSearchPaginationParams } from '@worldbrain/memex-common/ts/search/types'
 import type {
     PageData,
     PageResult,
@@ -20,9 +20,9 @@ import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 import {
     initNormalizedState,
     mergeNormalizedStates,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
-import { formateCalendarTime } from '@worldbrain/memex-common/lib/utils/date-time'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import { isMemexPageAPdf } from '@worldbrain/memex-common/ts/page-indexing/utils'
+import { formateCalendarTime } from '@worldbrain/memex-common/ts/utils/date-time'
 import type {
     PageAnnotationsCacheInterface,
     RGBAColor,
@@ -88,7 +88,7 @@ export const areAllNotesShown = ({ results }: RootState): boolean => {
 
 export const bindFunctionalProps = <
     Props = { [key: string]: (...args: any) => any },
-    BoundProps = { [key: string]: (...args: any) => any }
+    BoundProps = { [key: string]: (...args: any) => any },
 >(
     props: Props,
     ...args

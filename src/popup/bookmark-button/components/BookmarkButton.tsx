@@ -9,20 +9,17 @@ import * as acts from '../actions'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-import { Browser } from 'webextension-polyfill'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
 
-const styles = require('./BookmarkButton.css')
-const buttonStyles = require('../../components/Button.css')
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 
 export interface OwnProps {
     closePopup: () => void
     pageUrl: string
     isSavedPage: boolean
     getRootElement: () => HTMLElement
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     collectionsBG: RemoteCollectionsInterface
     saveBookmark: () => Promise<boolean>
 }
@@ -47,10 +44,8 @@ class BookmarkButton extends PureComponent<Props> {
     }
 
     private async getKeyboardShortcutText() {
-        const {
-            shortcutsEnabled,
-            createBookmark,
-        } = await getKeyboardShortcutsState()
+        const { shortcutsEnabled, createBookmark } =
+            await getKeyboardShortcutsState()
 
         if (!shortcutsEnabled || !createBookmark.enabled) {
             this.setState({

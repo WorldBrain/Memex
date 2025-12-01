@@ -1,1 +1,1 @@
-export { getAnchorSelector } from '@worldbrain/memex-common/lib/annotations/utils'
+export { getAnchorSelector } from '@worldbrain/memex-common/ts/annotations/utils'

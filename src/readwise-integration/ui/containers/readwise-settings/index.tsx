@@ -11,7 +11,7 @@ import {
 import * as selectors from './selectors'
 import Checkbox from 'src/common-ui/components/Checkbox'
 
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
@@ -20,7 +20,7 @@ import { ReadwiseInterface } from 'src/readwise-integration/background/types/rem
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { userAuthorizedForReadwise } from './utils'
 import analytics from 'src/analytics'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 
 class ReadwiseSettingsContainer extends React.Component<
     AuthContextInterface & { showSubscriptionModal: () => void }

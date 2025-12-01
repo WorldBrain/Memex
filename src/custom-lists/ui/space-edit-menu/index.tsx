@@ -1,25 +1,25 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { sharedListRoleIDToString } from '@worldbrain/memex-common/ts/content-sharing/ui/list-share-modal/util'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { SharedListRoleID } from '@worldbrain/memex-common/ts/content-sharing/types'
 import {
     SelectionMenuBtn,
     MenuItemProps,
 } from 'src/common-ui/components/selection-menu-btn'
-import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
-import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { isValidEmail } from '@worldbrain/memex-common/ts/utils/email-validation'
+import { normalizedStateToArray } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -30,13 +30,13 @@ export interface Props extends Dependencies {
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
 //  from opening when you use the context menu in the dashboard.
 //  __If you add new click handlers to this component, ensure you wrap them with this!__
-const wrapClick = (
-    handler: React.MouseEventHandler,
-): React.MouseEventHandler => (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    return handler(e)
-}
+const wrapClick =
+    (handler: React.MouseEventHandler): React.MouseEventHandler =>
+    (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        return handler(e)
+    }
 
 export default class SpaceEditMenuContainer extends StatefulUIElement<
     Props,
@@ -51,12 +51,11 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
         super(props, new Logic(props))
     }
 
-    private handleNameChange: React.ChangeEventHandler<
-        HTMLInputElement
-    > = async (event) => {
-        const name = (event.target as HTMLInputElement).value
-        await this.processEvent('updateSpaceName', { name })
-    }
+    private handleNameChange: React.ChangeEventHandler<HTMLInputElement> =
+        async (event) => {
+            const name = (event.target as HTMLInputElement).value
+            await this.processEvent('updateSpaceName', { name })
+        }
 
     private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
         e,
@@ -293,7 +292,12 @@ const DetailsText = styled.span`
     opacity: 0.8;
     font-size: 14px;
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     color: ${(props) => props.theme.colors.greyScale5};
     margin-bottom: 5px;

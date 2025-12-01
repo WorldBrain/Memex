@@ -9,14 +9,14 @@ import DomainPickerLogic, {
     DomainPickerState,
 } from './logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import IconBox from '@worldbrain/memex-common/ts/common-ui/components/icon-box'
 
 class DomainPicker extends StatefulUIElement<
     DomainPickerDependencies,

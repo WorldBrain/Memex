@@ -3,13 +3,13 @@ import { reactEventHandler } from 'src/util/ui-logic'
 import styled from 'styled-components'
 import TutorialStep from './tutorial-step'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import browser from 'webextension-polyfill'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 
-const icon = browser.runtime.getURL('/img/memex-icon.svg')
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
+
+const icon = chrome.runtime.getURL('/img/memex-icon.svg')
 
 // tutorial step like in the mockup
 export type TutorialStepContent = {

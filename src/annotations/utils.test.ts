@@ -1,5 +1,5 @@
 import { generateAnnotationUrl } from './utils'
-import { isUrlForAnnotation } from '@worldbrain/memex-common/lib/annotations/utils'
+import { isUrlForAnnotation } from '@worldbrain/memex-common/ts/annotations/utils'
 
 const NORMALIZED_PAGE_URLS = [
     'getmemex.com',

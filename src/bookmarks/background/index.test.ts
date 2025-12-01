@@ -1,9 +1,8 @@
 import expect from 'expect'
-import { Tabs } from 'webextension-polyfill'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 
 import * as DATA from 'src/tests/common-fixtures.data'
 import {
@@ -36,7 +35,7 @@ describe('bookmarks background unit tests', () => {
             { url: 'https://test.com/2' },
             { url: 'https://test.com/3' },
             { url: 'https://worldbrain.io' },
-        ] as Tabs.Tab[]
+        ] as chrome.tabs.Tab[]
 
         for (const index of bmIndicies) {
             await bookmarksBG.addBookmark({ fullUrl: mockTabs[index].url })

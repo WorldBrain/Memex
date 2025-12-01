@@ -1,7 +1,6 @@
 import React, { PureComponent, MouseEventHandler, MouseEvent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import { RootState } from 'src/options/types'
-const styles = require('./ResultList.css')
 
 interface LocalState {}
 

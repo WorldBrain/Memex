@@ -1,9 +1,6 @@
 import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
-import cx from 'classnames'
 import PropTypes from 'prop-types'
-
-import styles from './FilteredRow.css'
 
 class FilteredRow extends PureComponent {
     static propTypes = {
@@ -34,12 +31,6 @@ class FilteredRow extends PureComponent {
         this.ensureVisible()
     }
 
-    get mainClass() {
-        return cx(styles.menuItem, {
-            [styles.menuItemFocused]: this.props.focused,
-        })
-    }
-
     ensureVisible = () => {
         if (this.props.focused) {
             this.props.scrollIntoView(ReactDOM.findDOMNode(this))
@@ -48,31 +39,16 @@ class FilteredRow extends PureComponent {
 
     render() {
         return (
-            <div className={styles.container}>
-                <div className={this.mainClass} onClick={this.props.onClick}>
-                    <div
-                        className={cx(styles.listName, {
-                            [styles.available]: !this.props.available,
-                        })}
-                        title={this.props.value}
-                    >
-                        {this.props.value}
-                    </div>
-                    {this.props.isExclusive &&
-                        this.props.available && (
-                            <button
-                                title={'Results from this domain excluded'}
-                                className={cx(styles.exclusion, styles.button)}
-                            />
-                        )}
-                    {this.props.active &&
-                        this.props.available && (
-                            <button className={cx(styles.button)} />
-                        )}
-                    {this.props.active &&
-                        !this.props.available && (
-                            <span className={styles.soon}>Soon</span>
-                        )}
+            <div>
+                <div onClick={this.props.onClick}>
+                    <div title={this.props.value}>{this.props.value}</div>
+                    {this.props.isExclusive && this.props.available && (
+                        <button title={'Results from this domain excluded'} />
+                    )}
+                    {this.props.active && this.props.available && <button />}
+                    {this.props.active && !this.props.available && (
+                        <span>Soon</span>
+                    )}
                 </div>
             </div>
         )

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Settings</title>
+
+        <link
+            rel="stylesheet"
+            href="/src/fonts/material-icons/material-icons.css"
+        />
+        <link rel="stylesheet" href="/src/options.css" />
+        <link rel="stylesheet" href="/src/fonts/Satoshi/satoshi.css" />
+    </head>
+
+    <body
+        style="
+            background-color: #12131b;
+            font-family: 'Satoshi', sans-serif;
+            font-feature-settings:
+                'pnum' on,
+                'lnum' on,
+                'case' on,
+                'ss03' on,
+                'ss04' on,
+                'liga' off;
+            min-width: fit-content;
+        "
+    >
+        <div id="app"></div>
+
+        <script type="module" src="/src/options/options.tsx"></script>
+    </body>
+</html>

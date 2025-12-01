@@ -1,9 +1,7 @@
 import kebabCase from 'lodash/kebabCase'
-import type { Browser } from 'webextension-polyfill'
 import { UAParser } from 'ua-parser-js'
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import NotificationBackground from 'src/notifications/background'
-import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/annotations/background'
 import SearchBackground from 'src/search/background'
 import EventLogBackground from 'src/analytics/internal/background'
@@ -23,8 +21,8 @@ import {
 import {
     registerModuleMapCollections,
     StorageModule,
-} from '@worldbrain/storex-pattern-modules'
-import { firebaseService } from '@worldbrain/memex-common/lib/firebase-backend/services/client'
+} from '@worldbrain/storex-pattern-modules/ts'
+import { firebaseService } from '@worldbrain/memex-common/ts/firebase-backend/services/client'
 import {
     setImportStateManager,
     ImportStateManager,
@@ -64,43 +62,43 @@ import { SyncSettingsBackground } from 'src/sync-settings/background'
 import type { AuthServices, Services } from 'src/services/types'
 import { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
-// import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
-// import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
+// import { FirebaseUserMessageService } from '@worldbrain/memex-common/ts/user-messages/service/firebase'
+// import { UserMessageService } from '@worldbrain/memex-common/ts/user-messages/service/types'
 import {
     PersonalDeviceType,
     PersonalDeviceProduct,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
 import {
     PersonalCloudBackend,
     PersonalCloudMediaBackend,
     PersonalCloudService,
     SyncTriggerSetup,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
-import { authChangesGeneratorFactory } from '@worldbrain/memex-common/lib/authentication/utils'
+import { authChangesGeneratorFactory } from '@worldbrain/memex-common/ts/authentication/utils'
 import FirebasePersonalCloudBackend, {
     CloudBackendFirebaseDeps,
     FirebasePersonalCloudMediaBackend,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/firebase'
-import { deviceIdCreatorFactory } from '@worldbrain/memex-common/lib/personal-cloud/storage/device-id'
-import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
-import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/firebase'
+import { deviceIdCreatorFactory } from '@worldbrain/memex-common/ts/personal-cloud/storage/device-id'
+import { getCurrentSchemaVersion } from '@worldbrain/memex-common/ts/storage/utils'
+import { ContentSharingBackend } from '@worldbrain/memex-common/ts/content-sharing/backend'
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
 import type { LocalExtensionSettings } from './types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import DeprecatedStorageModules from './deprecated-storage-modules'
 import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
-import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { PageDataResult } from '@worldbrain/memex-common/ts/page-indexing/fetch-page-data/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import { ImageSupportBackground } from 'src/image-support/background'
-import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
-import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
-import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
+import { ImageSupportBackend } from '@worldbrain/memex-common/ts/image-support/types'
+import { PdfUploadService } from '@worldbrain/memex-common/ts/pdf/uploads/service'
+import { dataUrlToBlob } from '@worldbrain/memex-common/ts/utils/blob-to-data-url'
 import { FOLLOWED_LIST_SYNC_ALARM_NAME } from 'src/page-activity-indicator/constants'
 import {
     CLOUD_SYNC_PERIODIC_DL_ALARM_NAME,
@@ -123,7 +121,6 @@ export interface BackgroundModules {
     auth: AuthBackground
     analytics: AnalyticsBackground
     notifications: NotificationBackground
-    social: SocialBackground
     pdfBg: PDFBackground
     // connectivityChecker: ConnectivityCheckerBackground
     pageActivityIndicator: PageActivityIndicatorBackground
@@ -164,7 +161,7 @@ export function createBackgroundModules(options: {
     persistentStorageManager: StorageManager
     authServices: AuthServices
     services: Services
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     serverStorage: ServerStorage
     imageSupportBackend: ImageSupportBackend
     backendEnv: 'staging' | 'production'
@@ -330,8 +327,6 @@ export function createBackgroundModules(options: {
     })
     pages.options.onPagePut = pdfBg.handlePagePut
 
-    const social = new SocialBackground({ storageManager })
-
     const activityIndicator = new ActivityIndicatorBackground({
         services: options.services,
         syncSettings: syncSettingsStore,
@@ -348,7 +343,6 @@ export function createBackgroundModules(options: {
     const directLinking = new DirectLinkingBackground({
         browserAPIs: options.browserAPIs,
         storageManager,
-        socialBg: social,
         pages,
         analytics,
         analyticsBG,
@@ -400,8 +394,8 @@ export function createBackgroundModules(options: {
             callFirebaseFunction,
         )
 
-    const contentSharing: ContentSharingBackground = new ContentSharingBackground(
-        {
+    const contentSharing: ContentSharingBackground =
+        new ContentSharingBackground({
             backend: contentSharingBackend,
             remoteEmitter: createRemoteEventEmitter('contentSharing', {
                 broadcastToTabs: true,
@@ -425,8 +419,7 @@ export function createBackgroundModules(options: {
                 directLinking,
                 pageActivityIndicator,
             }),
-        },
-    )
+        })
 
     const customLists = new CustomListBackground({
         analytics,
@@ -437,9 +430,8 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         pages,
         authServices: options.authServices,
-        removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
-            directLinking,
-        ),
+        removeChildAnnotationsFromList:
+            directLinking.removeChildAnnotationsFromList.bind(directLinking),
         analyticsBG,
         pkmSyncBG,
     })
@@ -464,11 +456,13 @@ export function createBackgroundModules(options: {
             ),
     })
 
-    const localExtSettingStore = new BrowserSettingsStore<
-        LocalExtensionSettings
-    >(options.browserAPIs.storage.local, {
-        prefix: 'localSettings.',
-    })
+    const localExtSettingStore =
+        new BrowserSettingsStore<LocalExtensionSettings>(
+            options.browserAPIs.storage.local,
+            {
+                prefix: 'localSettings.',
+            },
+        )
 
     // const connectivityChecker = new ConnectivityCheckerBackground({
     //     xhr: new XMLHttpRequest(),
@@ -483,11 +477,13 @@ export function createBackgroundModules(options: {
         await customLists.createInboxListEntry({ fullUrl: fullPageUrl })
     }
 
-    const personalCloudSettingStore = new BrowserSettingsStore<
-        LocalPersonalCloudSettings
-    >(options.browserAPIs.storage.local, {
-        prefix: 'personalCloud.',
-    })
+    const personalCloudSettingStore =
+        new BrowserSettingsStore<LocalPersonalCloudSettings>(
+            options.browserAPIs.storage.local,
+            {
+                prefix: 'personalCloud.',
+            },
+        )
 
     const pageActivityIndicator = new PageActivityIndicatorBackground({
         fetch,
@@ -614,7 +610,6 @@ export function createBackgroundModules(options: {
 
     return {
         auth,
-        social,
         analytics,
         analyticsBG,
         notifications,
@@ -680,9 +675,10 @@ export function createBackgroundModules(options: {
                 )
             },
             addToLists: async (params) => {
-                const existingEntries = await customLists.storage.fetchListIdsByUrl(
-                    params.normalizedUrl,
-                )
+                const existingEntries =
+                    await customLists.storage.fetchListIdsByUrl(
+                        params.normalizedUrl,
+                    )
                 await Promise.all(
                     params.lists.map(async (listId) => {
                         if (!existingEntries.includes(listId)) {
@@ -739,7 +735,7 @@ export function createBackgroundModules(options: {
 export async function setupBackgroundModules(
     backgroundModules: BackgroundModules,
     storageManager: StorageManager,
-    browserAPIs: Browser,
+    browserAPIs: typeof chrome,
 ) {
     backgroundModules.bgScript.setupWebExtAPIHandlers()
 
@@ -760,7 +756,6 @@ export async function setupBackgroundModules(
 
     backgroundModules.auth.registerRemoteEmitter()
     backgroundModules.notifications.setupRemoteFunctions()
-    backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
     backgroundModules.contentSharing.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
@@ -790,7 +785,9 @@ export async function setupBackgroundModules(
     // Set up static alarm jobs
     let alarmJobs: { [name: string]: AlarmJob } = {
         [FOLLOWED_LIST_SYNC_ALARM_NAME]: {
-            alarmDefinition: { periodInMinutes: 20 },
+            alarmDefinition: {
+                periodInMinutes: 20,
+            } as unknown as typeof chrome.alarms,
             job: () =>
                 backgroundModules.pageActivityIndicator.syncFollowedListEntriesWithNewActivity(),
         },
@@ -804,7 +801,9 @@ export async function setupBackgroundModules(
                 backgroundModules.personalCloud.actionQueue.executePendingActions(),
         },
         [DB_DATA_LOSS_CHECK_ALARM_NAME]: {
-            alarmDefinition: { periodInMinutes: 15 },
+            alarmDefinition: {
+                periodInMinutes: 15,
+            } as unknown as typeof chrome.alarms,
             job: () =>
                 checkDataLoss({
                     captureException,
@@ -812,14 +811,18 @@ export async function setupBackgroundModules(
                 }),
         },
         [CHECK_MEMEX_UPDATE_ALARM_NAME]: {
-            alarmDefinition: { periodInMinutes: 360 },
+            alarmDefinition: {
+                periodInMinutes: 360,
+            } as unknown as typeof chrome.alarms,
             job: () => checkForUpdates(),
         },
     }
 
     if (checkBrowser() !== 'firefox') {
         alarmJobs[CLOUD_SYNC_PERIODIC_DL_ALARM_NAME] = {
-            alarmDefinition: { periodInMinutes: 60 },
+            alarmDefinition: {
+                periodInMinutes: 60,
+            } as unknown as typeof chrome.alarms,
             job: () => backgroundModules.personalCloud.invokeSyncDownload(),
         }
     }
@@ -842,7 +845,6 @@ export function getBackgroundStorageModules(
         backup: backgroundModules.backupModule.storage,
         eventLog: backgroundModules.eventLog.storage,
         search: backgroundModules.search.storage,
-        social: backgroundModules.social.storage,
         tags: backgroundModules.tags.storage,
         clientSyncLog: __deprecatedModules.clientSyncLogStorage,
         syncInfo: __deprecatedModules.syncInfoStorage,

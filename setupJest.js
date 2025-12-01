@@ -5,8 +5,8 @@ global.TextEncoder = util.TextEncoder
 global.TextDecoder = util.TextDecoder
 
 global.browser = global.browser ?? {}
-global.browser.runtime = global.browser.runtime ?? {}
-global.browser.runtime.id = global.browser.runtime ?? 'test-id'
+global.chrome.runtime = global.chrome.runtime ?? {}
+global.chrome.runtime.id = global.chrome.runtime ?? 'test-id'
 
 global.chrome = global.chrome ?? {}
 global.chrome.runtime = global.chrome.runtime ?? {}

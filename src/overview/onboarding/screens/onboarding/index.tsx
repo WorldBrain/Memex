@@ -11,18 +11,18 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import AuthDialog from 'src/authentication/components/AuthDialog/index'
 
 import { runInBackground } from 'src/util/webextensionRPC'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import { GUIDED_ONBOARDING_URL } from '../../constants'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import {
     trackOnboardingPath,
     trackOnboardingSelection,
-} from '@worldbrain/memex-common/lib/analytics/events'
+} from '@worldbrain/memex-common/ts/analytics/events'
 import Checkbox from 'src/common-ui/components/Checkbox'
 import UpgradeModal from 'src/authentication/upgrade-modal'
-import Browser from 'webextension-polyfill'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 
 export interface Props extends Dependencies {}
 
@@ -54,7 +54,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             window.open(GUIDED_ONBOARDING_URL)
         },
         analyticsBG: runInBackground(),
-        browserAPIs: Browser,
+        browserAPIs: typeof chrome,
     }
 
     constructor(props: Props) {

@@ -1,4 +1,4 @@
-import { createAnnotationFromMessage } from '@worldbrain/memex-common/lib/chat-bots/utils'
+import { createAnnotationFromMessage } from '@worldbrain/memex-common/ts/chat-bots/utils'
 import { setupDiscordTestContext } from './event-processor.test-setup'
 
 const createDiscordLink = (messageId: number) =>

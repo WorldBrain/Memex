@@ -1,11 +1,11 @@
 import type SearchStorage from './storage'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
-import type { Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
-import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { Annotation } from '@worldbrain/memex-common/ts/types/core-data-types/client'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import type {
     UnifiedSearchParams,
     UnifiedSearchPaginationParams,
-} from '@worldbrain/memex-common/lib/search/types'
+} from '@worldbrain/memex-common/ts/search/types'
 
 export type SearchResultAnnotation = Annotation & {
     lists: number[]
@@ -92,9 +92,7 @@ export interface RemoteSearchInterface {
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
     delPages: PageIndexingBackground['delPages']
-    resolvePdfPageFullUrls: (
-        url: string,
-    ) => Promise<{
+    resolvePdfPageFullUrls: (url: string) => Promise<{
         fullUrl: string
         fullPdfUrl: string
         originalLocation: string

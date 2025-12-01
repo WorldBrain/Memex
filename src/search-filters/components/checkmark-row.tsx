@@ -1,8 +1,6 @@
 import React, { PureComponent } from 'react'
 import cx from 'classnames'
 
-const styles = require('./checkmark-row.css')
-
 export interface Props {
     value: string
     subtitle: string
@@ -24,17 +22,17 @@ class CheckmarkRow extends PureComponent<Props, State> {
         const { value, subtitle, onClick, small, active } = this.props
         return (
             <div
-                className={cx(styles.container, {
-                    [styles.small]: small,
-                    [styles.active]: active,
+                className={cx({
+                    small: small,
+                    active: active,
                 })}
                 onClick={onClick}
             >
-                <div className={styles.item}>
-                    <p className={styles.title}>{value}</p>
-                    <p className={styles.sub}>{subtitle}</p>
+                <div>
+                    <p>{value}</p>
+                    <p>{subtitle}</p>
                 </div>
-                <span className={styles.checkmark} />
+                <span />
             </div>
         )
     }

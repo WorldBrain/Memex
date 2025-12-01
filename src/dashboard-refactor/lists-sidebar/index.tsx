@@ -23,8 +23,8 @@ import type { RootState as ListsSidebarState } from './types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './constants'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import { ListTrees } from 'src/custom-lists/ui/list-trees'
 import type {
     DragNDropActions,

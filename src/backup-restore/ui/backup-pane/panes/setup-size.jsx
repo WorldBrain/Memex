@@ -1,12 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import localStyles from './setup-size.css'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
-import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
-
-const settingsStyle = require('src/options/settings/components/settings.css')
+import LoadingBlock from '@worldbrain/memex-common/ts/common-ui/components/loading-block'
 
 export default class OnboardingSizeContainer extends React.Component {
     static propTypes = {

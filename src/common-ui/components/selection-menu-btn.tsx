@@ -1,6 +1,6 @@
 import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 export interface MenuItemProps {
     name: string

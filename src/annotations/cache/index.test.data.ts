@@ -1,6 +1,6 @@
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
+import { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import type { UnifiedAnnotation, UnifiedList } from './types'
 
 export const USER_1: UserReference = {

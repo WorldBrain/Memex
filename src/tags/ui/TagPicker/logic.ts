@@ -1,4 +1,4 @@
-import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/ts/storage/constants'
 
 import GenericPickerLogic, {
     GenericPickerDependencies,

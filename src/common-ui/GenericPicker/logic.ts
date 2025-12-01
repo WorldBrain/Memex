@@ -1,4 +1,4 @@
-import { UILogic, UIEvent } from 'ui-logic-core'
+import { UILogic, UIEvent } from 'ui-logic-core/ts'
 import debounce from 'lodash/debounce'
 
 import type { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
@@ -64,7 +64,7 @@ interface GenericPickerUIEvent<T extends keyof GenericPickerEvent> {
 export default abstract class GenericPickerLogic<
     Dependencies extends GenericPickerDependencies = GenericPickerDependencies,
     State extends GenericPickerState = GenericPickerState,
-    Event extends GenericPickerEvent = GenericPickerEvent
+    Event extends GenericPickerEvent = GenericPickerEvent,
 > extends UILogic<State, Event> {
     private searchInputRef?: HTMLInputElement
 

@@ -1,5 +1,3 @@
-import { Tabs } from 'webextension-polyfill'
-
 import Tab from './tab-state'
 import { TabState, NavState } from './types'
 
@@ -17,7 +15,7 @@ export class TabManager {
      * @param {tabs.Tab} tab The browser tab to start keeping track of.
      */
     trackTab = (
-        { id, active, url, windowId }: Tabs.Tab,
+        { id, active, url, windowId }: chrome.tabs.Tab,
         extraProps: Partial<TabState> = {},
     ) =>
         this._tabs.set(

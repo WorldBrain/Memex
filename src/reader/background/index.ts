@@ -1,5 +1,5 @@
 import ReaderStorage from 'src/reader/background/storage'
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import { RemoteReaderInterface } from 'src/reader/types'
 
 export class ReaderBackground {

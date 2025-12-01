@@ -6,10 +6,10 @@ import {
     PageSearchCopyPaster,
 } from 'src/copy-paster'
 import { SearchType } from '../types'
-import type { UnifiedSearchParams } from '@worldbrain/memex-common/lib/search/types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import type { UnifiedSearchParams } from '@worldbrain/memex-common/ts/search/types'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 export interface Props {

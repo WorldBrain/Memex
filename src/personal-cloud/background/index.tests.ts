@@ -1,6 +1,6 @@
 import SQLite3 from 'better-sqlite3'
-import StorageManager from '@worldbrain/storex'
-import { createSQLiteStorageBackend } from '@worldbrain/storex-backend-sql/lib/sqlite'
+import StorageManager from '@worldbrain/storex/ts'
+import { createSQLiteStorageBackend } from '@worldbrain/storex-backend-sql/ts/sqlite'
 import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 import type {
     BackgroundIntegrationTest,
@@ -12,13 +12,13 @@ import {
     setupBackgroundIntegrationTest,
     BackgroundIntegrationTestSetupOpts,
 } from 'src/tests/background-integration-tests'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import { createTestServerStorage } from 'src/storage/server.tests'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
     StorexPersonalCloudMediaBackend,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/storex'
 import {
     ChangeWatchMiddlewareSettings,
     ChangeWatchMiddleware,
@@ -26,11 +26,11 @@ import {
 } from '@worldbrain/storex-middleware-change-watcher'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
-import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
-import { registerModuleCollections } from '@worldbrain/storex-pattern-modules'
-import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
-import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
+import { PersonalDeviceType } from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
+import PersonalCloudStorage from '@worldbrain/memex-common/ts/personal-cloud/storage'
+import { registerModuleCollections } from '@worldbrain/storex-pattern-modules/ts'
+import UserStorage from '@worldbrain/memex-common/ts/user-management/storage'
+import { StorageMiddleware } from '@worldbrain/storex/ts/types/middleware'
 import { createAuthServices } from 'src/services/local-services'
 import { MockPushMessagingService } from 'src/tests/push-messaging'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
@@ -427,8 +427,8 @@ export async function setupSyncBackgroundTest(
             storageManager: serverStorage.manager,
         })
 
-        const setup: BackgroundIntegrationTestSetup = await setupBackgroundIntegrationTest(
-            {
+        const setup: BackgroundIntegrationTestSetup =
+            await setupBackgroundIntegrationTest({
                 ...options,
                 services,
                 authServices,
@@ -436,8 +436,7 @@ export async function setupSyncBackgroundTest(
                 pushMessagingService,
                 personalCloudBackend,
                 personalCloudMediaBackend,
-            },
-        )
+            })
         setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
         setup.backgroundModules.personalCloud.strictErrorReporting = true
         setup.authService.setUser({ ...TEST_USER })
@@ -484,4 +483,4 @@ const getReadableDeviceIndex = (index: number) =>
         0: 'A',
         1: 'B',
         2: 'C',
-    }[index])
+    })[index]

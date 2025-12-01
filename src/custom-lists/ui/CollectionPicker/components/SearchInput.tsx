@@ -1,10 +1,10 @@
 import React, { ChangeEventHandler } from 'react'
 import styled, { css } from 'styled-components'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import browser from 'webextension-polyfill'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
-const search = browser.runtime.getURL('/img/search.svg')
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+
+const search = chrome.runtime.getURL('/img/search.svg')
 
 interface Props {
     onChange: (value: string) => void
@@ -104,7 +104,12 @@ const SearchInput = styled(TextField)`
     flex: 1;
     color: ${(props) => props.theme.colors.white};
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     font-size: 14px;
     height: fill-available;
@@ -112,8 +117,13 @@ const SearchInput = styled(TextField)`
 
     & * {
         font-family: 'Satoshi', sans-serif;
-        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
-            'ss04' on, 'liga' off;
+        font-feature-settings:
+            'pnum' on,
+            'lnum' on,
+            'case' on,
+            'ss03' on,
+            'ss04' on,
+            'liga' off;
     }
 
     &:focus {

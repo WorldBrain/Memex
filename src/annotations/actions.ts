@@ -3,7 +3,7 @@ import { Thunk } from 'src/sidebar-overlay/types'
 import * as selectors from 'src/sidebar-overlay/sidebar/selectors'
 import { RES_PAGE_SIZE } from 'src/sidebar-overlay/sidebar/constants'
 import { AnnotSearchParams } from 'src/search/background/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import {
     nextResultsPage,
     setIsLoading,
@@ -43,41 +43,37 @@ export const editAnnotation: (
 ) => Thunk = (url, comment, tags) => async (dispatch, getState) => {
     const state = getState()
 }
-export const deleteAnnotation: (url: string) => Thunk = (url) => async (
-    dispatch,
-    getState,
-) => {
-    const state = getState()
-}
-export const searchAnnotations: () => Thunk = () => async (
-    dispatch,
-    getState,
-) => {
-    dispatch(setIsLoading(true))
+export const deleteAnnotation: (url: string) => Thunk =
+    (url) => async (dispatch, getState) => {
+        const state = getState()
+    }
+export const searchAnnotations: () => Thunk =
+    () => async (dispatch, getState) => {
+        dispatch(setIsLoading(true))
 
-    const state = getState()
-    let { url } = selectors.page(state)
+        const state = getState()
+        let { url } = selectors.page(state)
 
-    url = url ? url : globalThis.location.href
+        url = url ? url : globalThis.location.href
 
-    if (selectors.pageType(state) !== 'page') {
+        if (selectors.pageType(state) !== 'page') {
+            dispatch(setIsLoading(false))
+            return
+        }
+
+        const searchParams: AnnotSearchParams = {
+            query: state.searchBar.query,
+            startDate: state.searchBar.startDate,
+            endDate: state.searchBar.endDate,
+            bookmarksOnly: state.searchFilters.onlyBookmarks,
+            tagsInc: state.searchFilters.tags,
+            tagsExc: state.searchFilters.tagsExc,
+            domainsInc: state.searchFilters.domainsInc,
+            domainsExc: state.searchFilters.domainsExc,
+            limit: RES_PAGE_SIZE,
+            collections: [state.searchFilters.lists],
+            url,
+        }
+
         dispatch(setIsLoading(false))
-        return
     }
-
-    const searchParams: AnnotSearchParams = {
-        query: state.searchBar.query,
-        startDate: state.searchBar.startDate,
-        endDate: state.searchBar.endDate,
-        bookmarksOnly: state.searchFilters.onlyBookmarks,
-        tagsInc: state.searchFilters.tags,
-        tagsExc: state.searchFilters.tagsExc,
-        domainsInc: state.searchFilters.domainsInc,
-        domainsExc: state.searchFilters.domainsExc,
-        limit: RES_PAGE_SIZE,
-        collections: [state.searchFilters.lists],
-        url,
-    }
-
-    dispatch(setIsLoading(false))
-}

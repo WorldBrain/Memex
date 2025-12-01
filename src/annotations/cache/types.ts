@@ -1,13 +1,13 @@
 import type TypedEventEmitter from 'typed-emitter'
-import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { SharedAnnotation } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { NormalizedState } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import type { SharedAnnotation } from '@worldbrain/memex-common/ts/content-sharing/types'
 import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import type { Anchor } from 'src/highlighting/types'
 import type { Annotation } from '../types'
-import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { Orderable } from '@worldbrain/memex-common/lib/utils/item-ordering'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import type { Orderable } from '@worldbrain/memex-common/ts/utils/item-ordering'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 
 export interface PageAnnotationsCacheEvents {
     updatedPageData: (
@@ -37,9 +37,9 @@ export interface PageAnnotationsCacheInterface {
         annotations: UnifiedAnnotationForCache[],
         opts?: { now?: number; keepExistingData?: boolean },
     ) => { unifiedIds: UnifiedAnnotation['unifiedId'][] }
-    setLists: (
-        lists: UnifiedListForCache[],
-    ) => { unifiedIds: UnifiedList['unifiedId'][] }
+    setLists: (lists: UnifiedListForCache[]) => {
+        unifiedIds: UnifiedList['unifiedId'][]
+    }
     addAnnotation: (
         annotation: UnifiedAnnotationForCache,
         opts?: { now?: number },
@@ -194,28 +194,26 @@ interface CoreUnifiedList<T> extends Orderable {
 
 export type UnifiedListType = 'user-list' | 'special-list' | 'page-link'
 
-export type UnifiedList<
-    T extends UnifiedListType = UnifiedListType
-> = T extends 'page-link'
-    ? CoreUnifiedList<'page-link'> & {
-          normalizedPageUrl: string // Used in the sidebar logic, affording a way to relate page link lists to a given page the sidebar is open for
-          remoteId: string // This makes up the first part of the page link
-          sharedListEntryId: string // This makes up the last part of the page link
-      }
-    : CoreUnifiedList<T>
+export type UnifiedList<T extends UnifiedListType = UnifiedListType> =
+    T extends 'page-link'
+        ? CoreUnifiedList<'page-link'> & {
+              normalizedPageUrl: string // Used in the sidebar logic, affording a way to relate page link lists to a given page the sidebar is open for
+              remoteId: string // This makes up the first part of the page link
+              sharedListEntryId: string // This makes up the last part of the page link
+          }
+        : CoreUnifiedList<T>
 
-export type UnifiedListForCache<
-    T extends UnifiedListType = UnifiedListType
-> = Omit<
-    UnifiedList<T>,
-    | 'order'
-    | 'unifiedId'
-    | 'parentUnifiedId'
-    | 'parentLocalId'
-    | 'pathLocalIds'
-    | 'pathUnifiedIds'
-> & {
-    order?: number
-    parentLocalId?: number | null
-    pathLocalIds?: number[]
-}
+export type UnifiedListForCache<T extends UnifiedListType = UnifiedListType> =
+    Omit<
+        UnifiedList<T>,
+        | 'order'
+        | 'unifiedId'
+        | 'parentUnifiedId'
+        | 'parentLocalId'
+        | 'pathLocalIds'
+        | 'pathUnifiedIds'
+    > & {
+        order?: number
+        parentLocalId?: number | null
+        pathLocalIds?: number[]
+    }

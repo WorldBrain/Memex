@@ -1,5 +1,5 @@
-import { UILogic } from 'ui-logic-core'
-import { TestLogicContainer } from 'ui-logic-core/lib/testing'
+import { UILogic } from 'ui-logic-core/ts'
+import { TestLogicContainer } from 'ui-logic-core/ts/testing'
 import mapValues from 'lodash/mapValues'
 
 import {

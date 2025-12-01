@@ -2,10 +2,9 @@ import React, { SyntheticEvent, HTMLProps } from 'react'
 
 import { Props as ContainerProps } from './PauseContainer'
 
-const styles = require('./PauseButton.css')
-
 export interface Props
-    extends Pick<ContainerProps, 'pauseTime' | 'onTimeChange'>,
+    extends
+        Pick<ContainerProps, 'pauseTime' | 'onTimeChange'>,
         HTMLProps<HTMLSelectElement> {
     children: React.ReactChild[]
 }
@@ -20,7 +19,6 @@ export default function PauseSelect({
         <React.Fragment>
             Pause Indexing for
             <select
-                className={styles.dropdown}
                 value={pauseTime}
                 onChange={onTimeChange}
                 onClick={onClick}

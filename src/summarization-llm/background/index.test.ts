@@ -1,13 +1,9 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 
 async function setupTest() {
-    const {
-        backgroundModules,
-        serverStorage,
-        authService,
-        services,
-    } = await setupBackgroundIntegrationTest()
+    const { backgroundModules, serverStorage, authService, services } =
+        await setupBackgroundIntegrationTest()
 
     return {
         backgroundModules,
@@ -73,16 +69,15 @@ describe('Activity indicator background tests', () => {
             userBReference,
         )
 
-        const pageInfoReference = await storageModules.contentSharing.createPageInfo(
-            {
+        const pageInfoReference =
+            await storageModules.contentSharing.createPageInfo({
                 creatorReference: userAReference,
                 pageInfo: {
                     fullTitle: 'AAAA',
                     originalUrl: 'https://test.com',
                     normalizedUrl: 'test.com',
                 },
-            },
-        )
+            })
 
         await activityStreams.followEntity({
             entityType: 'sharedPageInfo',
@@ -90,30 +85,31 @@ describe('Activity indicator background tests', () => {
             feeds: { home: true },
         })
 
-        const sharedListReference = await storageModules.contentSharing.createSharedList(
-            { userReference: userAReference, listData: { title: 'test list' } },
-        )
+        const sharedListReference =
+            await storageModules.contentSharing.createSharedList({
+                userReference: userAReference,
+                listData: { title: 'test list' },
+            })
         await activityStreams.followEntity({
             entityType: 'sharedList',
             entity: sharedListReference,
             feeds: { home: true },
         })
 
-        const {
-            sharedAnnotationReferences,
-        } = await storageModules.contentSharing.createAnnotations({
-            creator: userAReference,
-            listReferences: [sharedListReference],
-            annotationsByPage: {
-                ['test.com']: [
-                    {
-                        localId: 'test.com#123',
-                        createdWhen: Date.now(),
-                        comment: 'TESST',
-                    },
-                ],
-            },
-        })
+        const { sharedAnnotationReferences } =
+            await storageModules.contentSharing.createAnnotations({
+                creator: userAReference,
+                listReferences: [sharedListReference],
+                annotationsByPage: {
+                    ['test.com']: [
+                        {
+                            localId: 'test.com#123',
+                            createdWhen: Date.now(),
+                            comment: 'TESST',
+                        },
+                    ],
+                },
+            })
         // Ensure the annot author follows their own annot
         await activityStreams.followEntity({
             entityType: 'conversationThread',
@@ -124,18 +120,16 @@ describe('Activity indicator background tests', () => {
             feeds: { home: true },
         })
 
-        const {
-            reference: replyReference,
-            threadReference,
-        } = await storageModules.contentConversations.createReply({
-            previousReplyReference: null,
-            annotationReference: sharedAnnotationReferences['test.com#123'],
-            normalizedPageUrl: 'test.com',
-            pageCreatorReference: userAReference,
-            sharedListReference,
-            userReference: userBReference,
-            reply: { content: 'TEST' },
-        })
+        const { reference: replyReference, threadReference } =
+            await storageModules.contentConversations.createReply({
+                previousReplyReference: null,
+                annotationReference: sharedAnnotationReferences['test.com#123'],
+                normalizedPageUrl: 'test.com',
+                pageCreatorReference: userAReference,
+                sharedListReference,
+                userReference: userBReference,
+                reply: { content: 'TEST' },
+            })
 
         // Login as other user so that reply activity gets assoc. with them (they are the replier)
         await loginTestUser(userBReference)

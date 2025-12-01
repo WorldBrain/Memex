@@ -4,15 +4,20 @@ import styled from 'styled-components'
 import { Template } from '../types'
 import TemplateEditor from './TemplateEditor'
 import TemplateList from './TemplateList'
-import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { OverlayModals } from '@worldbrain/memex-common/ts/common-ui/components/overlay-modals'
+import { TaskState } from 'ui-logic-core/ts/types'
 
 const CopyPasterWrapper = styled.div`
     min-width: 340px;
     & * {
         font-family: 'Satoshi', sans-serif;
-        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
-            'ss04' on, 'liga' off;
+        font-feature-settings:
+            'pnum' on,
+            'lnum' on,
+            'case' on,
+            'ss03' on,
+            'ss04' on,
+            'liga' off;
     }
 `
 

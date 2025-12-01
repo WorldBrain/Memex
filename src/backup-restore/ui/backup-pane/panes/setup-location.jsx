@@ -1,13 +1,13 @@
 import React from 'react'
-import browser from 'webextension-polyfill'
+
 import { checkServerStatus } from '../../utils'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import styled from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 import ButtonBar from 'src/options/imports/components/ButtonBar'
 import { getFolder } from 'src/pkm-integrations/utils'
 
@@ -34,7 +34,7 @@ export default class SetupLocation extends React.Component {
             provider,
         })
 
-        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const data = await chrome.storage.local.get('PKMSYNCpkmFolders')
         let backupFolder = null
         if (data) {
             backupFolder = data.PKMSYNCpkmFolders.backupFolder || null
@@ -54,7 +54,7 @@ export default class SetupLocation extends React.Component {
 
     _proceedIfServerIsRunning = async () => {
         let overlay = null
-        const status = await checkServerStatus({ storageAPI: browser.storage })
+        const status = await checkServerStatus({ storageAPI: chrome.storage })
         if (status) {
             overlay = null
         } else {
@@ -67,7 +67,7 @@ export default class SetupLocation extends React.Component {
 
     _handleChangeBackupPath = async () => {
         const newBackupPath = await getFolder('backup', {
-            storageAPI: browser.storage,
+            storageAPI: chrome.storage,
         })
 
         if (newBackupPath) {

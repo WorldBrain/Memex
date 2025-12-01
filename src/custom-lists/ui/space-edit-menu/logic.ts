@@ -1,20 +1,20 @@
-import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core/ts'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import type { TaskState } from 'ui-logic-core/lib/types'
-import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
+import type { InviteLink } from '@worldbrain/memex-common/ts/content-sharing/ui/list-share-modal/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import {
     SharedListEmailInvite,
     SharedListRoleID,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import {
     NormalizedState,
     initNormalizedState,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
@@ -128,11 +128,10 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             }
 
             // TODO: maybe remove this call
-            const listDataWithOwnership = await spacesBG.fetchSharedListDataWithOwnership(
-                {
+            const listDataWithOwnership =
+                await spacesBG.fetchSharedListDataWithOwnership({
                     remoteListId: listData.remoteId,
-                },
-            )
+                })
             if (listData == null) {
                 throw new Error('Remote list data not found')
             }

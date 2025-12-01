@@ -9,7 +9,7 @@ import { query, isEmptyQuery } from '../search-bar/selectors'
 import { listFilterActive, listIdFilter } from 'src/search-filters/selectors'
 import * as constants from './constants'
 import { ResultsByUrl } from '../types'
-import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 
 /**
  * Either set display title to be the top-level title field, else look in content. Fallback is the URL.
@@ -29,21 +29,17 @@ function decideTitle(pageDoc) {
 /**
  * Returns page doc with modified title, isDeleting and tagPills data.
  */
-const editPageResults = ({
-    modalShown,
-    deleting,
-    tagIndex,
-    listIndex,
-    copyPasterIndex,
-}) => (pageDoc, i) => ({
-    ...pageDoc,
-    title: decideTitle(pageDoc),
-    isDeleting: !modalShown && i === deleting,
-    tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
-    shouldDisplayTagPopup: i === tagIndex,
-    shouldDisplayListPopup: i === listIndex,
-    shouldDisplayCopyPasterPopup: i === copyPasterIndex,
-})
+const editPageResults =
+    ({ modalShown, deleting, tagIndex, listIndex, copyPasterIndex }) =>
+    (pageDoc, i) => ({
+        ...pageDoc,
+        title: decideTitle(pageDoc),
+        isDeleting: !modalShown && i === deleting,
+        tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
+        shouldDisplayTagPopup: i === tagIndex,
+        shouldDisplayListPopup: i === listIndex,
+        shouldDisplayCopyPasterPopup: i === copyPasterIndex,
+    })
 
 const resultsState = (state: RootState) => state.results
 

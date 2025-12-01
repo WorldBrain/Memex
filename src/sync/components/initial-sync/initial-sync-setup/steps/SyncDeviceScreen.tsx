@@ -2,7 +2,7 @@ import React from 'react'
 import { ModalBox } from 'src/common-ui/components/design-library/ModalBox'
 import ProgressBar from 'src/common-ui/components/ProgressBar'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import {
     CenterText,
     TypographyBodyBold,
@@ -14,8 +14,6 @@ import {
     WhiteSpacer20,
     WhiteSpacer30,
 } from 'src/common-ui/components/design-library/typography'
-
-const styles = require('./styles.css')
 
 export const SyncDeviceScreen = ({
     error,
@@ -40,9 +38,9 @@ export const SyncDeviceScreen = ({
         >
             <ProgressBox>
                 <CenterText>
-                    <div className={styles.progressBar}>
+                    <div>
                         {!error ? (
-                            <div className={styles.progressBox}>
+                            <div>
                                 <TypographyBodyBold>
                                     {
                                         'Initial sync is in progress... this may take a while'
@@ -56,7 +54,7 @@ export const SyncDeviceScreen = ({
                                 {progressPct === undefined ? (
                                     <LoadingIndicator />
                                 ) : (
-                                    <div className={styles.progressBar}>
+                                    <div>
                                         <ProgressBar
                                             progress={progressPct * 100}
                                         />
@@ -65,7 +63,7 @@ export const SyncDeviceScreen = ({
                                 )}
                             </div>
                         ) : (
-                            <div className={styles.progressBox}>
+                            <div>
                                 <Warning>⚠️ Something went wrong</Warning>
                                 <TypographyBodyCenter>
                                     {error}

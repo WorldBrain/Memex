@@ -3,11 +3,11 @@ import PropTypes from 'prop-types'
 import Dropdown from './Dropdown'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import styled from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 
 interface ResultsProps {
     position: string

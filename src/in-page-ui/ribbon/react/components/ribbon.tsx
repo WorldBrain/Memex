@@ -1,6 +1,5 @@
 import React, { Component, createRef, KeyboardEventHandler } from 'react'
 import styled, { createGlobalStyle, css, keyframes } from 'styled-components'
-import browser, { Browser } from 'webextension-polyfill'
 
 import moment from 'moment'
 import {
@@ -12,43 +11,43 @@ import type {
     Shortcut,
     BaseKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
-import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import QuickTutorial from '@worldbrain/memex-common/ts/editor/components/QuickTutorial'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { ListDetailsGetter } from 'src/annotations/types'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 import { addUrlToBlacklist } from 'src/blacklist/utils'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { HexColorPicker, RgbaColorPicker } from 'react-colorful'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
-import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/ts/annotations/constants'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import { TrialStatusIndicator } from 'src/util/subscriptions/trialStatusIndicator'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/ts/telegram/utils'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
-import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
-import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
-import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
+import { RGBAobjectToString } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/utils'
+import { ErrorNotification } from '@worldbrain/memex-common/ts/common-ui/components/error-notification'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
+import { isUrlYTVideo } from '@worldbrain/memex-common/ts/utils/youtube-url'
+import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/constants'
+import { OverlayModals } from '@worldbrain/memex-common/ts/common-ui/components/overlay-modals'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 import { renderNudgeTooltip } from 'src/util/nudges-utils'
 
 export interface Props extends RibbonSubcomponentProps {
@@ -87,7 +86,7 @@ export interface Props extends RibbonSubcomponentProps {
     getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface<'caller'>
     setWriteError: (error: string) => void
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     showRabbitHoleButton: boolean
     tutorialIdToOpen: string
     setTutorialIdToOpen: (tutorialId: string) => void
@@ -163,9 +162,8 @@ export default class Ribbon extends Component<Props, State> {
         this.setState(() => ({ shortcutsReady: true }))
         await this.initialiseHighlightColor()
 
-        const updatesAvailable = await browser.storage.local.get(
-            READ_STORAGE_FLAG,
-        )
+        const updatesAvailable =
+            await chrome.storage.local.get(READ_STORAGE_FLAG)
 
         this.setState({
             updatesAvailable: !updatesAvailable[READ_STORAGE_FLAG],
@@ -173,12 +171,12 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     async setUpdateFlagToRead() {
-        await browser.storage.local.set({ [READ_STORAGE_FLAG]: true })
+        await chrome.storage.local.set({ [READ_STORAGE_FLAG]: true })
     }
 
     async initialiseHighlightColor() {
         const { [HIGHLIGHT_COLOR_KEY]: highlightsColor } =
-            await browser.storage.local.get({
+            await chrome.storage.local.get({
                 [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
             })
         this.setState({
@@ -225,7 +223,7 @@ export default class Ribbon extends Component<Props, State> {
         })
         this.props.toggleShowTutorial()
 
-        await browser.storage.local.set({
+        await chrome.storage.local.set({
             [HIGHLIGHT_COLOR_KEY]: this.state.pickerColor,
         })
     }
@@ -367,34 +365,34 @@ export default class Ribbon extends Component<Props, State> {
                     condition1
                         ? 'bottom-end'
                         : condition2
-                        ? 'top-end'
-                        : condition3
-                        ? 'left-start'
-                        : condition4
-                        ? 'left-start'
-                        : 'left-start'
+                          ? 'top-end'
+                          : condition3
+                            ? 'left-start'
+                            : condition4
+                              ? 'left-start'
+                              : 'left-start'
                 }
                 offsetX={
                     condition1
                         ? 10
                         : condition2
-                        ? 10
-                        : condition3
-                        ? 10
-                        : condition4
-                        ? 10
-                        : 0
+                          ? 10
+                          : condition3
+                            ? 10
+                            : condition4
+                              ? 10
+                              : 0
                 }
                 offsetY={
                     condition1
                         ? 10
                         : condition2
-                        ? 10
-                        : condition3
-                        ? 10
-                        : condition4
-                        ? 0
-                        : 0
+                          ? 10
+                          : condition3
+                            ? 10
+                            : condition4
+                              ? 0
+                              : 0
                 }
                 closeComponent={this.hideListPicker}
                 instaClose
@@ -408,7 +406,7 @@ export default class Ribbon extends Component<Props, State> {
                     bgScriptBG={this.props.bgScriptBG}
                     analyticsBG={this.props.analyticsBG}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
-                    localStorageAPI={browser.storage.local}
+                    localStorageAPI={chrome.storage.local}
                     actOnAllTabs={this.props.lists.listAllTabs}
                     initialSelectedListIds={
                         this.props.lists.fetchInitialListSelections
@@ -439,10 +437,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left-end'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left-end'
                 }
                 offsetX={
                     topRight ||
@@ -732,10 +730,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left-start'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left-start'
                 }
                 offsetX={
                     topRight ||
@@ -791,10 +789,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left-start'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left-start'
                 }
                 offsetX={
                     topRight ||
@@ -994,10 +992,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left'
                 }
                 offsetX={0}
                 getPortalRoot={this.props.getRootElement}
@@ -1047,10 +1045,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left'
                 }
                 offsetX={
                     topRight ||
@@ -1081,10 +1079,10 @@ export default class Ribbon extends Component<Props, State> {
                         this.props.sidebar.isSidebarOpen
                             ? 'left'
                             : topRight
-                            ? 'bottom'
-                            : bottomRight
-                            ? 'top'
-                            : 'left'
+                              ? 'bottom'
+                              : bottomRight
+                                ? 'top'
+                                : 'left'
                     }
                     getPortalRoot={this.props.getRootElement}
                 >
@@ -1104,10 +1102,10 @@ export default class Ribbon extends Component<Props, State> {
                         this.props.sidebar.isSidebarOpen
                             ? 'left'
                             : topRight
-                            ? 'bottom'
-                            : bottomRight
-                            ? 'top'
-                            : 'left'
+                              ? 'bottom'
+                              : bottomRight
+                                ? 'top'
+                                : 'left'
                     }
                     getPortalRoot={this.props.getRootElement}
                 >
@@ -1168,10 +1166,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left'
                 }
                 offsetX={10}
             >
@@ -1291,10 +1289,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left'
                 }
                 getPortalRoot={this.props.getRootElement}
                 offsetX={10}
@@ -1552,10 +1550,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left'
                 }
                 offsetX={10}
                 getPortalRoot={this.props.getRootElement}
@@ -1628,10 +1626,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left'
                 }
                 offsetX={10}
                 getPortalRoot={this.props.getRootElement}
@@ -1683,10 +1681,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left'
                 }
                 offsetX={10}
                 getPortalRoot={this.props.getRootElement}
@@ -1753,10 +1751,10 @@ export default class Ribbon extends Component<Props, State> {
                             this.props.sidebar.isSidebarOpen
                                 ? 'left'
                                 : topRight
-                                ? 'bottom'
-                                : bottomRight
-                                ? 'top'
-                                : 'left'
+                                  ? 'bottom'
+                                  : bottomRight
+                                    ? 'top'
+                                    : 'left'
                         }
                         offsetX={10}
                         getPortalRoot={this.props.getRootElement}
@@ -1802,10 +1800,10 @@ export default class Ribbon extends Component<Props, State> {
                             this.props.sidebar.isSidebarOpen
                                 ? 'left'
                                 : topRight
-                                ? 'bottom'
-                                : bottomRight
-                                ? 'top'
-                                : 'left'
+                                  ? 'bottom'
+                                  : bottomRight
+                                    ? 'top'
+                                    : 'left'
                         }
                         offsetX={10}
                         getPortalRoot={this.props.getRootElement}
@@ -1850,10 +1848,10 @@ export default class Ribbon extends Component<Props, State> {
                             this.props.sidebar.isSidebarOpen
                                 ? 'left'
                                 : topRight
-                                ? 'bottom'
-                                : bottomRight
-                                ? 'top'
-                                : 'left'
+                                  ? 'bottom'
+                                  : bottomRight
+                                    ? 'top'
+                                    : 'left'
                         }
                         offsetX={10}
                         getPortalRoot={this.props.getRootElement}
@@ -1896,10 +1894,10 @@ export default class Ribbon extends Component<Props, State> {
                             this.props.sidebar.isSidebarOpen
                                 ? 'left'
                                 : topRight
-                                ? 'bottom'
-                                : bottomRight
-                                ? 'top'
-                                : 'left'
+                                  ? 'bottom'
+                                  : bottomRight
+                                    ? 'top'
+                                    : 'left'
                         }
                         offsetX={10}
                         getPortalRoot={this.props.getRootElement}
@@ -1941,10 +1939,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left-end'
                         : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left'
+                          ? 'bottom'
+                          : bottomRight
+                            ? 'top'
+                            : 'left'
                 }
                 offsetX={15}
                 getPortalRoot={this.props.getRootElement}
@@ -1977,10 +1975,10 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen
                         ? 'left-end'
                         : topRight
-                        ? 'bottom-end'
-                        : bottomRight
-                        ? 'top-end'
-                        : 'left'
+                          ? 'bottom-end'
+                          : bottomRight
+                            ? 'top-end'
+                            : 'left'
                 }
                 offsetX={15}
                 getPortalRoot={this.props.getRootElement}

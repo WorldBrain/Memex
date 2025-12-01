@@ -1,6 +1,4 @@
-import browser from 'webextension-polyfill'
-
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/ts/transform-page-html.service-worker'
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import {
@@ -34,14 +32,14 @@ import initSentry, { captureException } from 'src/util/raven'
 import { createSelfTests } from './tests/self-tests'
 import { createPersistentStorageManager } from './storage/persistent-storage'
 import { createAuthServices } from './services/local-services'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { initFirestoreSyncTriggerListener } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils-mv2'
+import { SharedListRoleID } from '@worldbrain/memex-common/ts/content-sharing/types'
+import { initFirestoreSyncTriggerListener } from '@worldbrain/memex-common/ts/personal-cloud/backend/utils-mv2'
 import { setupOmnibar } from 'src/omnibar'
 import delay from './util/delay'
-import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
-import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
-import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { fetchPageData } from '@worldbrain/memex-common/ts/page-indexing/fetch-page-data'
+import fetchAndExtractPdfContent from '@worldbrain/memex-common/ts/ng/fetch-page-data/fetch-pdf-data.browser'
+import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/ts/image-support/backend'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 let __debugCounter = 0
 let __BGInitAttemptCounter = 0
@@ -51,7 +49,7 @@ export async function main(): Promise<void> {
     __debugCounter = 0
 
     const rpcManager = setupRpcConnection({
-        browserAPIs: browser,
+        browserAPIs: chrome,
         sideName: 'background',
         role: 'background',
         paused: true,
@@ -59,7 +57,7 @@ export async function main(): Promise<void> {
     const firebase = getFirebase()
 
     const localStorageChangesManager = new StorageChangesManager({
-        storage: browser.storage,
+        storage: chrome.storage,
     })
     initSentry({})
 
@@ -99,7 +97,7 @@ export async function main(): Promise<void> {
 
     const fetch = globalThis.fetch.bind(
         globalThis,
-    ) as typeof globalThis['fetch']
+    ) as (typeof globalThis)['fetch']
 
     const backgroundModules = createBackgroundModules({
         manifestVersion: '2',
@@ -120,10 +118,10 @@ export async function main(): Promise<void> {
         fetchPDFData: async (url) =>
             fetchAndExtractPdfContent(url, {
                 fetch,
-                pdfJSWorkerSrc: browser.runtime.getURL('/build/pdf.worker.js'),
+                pdfJSWorkerSrc: chrome.runtime.getURL('/build/pdf.worker.js'),
             }),
         fetch,
-        browserAPIs: browser,
+        browserAPIs: chrome,
         captureException,
         storageManager,
         persistentStorageManager,
@@ -187,7 +185,7 @@ export async function main(): Promise<void> {
 
     setupOmnibar({
         bgModules: backgroundModules,
-        browserAPIs: browser,
+        browserAPIs: typeof chrome,
     })
 
     // Gradually moving all remote function registrations here
@@ -236,7 +234,7 @@ export async function main(): Promise<void> {
             storageManager,
             backgroundModules,
             persistentStorageManager,
-            localStorage: browser.storage.local,
+            localStorage: chrome.storage.local,
         })
     }
 
@@ -251,7 +249,7 @@ const handleError = async (originalError: Error) => {
         noMoreAttempts
             ? `BG INIT LOGIC RETRIES EXHAUSTED: `
             : `` +
-              `Error occurred during background script setup: ${originalError.message} - debug counter: ${__debugCounter}`,
+                  `Error occurred during background script setup: ${originalError.message} - debug counter: ${__debugCounter}`,
     )
     if (originalError.stack) {
         error.stack = originalError.stack

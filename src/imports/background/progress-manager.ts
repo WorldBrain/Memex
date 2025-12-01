@@ -6,7 +6,7 @@ import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
-import browser from 'webextension-polyfill'
+
 import checkBrowser from 'src/util/check-browser'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
 
@@ -100,64 +100,63 @@ export default class ImportProgressManager {
      * @param {string} chunkKey The key of the chunk currently being processed.
      * @returns {(chunkEntry) => Promise<void>} Async function affording processing of single entry in chunk.
      */
-    _processItem = (chunkKey, spaceTreeMap?) => async ([
-        encodedUrl,
-        importItem,
-    ]) => {
-        const processor = new this._Processor({
-            tagsModule: this.options.tagsModule,
-            customListsModule: this.options.customListsModule,
-            pages: this.options.pages,
-            bookmarks: this.options.bookmarks,
-        })
+    _processItem =
+        (chunkKey, spaceTreeMap?) =>
+        async ([encodedUrl, importItem]) => {
+            const processor = new this._Processor({
+                tagsModule: this.options.tagsModule,
+                customListsModule: this.options.customListsModule,
+                pages: this.options.pages,
+                bookmarks: this.options.bookmarks,
+            })
 
-        // Used to build the message to send to observer
-        const msg: { type: any; url: any; status?: any; error?: any } = {
-            type: importItem.type,
-            url: importItem.url,
-        }
-
-        try {
-            if (this.stopped) {
-                throw this._Processor.makeInterruptedErr()
+            // Used to build the message to send to observer
+            const msg: { type: any; url: any; status?: any; error?: any } = {
+                type: importItem.type,
+                url: importItem.url,
             }
 
-            // Save reference to processor for cancelling later
-            this.processors[this._nextProcIndex()] = processor
-            const res = await processor.process(
-                importItem,
-                spaceTreeMap,
-                this.options.stateManager.options,
-            )
-            msg.status = res.status
-        } catch (err) {
-            // Throw execution was cancelled, throw error up the stack
-            if (err.cancelled) {
-                throw err
-            }
-            msg.error = err.message
-        } finally {
-            processor.finished = true
+            try {
+                if (this.stopped) {
+                    throw this._Processor.makeInterruptedErr()
+                }
 
-            // Send item data + outcome status down to UI (and error if present)
-            if (!this.stopped) {
-                this._observer.next(msg)
+                // Save reference to processor for cancelling later
+                this.processors[this._nextProcIndex()] = processor
+                const res = await processor.process(
+                    importItem,
+                    spaceTreeMap,
+                    this.options.stateManager.options,
+                )
+                msg.status = res.status
+            } catch (err) {
+                // Throw execution was cancelled, throw error up the stack
+                if (err.cancelled) {
+                    throw err
+                }
+                msg.error = err.message
+            } finally {
+                processor.finished = true
 
-                // Either flag as error or remove from state depending on processing error status
-                if (msg.error) {
-                    await this.options.stateManager.flagItemAsError(
-                        chunkKey,
-                        encodedUrl,
-                    )
-                } else {
-                    await this.options.stateManager.removeItem(
-                        chunkKey,
-                        encodedUrl,
-                    )
+                // Send item data + outcome status down to UI (and error if present)
+                if (!this.stopped) {
+                    this._observer.next(msg)
+
+                    // Either flag as error or remove from state depending on processing error status
+                    if (msg.error) {
+                        await this.options.stateManager.flagItemAsError(
+                            chunkKey,
+                            encodedUrl,
+                        )
+                    } else {
+                        await this.options.stateManager.removeItem(
+                            chunkKey,
+                            encodedUrl,
+                        )
+                    }
                 }
             }
         }
-    }
 
     /**
      * Start execution
@@ -186,17 +185,15 @@ export default class ImportProgressManager {
 
                 let localListId = null
                 let map = {}
-                const existing = await this.options.customListsModule.fetchListByName(
-                    {
+                const existing =
+                    await this.options.customListsModule.fetchListByName({
                         name: 'Browser Bookmarks',
-                    },
-                )
+                    })
                 if (existing == null) {
-                    const BrowserBookmarksSpace = await this.options.customListsModule.createCustomList(
-                        {
+                    const BrowserBookmarksSpace =
+                        await this.options.customListsModule.createCustomList({
                             name: 'Browser Bookmarks',
-                        },
-                    )
+                        })
                     map[-1] = BrowserBookmarksSpace.localListId
                     localListId = BrowserBookmarksSpace.localListId
                 } else {
@@ -258,7 +255,7 @@ export default class ImportProgressManager {
             dirNode = this.ROOT_BM
         }
 
-        const children = await browser.bookmarks.getChildren(dirNode.id)
+        const children = await chrome.bookmarks.getChildren(dirNode.id)
         // Process each child node
         for (const child of children) {
             const { id, parentId, title, url } = child
@@ -267,16 +264,16 @@ export default class ImportProgressManager {
             if (!url) {
                 // Create custom list for the folder
 
-                const existingList = await this.options.customListsModule.fetchListByName(
-                    {
+                const existingList =
+                    await this.options.customListsModule.fetchListByName({
                         name: title,
-                    },
-                )
+                    })
 
                 if (existingList) {
-                    const existingListTree = await this.options.customListsModule.fetchListTreeById(
-                        { id: existingList.id },
-                    )
+                    const existingListTree =
+                        await this.options.customListsModule.fetchListTreeById({
+                            id: existingList.id,
+                        })
 
                     // check if the existing list is in the subfolders of the browser bookmarks
                     const existingPath = existingListTree.pathListIds
@@ -286,12 +283,11 @@ export default class ImportProgressManager {
                     }
                 }
 
-                const {
-                    localListId,
-                } = await this.options.customListsModule.createCustomList({
-                    name: title,
-                    parentListId: parentSpaceId,
-                })
+                const { localListId } =
+                    await this.options.customListsModule.createCustomList({
+                        name: title,
+                        parentListId: parentSpaceId,
+                    })
 
                 // Map the parentId to the spaceId
                 map[id] = localListId

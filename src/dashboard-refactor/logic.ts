@@ -1,11 +1,11 @@
-import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core/ts'
 import debounce from 'lodash/debounce'
-import type { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
+import type { AnnotationPrivacyState } from '@worldbrain/memex-common/ts/annotations/types'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { RootState as State, DashboardDependencies, Events } from './types'
-import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
+import { formatTimestamp } from '@worldbrain/memex-common/ts/utils/date-time'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
 import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
@@ -21,7 +21,7 @@ import {
     getListData,
     getOwnLists,
 } from './util'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 import type { NoResultsType, SelectableBlock } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
@@ -29,7 +29,7 @@ import {
     initNormalizedState,
     mergeNormalizedStates,
     normalizedStateToArray,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
@@ -45,10 +45,10 @@ import {
 import { setUserContext as setSentryUserContext } from 'src/util/raven'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
 import type { AnnotationSharingStates } from 'src/content-sharing/background/types'
-import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/ts/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
-import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { validateSpaceName } from '@worldbrain/memex-common/ts/utils/space-name-validation'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import {
     deriveListOwnershipStatus,
@@ -56,19 +56,19 @@ import {
 } from 'src/annotations/cache/utils'
 import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import {
     clearBulkEditItems,
     getBulkEditItems,
     setBulkEdit,
 } from 'src/bulk-edit/utils'
 import type { DragPageToListAction } from './lists-sidebar/types'
-import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/ts/utils/item-ordering'
 import MarkdownIt from 'markdown-it'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { captureException } from 'src/util/raven'
 import analytics from 'src/analytics'
-import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import { processCommentForImageUpload } from '@worldbrain/memex-common/ts/annotations/processCommentForImageUpload'
 import type { UnifiedSearchResult } from 'src/search/background/types'
 import type { BulkEditCollection } from 'src/bulk-edit/types'
 import checkBrowser from 'src/util/check-browser'
@@ -380,9 +380,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             syncSettingsBG: this.options.syncSettingsBG,
         })
 
-        const highlightColorSettings = await syncSettings.highlightColors.get(
-            'highlightColors',
-        )
+        const highlightColorSettings =
+            await syncSettings.highlightColors.get('highlightColors')
 
         this.emitMutation({
             highlightColors: { $set: highlightColorSettings },
@@ -413,8 +412,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                             bgScript: this.options.bgScriptBG,
                             customLists: this.options.listsBG,
                             contentSharing: this.options.contentShareBG,
-                            pageActivityIndicator: this.options
-                                .pageActivityIndicatorBG,
+                            pageActivityIndicator:
+                                this.options.pageActivityIndicatorBG,
                         },
                     })
                 },
@@ -430,9 +429,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             ) {
                 let selectedListId
                 selectedListId = selectedSpace
-                    ? this.options.annotationsCache.getListByLocalId(
+                    ? (this.options.annotationsCache.getListByLocalId(
                           selectedSpace,
-                      )?.unifiedId ?? null
+                      )?.unifiedId ?? null)
                     : null
                 this.mutateAndTriggerSearch(previousState, {
                     listsSidebar: { selectedListId: { $set: selectedListId } },
@@ -488,7 +487,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     private downloadStoppedTimeout: any | null = null
 
     getDownloadStats = async () => {
-        const pendingDownloads = await this.options.personalCloudBG.countPendingSyncDownloads()
+        const pendingDownloads =
+            await this.options.personalCloudBG.countPendingSyncDownloads()
         this.emitMutation({
             syncMenu: {
                 pendingRemoteChangeCount: { $set: pendingDownloads },
@@ -606,15 +606,13 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.options.history.replaceState({}, '', cleanUrl)
     }
 
-    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
-        nextLists,
-    ) => {
-        this.emitMutation({ listsSidebar: { lists: { $set: nextLists } } })
-    }
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] =
+        (nextLists) => {
+            this.emitMutation({ listsSidebar: { lists: { $set: nextLists } } })
+        }
 
-    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
-        nextAnnotations,
-    ) => {}
+    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] =
+        (nextAnnotations) => {}
 
     observeBlurContainer() {
         const container = document.getElementById('BlurContainer')
@@ -667,10 +665,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                         blurEffectReset: { $set: false },
                     })
                     setTimeout(() => {
-                        const blurContainer = document.getElementById(
-                            'BlurContainer',
-                        )
-                        blurContainer.style.background = this.options.theme.colors.black
+                        const blurContainer =
+                            document.getElementById('BlurContainer')
+                        blurContainer.style.background =
+                            this.options.theme.colors.black
                         if (
                             // @ts-ignore
                             !blurContainer.style.backdropFilter ||
@@ -695,9 +693,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     async initThemeVariant() {
-        const variantStorage = await this.options.localStorage.get(
-            'themeVariant',
-        )
+        const variantStorage =
+            await this.options.localStorage.get('themeVariant')
         const variant = variantStorage['themeVariant'] ?? 'dark'
         this.emitMutation({ themeVariant: { $set: variant } })
     }
@@ -747,7 +744,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const lastSyncTime: number =
             lastSyncDownload > lastSyncUpload
                 ? lastSyncDownload
-                : lastSyncUpload ?? null
+                : (lastSyncUpload ?? null)
 
         const mutation: UIMutation<State> = {
             searchResults: {
@@ -764,7 +761,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isSidebarLocked: {
                     $set: this.islikelyInPage
                         ? false
-                        : listsSidebarLocked ?? true,
+                        : (listsSidebarLocked ?? true),
                 },
             },
             syncMenu: {
@@ -776,9 +773,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private async getFeedActivityStatus() {
-        const hasActivityStored = await this.syncSettings.activityIndicator.get(
-            'feedHasActivity',
-        )
+        const hasActivityStored =
+            await this.syncSettings.activityIndicator.get('feedHasActivity')
 
         if (hasActivityStored === true) {
             this.emitMutation({
@@ -787,7 +783,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         } else {
-            const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
+            const activityStatus =
+                await this.options.activityIndicatorBG.checkActivityStatus()
             const hasFeedActivity = activityStatus === 'has-unseen'
             await this.options.localStorage.set({
                 [ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY]: hasFeedActivity,
@@ -1208,11 +1205,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             this,
             (taskState) => ({
                 searchResults: {
-                    [event?.paginate
-                        ? 'searchPaginationState'
-                        : 'searchState']: {
-                        $set: taskState,
-                    },
+                    [event?.paginate ? 'searchPaginationState' : 'searchState']:
+                        {
+                            $set: taskState,
+                        },
                 },
             }),
 
@@ -1228,21 +1224,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                         searchState,
                         this.options.annotationsCache,
                     )
-                    const result = await this.options.searchBG.unifiedSearch(
-                        params,
-                    )
+                    const result =
+                        await this.options.searchBG.unifiedSearch(params)
 
-                    const {
-                        noteData,
-                        pageData,
-                        results,
-                        pageIdToResultIds,
-                    } = utils.pageSearchResultToState(
-                        result,
-                        params,
-                        this.options.annotationsCache,
-                        previousState.showAllNotes,
-                    )
+                    const { noteData, pageData, results, pageIdToResultIds } =
+                        utils.pageSearchResultToState(
+                            result,
+                            params,
+                            this.options.annotationsCache,
+                            previousState.showAllNotes,
+                        )
 
                     let noResultsType: NoResultsType = null
                     if (
@@ -1276,7 +1267,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
 
                     // Merge page ID -> result IDs indices, if we're paginating
-                    let nextPageIdToResultIds: State['searchResults']['pageIdToResultIds'] = {}
+                    let nextPageIdToResultIds: State['searchResults']['pageIdToResultIds'] =
+                        {}
                     if (event?.paginate) {
                         const allPageIds = new Set([
                             ...Object.keys(pageIdToResultIds),
@@ -1478,25 +1470,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.options.personalCloudBG.invokeSyncDownload()
     }
 
-    setShowDisplayNameSetupModal: EventHandler<
-        'setShowDisplayNameSetupModal'
-    > = ({ event }) => {
-        this.emitMutation({
-            modals: {
-                showDisplayNameSetup: { $set: event.isShown },
-            },
-        })
-    }
+    setShowDisplayNameSetupModal: EventHandler<'setShowDisplayNameSetupModal'> =
+        ({ event }) => {
+            this.emitMutation({
+                modals: {
+                    showDisplayNameSetup: { $set: event.isShown },
+                },
+            })
+        }
 
-    setShowNoteShareOnboardingModal: EventHandler<
-        'setShowNoteShareOnboardingModal'
-    > = ({ event }) => {
-        this.emitMutation({
-            modals: {
-                showNoteShareOnboarding: { $set: event.isShown },
-            },
-        })
-    }
+    setShowNoteShareOnboardingModal: EventHandler<'setShowNoteShareOnboardingModal'> =
+        ({ event }) => {
+            this.emitMutation({
+                modals: {
+                    showNoteShareOnboarding: { $set: event.isShown },
+                },
+            })
+        }
 
     setShowSubscriptionModal: EventHandler<'setShowSubscriptionModal'> = ({
         event,
@@ -1508,30 +1498,29 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    getHighlightColorSettings: EventHandler<
-        'getHighlightColorSettings'
-    > = async ({ event, previousState }) => {
-        let highlightColors = previousState.highlightColors
-        if (!highlightColors) {
-            highlightColors = await this.syncSettings.highlightColors.get(
-                'highlightColors',
-            )
+    getHighlightColorSettings: EventHandler<'getHighlightColorSettings'> =
+        async ({ event, previousState }) => {
+            let highlightColors = previousState.highlightColors
             if (!highlightColors) {
-                highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
+                highlightColors =
+                    await this.syncSettings.highlightColors.get(
+                        'highlightColors',
+                    )
+                if (!highlightColors) {
+                    highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
+                }
             }
-        }
 
-        this.emitMutation({ highlightColors: { $set: highlightColors } })
-    }
+            this.emitMutation({ highlightColors: { $set: highlightColors } })
+        }
 
     saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
         event,
         previousState,
     }) => {
         const colorToUpdate = event.color
-        const { ...existing } = previousState.searchResults.noteData.byId[
-            event.noteId
-        ]
+        const { ...existing } =
+            previousState.searchResults.noteData.byId[event.noteId]
 
         await executeUITask(
             this,
@@ -1712,18 +1701,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                     searchResults: { pageDeleteState: { $set: taskState } },
                 }),
                 async () => {
-                    const resultsMutation: UIMutation<
-                        State['searchResults']
-                    > = {
-                        pageData: {
-                            byId: { $unset: [event.pageResultId] },
-                            allIds: {
-                                $set: previousState.searchResults.pageData.allIds.filter(
-                                    (id) => id !== event.pageResultId,
-                                ),
+                    const resultsMutation: UIMutation<State['searchResults']> =
+                        {
+                            pageData: {
+                                byId: { $unset: [event.pageResultId] },
+                                allIds: {
+                                    $set: previousState.searchResults.pageData.allIds.filter(
+                                        (id) => id !== event.pageResultId,
+                                    ),
+                                },
                             },
-                        },
-                    }
+                        }
 
                     if (event.day === PAGE_SEARCH_DUMMY_DAY) {
                         resultsMutation.results = {
@@ -1741,10 +1729,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                             },
                         }
                     } else {
-                        resultsMutation.results = removeAllResultOccurrencesOfPage(
-                            previousState.searchResults.results,
-                            event.pageResultId,
-                        )
+                        resultsMutation.results =
+                            removeAllResultOccurrencesOfPage(
+                                previousState.searchResults.results,
+                                event.pageResultId,
+                            )
                     }
 
                     this.emitMutation({
@@ -1760,21 +1749,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    setPrivatizeNoteConfirmArgs: EventHandler<
-        'setPrivatizeNoteConfirmArgs'
-    > = async ({ event }) => {
-        this.emitMutation({
-            modals: { confirmPrivatizeNoteArgs: { $set: event } },
-        })
-    }
+    setPrivatizeNoteConfirmArgs: EventHandler<'setPrivatizeNoteConfirmArgs'> =
+        async ({ event }) => {
+            this.emitMutation({
+                modals: { confirmPrivatizeNoteArgs: { $set: event } },
+            })
+        }
 
-    setSelectNoteSpaceConfirmArgs: EventHandler<
-        'setSelectNoteSpaceConfirmArgs'
-    > = async ({ event }) => {
-        this.emitMutation({
-            modals: { confirmSelectNoteSpaceArgs: { $set: event } },
-        })
-    }
+    setSelectNoteSpaceConfirmArgs: EventHandler<'setSelectNoteSpaceConfirmArgs'> =
+        async ({ event }) => {
+            this.emitMutation({
+                modals: { confirmSelectNoteSpaceArgs: { $set: event } },
+            })
+        }
 
     private updateBulkNotesShareInfoFromShareState = (params: {
         previousState: State
@@ -1805,23 +1792,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: { noteData: mutation } })
     }
 
-    updateAllPageResultNotesShareInfo: EventHandler<
-        'updateAllPageResultNotesShareInfo'
-    > = async ({ event, previousState }) => {
-        this.updateBulkNotesShareInfoFromShareState({
-            previousState,
-            shareStates: event.shareStates,
-        })
-    }
+    updateAllPageResultNotesShareInfo: EventHandler<'updateAllPageResultNotesShareInfo'> =
+        async ({ event, previousState }) => {
+            this.updateBulkNotesShareInfoFromShareState({
+                previousState,
+                shareStates: event.shareStates,
+            })
+        }
 
-    updatePageNotesShareInfo: EventHandler<
-        'updatePageNotesShareInfo'
-    > = async ({ event, previousState }) => {
-        this.updateBulkNotesShareInfoFromShareState({
-            previousState,
-            shareStates: event.shareStates,
-        })
-    }
+    updatePageNotesShareInfo: EventHandler<'updatePageNotesShareInfo'> =
+        async ({ event, previousState }) => {
+            this.updateBulkNotesShareInfoFromShareState({
+                previousState,
+                shareStates: event.shareStates,
+            })
+        }
 
     removePageFromList: EventHandler<'removePageFromList'> = async ({
         event,
@@ -2047,7 +2032,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
             async () => {
                 try {
-                    const itemsInStorage: BulkEditCollection = await getBulkEditItems()
+                    const itemsInStorage: BulkEditCollection =
+                        await getBulkEditItems()
 
                     let pagesToDelete = []
                     let notesToDelete = []
@@ -2208,40 +2194,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         document.body.removeChild(hiddenDiv)
     }
 
-    setCopyPasterDefaultExecute: EventHandler<
-        'setCopyPasterDefaultExecute'
-    > = async ({ event, previousState }) => {
-        this.emitMutation({
-            searchResults: {
-                results: {
-                    [event.day]: {
-                        pages: {
-                            byId: {
-                                [event.pageResultId]: {
-                                    copyLoadingState: {
-                                        $set: 'running',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        })
-
-        let templateCopyResult
-        if (
-            !previousState.searchResults.results[event.day]?.pages.byId[
-                event.pageResultId
-            ].isCopyPasterShown
-        ) {
-            templateCopyResult = await this.handleDefaultTemplateCopy(
-                [null],
-                [event.pageResultId],
-            )
-        }
-
-        if (templateCopyResult) {
+    setCopyPasterDefaultExecute: EventHandler<'setCopyPasterDefaultExecute'> =
+        async ({ event, previousState }) => {
             this.emitMutation({
                 searchResults: {
                     results: {
@@ -2250,7 +2204,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 byId: {
                                     [event.pageResultId]: {
                                         copyLoadingState: {
-                                            $set: 'success',
+                                            $set: 'running',
                                         },
                                     },
                                 },
@@ -2260,7 +2214,19 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
 
-            setTimeout(() => {
+            let templateCopyResult
+            if (
+                !previousState.searchResults.results[event.day]?.pages.byId[
+                    event.pageResultId
+                ].isCopyPasterShown
+            ) {
+                templateCopyResult = await this.handleDefaultTemplateCopy(
+                    [null],
+                    [event.pageResultId],
+                )
+            }
+
+            if (templateCopyResult) {
                 this.emitMutation({
                     searchResults: {
                         results: {
@@ -2269,7 +2235,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     byId: {
                                         [event.pageResultId]: {
                                             copyLoadingState: {
-                                                $set: 'pristine',
+                                                $set: 'success',
                                             },
                                         },
                                     },
@@ -2278,9 +2244,28 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 })
-            }, 3000)
+
+                setTimeout(() => {
+                    this.emitMutation({
+                        searchResults: {
+                            results: {
+                                [event.day]: {
+                                    pages: {
+                                        byId: {
+                                            [event.pageResultId]: {
+                                                copyLoadingState: {
+                                                    $set: 'pristine',
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    })
+                }, 3000)
+            }
         }
-    }
     setPageCopyPasterShown: EventHandler<'setPageCopyPasterShown'> = ({
         event,
         previousState,
@@ -2607,19 +2592,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         emitMutation()
     }
 
-    setPageNewNoteTagPickerShown: EventHandler<
-        'setPageNewNoteTagPickerShown'
-    > = ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                results: {
-                    [event.day]: {
-                        pages: {
-                            byId: {
-                                [event.pageResultId]: {
-                                    newNoteForm: {
-                                        isTagPickerShown: {
-                                            $set: event.isShown,
+    setPageNewNoteTagPickerShown: EventHandler<'setPageNewNoteTagPickerShown'> =
+        ({ event }) => {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [event.day]: {
+                            pages: {
+                                byId: {
+                                    [event.pageResultId]: {
+                                        newNoteForm: {
+                                            isTagPickerShown: {
+                                                $set: event.isShown,
+                                            },
                                         },
                                     },
                                 },
@@ -2627,9 +2612,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 },
-            },
-        })
-    }
+            })
+        }
 
     setPageNewNoteLists: EventHandler<'setPageNewNoteLists'> = ({
         event,
@@ -2704,74 +2688,70 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    addNewSpaceViaWikiLinksNewNote: EventHandler<
-        'addNewSpaceViaWikiLinksNewNote'
-    > = async ({ event, previousState }) => {
-        const {
-            localListId,
-            remoteListId,
-            collabKey,
-        } = await this.options.listsBG.createCustomList({
-            name: event.spaceName,
-        })
+    addNewSpaceViaWikiLinksNewNote: EventHandler<'addNewSpaceViaWikiLinksNewNote'> =
+        async ({ event, previousState }) => {
+            const { localListId, remoteListId, collabKey } =
+                await this.options.listsBG.createCustomList({
+                    name: event.spaceName,
+                })
 
-        const { unifiedId } = this.options.annotationsCache.addList({
-            name: event.spaceName,
-            collabKey,
-            localId: localListId,
-            remoteId: remoteListId,
-            hasRemoteAnnotationsToLoad: false,
-            type: 'user-list',
-            unifiedAnnotationIds: [],
-            creator:
-                previousState.currentUser != null
-                    ? {
-                          type: 'user-reference',
-                          id: previousState.currentUser.id,
-                      }
-                    : undefined,
-            parentLocalId: null,
-            isPrivate: true,
-        })
+            const { unifiedId } = this.options.annotationsCache.addList({
+                name: event.spaceName,
+                collabKey,
+                localId: localListId,
+                remoteId: remoteListId,
+                hasRemoteAnnotationsToLoad: false,
+                type: 'user-list',
+                unifiedAnnotationIds: [],
+                creator:
+                    previousState.currentUser != null
+                        ? {
+                              type: 'user-reference',
+                              id: previousState.currentUser.id,
+                          }
+                        : undefined,
+                parentLocalId: null,
+                isPrivate: true,
+            })
 
-        const listsToAdd = [
-            ...previousState.searchResults.results[event.day].pages.byId[
-                event.pageId
-            ].newNoteForm.lists,
-            unifiedId,
-        ]
+            const listsToAdd = [
+                ...previousState.searchResults.results[event.day].pages.byId[
+                    event.pageId
+                ].newNoteForm.lists,
+                unifiedId,
+            ]
 
-        this.processUIEvent('setPageNewNoteLists', {
-            event: {
-                day: event.day,
-                pageResultId: event.pageId,
-                lists: listsToAdd,
-            },
-            previousState,
-        })
-    }
+            this.processUIEvent('setPageNewNoteLists', {
+                event: {
+                    day: event.day,
+                    pageResultId: event.pageId,
+                    lists: listsToAdd,
+                },
+                previousState,
+            })
+        }
 
-    updateSpacesSearchSuggestions: EventHandler<
-        'updateSpacesSearchSuggestions'
-    > = async ({ event, previousState }) => {
-        const lists = this.options.annotationsCache.lists.allIds
-            .filter(
-                (listId) =>
-                    this.options.annotationsCache.lists.byId[listId].name
-                        .toLowerCase()
-                        .includes(event.searchQuery.toLowerCase()) &&
-                    this.options.annotationsCache.lists.byId[listId].type !==
-                        'page-link',
-            )
-            .map((listId) => ({
-                id: this.options.annotationsCache.lists.byId[listId].localId,
-                name: this.options.annotationsCache.lists.byId[listId].name,
-            }))
+    updateSpacesSearchSuggestions: EventHandler<'updateSpacesSearchSuggestions'> =
+        async ({ event, previousState }) => {
+            const lists = this.options.annotationsCache.lists.allIds
+                .filter(
+                    (listId) =>
+                        this.options.annotationsCache.lists.byId[listId].name
+                            .toLowerCase()
+                            .includes(event.searchQuery.toLowerCase()) &&
+                        this.options.annotationsCache.lists.byId[listId]
+                            .type !== 'page-link',
+                )
+                .map((listId) => ({
+                    id: this.options.annotationsCache.lists.byId[listId]
+                        .localId,
+                    name: this.options.annotationsCache.lists.byId[listId].name,
+                }))
 
-        this.emitMutation({
-            spaceSearchSuggestions: { $set: lists },
-        })
-    }
+            this.emitMutation({
+                spaceSearchSuggestions: { $set: lists },
+            })
+        }
 
     savePageNewNote: EventHandler<'savePageNewNote'> = async ({
         event,
@@ -2845,7 +2825,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         isShared:
                                             shouldSetAsAutoAdded ||
                                             event.shouldShare,
-                                        isBulkShareProtected: !!event.isProtected,
+                                        isBulkShareProtected:
+                                            !!event.isProtected,
                                         ...utils.getInitialNoteResultState(
                                             formState.inputValue,
                                         ),
@@ -2904,23 +2885,23 @@ export class DashboardLogic extends UILogic<State, Events> {
     setAllNotesShown: EventHandler<'setAllNotesShown'> = ({
         previousState,
     }) => {
-        const applyChangeTooAll = (newState: boolean) => (
-            results: State['searchResults']['results'],
-        ) => {
-            for (const { day, pages } of Object.values(
-                previousState.searchResults.results,
-            )) {
-                const pageIdsWithNotes = pages.allIds.filter((pageId) => {
-                    const page = results[day].pages.byId[pageId]
-                    return page.noteIds[page.notesType].length > 0
-                })
+        const applyChangeTooAll =
+            (newState: boolean) =>
+            (results: State['searchResults']['results']) => {
+                for (const { day, pages } of Object.values(
+                    previousState.searchResults.results,
+                )) {
+                    const pageIdsWithNotes = pages.allIds.filter((pageId) => {
+                        const page = results[day].pages.byId[pageId]
+                        return page.noteIds[page.notesType].length > 0
+                    })
 
-                for (const pageId of pageIdsWithNotes) {
-                    results[day].pages.byId[pageId].areNotesShown = newState
+                    for (const pageId of pageIdsWithNotes) {
+                        results[day].pages.byId[pageId].areNotesShown = newState
+                    }
                 }
+                return results
             }
-            return results
-        }
 
         if (previousState.showAllNotes) {
             this.emitMutation({
@@ -3006,29 +2987,30 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    onMatchingTextToggleClick: EventHandler<
-        'onMatchingTextToggleClick'
-    > = async ({ event, previousState }) => {
-        const previousValue =
-            previousState.searchResults.results[-1].pages.byId[
-                event.pageResultId
-            ]?.showAllResults
-        this.emitMutation({
-            searchResults: {
-                results: {
-                    [-1]: {
-                        pages: {
-                            byId: {
-                                [event.pageResultId]: {
-                                    showAllResults: { $set: !previousValue },
+    onMatchingTextToggleClick: EventHandler<'onMatchingTextToggleClick'> =
+        async ({ event, previousState }) => {
+            const previousValue =
+                previousState.searchResults.results[-1].pages.byId[
+                    event.pageResultId
+                ]?.showAllResults
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [-1]: {
+                            pages: {
+                                byId: {
+                                    [event.pageResultId]: {
+                                        showAllResults: {
+                                            $set: !previousValue,
+                                        },
+                                    },
                                 },
                             },
                         },
                     },
                 },
-            },
-        })
-    }
+            })
+        }
     toggleNoteSidebarOff: EventHandler<'toggleNoteSidebarOn'> = async ({
         event,
         previousState,
@@ -3171,60 +3153,59 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setCopyPasterDefaultNoteExecute: EventHandler<
-        'setCopyPasterDefaultNoteExecute'
-    > = async ({ event, previousState }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            copyLoadingState: { $set: 'running' },
-                        },
-                    },
-                },
-            },
-        })
-
-        let templateCopyResult
-        if (
-            !previousState.searchResults.noteData.byId[event.noteId]
-                .isCopyPasterShown
-        ) {
-            templateCopyResult = await this.handleDefaultTemplateCopy(
-                [event.noteId],
-                null,
-            )
-        }
-
-        if (templateCopyResult) {
+    setCopyPasterDefaultNoteExecute: EventHandler<'setCopyPasterDefaultNoteExecute'> =
+        async ({ event, previousState }) => {
             this.emitMutation({
                 searchResults: {
                     noteData: {
                         byId: {
                             [event.noteId]: {
-                                copyLoadingState: { $set: 'success' },
+                                copyLoadingState: { $set: 'running' },
                             },
                         },
                     },
                 },
             })
 
-            setTimeout(() => {
+            let templateCopyResult
+            if (
+                !previousState.searchResults.noteData.byId[event.noteId]
+                    .isCopyPasterShown
+            ) {
+                templateCopyResult = await this.handleDefaultTemplateCopy(
+                    [event.noteId],
+                    null,
+                )
+            }
+
+            if (templateCopyResult) {
                 this.emitMutation({
                     searchResults: {
                         noteData: {
                             byId: {
                                 [event.noteId]: {
-                                    copyLoadingState: { $set: 'pristine' },
+                                    copyLoadingState: { $set: 'success' },
                                 },
                             },
                         },
                     },
                 })
-            }, 3000)
+
+                setTimeout(() => {
+                    this.emitMutation({
+                        searchResults: {
+                            noteData: {
+                                byId: {
+                                    [event.noteId]: {
+                                        copyLoadingState: { $set: 'pristine' },
+                                    },
+                                },
+                            },
+                        },
+                    })
+                }, 3000)
+            }
         }
-    }
 
     setNoteRepliesShown: EventHandler<'setNoteRepliesShown'> = ({ event }) => {
         this.emitMutation({
@@ -3423,14 +3404,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         ])
     }
 
-    dismissSubscriptionBanner: EventHandler<
-        'dismissSubscriptionBanner'
-    > = async () => {
-        await this.syncSettings.dashboard.set('subscribeBannerShownAfter', null)
-        this.emitMutation({
-            searchResults: { isSubscriptionBannerShown: { $set: false } },
-        })
-    }
+    dismissSubscriptionBanner: EventHandler<'dismissSubscriptionBanner'> =
+        async () => {
+            await this.syncSettings.dashboard.set(
+                'subscribeBannerShownAfter',
+                null,
+            )
+            this.emitMutation({
+                searchResults: { isSubscriptionBannerShown: { $set: false } },
+            })
+        }
 
     dismissMobileAd: EventHandler<'dismissMobileAd'> = async () => {
         await this.options.localStorage.set({
@@ -3543,11 +3526,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const {
-            comment,
-            tags,
-            lists,
-        } = previousState.searchResults.noteData.byId[event.noteId]
+        const { comment, tags, lists } =
+            previousState.searchResults.noteData.byId[event.noteId]
 
         this.emitMutation({
             searchResults: {
@@ -3574,10 +3554,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const {
-            editNoteForm,
-            ...existing
-        } = previousState.searchResults.noteData.byId[event.noteId]
+        const { editNoteForm, ...existing } =
+            previousState.searchResults.noteData.byId[event.noteId]
         const tagsHaveChanged = haveArraysChanged(
             existing.tags,
             editNoteForm.tags,
@@ -3839,8 +3817,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         localListIds.add(event.spaceId)
 
         if (previousState.listsSidebar.selectedListId != null) {
-            const selectedLocalListId = this.options.annotationsCache.lists
-                .byId[previousState.listsSidebar.selectedListId]?.localId
+            const selectedLocalListId =
+                this.options.annotationsCache.lists.byId[
+                    previousState.listsSidebar.selectedListId
+                ]?.localId
             if (
                 selectedLocalListId != null &&
                 selectedLocalListId !== event.spaceId
@@ -4322,13 +4302,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                         searchQuery: { $set: '' },
                     },
                 })
-                const {
-                    collabKey,
-                    remoteListId,
-                } = await this.options.listsBG.createCustomList({
-                    name: newListName,
-                    id: localListId,
-                })
+                const { collabKey, remoteListId } =
+                    await this.options.listsBG.createCustomList({
+                        name: newListName,
+                        id: localListId,
+                    })
                 this.options.annotationsCache.updateList({
                     unifiedId,
                     collabKey,
@@ -4349,15 +4327,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setFollowedListsExpanded: EventHandler<
-        'setFollowedListsExpanded'
-    > = async ({ event }) => {
-        this.emitMutation({
-            listsSidebar: {
-                areFollowedListsExpanded: { $set: event.isExpanded },
-            },
-        })
-    }
+    setFollowedListsExpanded: EventHandler<'setFollowedListsExpanded'> =
+        async ({ event }) => {
+            this.emitMutation({
+                listsSidebar: {
+                    areFollowedListsExpanded: { $set: event.isExpanded },
+                },
+            })
+        }
 
     setJoinedListsExpanded: EventHandler<'setJoinedListsExpanded'> = async ({
         event,
@@ -4631,9 +4608,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             event.synthEvent.preventDefault()
 
             const pdfUrl = pageData.fullUrl
-            const PDFurlwithID = await this.options.searchBG.resolvePdfPageFullUrls(
-                pdfUrl,
-            )
+            const PDFurlwithID =
+                await this.options.searchBG.resolvePdfPageFullUrls(pdfUrl)
 
             const memexCloudUrl = new URL(PDFurlwithID.originalLocation)
             const uploadId = memexCloudUrl?.searchParams.get('upload_id')
@@ -4664,9 +4640,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     }),
                     async () => {
-                        const tempPdfAccessUrl = await this.options.pdfViewerBG.getTempPdfAccessUrl(
-                            uploadId,
-                        )
+                        const tempPdfAccessUrl =
+                            await this.options.pdfViewerBG.getTempPdfAccessUrl(
+                                uploadId,
+                            )
                         await openPDFInViewer(tempPdfAccessUrl, {
                             tabsAPI: this.options.tabsAPI,
                             runtimeAPI: this.options.runtimeAPI,
@@ -4883,36 +4860,35 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ themeVariant: { $set: nextTheme } })
     }
 
-    updateSelectedListDescription: EventHandler<
-        'updateSelectedListDescription'
-    > = async ({ event, previousState }) => {
-        const { selectedListId } = previousState.listsSidebar
-        if (!selectedListId) {
-            throw new Error('No selected list ID set to update description')
+    updateSelectedListDescription: EventHandler<'updateSelectedListDescription'> =
+        async ({ event, previousState }) => {
+            const { selectedListId } = previousState.listsSidebar
+            if (!selectedListId) {
+                throw new Error('No selected list ID set to update description')
+            }
+            const listData = getListData(selectedListId, previousState, {
+                mustBeLocal: true,
+                source: 'updateSelectedListDescription',
+            })
+
+            const processedDescription = processCommentForImageUpload(
+                event.description,
+                null,
+                null,
+                this.options.imageSupportBG,
+                false,
+            ).toString()
+
+            this.options.annotationsCache.updateList({
+                unifiedId: selectedListId,
+                description: processedDescription,
+            })
+
+            await this.options.listsBG.updateListDescription({
+                description: processedDescription,
+                listId: listData.localId!,
+            })
         }
-        const listData = getListData(selectedListId, previousState, {
-            mustBeLocal: true,
-            source: 'updateSelectedListDescription',
-        })
-
-        const processedDescription = processCommentForImageUpload(
-            event.description,
-            null,
-            null,
-            this.options.imageSupportBG,
-            false,
-        ).toString()
-
-        this.options.annotationsCache.updateList({
-            unifiedId: selectedListId,
-            description: processedDescription,
-        })
-
-        await this.options.listsBG.updateListDescription({
-            description: processedDescription,
-            listId: listData.localId!,
-        })
-    }
 
     setDeletingListId: EventHandler<'setDeletingListId'> = async ({
         event,
@@ -4996,13 +4972,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - lists sidebar event handlers */
 
     /* START - sync status menu event handlers */
-    setSyncStatusMenuDisplayState: EventHandler<
-        'setSyncStatusMenuDisplayState'
-    > = async ({ event }) => {
-        this.emitMutation({
-            syncMenu: { isDisplayed: { $set: !event.isShown } },
-        })
-    }
+    setSyncStatusMenuDisplayState: EventHandler<'setSyncStatusMenuDisplayState'> =
+        async ({ event }) => {
+            this.emitMutation({
+                syncMenu: { isDisplayed: { $set: !event.isShown } },
+            })
+        }
 
     setPendingChangeCounts: EventHandler<'setPendingChangeCounts'> = async ({
         event,

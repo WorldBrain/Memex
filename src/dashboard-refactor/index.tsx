@@ -1,7 +1,7 @@
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
-import browser from 'webextension-polyfill'
-import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
+
+import ListShareModal from '@worldbrain/memex-common/ts/content-sharing/ui/list-share-modal'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -49,34 +49,34 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SearchCopyPaster from './search-results/components/search-copy-paster'
 import ExpandAllNotes from './search-results/components/expand-all-notes'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import { PageAnnotationsCache } from 'src/annotations/cache'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
-import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/services/youtube/library'
-import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { YoutubeService } from '@worldbrain/memex-common/ts/services/youtube'
+import { createYoutubeServiceOptions } from '@worldbrain/memex-common/ts/services/youtube/library'
+import { normalizedStateToArray } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import * as cacheUtils from 'src/annotations/cache/utils'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import BulkEditWidget from 'src/bulk-edit'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import type { RGBAColor, UnifiedAnnotation } from 'src/annotations/cache/types'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
 import SyncStatusMenu from './header/sync-status-menu'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import SearchBar from './header/search-bar'
 import { SETTINGS_URL } from 'src/constants'
 import {
     ColorThemeKeys,
     IconKeys,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+} from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
-import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { OverlayModals } from '@worldbrain/memex-common/ts/common-ui/components/overlay-modals'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
-import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import ImagePreviewModal from '@worldbrain/memex-common/lib/common-ui/image-preview-modal'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/ts/utils/item-ordering'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
+import ImagePreviewModal from '@worldbrain/memex-common/ts/common-ui/image-preview-modal'
 import type { ListTrees } from 'src/custom-lists/ui/list-trees'
 
 export type Props = DashboardDependencies & {
@@ -144,10 +144,10 @@ export class DashboardContainer extends StatefulUIElement<
         document: window.document,
         location: window.location,
         history: window.history,
-        tabsAPI: browser.tabs,
-        runtimeAPI: browser.runtime,
-        browserAPIs: browser,
-        localStorage: browser.storage.local,
+        tabsAPI: chrome.tabs,
+        runtimeAPI: chrome.runtime,
+        browserAPIs: chrome,
+        localStorage: chrome.storage.local,
         pageActivityIndicatorBG: runInBackground(),
         summarizeBG: runInBackground(),
         analyticsBG: runInBackground(),
@@ -492,7 +492,8 @@ export class DashboardContainer extends StatefulUIElement<
                                         this.processEvent(
                                             'setSearchCopyPasterShown',
                                             {
-                                                isShown: !searchResults.isSearchCopyPasterShown,
+                                                isShown:
+                                                    !searchResults.isSearchCopyPasterShown,
                                             },
                                         )
                                     }
@@ -633,7 +634,7 @@ export class DashboardContainer extends StatefulUIElement<
                             syncStatusIconState,
                             isLoggedIn: this.state.currentUser != null,
                             outsideClickIgnoreClass:
-                                HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
+                                'SYNC_MENU_TOGGLE_BTN_CLASS',
                             onLoginClick: () => {
                                 this.processEvent(
                                     'setSyncStatusMenuDisplayState',
@@ -649,7 +650,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 this.processEvent('syncNow', {
                                     preventUpdateStats: preventUpdateStats,
                                 }),
-                            browserAPIs: browser,
+                            browserAPIs: typeof chrome,
                         }}
                         syncStatusIconState={syncStatusIconState}
                     />
@@ -728,7 +729,8 @@ export class DashboardContainer extends StatefulUIElement<
                 setSidebarPeekState={(isPeeking) => () =>
                     this.processEvent('setSidebarPeeking', {
                         isPeeking,
-                    })}
+                    })
+                }
                 searchBarProps={{
                     searchQuery: listsSidebar.searchQuery,
                     isSidebarLocked: listsSidebar.isSidebarLocked,
@@ -748,8 +750,8 @@ export class DashboardContainer extends StatefulUIElement<
                     loadingState: listsSidebar.listLoadState,
                     title: 'My Spaces',
                     listData: ownListsData,
-                    spaceSidebarWidth: this.state.listsSidebar
-                        .spaceSidebarWidth,
+                    spaceSidebarWidth:
+                        this.state.listsSidebar.spaceSidebarWidth,
                     onAddBtnClick: (event) => {
                         event.preventDefault()
                         event.stopPropagation()
@@ -767,8 +769,8 @@ export class DashboardContainer extends StatefulUIElement<
                     isExpanded: listsSidebar.areFollowedListsExpanded,
                     loadingState: listsSidebar.listLoadState,
                     title: 'Followed Spaces',
-                    spaceSidebarWidth: this.state.listsSidebar
-                        .spaceSidebarWidth,
+                    spaceSidebarWidth:
+                        this.state.listsSidebar.spaceSidebarWidth,
                     listData: followedListsData,
                     onExpandBtnClick: () =>
                         this.processEvent('setFollowedListsExpanded', {
@@ -780,8 +782,8 @@ export class DashboardContainer extends StatefulUIElement<
                     isExpanded: listsSidebar.areJoinedListsExpanded,
                     loadingState: listsSidebar.listLoadState,
                     title: 'Joined Spaces',
-                    spaceSidebarWidth: this.state.listsSidebar
-                        .spaceSidebarWidth,
+                    spaceSidebarWidth:
+                        this.state.listsSidebar.spaceSidebarWidth,
                     onExpandBtnClick: () => {
                         this.processEvent('setJoinedListsExpanded', {
                             isExpanded: !listsSidebar.areJoinedListsExpanded,
@@ -815,7 +817,7 @@ export class DashboardContainer extends StatefulUIElement<
                         e.preventDefault()
                         e.stopPropagation()
                         // Needed to push this op back on the event queue, so it fires after the previous
-                        //  list item's `onDropLeave` event
+                        //  list item's `onDropLeave` event
                         setTimeout(
                             () =>
                                 this.processEvent('setDragOverListId', {
@@ -884,8 +886,9 @@ export class DashboardContainer extends StatefulUIElement<
         added: number
         deleted: number
     }): { added: string; deleted: string } => {
-        const added = this.props.annotationsCache.getListByLocalId(args.added)
-            ?.unifiedId
+        const added = this.props.annotationsCache.getListByLocalId(
+            args.added,
+        )?.unifiedId
         const deleted = this.props.annotationsCache.getListByLocalId(
             args.deleted,
         )?.unifiedId
@@ -907,9 +910,10 @@ export class DashboardContainer extends StatefulUIElement<
                     )
                 }}
                 filterByList={(localListId) => {
-                    const listData = this.props.annotationsCache.getListByLocalId(
-                        localListId,
-                    )
+                    const listData =
+                        this.props.annotationsCache.getListByLocalId(
+                            localListId,
+                        )
                     if (!listData) {
                         throw new Error(
                             'Specified list to filter search by could not be found',
@@ -1035,13 +1039,15 @@ export class DashboardContainer extends StatefulUIElement<
                         day,
                         pageResultId: pageId,
                         sortingFn,
-                    })}
+                    })
+                }
                 onPageNotesTypeSelection={(day, pageId) => (noteType) =>
                     this.processEvent('setPageNotesType', {
                         day,
                         pageResultId: pageId,
                         noteType,
-                    })}
+                    })
+                }
                 onShowAllNotesClick={() =>
                     this.processEvent('setAllNotesShown', null)
                 }
@@ -1105,14 +1111,12 @@ export class DashboardContainer extends StatefulUIElement<
                             synthEvent: event,
                         })
                     },
-                    onMatchingTextToggleClick: (
-                        day,
-                        pageResultId,
-                    ) => async () =>
-                        this.processEvent('onMatchingTextToggleClick', {
-                            day,
-                            pageResultId: pageResultId,
-                        }),
+                    onMatchingTextToggleClick:
+                        (day, pageResultId) => async () =>
+                            this.processEvent('onMatchingTextToggleClick', {
+                                day,
+                                pageResultId: pageResultId,
+                            }),
                     onNotesBtnClick: (day, pageResultId) => (e) => {
                         // TODO: Multiple processEvent calls should never happen from a single user action. Needs to be unified
                         //  These are also running concurrently, potentially introducing race conditions
@@ -1131,8 +1135,10 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('setPageNotesShown', {
                                 day,
                                 pageResultId: pageResultId,
-                                areShown: !searchResults.results[day].pages
-                                    .byId[pageResultId].areNotesShown,
+                                areShown:
+                                    !searchResults.results[day].pages.byId[
+                                        pageResultId
+                                    ].areNotesShown,
                             })
                             return
                         }
@@ -1175,18 +1181,18 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setPageCopyPasterShown', {
                             day,
                             pageResultId: pageId,
-                            isShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].isCopyPasterShown,
+                            isShown:
+                                !searchResults.results[day].pages.byId[pageId]
+                                    .isCopyPasterShown,
                             event: event,
                         }),
                     onCopyPasterDefaultExecute: (day, pageId) => (event) =>
                         this.processEvent('setCopyPasterDefaultExecute', {
                             day,
                             pageResultId: pageId,
-                            isShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].isCopyPasterShown,
+                            isShown:
+                                !searchResults.results[day].pages.byId[pageId]
+                                    .isCopyPasterShown,
                             event: event,
                         }),
                     onTrashBtnClick: (day, pageId) => (instaDelete) =>
@@ -1199,9 +1205,9 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setPageShareMenuShown', {
                             day,
                             pageResultId: pageId,
-                            isShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].isShareMenuShown,
+                            isShown:
+                                !searchResults.results[day].pages.byId[pageId]
+                                    .isShareMenuShown,
                         }),
                     onMainContentHover: (day, pageId) => () => {
                         this.processEvent('onMainContentHover', {
@@ -1267,28 +1273,24 @@ export class DashboardContainer extends StatefulUIElement<
                             pageResultId: pageId,
                             shareStates,
                         }),
-                    onEditTitleSave: (day, pageId) => (
-                        normalizedPageUrl,
-                        changedTitle,
-                    ) => {
-                        this.processEvent('updatePageTitle', {
-                            normalizedPageUrl,
-                            changedTitle,
-                            day,
-                            pageId,
-                        })
-                    },
-                    onEditTitleChange: (day, pageId) => (
-                        normalizedPageUrl,
-                        changedTitle,
-                    ) => {
-                        this.processEvent('updatePageTitleState', {
-                            normalizedPageUrl,
-                            changedTitle,
-                            day,
-                            pageId,
-                        })
-                    },
+                    onEditTitleSave:
+                        (day, pageId) => (normalizedPageUrl, changedTitle) => {
+                            this.processEvent('updatePageTitle', {
+                                normalizedPageUrl,
+                                changedTitle,
+                                day,
+                                pageId,
+                            })
+                        },
+                    onEditTitleChange:
+                        (day, pageId) => (normalizedPageUrl, changedTitle) => {
+                            this.processEvent('updatePageTitleState', {
+                                normalizedPageUrl,
+                                changedTitle,
+                                day,
+                                pageId,
+                            })
+                        },
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageResultId) => (args) =>
@@ -1312,9 +1314,8 @@ export class DashboardContainer extends StatefulUIElement<
                             value,
                         }),
                     addPageToList: (day, pageId) => (listId) => {
-                        const listData = this.props.annotationsCache.getListByLocalId(
-                            listId,
-                        )
+                        const listData =
+                            this.props.annotationsCache.getListByLocalId(listId)
                         if (!listData) {
                             throw new Error(
                                 'Specified list to add to page could not be found',
@@ -1331,9 +1332,8 @@ export class DashboardContainer extends StatefulUIElement<
                         })
                     },
                     removePageFromList: (day, pageId) => (listId) => {
-                        const listData = this.props.annotationsCache.getListByLocalId(
-                            listId,
-                        )
+                        const listData =
+                            this.props.annotationsCache.getListByLocalId(listId)
                         if (!listData) {
                             throw new Error(
                                 'Specified list to remove from page could not be found',
@@ -1349,74 +1349,78 @@ export class DashboardContainer extends StatefulUIElement<
                             ),
                         })
                     },
-                    onSave: (day, pageResultId) => async (
-                        shouldShare,
-                        isProtected,
-                    ) => {
-                        const pageResult =
-                            searchResults.results[-1].pages.byId[pageResultId]
-                        await this.processEvent('savePageNewNote', {
-                            day,
-                            pageResultId: pageResultId,
-                            isProtected,
-                            shouldShare,
-                            fullPageUrl:
-                                searchResults.pageData.byId[pageResult.pageId]
-                                    .fullUrl,
-                        })
-                    },
-                    addNewSpaceViaWikiLinksNewNote: (day, pageId) => (
-                        spaceName: string,
-                    ) => {
-                        this.processEvent('addNewSpaceViaWikiLinksNewNote', {
-                            spaceName: spaceName,
-                            day: day,
-                            pageId: pageId,
-                        })
-                    },
+                    onSave:
+                        (day, pageResultId) =>
+                        async (shouldShare, isProtected) => {
+                            const pageResult =
+                                searchResults.results[-1].pages.byId[
+                                    pageResultId
+                                ]
+                            await this.processEvent('savePageNewNote', {
+                                day,
+                                pageResultId: pageResultId,
+                                isProtected,
+                                shouldShare,
+                                fullPageUrl:
+                                    searchResults.pageData.byId[
+                                        pageResult.pageId
+                                    ].fullUrl,
+                            })
+                        },
+                    addNewSpaceViaWikiLinksNewNote:
+                        (day, pageId) => (spaceName: string) => {
+                            this.processEvent(
+                                'addNewSpaceViaWikiLinksNewNote',
+                                {
+                                    spaceName: spaceName,
+                                    day: day,
+                                    pageId: pageId,
+                                },
+                            )
+                        },
 
-                    selectSpaceForEditorPicker: (day, pageId) => (
-                        spaceId: number,
-                    ) => {
-                        const listData = this.props.annotationsCache.getListByLocalId(
-                            spaceId,
-                        )
-                        if (!listData) {
-                            throw new Error(
-                                'Specified list to add to page could not be found',
-                            )
-                        }
-                        this.processEvent('setPageNewNoteLists', {
-                            day,
-                            pageResultId: pageId,
-                            lists: [
-                                ...this.state.searchResults.results[day].pages
-                                    .byId[pageId].newNoteForm.lists,
-                                listData.unifiedId,
-                            ],
-                        })
-                    },
-                    removeSpaceFromEditorPicker: (day, pageId) => (
-                        spaceId: number,
-                    ) => {
-                        const listData = this.props.annotationsCache.getListByLocalId(
-                            spaceId,
-                        )
-                        if (!listData) {
-                            throw new Error(
-                                'Specified list to add to page could not be found',
-                            )
-                        }
-                        this.processEvent('setPageNewNoteLists', {
-                            day,
-                            pageResultId: pageId,
-                            lists: this.state.searchResults.results[
-                                day
-                            ].pages.byId[pageId].newNoteForm.lists.filter(
-                                (id) => id !== listData.unifiedId,
-                            ),
-                        })
-                    },
+                    selectSpaceForEditorPicker:
+                        (day, pageId) => (spaceId: number) => {
+                            const listData =
+                                this.props.annotationsCache.getListByLocalId(
+                                    spaceId,
+                                )
+                            if (!listData) {
+                                throw new Error(
+                                    'Specified list to add to page could not be found',
+                                )
+                            }
+                            this.processEvent('setPageNewNoteLists', {
+                                day,
+                                pageResultId: pageId,
+                                lists: [
+                                    ...this.state.searchResults.results[day]
+                                        .pages.byId[pageId].newNoteForm.lists,
+                                    listData.unifiedId,
+                                ],
+                            })
+                        },
+                    removeSpaceFromEditorPicker:
+                        (day, pageId) => (spaceId: number) => {
+                            const listData =
+                                this.props.annotationsCache.getListByLocalId(
+                                    spaceId,
+                                )
+                            if (!listData) {
+                                throw new Error(
+                                    'Specified list to add to page could not be found',
+                                )
+                            }
+                            this.processEvent('setPageNewNoteLists', {
+                                day,
+                                pageResultId: pageId,
+                                lists: this.state.searchResults.results[
+                                    day
+                                ].pages.byId[pageId].newNoteForm.lists.filter(
+                                    (id) => id !== listData.unifiedId,
+                                ),
+                            })
+                        },
                 }}
                 noteInteractionProps={{
                     onEditBtnClick: (noteId) => () =>
@@ -1434,18 +1438,17 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelNoteEdit', {
                             noteId,
                         }),
-                    onEditConfirm: (noteId) => (showExternalConfirmations) => (
-                        shouldShare,
-                        isProtected,
-                        opts,
-                    ) => {
-                        return this.processEvent('saveNoteEdit', {
-                            noteId,
-                            shouldShare,
-                            isProtected,
-                            ...opts,
-                        })
-                    },
+                    onEditConfirm:
+                        (noteId) =>
+                        (showExternalConfirmations) =>
+                        (shouldShare, isProtected, opts) => {
+                            return this.processEvent('saveNoteEdit', {
+                                noteId,
+                                shouldShare,
+                                isProtected,
+                                ...opts,
+                            })
+                        },
                     openImageInPreview: () => (imageSource: string) =>
                         this.processEvent('openImageInPreview', imageSource),
                     onGoToHighlightClick: (noteId) => () =>
@@ -1463,8 +1466,9 @@ export class DashboardContainer extends StatefulUIElement<
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {
                             noteId,
-                            isShown: !searchResults.noteData.byId[noteId]
-                                .isCopyPasterShown,
+                            isShown:
+                                !searchResults.noteData.byId[noteId]
+                                    .isCopyPasterShown,
                         }),
 
                     onCopyPasterDefaultExecute: (noteId) => () => {
@@ -1475,15 +1479,15 @@ export class DashboardContainer extends StatefulUIElement<
                     onReplyBtnClick: (noteId) => () =>
                         this.processEvent('setNoteRepliesShown', {
                             noteId,
-                            areShown: !searchResults.noteData.byId[noteId]
-                                .areRepliesShown,
+                            areShown:
+                                !searchResults.noteData.byId[noteId]
+                                    .areRepliesShown,
                         }),
                     updateTags: (noteId) => (args) =>
                         this.processEvent('setNoteTags', { ...args, noteId }),
                     updateLists: (noteId) => (args) => {
-                        const {
-                            isShared: isAnnotShared,
-                        } = this.state.searchResults.noteData.byId[noteId]
+                        const { isShared: isAnnotShared } =
+                            this.state.searchResults.noteData.byId[noteId]
                         const isListShared =
                             this.state.listsSidebar.lists.byId[
                                 args.added ?? args.deleted
@@ -1504,14 +1508,13 @@ export class DashboardContainer extends StatefulUIElement<
                             },
                         )
                     },
-                    onTrashBtnClick: (noteId, day, pageResultId) => (
-                        instaDelete,
-                    ) =>
-                        this.processEvent('setDeletingNoteArgs', {
-                            noteId,
-                            pageResultId,
-                            day,
-                        }),
+                    onTrashBtnClick:
+                        (noteId, day, pageResultId) => (instaDelete) =>
+                            this.processEvent('setDeletingNoteArgs', {
+                                noteId,
+                                pageResultId,
+                                day,
+                            }),
                     onCommentChange: (noteId) => (event) => {
                         this.processEvent('setNoteEditCommentValue', {
                             noteId,
@@ -1539,23 +1542,21 @@ export class DashboardContainer extends StatefulUIElement<
                             privacyLevel: state.privacyLevel,
                             keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         }),
-                    addNewSpaceViaWikiLinksEditNote: (noteId) => async (
-                        spaceName: string,
-                    ) => {
-                        const {
-                            localListId,
-                        } = await this.props.listsBG.createCustomList({
-                            name: spaceName,
-                        })
+                    addNewSpaceViaWikiLinksEditNote:
+                        (noteId) => async (spaceName: string) => {
+                            const { localListId } =
+                                await this.props.listsBG.createCustomList({
+                                    name: spaceName,
+                                })
 
-                        return this.processEvent('setNoteLists', {
-                            ...this.localListPickerArgIdsToCached({
-                                added: localListId,
-                                deleted: null,
-                            }),
-                            noteId,
-                        })
-                    },
+                            return this.processEvent('setNoteLists', {
+                                ...this.localListPickerArgIdsToCached({
+                                    added: localListId,
+                                    deleted: null,
+                                }),
+                                noteId,
+                            })
+                        },
                 }}
             />
         )
@@ -1580,7 +1581,8 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('saveNoteEdit', {
                                 ...modalsState.confirmPrivatizeNoteArgs,
                                 keepListsIfUnsharing: !affirmative,
-                            })}
+                            })
+                        }
                     />
                 </ConfirmModal>
             )
@@ -1603,7 +1605,8 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('setNoteLists', {
                                 ...modalsState.confirmSelectNoteSpaceArgs,
                                 protectAnnotation: affirmative,
-                            })}
+                            })
+                        }
                     />
                 </ConfirmModal>
             )
@@ -1726,11 +1729,12 @@ export class DashboardContainer extends StatefulUIElement<
                         ? { listId: listData.remoteId }
                         : {
                               scheduleListShare: async () => {
-                                  const shareResult = await this.props.contentShareBG.scheduleListShare(
-                                      {
-                                          localListId: listData.localId,
-                                      },
-                                  )
+                                  const shareResult =
+                                      await this.props.contentShareBG.scheduleListShare(
+                                          {
+                                              localListId: listData.localId,
+                                          },
+                                      )
                                   //   await this.processEvent('setListRemoteId', {
                                   //       listId: listData.unifiedId,
                                   //       remoteListId: shareResult.remoteListId,
@@ -1805,14 +1809,14 @@ export class DashboardContainer extends StatefulUIElement<
             height: this.props.inPageMode
                 ? '100%'
                 : listsSidebar.isSidebarPeeking
-                ? '90vh'
-                : '100vh',
+                  ? '90vh'
+                  : '100vh',
             position:
                 this.props.inPageMode && listsSidebar.isSidebarPeeking
                     ? 'absolute'
                     : listsSidebar.isSidebarPeeking
-                    ? 'fixed'
-                    : 'sticky',
+                      ? 'fixed'
+                      : 'sticky',
         }
 
         return (
@@ -1891,8 +1895,8 @@ export class DashboardContainer extends StatefulUIElement<
                                 height: this.props.inPageMode
                                     ? 'fill-available'
                                     : listsSidebar.isSidebarPeeking
-                                    ? '90vh'
-                                    : '100vh',
+                                      ? '90vh'
+                                      : '100vh',
                             }}
                             peeking={
                                 listsSidebar.isSidebarPeeking
@@ -1967,15 +1971,6 @@ export class DashboardContainer extends StatefulUIElement<
                             {this.state.listsSidebar.selectedListId ===
                             SPECIAL_LIST_STRING_IDS.FEED ? (
                                 <FeedContainer>
-                                    {/* <TitleContainer>
-                                        <SectionTitle>
-                                            Activity Feed
-                                        </SectionTitle>
-                                        <SectionDescription>
-                                            Updates from Spaces you follow or
-                                            conversation you participate in
-                                        </SectionDescription>
-                                    </TitleContainer> */}
                                     <FeedFrame src={this.whichFeed()} />
                                 </FeedContainer>
                             ) : (
@@ -2104,8 +2099,6 @@ export class DashboardContainer extends StatefulUIElement<
                             await this.props.authBG.getJWTTokenForFeatureBase()
                         }
                     />
-                    {/* {this.state.listsSidebar.draggedListId != null ||
-                        (this.state.searchResults.draggedPageId != null && ( */}
                     <DragElement
                         isHoveringOverListItem={
                             listsSidebar.dragOverListId != null
@@ -2216,7 +2209,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                     />
                 </MainContainer>
-                {!this.state.activePageID && (
+                {/* {!this.state.activePageID && (
                     <MemexLogoContainer location={'bottomLeft'}>
                         <Icon
                             icon={'memexIconOnly'}
@@ -2226,7 +2219,7 @@ export class DashboardContainer extends StatefulUIElement<
                             hoverOff
                         />
                     </MemexLogoContainer>
-                )}
+                )} */}
             </Container>
         )
     }
@@ -2294,7 +2287,13 @@ const Container = styled.div<{
 
     & * {
         font-family: 'Satoshi', sans-serif;
-font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
+        font-feature-settings:
+            'pnum' on,
+            'lnum' on,
+            'case' on,
+            'ss03' on,
+            'ss04' on,
+            'liga' off;
     }
 
     ${(props) =>
@@ -2318,7 +2317,7 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
             max-height: 1000px:
             max-width: 1280px;
         `}
-    `
+`
 
 const resizeAnimation = keyframes`
     0% {
@@ -2426,7 +2425,6 @@ const ListSidebarContent = styled(Rnd)<{
     z-index: 3000;
     left: 0px;
 
-
     ${(props) =>
         props.locked &&
         css`
@@ -2477,23 +2475,22 @@ const ListSidebarContent = styled(Rnd)<{
 
 
         @keyframes slide-in {
-            0% {
-                left: -200px;
-                opacity: 0%;
-            }
-            100% {
-                left: 0px;
-                opacity: 100%;
-            }
+        0% {
+            left: -200px;
+            opacity: 0%;
         }
+        100% {
+            left: 0px;
+            opacity: 100%;
+        }
+    }
 
-        ${(props) =>
-            props.theme.variant === 'light' &&
-            css`
-                border-color: ${(props) => props.theme.colors.greyScale2};
-                /* box-shadow: ${() =>
-                    props.theme.borderStyles.boxShadowRight}; */
-            `};
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            border-color: ${(props) => props.theme.colors.greyScale2};
+            /* box-shadow: ${() => props.theme.borderStyles.boxShadowRight}; */
+        `};
 `
 
 const FeedContainer = styled.div`

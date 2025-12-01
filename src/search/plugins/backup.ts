@@ -1,4 +1,4 @@
-import { StorageBackendPlugin } from '@worldbrain/storex'
+import { StorageBackendPlugin } from '@worldbrain/storex/ts'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 export class BackupPlugin extends StorageBackendPlugin<DexieStorageBackend> {
@@ -35,7 +35,7 @@ export class BackupPlugin extends StorageBackendPlugin<DexieStorageBackend> {
                     .limit(chunkSize)
                     .primaryKeys()
 
-                const changes = pks.map(objectPk => ({
+                const changes = pks.map((objectPk) => ({
                     timestamp: pkIterator++,
                     operation: 'create',
                     collection,

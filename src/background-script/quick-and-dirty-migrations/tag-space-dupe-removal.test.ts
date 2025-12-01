@@ -1,4 +1,4 @@
-import type StorageManager from '@worldbrain/storex'
+import type StorageManager from '@worldbrain/storex/ts'
 import { removeDupeSpaces } from './tag-space-dupe-removal'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 

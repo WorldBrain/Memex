@@ -1,13 +1,13 @@
 import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import { theme } from './design-library/theme'
-import browser from 'webextension-polyfill'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-const MemexLogo = browser.runtime.getURL('img/memexLogo.svg')
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
+
+const MemexLogo = chrome.runtime.getURL('img/memexLogo.svg')
 export interface ThemeProps {
     variant: MemexThemeVariant
     width?: string

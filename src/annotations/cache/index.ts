@@ -17,21 +17,21 @@ import {
 import {
     initNormalizedState,
     normalizedStateToArray,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { areArrayContentsEqual } from '@worldbrain/memex-common/ts/utils/array-comparison'
 import {
     forEachTreeTraverse,
     mapTreeTraverse,
-} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+} from '@worldbrain/memex-common/ts/content-sharing/tree-utils'
 import {
     defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
-import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/ts/annotations/constants'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/constants'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -40,9 +40,11 @@ export interface PageAnnotationCacheDeps {
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
-    normalizedPageUrlsToPageLinkListIds: PageAnnotationsCacheInterface['normalizedPageUrlsToPageLinkListIds'] = new Map()
+    normalizedPageUrlsToPageLinkListIds: PageAnnotationsCacheInterface['normalizedPageUrlsToPageLinkListIds'] =
+        new Map()
     pageListIds: PageAnnotationsCacheInterface['pageListIds'] = new Map()
-    annotations: PageAnnotationsCacheInterface['annotations'] = initNormalizedState()
+    annotations: PageAnnotationsCacheInterface['annotations'] =
+        initNormalizedState()
     lists: PageAnnotationsCacheInterface['lists'] = initNormalizedState()
 
     private annotationIdCounter = 0
@@ -92,34 +94,31 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     private warn = (msg: string) =>
         this.deps.debug ? console.warn(msg) : undefined
 
-    setHighlightColorDictionary: PageAnnotationsCacheInterface['setHighlightColorDictionary'] = (
-        colors,
-    ) => {
-        this.highlightColorDict = colors
-    }
-
-    getAnnotationsArray: PageAnnotationsCacheInterface['getAnnotationsArray'] = () =>
-        normalizedStateToArray(this.annotations)
-
-    getAnnotationByLocalId: PageAnnotationsCacheInterface['getAnnotationByLocalId'] = (
-        localId,
-    ) => {
-        const unifiedAnnotId = this.localAnnotIdsToCacheIds.get(localId)
-        if (unifiedAnnotId == null) {
-            return null
+    setHighlightColorDictionary: PageAnnotationsCacheInterface['setHighlightColorDictionary'] =
+        (colors) => {
+            this.highlightColorDict = colors
         }
-        return this.annotations.byId[unifiedAnnotId] ?? null
-    }
 
-    getAnnotationByRemoteId: PageAnnotationsCacheInterface['getAnnotationByRemoteId'] = (
-        remoteId,
-    ) => {
-        const unifiedAnnotId = this.remoteAnnotIdsToCacheIds.get(remoteId)
-        if (unifiedAnnotId == null) {
-            return null
+    getAnnotationsArray: PageAnnotationsCacheInterface['getAnnotationsArray'] =
+        () => normalizedStateToArray(this.annotations)
+
+    getAnnotationByLocalId: PageAnnotationsCacheInterface['getAnnotationByLocalId'] =
+        (localId) => {
+            const unifiedAnnotId = this.localAnnotIdsToCacheIds.get(localId)
+            if (unifiedAnnotId == null) {
+                return null
+            }
+            return this.annotations.byId[unifiedAnnotId] ?? null
         }
-        return this.annotations.byId[unifiedAnnotId] ?? null
-    }
+
+    getAnnotationByRemoteId: PageAnnotationsCacheInterface['getAnnotationByRemoteId'] =
+        (remoteId) => {
+            const unifiedAnnotId = this.remoteAnnotIdsToCacheIds.get(remoteId)
+            if (unifiedAnnotId == null) {
+                return null
+            }
+            return this.annotations.byId[unifiedAnnotId] ?? null
+        }
 
     getListByLocalId: PageAnnotationsCacheInterface['getListByLocalId'] = (
         localId,
@@ -153,19 +152,18 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         ].sort(defaultOrderableSorter)
     }
 
-    getAllListsInTreeByRootId: PageAnnotationsCacheInterface['getAllListsInTreeByRootId'] = (
-        rootUnifiedId,
-    ) => {
-        return [
-            ...normalizedStateToArray(this.lists).filter(
-                (list) =>
-                    list.type === 'user-list' &&
-                    (list.pathUnifiedIds.length === 0
-                        ? list.unifiedId === rootUnifiedId
-                        : list.pathUnifiedIds[0] === rootUnifiedId),
-            ),
-        ].sort(defaultOrderableSorter)
-    }
+    getAllListsInTreeByRootId: PageAnnotationsCacheInterface['getAllListsInTreeByRootId'] =
+        (rootUnifiedId) => {
+            return [
+                ...normalizedStateToArray(this.lists).filter(
+                    (list) =>
+                        list.type === 'user-list' &&
+                        (list.pathUnifiedIds.length === 0
+                            ? list.unifiedId === rootUnifiedId
+                            : list.pathUnifiedIds[0] === rootUnifiedId),
+                ),
+            ].sort(defaultOrderableSorter)
+        }
 
     private prepareListForCaching = (
         list: UnifiedListForCache,
@@ -242,9 +240,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 [
                     ...(annotation.unifiedListIds ?? []),
                     ...localListIds.map((localListId) => {
-                        const unifiedListId = this.localListIdsToCacheIds.get(
-                            localListId,
-                        )
+                        const unifiedListId =
+                            this.localListIdsToCacheIds.get(localListId)
                         if (!unifiedListId) {
                             this.warn(
                                 'No cached list data found for given local list IDs on annotation - did you remember to cache lists before annotations?',
@@ -352,9 +349,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                     )
                 } else {
                     // List not ref'd from annot - ensure ref to that annot from list is removed
-                    listData.unifiedAnnotationIds = listData.unifiedAnnotationIds.filter(
-                        (_annotId) => _annotId !== annotId,
-                    )
+                    listData.unifiedAnnotationIds =
+                        listData.unifiedAnnotationIds.filter(
+                            (_annotId) => _annotId !== annotId,
+                        )
                 }
             }
         }
@@ -420,9 +418,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         for (const listId of removedListIds) {
             const cachedList = this.lists.byId[listId]
             if (cachedList) {
-                cachedList.unifiedAnnotationIds = cachedList.unifiedAnnotationIds.filter(
-                    (annotId) => annotId !== prev.unifiedId,
-                )
+                cachedList.unifiedAnnotationIds =
+                    cachedList.unifiedAnnotationIds.filter(
+                        (annotId) => annotId !== prev.unifiedId,
+                    )
             }
         }
 
@@ -718,7 +717,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             body: updates.body ?? previous.body,
             remoteId: updates.remoteId ?? previous.remoteId,
             lastEdited: opts?.updateLastEditedTimestamp
-                ? opts?.now ?? Date.now()
+                ? (opts?.now ?? Date.now())
                 : previous.lastEdited,
             color: updates.color ?? previous.color,
         }
@@ -754,7 +753,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 // If it's `null`, then we're updating a list tree node to be a top-level node
                 updates.parentUnifiedId === null
                     ? updates.parentUnifiedId
-                    : updates.parentUnifiedId ?? previousList.parentUnifiedId,
+                    : (updates.parentUnifiedId ?? previousList.parentUnifiedId),
         }
 
         if (
@@ -823,7 +822,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         // If list was shared, reflect updates in any public annotations.
         //  Note this needs to be separate to the previous condition else things go silly due to some timing issue. TODO: Figure out why and document
         if (previousList.remoteId !== nextList.remoteId) {
-            const changedAnnots = this.updateSharedAnnotationsWithSharedPageLists()
+            const changedAnnots =
+                this.updateSharedAnnotationsWithSharedPageLists()
 
             // Ensure any annots that were added to this list have a reverse reference from this list
             nextList.unifiedAnnotationIds = Array.from(

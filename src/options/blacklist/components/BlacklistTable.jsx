@@ -1,13 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import styles from './BlacklistTable.css'
-
 const BlacklistTable = ({ children }) => (
     <div>
-        <div className={styles.toolbar} />
-        <div className={styles.tableContainer}>
-            <table className={styles.table}>
+        <div />
+        <div>
+            <table>
                 <tbody>{children}</tbody>
             </table>
         </div>

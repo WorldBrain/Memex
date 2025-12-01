@@ -15,8 +15,6 @@ import { acts as tooltipActs } from 'src/overview/tooltips'
 
 import cx from 'classnames'
 
-const styles = require('./dates-filter.css')
-
 interface StateProps {
     startDate: number
     endDate: number
@@ -80,8 +78,8 @@ class DatesFilter extends PureComponent<Props, State> {
                     <Tooltip
                         position={this.props.tooltipPosition}
                         itemClass={cx({
-                            [styles.tooltip]: this.props.env === 'overview',
-                            [styles.inpagetooltip]: this.props.env === 'inpage',
+                            tooltip: this.props.env === 'overview',
+                            inpagetooltip: this.props.env === 'inpage',
                         })}
                     >
                         <DateRangeSelection

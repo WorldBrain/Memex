@@ -1,26 +1,25 @@
-import type { Tabs, Runtime, Extension } from 'webextension-polyfill'
-import type { UIEventHandler } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+import type { UIEventHandler } from '@worldbrain/memex-common/ts/main-ui/classes/logic'
 import {
     UILogic,
     loadInitial,
-} from '@worldbrain/memex-common/lib/main-ui/classes/logic'
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+} from '@worldbrain/memex-common/ts/main-ui/classes/logic'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { setUserContext as setSentryUserContext } from 'src/util/raven'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 export interface Dependencies {
-    extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
-    tabsAPI: Pick<Tabs.Static, 'create' | 'query' | 'update'>
-    runtimeAPI: Pick<Runtime.Static, 'getURL'>
+    extensionAPI: typeof chrome.extension
+    tabsAPI: typeof chrome.tabs
+    runtimeAPI: typeof chrome.runtime
     syncSettings: SyncSettingsStore<'pdfIntegration' | 'extension'>
     customListsBG: RemoteCollectionsInterface
     pdfIntegrationBG: PDFRemoteInterface
@@ -107,13 +106,13 @@ export default class PopupLogic extends UILogic<State, Event> {
                 currentTab.url.startsWith('about:')
             ) {
             } else {
-                const identifier = await pageIndexingBG.waitForContentIdentifier(
-                    {
+                const identifier =
+                    await pageIndexingBG.waitForContentIdentifier({
                         tabId: currentTab.id,
                         fullUrl: currentTab.url,
-                    },
-                )
-                const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
+                    })
+                const isFileAccessAllowed =
+                    await extensionAPI.isAllowedFileSchemeAccess()
 
                 // const [isPDFReaderEnabled] = await Promise.all([
                 //     syncSettings.pdfIntegration.get('shouldAutoOpen'),
@@ -152,11 +151,10 @@ export default class PopupLogic extends UILogic<State, Event> {
     }
 
     loadBookmarkState = async (fullUrl: string) => {
-        const pageTitle = await this.dependencies.pageIndexingBG.getTitleForPage(
-            {
+        const pageTitle =
+            await this.dependencies.pageIndexingBG.getTitleForPage({
                 fullPageUrl: fullUrl,
-            },
-        )
+            })
         if (pageTitle && pageTitle.length > 0) {
             return true
         } else {

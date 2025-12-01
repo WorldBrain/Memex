@@ -1,7 +1,6 @@
-import browser from 'webextension-polyfill'
 import XMLHttpRequest from 'xhr-shim'
 import { parseHTML } from 'linkedom/worker'
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/ts/transform-page-html.service-worker'
 import { getToken } from 'firebase/messaging'
 import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import {
@@ -32,26 +31,29 @@ import type {
     DexieStorageBackend,
     IndexedDbImplementation,
 } from '@worldbrain/storex-backend-dexie'
-import type { PushMessagePayload } from '@worldbrain/memex-common/lib/push-messaging/types'
+import type { PushMessagePayload } from '@worldbrain/memex-common/ts/push-messaging/types'
 import PushMessagingClient from './push-messaging/background'
 import { setupOmnibar } from 'src/omnibar'
-import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
-import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
-import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { fetchPageData } from '@worldbrain/memex-common/ts/page-indexing/fetch-page-data'
+import fetchAndExtractPdfContent from '@worldbrain/memex-common/ts/page-indexing/fetch-page-data/fetch-pdf-data.browser'
+import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/ts/image-support/backend'
+import { SharedListRoleID } from '@worldbrain/memex-common/ts/content-sharing/types'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
     IDBKeyRange: IndexedDbImplementation['range']
 }
 
+// Use native Chrome API for MV3 service worker
+declare const chrome: any
+
 // TODO mv3: remove this once firebase/storage is updated to use fetch API: https://github.com/firebase/firebase-js-sdk/issues/6595
 global['XMLHttpRequest'] = XMLHttpRequest
 
 async function main() {
     const rpcManager = setupRpcConnection({
-        browserAPIs: browser,
+        browserAPIs: chrome,
         sideName: 'background',
         role: 'background',
         paused: true,
@@ -71,7 +73,7 @@ async function main() {
     })
 
     const localStorageChangesManager = new StorageChangesManager({
-        storage: browser.storage,
+        storage: chrome.storage,
     })
     initSentry({})
 
@@ -102,7 +104,7 @@ async function main() {
 
     const fetch = globalThis.fetch.bind(
         globalThis,
-    ) as typeof globalThis['fetch']
+    ) as (typeof globalThis)['fetch']
 
     const backgroundModules = createBackgroundModules({
         manifestVersion: '3',
@@ -122,10 +124,10 @@ async function main() {
         fetchPDFData: async (url) =>
             fetchAndExtractPdfContent(url, {
                 fetch,
-                pdfJSWorkerSrc: browser.runtime.getURL('/build/pdf.worker.js'),
+                pdfJSWorkerSrc: chrome.runtime.getURL('/build/pdf.worker.js'),
             }),
         fetch,
-        browserAPIs: browser,
+        browserAPIs: chrome,
         captureException,
         storageManager,
         persistentStorageManager,
@@ -146,7 +148,7 @@ async function main() {
         },
         getFCMRegistrationToken: () =>
             getToken(fbMessaging, {
-                vapidKey: process.env.FCM_VAPID_KEY,
+                vapidKey: import.meta.env.VITE_FCM_VAPID_KEY,
                 serviceWorkerRegistration: self.registration,
             }),
         imageSupportBackend: new CloudflareImageSupportBackend({
@@ -179,11 +181,11 @@ async function main() {
     await storageManager.finishInitialization()
     await persistentStorageManager.finishInitialization()
 
-    await setupBackgroundModules(backgroundModules, storageManager, browser)
+    await setupBackgroundModules(backgroundModules, storageManager, chrome)
 
     setStorex(storageManager)
     setupOmnibar({
-        browserAPIs: browser,
+        browserAPIs: chrome,
         bgModules: backgroundModules,
     })
 

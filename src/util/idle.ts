@@ -1,8 +1,6 @@
-import browser, { Idle } from 'webextension-polyfill'
-
 import * as Raven from 'src/util/raven'
 
-export type IdleState = Idle.IdleState | 'locked'
+export type IdleState = typeof chrome.idle.IdleState | 'locked'
 type Handler = () => Promise<void> | void
 type ErrHandler = (err: Error) => void
 
@@ -44,15 +42,17 @@ export class IdleManager {
     }
 
     public set idleInterval(seconds: number) {
-        if (browser.idle) {
-            browser.idle.setDetectionInterval(seconds)
+        if (chrome.idle) {
+            chrome.idle.setDetectionInterval(seconds)
         }
 
         this.interval = seconds
     }
 
     public handleIdleStateChange = (state: IdleState) =>
-        [...this.handlers[state]].map(this.runHandler)
+        [...this.handlers[state as keyof typeof this.handlers]].map(
+            this.runHandler,
+        )
 
     /**
      * Allow setting up of logic to be run on different browser idle events.
@@ -74,9 +74,11 @@ export class IdleManager {
 
 const idleManager = new IdleManager()
 
-if (browser.idle) {
+if (chrome.idle) {
     // Run all handlers in specific state corresponding to idle state change
-    browser.idle.onStateChanged.addListener(idleManager.handleIdleStateChange)
+    chrome.idle.onStateChanged.addListener((newState) =>
+        idleManager.handleIdleStateChange(newState as IdleState),
+    )
 }
 
 export { idleManager }

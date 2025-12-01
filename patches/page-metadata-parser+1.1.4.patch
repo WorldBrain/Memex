@@ -1,0 +1,27 @@
+diff --git a/node_modules/page-metadata-parser/url-utils.js b/node_modules/page-metadata-parser/url-utils.js
+index 5803702..f69a136 100644
+--- a/node_modules/page-metadata-parser/url-utils.js
++++ b/node_modules/page-metadata-parser/url-utils.js
+@@ -8,22 +8,5 @@ if (global.URL !== undefined) {
+       return new URL(url).host;
+     }
+   };
+-} else {
+-  // We're in Node.js
+-  const urlparse = require('url');
+-  module.exports = {
+-    makeUrlAbsolute(base, relative) {
+-      const relativeParsed = urlparse.parse(relative);
+-
+-      if (relativeParsed.host === null) {
+-        return urlparse.resolve(base, relative);
+-      }
+-
+-      return relative;
+-    },
+-    parseUrl(url) {
+-      return urlparse.parse(url).hostname;
+-    }
+-  };
+ }
+ 

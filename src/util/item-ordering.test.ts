@@ -2,8 +2,8 @@ import expect from 'expect'
 import {
     OrderedItem,
     OrderedItemChanges,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
-import * as ordering from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
+import * as ordering from '@worldbrain/memex-common/ts/utils/item-ordering'
 
 function test(
     items: OrderedItem[],

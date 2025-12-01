@@ -7,15 +7,15 @@ import {
     insertBackgroundFunctionTab,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import {
     initNormalizedState,
     normalizedStateToArray,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import {
     generateAnnotationCardInstanceId,
     initAnnotationCardInstance,
@@ -30,8 +30,8 @@ import type {
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { WindowMock } from 'src/util/window-api-mock'
-import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
-import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
+import { HighlightRendererInterface } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/types'
+import { HighlightRenderer } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/renderer'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -399,16 +399,13 @@ describe('SidebarContainerLogic', () => {
         it(
             'should hydrate the page annotations cache with annotations and lists data from the DB upon init',
             async ({ device }) => {
-                const {
-                    sidebar,
-                    annotationsCache,
-                    emittedEvents,
-                } = await setupLogicHelper({
-                    device,
-                    withAuth: true,
-                    skipInitEvent: true,
-                    fullPageUrl: DATA.TAB_URL_1,
-                })
+                const { sidebar, annotationsCache, emittedEvents } =
+                    await setupLogicHelper({
+                        device,
+                        withAuth: true,
+                        skipInitEvent: true,
+                        fullPageUrl: DATA.TAB_URL_1,
+                    })
                 const expectedEvents = []
 
                 expect(emittedEvents).toEqual(expectedEvents)
@@ -426,9 +423,10 @@ describe('SidebarContainerLogic', () => {
                 expectedEvents.push({
                     event: 'renderHighlights',
                     args: {
-                        highlights: cacheUtils.getHighlightAnnotationsArray(
-                            annotationsCache,
-                        ),
+                        highlights:
+                            cacheUtils.getHighlightAnnotationsArray(
+                                annotationsCache,
+                            ),
                     },
                 })
 
@@ -517,7 +515,8 @@ describe('SidebarContainerLogic', () => {
                             remoteId: DATA.SHARED_LIST_IDS[4],
                             normalizedPageUrl:
                                 DATA.FOLLOWED_LIST_ENTRIES[5].normalizedPageUrl,
-                            sharedListEntryId: DATA.FOLLOWED_LIST_ENTRIES[5].sharedListEntry.toString(),
+                            sharedListEntryId:
+                                DATA.FOLLOWED_LIST_ENTRIES[5].sharedListEntry.toString(),
                         },
                     }),
                     cacheUtils.reshapeFollowedListForCache(
@@ -538,7 +537,8 @@ describe('SidebarContainerLogic', () => {
                                 normalizedPageUrl:
                                     DATA.FOLLOWED_LIST_ENTRIES[6]
                                         .normalizedPageUrl,
-                                sharedListEntryId: DATA.FOLLOWED_LIST_ENTRIES[6].sharedListEntry.toString(),
+                                sharedListEntryId:
+                                    DATA.FOLLOWED_LIST_ENTRIES[6].sharedListEntry.toString(),
                                 unifiedId: expect.any(String),
                                 unifiedAnnotationIds: [],
                             },
@@ -619,12 +619,9 @@ describe('SidebarContainerLogic', () => {
                 )
                 expect(sidebar.state.listInstances).toEqual(
                     fromPairs(
-                        normalizedStateToArray(
-                            annotationsCache.lists,
-                        ).map((list) => [
-                            list.unifiedId,
-                            initListInstance(list),
-                        ]),
+                        normalizedStateToArray(annotationsCache.lists).map(
+                            (list) => [list.unifiedId, initListInstance(list)],
+                        ),
                     ),
                 )
                 expect(sidebar.state.annotationCardInstances).toEqual(
@@ -667,16 +664,17 @@ describe('SidebarContainerLogic', () => {
                 await sidebar.init()
 
                 const normalizedUrl = normalizeUrl(DATA.TAB_URL_1)
-                const expectedPageActiveLists = DATA.FOLLOWED_LIST_ENTRIES.filter(
-                    (entry) =>
-                        entry.normalizedPageUrl === normalizedUrl &&
-                        entry.hasAnnotationsFromOthers,
-                ).map(
-                    (entry) =>
-                        annotationsCache.getListByRemoteId(
-                            entry.followedList.toString(),
-                        ).unifiedId,
-                )
+                const expectedPageActiveLists =
+                    DATA.FOLLOWED_LIST_ENTRIES.filter(
+                        (entry) =>
+                            entry.normalizedPageUrl === normalizedUrl &&
+                            entry.hasAnnotationsFromOthers,
+                    ).map(
+                        (entry) =>
+                            annotationsCache.getListByRemoteId(
+                                entry.followedList.toString(),
+                            ).unifiedId,
+                    )
                 const unifiedListIds = mapLocalListIdsToUnified(
                     [
                         DATA.LOCAL_LISTS[0].id,
@@ -754,25 +752,23 @@ describe('SidebarContainerLogic', () => {
                 expectedEvents.push({
                     event: 'renderHighlights',
                     args: {
-                        highlights: cacheUtils.getHighlightAnnotationsArray(
-                            annotationsCache,
-                        ),
+                        highlights:
+                            cacheUtils.getHighlightAnnotationsArray(
+                                annotationsCache,
+                            ),
                     },
                 })
 
                 const defaultListInstanceStates = fromPairs(
-                    normalizedStateToArray(
-                        annotationsCache.lists,
-                    ).map((list) => [list.unifiedId, initListInstance(list)]),
+                    normalizedStateToArray(annotationsCache.lists).map(
+                        (list) => [list.unifiedId, initListInstance(list)],
+                    ),
                 )
 
-                const [
-                    unifiedListIdA,
-                    unifiedListIdB,
-                    unifiedListIdC,
-                ] = normalizedStateToArray(annotationsCache.lists)
-                    .filter((list) => list.hasRemoteAnnotationsToLoad)
-                    .map((list) => list.unifiedId)
+                const [unifiedListIdA, unifiedListIdB, unifiedListIdC] =
+                    normalizedStateToArray(annotationsCache.lists)
+                        .filter((list) => list.hasRemoteAnnotationsToLoad)
+                        .map((list) => list.unifiedId)
 
                 let expectedListInstances = {
                     ...defaultListInstanceStates,
@@ -873,9 +869,10 @@ describe('SidebarContainerLogic', () => {
                     {
                         event: 'renderHighlights',
                         args: {
-                            highlights: cacheUtils.getHighlightAnnotationsArray(
-                                annotationsCache,
-                            ),
+                            highlights:
+                                cacheUtils.getHighlightAnnotationsArray(
+                                    annotationsCache,
+                                ),
                         },
                     },
                 )
@@ -886,9 +883,10 @@ describe('SidebarContainerLogic', () => {
                 let wasBGMethodCalled = false
                 sidebarLogic[
                     'options'
-                ].customListsBG.fetchAnnotationRefsForRemoteListsOnPage = (() => {
-                    wasBGMethodCalled = true
-                }) as any
+                ].customListsBG.fetchAnnotationRefsForRemoteListsOnPage =
+                    (() => {
+                        wasBGMethodCalled = true
+                    }) as any
 
                 await sidebar.processEvent('setActiveSidebarTab', {
                     tab: 'spaces',
@@ -939,25 +937,23 @@ describe('SidebarContainerLogic', () => {
                 expectedEvents.push({
                     event: 'renderHighlights',
                     args: {
-                        highlights: cacheUtils.getHighlightAnnotationsArray(
-                            annotationsCache,
-                        ),
+                        highlights:
+                            cacheUtils.getHighlightAnnotationsArray(
+                                annotationsCache,
+                            ),
                     },
                 })
 
                 const defaultListInstanceStates = fromPairs(
-                    normalizedStateToArray(
-                        annotationsCache.lists,
-                    ).map((list) => [list.unifiedId, initListInstance(list)]),
+                    normalizedStateToArray(annotationsCache.lists).map(
+                        (list) => [list.unifiedId, initListInstance(list)],
+                    ),
                 )
 
-                const [
-                    unifiedListIdA,
-                    unifiedListIdB,
-                    unifiedListIdC,
-                ] = normalizedStateToArray(annotationsCache.lists)
-                    .filter((list) => list.hasRemoteAnnotationsToLoad)
-                    .map((list) => list.unifiedId)
+                const [unifiedListIdA, unifiedListIdB, unifiedListIdC] =
+                    normalizedStateToArray(annotationsCache.lists)
+                        .filter((list) => list.hasRemoteAnnotationsToLoad)
+                        .map((list) => list.unifiedId)
 
                 let expectedListInstances = {
                     ...defaultListInstanceStates,
@@ -1181,11 +1177,10 @@ describe('SidebarContainerLogic', () => {
 
                 expect(emittedEvents).toEqual(expectedEvents)
                 let wasBGMethodCalled = false
-                sidebarLogic[
-                    'options'
-                ].annotationsBG.getSharedAnnotations = (() => {
-                    wasBGMethodCalled = true
-                }) as any
+                sidebarLogic['options'].annotationsBG.getSharedAnnotations =
+                    (() => {
+                        wasBGMethodCalled = true
+                    }) as any
 
                 await sidebar.processEvent('expandListAnnotations', {
                     unifiedListId: unifiedListIdA,
@@ -1373,13 +1368,11 @@ describe('SidebarContainerLogic', () => {
             it(
                 'should be able to save a new comment',
                 async ({ device }) => {
-                    const {
-                        sidebar,
-                        annotationsCache,
-                    } = await setupLogicHelper({
-                        device,
-                        withAuth: true,
-                    })
+                    const { sidebar, annotationsCache } =
+                        await setupLogicHelper({
+                            device,
+                            withAuth: true,
+                        })
 
                     expect(sidebar.state.commentBox.commentText).toEqual('')
                     await sidebar.processEvent('setNewPageNoteText', {
@@ -1394,7 +1387,8 @@ describe('SidebarContainerLogic', () => {
                         now: 123,
                     })
 
-                    const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                    const latestCachedAnnotId =
+                        annotationsCache.getLastAssignedAnnotationId()
                     expect(
                         sidebar.state.annotations.byId[latestCachedAnnotId],
                     ).toEqual({
@@ -1468,9 +1462,10 @@ describe('SidebarContainerLogic', () => {
                     withAuth: true,
                 })
 
-                const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
+                const unifiedAnnotationId =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
                 const cardId = generateAnnotationCardInstanceId(
                     { unifiedId: unifiedAnnotationId },
                     'annotations-tab',
@@ -1538,9 +1533,10 @@ describe('SidebarContainerLogic', () => {
                     withAuth: true,
                 })
 
-                const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
+                const unifiedAnnotationId =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
                 const cardId = generateAnnotationCardInstanceId(
                     { unifiedId: unifiedAnnotationId },
                     'annotations-tab',
@@ -1583,9 +1579,10 @@ describe('SidebarContainerLogic', () => {
                     withAuth: true,
                 })
 
-                const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
+                const unifiedAnnotationId =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
                 const cardId = generateAnnotationCardInstanceId(
                     { unifiedId: unifiedAnnotationId },
                     'annotations-tab',
@@ -1636,9 +1633,10 @@ describe('SidebarContainerLogic', () => {
 
                 const now = 123
                 const updatedComment = 'updated comment'
-                const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
+                const unifiedAnnotationId =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
                 const cardId = generateAnnotationCardInstanceId(
                     { unifiedId: unifiedAnnotationId },
                     'annotations-tab',
@@ -1766,9 +1764,10 @@ describe('SidebarContainerLogic', () => {
                 const updatedComment = 'test comment updated'
                 const now = 123
 
-                const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
+                const unifiedAnnotationId =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
                 const annotInstanceId = generateAnnotationCardInstanceId(
                     { unifiedId: unifiedAnnotationId },
                     'annotations-tab',
@@ -1801,7 +1800,8 @@ describe('SidebarContainerLogic', () => {
                     sidebar.state.annotations.byId[unifiedAnnotationId],
                 ).toEqual(
                     expect.objectContaining({
-                        lastEdited: DATA.LOCAL_ANNOTATIONS[0].createdWhen.getTime(),
+                        lastEdited:
+                            DATA.LOCAL_ANNOTATIONS[0].createdWhen.getTime(),
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                         comment: DATA.LOCAL_ANNOTATIONS[0].comment,
                     }),
@@ -1826,7 +1826,8 @@ describe('SidebarContainerLogic', () => {
                     sidebar.state.annotations.byId[unifiedAnnotationId],
                 ).toEqual(
                     expect.objectContaining({
-                        lastEdited: DATA.LOCAL_ANNOTATIONS[0].createdWhen.getTime(),
+                        lastEdited:
+                            DATA.LOCAL_ANNOTATIONS[0].createdWhen.getTime(),
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                         comment: DATA.LOCAL_ANNOTATIONS[0].comment,
                     }),
@@ -1895,9 +1896,10 @@ describe('SidebarContainerLogic', () => {
                     withAuth: false,
                 })
 
-                const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
+                const unifiedAnnotationId =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
 
                 expect(
                     sidebar.state.annotations.byId[unifiedAnnotationId].comment,
@@ -1934,15 +1936,17 @@ describe('SidebarContainerLogic', () => {
                 })
                 const now = 123
 
-                const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
+                const unifiedAnnotationId =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
 
                 expect(
                     sidebar.state.annotations.byId[unifiedAnnotationId],
                 ).toEqual(
                     expect.objectContaining({
-                        lastEdited: DATA.LOCAL_ANNOTATIONS[0].lastEdited.getTime(),
+                        lastEdited:
+                            DATA.LOCAL_ANNOTATIONS[0].lastEdited.getTime(),
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     }),
                 )
@@ -1975,7 +1979,8 @@ describe('SidebarContainerLogic', () => {
                     sidebar.state.annotations.byId[unifiedAnnotationId],
                 ).toEqual(
                     expect.objectContaining({
-                        lastEdited: DATA.LOCAL_ANNOTATIONS[0].lastEdited.getTime(),
+                        lastEdited:
+                            DATA.LOCAL_ANNOTATIONS[0].lastEdited.getTime(),
                         privacyLevel: AnnotationPrivacyLevels.SHARED,
                     }),
                 )
@@ -2015,9 +2020,10 @@ describe('SidebarContainerLogic', () => {
                     device,
                 })
 
-                const unifiedAnnotation = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                )
+                const unifiedAnnotation =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    )
                 const cardIdA = generateAnnotationCardInstanceId(
                     { unifiedId: unifiedAnnotation.unifiedId },
                     'annotations-tab',
@@ -2083,30 +2089,30 @@ describe('SidebarContainerLogic', () => {
         it(
             'should be able to activate annotations',
             async ({ device }) => {
-                const {
-                    sidebar,
-                    annotationsCache,
-                    emittedEvents,
-                } = await setupLogicHelper({
-                    device,
-                })
+                const { sidebar, annotationsCache, emittedEvents } =
+                    await setupLogicHelper({
+                        device,
+                    })
                 const expectedEvents: any[] = [
                     {
                         event: 'renderHighlights',
                         args: {
-                            highlights: cacheUtils.getHighlightAnnotationsArray(
-                                annotationsCache,
-                            ),
+                            highlights:
+                                cacheUtils.getHighlightAnnotationsArray(
+                                    annotationsCache,
+                                ),
                         },
                     },
                 ]
 
-                const unifiedAnnotationIdA = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
-                const unifiedAnnotationIdB = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[1].url,
-                ).unifiedId
+                const unifiedAnnotationIdA =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
+                const unifiedAnnotationIdB =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[1].url,
+                    ).unifiedId
                 const cardIdA = generateAnnotationCardInstanceId({
                     unifiedId: unifiedAnnotationIdA,
                 })
@@ -2213,12 +2219,14 @@ describe('SidebarContainerLogic', () => {
                 const unifiedListId = annotationsCache.getListByLocalId(
                     DATA.LOCAL_LISTS[0].id,
                 ).unifiedId
-                const unifiedAnnotationIdA = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
-                const unifiedAnnotationIdB = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[1].url,
-                ).unifiedId
+                const unifiedAnnotationIdA =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
+                const unifiedAnnotationIdB =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[1].url,
+                    ).unifiedId
 
                 // NOTE: we're getting the card instance IDs for those in the selected list view in the sidebar
                 const cardIdA = generateAnnotationCardInstanceId(
@@ -2301,21 +2309,19 @@ describe('SidebarContainerLogic', () => {
         it(
             'should be able to set selected list mode for a specific joined space',
             async ({ device }) => {
-                const {
-                    sidebar,
-                    emittedEvents,
-                    annotationsCache,
-                } = await setupLogicHelper({
-                    device,
-                    withAuth: true,
-                })
+                const { sidebar, emittedEvents, annotationsCache } =
+                    await setupLogicHelper({
+                        device,
+                        withAuth: true,
+                    })
                 const expectedEvents: any[] = [
                     {
                         event: 'renderHighlights',
                         args: {
-                            highlights: cacheUtils.getHighlightAnnotationsArray(
-                                annotationsCache,
-                            ),
+                            highlights:
+                                cacheUtils.getHighlightAnnotationsArray(
+                                    annotationsCache,
+                                ),
                         },
                     },
                 ]
@@ -2389,14 +2395,11 @@ describe('SidebarContainerLogic', () => {
         it(
             'should be able to set selected list mode for a specific followed-only space',
             async ({ device }) => {
-                const {
-                    sidebar,
-                    emittedEvents,
-                    annotationsCache,
-                } = await setupLogicHelper({
-                    device,
-                    withAuth: true,
-                })
+                const { sidebar, emittedEvents, annotationsCache } =
+                    await setupLogicHelper({
+                        device,
+                        withAuth: true,
+                    })
                 const followedCacheList = annotationsCache.getListByRemoteId(
                     DATA.SHARED_LIST_IDS[3],
                 )
@@ -2404,9 +2407,10 @@ describe('SidebarContainerLogic', () => {
                     {
                         event: 'renderHighlights',
                         args: {
-                            highlights: cacheUtils.getHighlightAnnotationsArray(
-                                annotationsCache,
-                            ),
+                            highlights:
+                                cacheUtils.getHighlightAnnotationsArray(
+                                    annotationsCache,
+                                ),
                         },
                     },
                 ]
@@ -2499,14 +2503,11 @@ describe('SidebarContainerLogic', () => {
                         id: 0,
                         name: 'test',
                     })
-                const {
-                    sidebar,
-                    emittedEvents,
-                    annotationsCache,
-                } = await setupLogicHelper({
-                    device,
-                    withAuth: true,
-                })
+                const { sidebar, emittedEvents, annotationsCache } =
+                    await setupLogicHelper({
+                        device,
+                        withAuth: true,
+                    })
                 const localOnlyCacheList = annotationsCache.getListByLocalId(
                     DATA.LOCAL_LISTS[3].id,
                 )
@@ -2514,9 +2515,10 @@ describe('SidebarContainerLogic', () => {
                     {
                         event: 'renderHighlights',
                         args: {
-                            highlights: cacheUtils.getHighlightAnnotationsArray(
-                                annotationsCache,
-                            ),
+                            highlights:
+                                cacheUtils.getHighlightAnnotationsArray(
+                                    annotationsCache,
+                                ),
                         },
                     },
                 ]
@@ -2574,26 +2576,23 @@ describe('SidebarContainerLogic', () => {
         it(
             'should be able to set selected list mode from the Web UI for a locally available space',
             async ({ device }) => {
-                const {
-                    sidebar,
-                    emittedEvents,
-                    annotationsCache,
-                } = await setupLogicHelper({
-                    device,
-                    withAuth: true,
-                })
+                const { sidebar, emittedEvents, annotationsCache } =
+                    await setupLogicHelper({
+                        device,
+                        withAuth: true,
+                    })
 
                 const sharedListId = DATA.SHARED_LIST_IDS[3]
-                const followedCacheList = annotationsCache.getListByRemoteId(
-                    sharedListId,
-                )
+                const followedCacheList =
+                    annotationsCache.getListByRemoteId(sharedListId)
                 const expectedEvents: any[] = [
                     {
                         event: 'renderHighlights',
                         args: {
-                            highlights: cacheUtils.getHighlightAnnotationsArray(
-                                annotationsCache,
-                            ),
+                            highlights:
+                                cacheUtils.getHighlightAnnotationsArray(
+                                    annotationsCache,
+                                ),
                         },
                     },
                 ]
@@ -2671,14 +2670,11 @@ describe('SidebarContainerLogic', () => {
         it(
             'should be able to set selected list mode from the Web UI for a NON-locally available space',
             async ({ device }) => {
-                const {
-                    sidebar,
-                    emittedEvents,
-                    annotationsCache,
-                } = await setupLogicHelper({
-                    device,
-                    withAuth: true,
-                })
+                const { sidebar, emittedEvents, annotationsCache } =
+                    await setupLogicHelper({
+                        device,
+                        withAuth: true,
+                    })
 
                 // Let's add a new sharedList + entries to test with
                 const { manager: serverStorageManager } = device.serverStorage
@@ -2769,9 +2765,10 @@ describe('SidebarContainerLogic', () => {
                     {
                         event: 'renderHighlights',
                         args: {
-                            highlights: cacheUtils.getHighlightAnnotationsArray(
-                                annotationsCache,
-                            ),
+                            highlights:
+                                cacheUtils.getHighlightAnnotationsArray(
+                                    annotationsCache,
+                                ),
                         },
                     },
                 ]
@@ -2796,7 +2793,8 @@ describe('SidebarContainerLogic', () => {
                     sharedListId,
                 })
 
-                const unifiedForeignListId = annotationsCache.getLastAssignedListId()
+                const unifiedForeignListId =
+                    annotationsCache.getLastAssignedListId()
 
                 expectedEvents.push(
                     {
@@ -2865,9 +2863,10 @@ describe('SidebarContainerLogic', () => {
                 })
 
                 // Verify remote annots got loaded
-                const unifiedForeignAnnotIds = sidebar.state.annotations.allIds.filter(
-                    (id) => !annotationsBefore.includes(id),
-                )
+                const unifiedForeignAnnotIds =
+                    sidebar.state.annotations.allIds.filter(
+                        (id) => !annotationsBefore.includes(id),
+                    )
                 expect(unifiedForeignAnnotIds.length).toBe(2)
                 expect(
                     Object.keys(sidebar.state.annotationCardInstances).length,
@@ -3046,8 +3045,9 @@ describe('SidebarContainerLogic', () => {
                         ? {
                               localId: localAnnotId,
                               remoteId: expect.any(String),
-                              excludeFromLists: !opts.expectedAnnotationData
-                                  .isSharedToPageLists,
+                              excludeFromLists:
+                                  !opts.expectedAnnotationData
+                                      .isSharedToPageLists,
                           }
                         : null,
                 )
@@ -3074,7 +3074,8 @@ describe('SidebarContainerLogic', () => {
                     ]),
                 )
 
-                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                const latestCachedAnnotId =
+                    annotationsCache.getLastAssignedAnnotationId()
                 expect(
                     sidebar.state.annotations.byId[latestCachedAnnotId],
                 ).toEqual({
@@ -3176,13 +3177,11 @@ describe('SidebarContainerLogic', () => {
             it(
                 'should be able to save a new private comment in toggled list instance for a private list',
                 async ({ device }) => {
-                    const {
-                        sidebar,
-                        annotationsCache,
-                    } = await setupLogicHelper({
-                        device,
-                        withAuth: false,
-                    })
+                    const { sidebar, annotationsCache } =
+                        await setupLogicHelper({
+                            device,
+                            withAuth: false,
+                        })
 
                     expect(sidebar.state.commentBox.commentText).toEqual('')
                     await sidebar.processEvent('setNewPageNoteText', {
@@ -3248,7 +3247,8 @@ describe('SidebarContainerLogic', () => {
                         },
                     ])
 
-                    const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                    const latestCachedAnnotId =
+                        annotationsCache.getLastAssignedAnnotationId()
                     expect(
                         sidebar.state.annotations.byId[latestCachedAnnotId],
                     ).toEqual({
@@ -3273,13 +3273,11 @@ describe('SidebarContainerLogic', () => {
             it(
                 'should be able to save a new private comment in selected list mode for a private list',
                 async ({ device }) => {
-                    const {
-                        sidebar,
-                        annotationsCache,
-                    } = await setupLogicHelper({
-                        device,
-                        withAuth: false,
-                    })
+                    const { sidebar, annotationsCache } =
+                        await setupLogicHelper({
+                            device,
+                            withAuth: false,
+                        })
 
                     expect(sidebar.state.commentBox.commentText).toEqual('')
                     await sidebar.processEvent('setNewPageNoteText', {
@@ -3348,7 +3346,8 @@ describe('SidebarContainerLogic', () => {
                         },
                     ])
 
-                    const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                    const latestCachedAnnotId =
+                        annotationsCache.getLastAssignedAnnotationId()
                     expect(
                         sidebar.state.annotations.byId[latestCachedAnnotId],
                     ).toEqual({
@@ -3373,13 +3372,11 @@ describe('SidebarContainerLogic', () => {
             it(
                 'should be able to save a new private comment on the "My Annotations" tab while in selected list mode, without adding to that selected list',
                 async ({ device }) => {
-                    const {
-                        sidebar,
-                        annotationsCache,
-                    } = await setupLogicHelper({
-                        device,
-                        withAuth: false,
-                    })
+                    const { sidebar, annotationsCache } =
+                        await setupLogicHelper({
+                            device,
+                            withAuth: false,
+                        })
 
                     expect(sidebar.state.commentBox.commentText).toEqual('')
                     await sidebar.processEvent('setNewPageNoteText', {
@@ -3448,7 +3445,8 @@ describe('SidebarContainerLogic', () => {
                         },
                     ])
 
-                    const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                    const latestCachedAnnotId =
+                        annotationsCache.getLastAssignedAnnotationId()
                     expect(
                         sidebar.state.annotations.byId[latestCachedAnnotId],
                     ).toEqual({
@@ -3480,12 +3478,14 @@ describe('SidebarContainerLogic', () => {
                     device,
                     withAuth: true,
                 })
-                const unifiedAnnotationIdA = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[0].url,
-                ).unifiedId
-                const unifiedAnnotationIdB = annotationsCache.getAnnotationByLocalId(
-                    DATA.LOCAL_ANNOTATIONS[1].url,
-                ).unifiedId
+                const unifiedAnnotationIdA =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[0].url,
+                    ).unifiedId
+                const unifiedAnnotationIdB =
+                    annotationsCache.getAnnotationByLocalId(
+                        DATA.LOCAL_ANNOTATIONS[1].url,
+                    ).unifiedId
 
                 expect(
                     sidebar.state.annotations.byId[unifiedAnnotationIdA],

@@ -1,4 +1,4 @@
-import { ClientAnalyticsEvent } from '@worldbrain/memex-common/lib/analytics/types'
+import { ClientAnalyticsEvent } from '@worldbrain/memex-common/ts/analytics/types'
 import { Analytics } from '../types'
 import { updateLastActive } from '../utils'
 

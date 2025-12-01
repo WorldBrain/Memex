@@ -1,7 +1,5 @@
 import React, { PureComponent, SyntheticEvent } from 'react'
 
-const styles = require('./Popup.css')
-
 export interface Props {
     searchValue: string
     onSearchEnter: (e: SyntheticEvent<HTMLInputElement>) => void
@@ -11,11 +9,10 @@ export interface Props {
 class Search extends PureComponent<Props> {
     render() {
         return (
-            <form className={styles.searchContainer}>
-                <span className={styles.searchIcon}/>
+            <form>
+                <span />
                 <input
                     autoFocus
-                    className={styles.search}
                     name="query"
                     placeholder="Search your Memex"
                     autoComplete="off"

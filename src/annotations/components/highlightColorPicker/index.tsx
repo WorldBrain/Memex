@@ -7,23 +7,23 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { UnifiedAnnotation } from 'src/annotations/cache/types'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/constants'
+import { TaskState } from 'ui-logic-core/ts/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { RGBAColor } from '@worldbrain/memex-common/lib/annotations/types'
-import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { RGBAColor } from '@worldbrain/memex-common/ts/annotations/types'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/constants'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 import {
     RGBAobjectToString,
     modifyDomHighlightColor,
-} from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+} from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/utils'
 import { color } from 'html2canvas/dist/types/css/types/color'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-import LoadingBlock from '@worldbrain/memex-common/lib/common-ui/components/loading-block'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
+import LoadingBlock from '@worldbrain/memex-common/ts/common-ui/components/loading-block'
 
 export interface Props {
     annotationId: string
@@ -126,9 +126,8 @@ export default class HighlightColorPicker extends React.Component<
     getHighlightColorSettings = async (forceUpdate?) => {
         let highlightColors = this.state.highlightColorSettingState
         if (!highlightColors || forceUpdate) {
-            highlightColors = await this.syncSettings.highlightColors.get(
-                'highlightColors',
-            )
+            highlightColors =
+                await this.syncSettings.highlightColors.get('highlightColors')
             if (!highlightColors) {
                 highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
             }
@@ -204,20 +203,22 @@ export default class HighlightColorPicker extends React.Component<
                     <PrimaryAction
                         label={'Cancel'}
                         onClick={async (event) => {
-                            let highlights: NodeListOf<Element> = document.querySelectorAll(
-                                '.' + DEF_HIGHLIGHT_CSS_CLASS,
-                            )
-
-                            for (let item of (highlights as any) as HTMLElement[]) {
-                                const existingStyle = item.getAttribute(
-                                    'highlightcolor',
+                            let highlights: NodeListOf<Element> =
+                                document.querySelectorAll(
+                                    '.' + DEF_HIGHLIGHT_CSS_CLASS,
                                 )
+
+                            for (let item of highlights as any as HTMLElement[]) {
+                                const existingStyle =
+                                    item.getAttribute('highlightcolor')
 
                                 let color = null
                                 if (existingStyle) {
-                                    color = this.state.highlightColorSettingState.find(
-                                        (color) => color.id === existingStyle,
-                                    ).color
+                                    color =
+                                        this.state.highlightColorSettingState.find(
+                                            (color) =>
+                                                color.id === existingStyle,
+                                        ).color
                                     color = RGBAobjectToString(color)
                                 }
 
@@ -295,18 +296,20 @@ export default class HighlightColorPicker extends React.Component<
                         }}
                         onChange={(event) => {
                             {
-                                let newHighlightColorSettingState = this.state.highlightColorSettingState.map(
-                                    (i) => {
-                                        return JSON.parse(JSON.stringify(i))
-                                    },
-                                )
+                                let newHighlightColorSettingState =
+                                    this.state.highlightColorSettingState.map(
+                                        (i) => {
+                                            return JSON.parse(JSON.stringify(i))
+                                        },
+                                    )
 
                                 newHighlightColorSettingState[index]['label'] =
                                     event.target.value
 
                                 // modify the copy
                                 this.setState({
-                                    highlightColorSettingState: newHighlightColorSettingState,
+                                    highlightColorSettingState:
+                                        newHighlightColorSettingState,
                                 })
                             }
                         }}
@@ -321,27 +324,29 @@ export default class HighlightColorPicker extends React.Component<
                                 this.setState({
                                     highlightColorStateChanged: true,
                                 })
-                                let newHighlightColorSettingState = this.state
-                                    .highlightColorSettingState
+                                let newHighlightColorSettingState =
+                                    this.state.highlightColorSettingState
 
                                 const existingColor =
                                     newHighlightColorSettingState[index][
                                         'color'
                                     ]
 
-                                let highlights: NodeListOf<Element> = document.querySelectorAll(
-                                    '.' + DEF_HIGHLIGHT_CSS_CLASS,
-                                )
+                                let highlights: NodeListOf<Element> =
+                                    document.querySelectorAll(
+                                        '.' + DEF_HIGHLIGHT_CSS_CLASS,
+                                    )
 
-                                for (let item of (highlights as any) as HTMLElement[]) {
+                                for (let item of highlights as any as HTMLElement[]) {
                                     const existingStyle =
                                         item.style.backgroundColor
                                     let backgroundColor = ''
 
                                     if (existingStyle.startsWith('rgb(')) {
-                                        backgroundColor = item.style.backgroundColor
-                                            .replace(')', ', 1)')
-                                            .replace('rgb(', 'rgba(')
+                                        backgroundColor =
+                                            item.style.backgroundColor
+                                                .replace(')', ', 1)')
+                                                .replace('rgb(', 'rgba(')
                                     } else if (
                                         existingStyle.startsWith('rgba(')
                                     ) {
@@ -359,11 +364,11 @@ export default class HighlightColorPicker extends React.Component<
                                         )
                                     }
                                 }
-                                newHighlightColorSettingState[index][
-                                    'color'
-                                ] = value
+                                newHighlightColorSettingState[index]['color'] =
+                                    value
                                 this.setState({
-                                    highlightColorSettingState: newHighlightColorSettingState,
+                                    highlightColorSettingState:
+                                        newHighlightColorSettingState,
                                 })
                             }
                         }}
@@ -391,20 +396,22 @@ export default class HighlightColorPicker extends React.Component<
                                 ...this.state.highlightColorSettingState,
                             ]
 
-                            newHighlightColorSettingState[index][
-                                'color'
-                            ] = tinycolor(inputValue).toRgb()
+                            newHighlightColorSettingState[index]['color'] =
+                                tinycolor(inputValue).toRgb()
 
                             // modify the copy
                             this.setState({
-                                highlightColorSettingState: newHighlightColorSettingState,
-                                colorInputValue: (event.target as HTMLInputElement)
-                                    .value,
+                                highlightColorSettingState:
+                                    newHighlightColorSettingState,
+                                colorInputValue: (
+                                    event.target as HTMLInputElement
+                                ).value,
                             })
                         } else {
                             this.setState({
-                                colorInputValue: (event.target as HTMLInputElement)
-                                    .value,
+                                colorInputValue: (
+                                    event.target as HTMLInputElement
+                                ).value,
                             })
                         }
                     }}
@@ -494,7 +501,8 @@ export default class HighlightColorPicker extends React.Component<
                                                 ]
                                                 newShowEditColor[i] = true
                                                 this.setState({
-                                                    showEditColor: newShowEditColor,
+                                                    showEditColor:
+                                                        newShowEditColor,
                                                     showColorEditorPanel: true,
                                                 })
                                             }}
@@ -639,7 +647,12 @@ const SpaceTitleEditField = styled.input<{
     border-radius: 5px;
     padding: 10px;
     outline: 1px solid ${(props) => props.theme.colors.greyScale4};
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on;
     border: none;
 
     ${(props) =>
@@ -657,7 +670,11 @@ const SpaceTitleEditField = styled.input<{
             padding: 10px;
             border-radius: 5px;
             outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-            font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            font-feature-settings:
+                'pnum' on,
+                'lnum' on,
+                'case' on,
+                'ss03' on,
                 'ss04' on;
             border: none;
 

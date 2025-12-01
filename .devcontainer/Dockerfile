@@ -16,6 +16,6 @@ FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:0-10
 #    # Clean up
 #    && apt-get autoremove -y \
 #    && apt-get clean -y \
-#    && rm -rf /var/lib/apt/lists/*
+#    && rm -rf /var/ts/apt/lists/*
 # ENV DEBIAN_FRONTEND=dialog
 

@@ -3,13 +3,13 @@ import {
     AuthService,
     RegistrationResult,
     LoginResult,
-} from '@worldbrain/memex-common/lib/authentication/types'
+} from '@worldbrain/memex-common/ts/authentication/types'
 import {
     UserPlan,
     SubscriptionsService,
     UserFeature,
     Claims,
-} from '@worldbrain/memex-common/lib/subscriptions/types'
+} from '@worldbrain/memex-common/ts/subscriptions/types'
 import {
     getAuthorizedFeatures,
     isAuthorizedForFeature,
@@ -24,8 +24,8 @@ import {
 } from './types'
 import * as Raven from 'src/util/raven'
 import { isDev } from 'src/analytics/internal/constants'
-import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
-import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import UserStorage from '@worldbrain/memex-common/ts/user-management/storage'
+import { User } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import {
@@ -36,8 +36,7 @@ import {
 import type { FirebaseError } from 'firebase/app'
 import type { AuthServices } from 'src/services/types'
 import { listenToWebAppMessage } from './auth-sync'
-import type { Runtime } from 'webextension-polyfill'
-import { validGeneratedLoginToken } from '@worldbrain/memex-common/lib/authentication/auth-sync'
+import { validGeneratedLoginToken } from '@worldbrain/memex-common/ts/authentication/auth-sync'
 
 export class AuthBackground {
     authService: AuthService
@@ -50,7 +49,7 @@ export class AuthBackground {
 
     constructor(
         public options: {
-            runtimeAPI: Runtime.Static
+            runtimeAPI: typeof chrome.runtime
             authServices: AuthServices
             localStorageArea: LimitedBrowserStorage
             backendFunctions: AuthBackendFunctions
@@ -273,15 +272,14 @@ export class AuthBackground {
         }
     }
 
-    loginWithProvider: AuthRemoteFunctionsInterface['loginWithProvider'] = async (
-        provider,
-    ) => {
-        try {
-            await this.authService.loginWithProvider(provider)
-            return { result: { status: 'authenticated' } }
-        } catch (err) {
-            console.error(err)
-            return { result: { status: 'error', reason: 'unknown' } }
+    loginWithProvider: AuthRemoteFunctionsInterface['loginWithProvider'] =
+        async (provider) => {
+            try {
+                await this.authService.loginWithProvider(provider)
+                return { result: { status: 'authenticated' } }
+            } catch (err) {
+                console.error(err)
+                return { result: { status: 'error', reason: 'unknown' } }
+            }
         }
-    }
 }

@@ -1,8 +1,8 @@
 import type {
     PushMessagePayload,
     PushMessagingServiceInterface,
-} from '@worldbrain/memex-common/lib/push-messaging/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+} from '@worldbrain/memex-common/ts/push-messaging/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 
 export class MockPushMessagingService implements PushMessagingServiceInterface {
     sentMessages: Array<

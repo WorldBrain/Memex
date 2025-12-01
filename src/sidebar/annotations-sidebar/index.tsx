@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import * as ReactDOM from 'react-dom/client'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import {
@@ -14,8 +14,7 @@ import { InPageUIRootMount } from 'src/in-page-ui/types'
 import {
     MemexTheme,
     MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import browser from 'webextension-polyfill'
+} from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 interface RootProps {
     mount: InPageUIRootMount
@@ -40,15 +39,14 @@ class Root extends React.Component<RootProps, RootState> {
         }
         this.setState({ themeVariant, theme: theme({ variant: themeVariant }) })
 
-        browser.storage.onChanged.addListener(async (changes, areaName) => {
+        chrome.storage.onChanged.addListener(async (changes, areaName) => {
             if (areaName !== 'local') {
                 return
             }
 
             if (changes.themeVariant) {
-                const { themeVariant } = await browser.storage.local.get(
-                    'themeVariant',
-                )
+                const { themeVariant } =
+                    await chrome.storage.local.get('themeVariant')
 
                 this.setState({
                     themeVariant,
@@ -85,8 +83,13 @@ export function setupInPageSidebarUI(
         'sidebarContext' | 'theme'
     >,
 ) {
-    ReactDOM.render(
-        <Root mount={mount} dependencies={dependencies} />,
-        mount.rootElement,
+    const root = ReactDOM.createRoot(mount.rootElement)
+    root.render(
+        <StyleSheetManager target={mount.shadowRoot as any}>
+            <Root mount={mount} dependencies={dependencies} />
+        </StyleSheetManager>,
     )
+
+    // Optional: Return an unmount function for cleanup if needed elsewhere
+    return () => root.unmount()
 }

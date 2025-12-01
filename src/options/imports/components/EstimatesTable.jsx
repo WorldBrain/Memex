@@ -1,15 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Checkbox from 'src/common-ui/components/Checkbox'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
 import classNames from 'classnames'
-import localStyles from './Import.css'
+import localStyles from './Import.module.css'
 import styled from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 const EstimatesTable = ({
     onAllowHistoryClick,

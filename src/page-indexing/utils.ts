@@ -2,7 +2,7 @@ import type { PipelineRes } from 'src/search'
 import * as Raven from 'src/util/raven'
 import type { PageIndexingBackground } from './background'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
-import { isTempPdfAccessUrl } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { isTempPdfAccessUrl } from '@worldbrain/memex-common/ts/page-indexing/utils'
 
 export function pageIsStub(page: Pick<PipelineRes, 'text' | 'terms'>): boolean {
     return (

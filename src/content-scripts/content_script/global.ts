@@ -1,15 +1,15 @@
 import { EventEmitter } from 'events'
-import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import type { ContentIdentifier } from '@worldbrain/memex-common/ts/page-indexing/types'
 import {
     injectMemexExtDetectionEl,
     removeMemexExtDetectionEl,
-} from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
+} from '@worldbrain/memex-common/ts/common-ui/utils/content-script'
 import {
     MemexOpenLinkDetail,
     MemexRequestHandledDetail,
     MEMEX_OPEN_LINK_EVENT_NAME,
     MEMEX_REQUEST_HANDLED_EVENT_NAME,
-} from '@worldbrain/memex-common/lib/services/memex-extension'
+} from '@worldbrain/memex-common/ts/services/memex-extension'
 
 import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
 import {
@@ -52,7 +52,7 @@ import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { checkPageBlacklisted } from 'src/blacklist/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import { hydrateCacheForPageAnnotations } from 'src/annotations/cache/utils'
 import type {
     ContentSharingInterface,
@@ -61,39 +61,39 @@ import type {
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
-import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { isMemexPageAPdf } from '@worldbrain/memex-common/ts/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { pageActionAllowed } from '@worldbrain/memex-common/ts/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
-import browser from 'webextension-polyfill'
+
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
-import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/ts/annotations/constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { generateAnnotationUrl } from 'src/annotations/utils'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { HighlightRenderer } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/renderer'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import checkBrowser from 'src/util/check-browser'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/ts/telegram/utils'
 import {
     Anchor,
     AnnotationPrivacyLevels,
-} from '@worldbrain/memex-common/lib/annotations/types'
+} from '@worldbrain/memex-common/ts/annotations/types'
 import type { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import {
     trackAnnotationCreate,
     trackPageActivityIndicatorHit,
-} from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+} from '@worldbrain/memex-common/ts/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import {
     PdfScreenshot,
     promptPdfScreenshot,
-} from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
-import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+} from '@worldbrain/memex-common/ts/pdf/screenshots/selection'
+import { processCommentForImageUpload } from '@worldbrain/memex-common/ts/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { PDFRemoteInterface } from 'src/pdf/background/types'
-import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/constants'
 import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { injectTelegramCustomUI } from './injectionUtils/telegram'
 import { renderSpacesBar } from './injectionUtils/utils'
@@ -102,7 +102,7 @@ import {
     trackTwitterMessageList,
 } from './injectionUtils/twitter'
 import { injectSubstackButtons } from './injectionUtils/substack'
-import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
+import { extractRawPageContent } from '@worldbrain/memex-common/ts/page-indexing/content-extraction/extract-page-content'
 import { extractRawPDFContent } from 'src/page-analysis/content_script/extract-page-content'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { createUIServices } from 'src/services/ui'
@@ -110,20 +110,20 @@ import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
-import type { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
+import type { PseudoSelection } from '@worldbrain/memex-common/ts/in-page-ui/types'
 import {
     cloneSelectionAsPseudoObject,
     getSelectionHtml,
-} from '@worldbrain/memex-common/lib/annotations/utils'
+} from '@worldbrain/memex-common/ts/annotations/utils'
 import {
     COUNTER_STORAGE_KEY,
     DEFAULT_COUNTER_STORAGE_VALUE,
-} from '@worldbrain/memex-common/lib/subscriptions/constants'
+} from '@worldbrain/memex-common/ts/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
-import * as anchoring from '@worldbrain/memex-common/lib/annotations'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import * as anchoring from '@worldbrain/memex-common/ts/annotations'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import debounce from 'lodash/debounce'
 import { updateNudgesCounter } from 'src/util/nudges-utils'
 import {
@@ -149,7 +149,7 @@ export async function main(
     params.loadRemotely = params.loadRemotely ?? true
 
     setupRpcConnection({
-        browserAPIs: browser,
+        browserAPIs: chrome,
         sideName: 'content-script-global',
         role: 'content',
     })
@@ -186,7 +186,7 @@ export async function main(
         }
         if (event.key === 'z') {
             if (keysPressed.includes('Meta')) {
-                let lastActions = await globalThis['browser'].storage.local.get(
+                let lastActions = await chrome.storage.local.get(
                     `${UNDO_HISTORY}`,
                 )
 
@@ -195,16 +195,14 @@ export async function main(
                 let lastAction = lastActions[0]
 
                 if (lastAction.url !== window.location.href) {
-                    await globalThis['browser'].storage.local.remove([
-                        `${UNDO_HISTORY}`,
-                    ])
+                    await chrome.storage.local.remove([`${UNDO_HISTORY}`])
                     return
                 } else {
                     highlightRenderer.removeAnnotationHighlight({
                         id: lastAction.id,
                     })
                     lastActions.shift()
-                    await globalThis['browser'].storage.local.set({
+                    await chrome.storage.local.set({
                         [`${UNDO_HISTORY}`]: lastActions,
                     })
                 }
@@ -256,22 +254,18 @@ export async function main(
     const contentSharingBG = runInBackground<ContentSharingInterface>()
     const copyPasterBG = runInBackground<RemoteCopyPasterInterface>()
     const imageSupportBG = runInBackground<ImageSupportInterface<'caller'>>()
-    const contentConversationsBG = runInBackground<
-        ContentConversationsInterface
-    >()
-    const contentSharingByTabsBG = runInBackground<
-        RemoteContentSharingByTabsInterface<'caller'>
-    >()
+    const contentConversationsBG =
+        runInBackground<ContentConversationsInterface>()
+    const contentSharingByTabsBG =
+        runInBackground<RemoteContentSharingByTabsInterface<'caller'>>()
     const searchBG = runInBackground<RemoteSearchInterface>()
     const pdfViewerBG = runInBackground<PDFRemoteInterface>()
-    const contentScriptsBG = runInBackground<
-        ContentScriptsInterface<'caller'>
-    >()
+    const contentScriptsBG =
+        runInBackground<ContentScriptsInterface<'caller'>>()
     const syncSettingsBG = runInBackground<RemoteSyncSettingsInterface>()
     const collectionsBG = runInBackground<RemoteCollectionsInterface>()
-    const pageActivityIndicatorBG = runInBackground<
-        RemotePageActivityIndicatorInterface
-    >()
+    const pageActivityIndicatorBG =
+        runInBackground<RemotePageActivityIndicatorInterface>()
     const activityIndicatorBG = runInBackground<ActivityIndicatorInterface>()
     const pdfBG = runInBackground<PDFRemoteInterface>()
 
@@ -309,9 +303,9 @@ export async function main(
     })
 
     // add listener for when a person is over the pricing limit for saved pages
-    const currentTabURL = ((await runInBackground<
+    const currentTabURL = (await runInBackground<
         InPageUIInterface<'caller'>
-    >().getCurrentTabURL()) as unknown) as string
+    >().getCurrentTabURL()) as unknown as string
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
@@ -347,7 +341,7 @@ export async function main(
         icons: (iconName) => theme({ variant: 'dark' }).icons[iconName],
         captureException,
         getUndoHistory: async () => {
-            const storage = await browser.storage.local.get(UNDO_HISTORY)
+            const storage = await chrome.storage.local.get(UNDO_HISTORY)
             return storage[UNDO_HISTORY] ?? []
         },
         createHighlight: async (
@@ -364,7 +358,7 @@ export async function main(
             )
         },
         setUndoHistory: async (undoHistory) =>
-            browser.storage.local.set({
+            chrome.storage.local.set({
                 [UNDO_HISTORY]: undoHistory,
             }),
         getHighlightColorSettings: async () => {
@@ -373,7 +367,7 @@ export async function main(
             return colorSettings ?? HIGHLIGHT_COLORS_DEFAULT
         },
         onHighlightColorChange: (cb) => {
-            browser.storage.onChanged.addListener((changes) => {
+            chrome.storage.onChanged.addListener((changes) => {
                 if (changes[HIGHLIGHT_COLOR_KEY]?.newValue != null) {
                     cb(changes[HIGHLIGHT_COLOR_KEY].newValue)
                 }
@@ -460,31 +454,29 @@ export async function main(
                     false,
                 )
 
-                const {
-                    savePromise,
-                    remoteAnnotationId,
-                } = await createAnnotation({
-                    shareOpts: {
-                        shouldShare: shouldShareAnnotation,
-                        shouldCopyShareLink: data.shouldCopyShareLink,
-                    },
-                    annotationsBG,
-                    contentSharingBG,
-                    skipPageIndexing: false,
-                    syncSettingsBG: syncSettingsBG,
-                    privacyLevelOverride: privacyLevel,
-                    annotationData: {
-                        localId,
-                        localListIds,
-                        body: bodyForSaving,
-                        comment: data.comment,
-                        selector: data.selector,
-                        fullPageUrl: data.fullPageUrl,
-                        pageTitle: pageInfo.getPageTitle(),
-                        createdWhen: new Date(data.createdWhen),
-                        color: data.color as HighlightColor['id'],
-                    },
-                })
+                const { savePromise, remoteAnnotationId } =
+                    await createAnnotation({
+                        shareOpts: {
+                            shouldShare: shouldShareAnnotation,
+                            shouldCopyShareLink: data.shouldCopyShareLink,
+                        },
+                        annotationsBG,
+                        contentSharingBG,
+                        skipPageIndexing: false,
+                        syncSettingsBG: syncSettingsBG,
+                        privacyLevelOverride: privacyLevel,
+                        annotationData: {
+                            localId,
+                            localListIds,
+                            body: bodyForSaving,
+                            comment: data.comment,
+                            selector: data.selector,
+                            fullPageUrl: data.fullPageUrl,
+                            pageTitle: pageInfo.getPageTitle(),
+                            createdWhen: new Date(data.createdWhen),
+                            color: data.color as HighlightColor['id'],
+                        },
+                    })
 
                 if (remoteAnnotationId != null) {
                     const cachedAnnotation =
@@ -506,7 +498,8 @@ export async function main(
         },
     })
 
-    const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
+    const sidebarEvents =
+        new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     sidebarEvents.on('showPowerUpModal', async ({ limitReachedNotif }) => {
         if (currentTabURL?.includes(window.location.href)) {
@@ -594,7 +587,7 @@ export async function main(
     }
 
     const captureScreenshot = () =>
-        browser.tabs.captureVisibleTab(undefined, {
+        chrome.tabs.captureVisibleTab(undefined, {
             format: 'jpeg',
             quality: 100,
         })
@@ -610,22 +603,192 @@ export async function main(
 
     const annotationsFunctions = {
         // TODO: Simplify and move this logic away from here
-        createHighlight: (
-            analyticsEvent?: AnalyticsEvent<'Highlights'>,
-        ) => async (
-            selection: PseudoSelection,
-            shouldShare: boolean,
-            shouldCopyShareLink: boolean,
-            drawRectangle?: boolean,
-            color?: HighlightColor['id'],
-            preventHideTooltip?: boolean,
-        ) => {
-            highlightCreateState = 'running'
-            let anchor: Anchor
-            let quote: string
+        createHighlight:
+            (analyticsEvent?: AnalyticsEvent<'Highlights'>) =>
+            async (
+                selection: PseudoSelection,
+                shouldShare: boolean,
+                shouldCopyShareLink: boolean,
+                drawRectangle?: boolean,
+                color?: HighlightColor['id'],
+                preventHideTooltip?: boolean,
+            ) => {
+                highlightCreateState = 'running'
+                let anchor: Anchor
+                let quote: string
 
-            if (selection) {
-                quote = getSelectionHtml(selection)
+                if (selection) {
+                    quote = getSelectionHtml(selection)
+                    const descriptor = await anchoring.selectionToDescriptor({
+                        _document: this.document,
+                        _window: this.window,
+                        isPdf: this.pdfViewer != null,
+                        selection,
+                    })
+                    anchor = { quote, descriptor }
+                }
+
+                if (selection.toString().trim() === '') {
+                    return {
+                        annotationId: null,
+                        createPromise: Promise.resolve(),
+                    }
+                }
+
+                if (
+                    !(await pageActionAllowed(
+                        chrome,
+                        analyticsBG,
+                        collectionsBG,
+                        window.location.href,
+                    ))
+                ) {
+                    sidebarEvents.emit('showPowerUpModal', {
+                        limitReachedNotif: 'Bookmarks',
+                    })
+                    highlightCreateState = 'error'
+                    return
+                }
+
+                if (
+                    (quote?.length === 0 || !selection) &&
+                    window.location.href.includes('youtube.com')
+                ) {
+                    await inPageUI.showSidebar({
+                        action: 'youtube_timestamp',
+                    })
+                    return
+                } else if (quote?.length === 0 && !drawRectangle) {
+                    highlightCreateState = 'success'
+                    return
+                }
+
+                const highlightColorSettingStorage =
+                    await getHighlightColorSettings()
+                const highlightColor =
+                    color ?? highlightColorSettingStorage[0].id
+
+                if (inPageUI.componentsShown.sidebar) {
+                    inPageUI.showSidebar({
+                        action: 'show_annotation',
+                    })
+                }
+                let screenshotGrabResult: PdfScreenshot
+                let annotationId = null
+                if (isPdfViewerRunning && drawRectangle) {
+                    const pdfViewer = globalThis as any
+                    screenshotGrabResult = await promptPdfScreenshot(
+                        document,
+                        pdfViewer,
+                        {
+                            captureScreenshot,
+                            htmlElToCanvasEl: params.htmlElToCanvasEl,
+                        },
+                    )
+
+                    if (
+                        screenshotGrabResult == null ||
+                        screenshotGrabResult.anchor == null
+                    ) {
+                        highlightCreateState = 'success'
+                        return
+                    }
+
+                    const results = await saveHighlight(
+                        shouldShare,
+                        shouldCopyShareLink,
+                        screenshotGrabResult.anchor,
+                        screenshotGrabResult.screenshot,
+                        imageSupportBG,
+                        highlightColor,
+                        selection,
+                        anchor,
+                    )
+                    annotationId = results.annotationId
+                    await results.createPromise
+                } else if (quote.length > 0) {
+                    const results = await saveHighlight(
+                        shouldShare,
+                        shouldCopyShareLink,
+                        null,
+                        null,
+                        null,
+                        highlightColor,
+                        selection,
+                        anchor,
+                    )
+                    annotationId = results.annotationId
+                    await results.createPromise
+                }
+
+                // await inPageUI.hideTooltip()
+
+                if (preventHideTooltip) {
+                    const styleSheet = document.createElement('style')
+                    styleSheet.type = 'text/css'
+                    styleSheet.innerText = `
+                    @keyframes slideAndFade {
+                        0% { transform: translateY(-5px); opacity: 0; }
+                        10% { transform: translateY(10px); opacity: 1; }
+                        90% { transform: translateY(10px); opacity: 1; }
+                        100% { transform: translateY(-5px); opacity: 0; }
+                    }`
+                    document.head.appendChild(styleSheet)
+
+                    const notification = document.createElement('div')
+                    notification.textContent = '🔗 Link copied to clipboard'
+                    notification.style.position = 'fixed'
+                    notification.style.top = '5px'
+                    notification.style.left = '50%'
+                    notification.style.transform = 'translateX(-50%)'
+                    notification.style.backgroundColor = '#12131B95'
+                    ;(notification.style as any).backdropFilter = 'blur(10px)'
+                    notification.style.color = 'white'
+                    notification.style.padding = '10px'
+                    notification.style.borderRadius = '5px'
+                    notification.style.zIndex = '1000'
+                    notification.style.textAlign = 'center'
+                    notification.style.animation = 'slideAndFade 4s ease-in-out'
+                    document.body.appendChild(notification)
+                    setTimeout(() => {
+                        document.body.removeChild(notification)
+                    }, 2000)
+                }
+                if (analyticsBG) {
+                    try {
+                        await trackAnnotationCreate(analyticsBG, {
+                            annotationType: 'highlight',
+                        })
+                    } catch (error) {
+                        console.error(
+                            `Error tracking space create event', ${error}`,
+                        )
+                    }
+                }
+
+                highlightCreateState = 'success'
+                return annotationId
+            },
+        // TODO: Simplify and move this logic away from here
+        createAnnotation:
+            (analyticsEvent?: AnalyticsEvent<'Annotations'>) =>
+            async (
+                selection: PseudoSelection,
+                shouldShare: boolean,
+                shouldCopyShareLink: boolean,
+                showSpacePicker?: boolean,
+                commentText?: string,
+                color?: HighlightColor['id'],
+            ) => {
+                highlightCreateState = 'running'
+                const selectionEmpty = !selection?.toString().length
+                if (selectionEmpty) {
+                    highlightCreateState = 'success'
+                    return
+                }
+
+                let anchor: Anchor
+                const quote = getSelectionHtml(selection)
                 const descriptor = await anchoring.selectionToDescriptor({
                     _document: this.document,
                     _window: this.window,
@@ -633,318 +796,159 @@ export async function main(
                     selection,
                 })
                 anchor = { quote, descriptor }
-            }
 
-            if (selection.toString().trim() === '') {
-                return { annotationId: null, createPromise: Promise.resolve() }
-            }
+                if (
+                    !(await pageActionAllowed(
+                        chrome,
+                        analyticsBG,
+                        collectionsBG,
+                        window.location.href,
+                    ))
+                ) {
+                    sidebarEvents.emit('showPowerUpModal', {
+                        limitReachedNotif: 'Bookmarks',
+                    })
+                    highlightCreateState = 'error'
+                    return
+                }
 
-            if (
-                !(await pageActionAllowed(
-                    browser,
-                    analyticsBG,
-                    collectionsBG,
-                    window.location.href,
-                ))
-            ) {
-                sidebarEvents.emit('showPowerUpModal', {
-                    limitReachedNotif: 'Bookmarks',
-                })
-                highlightCreateState = 'error'
-                return
-            }
+                const highlightColorSettingStorage =
+                    await getHighlightColorSettings()
+                const highlightColor =
+                    color ?? highlightColorSettingStorage[0].id
 
-            if (
-                (quote?.length === 0 || !selection) &&
-                window.location.href.includes('youtube.com')
-            ) {
-                await inPageUI.showSidebar({
-                    action: 'youtube_timestamp',
-                })
-                return
-            } else if (quote?.length === 0 && !drawRectangle) {
+                let screenshotGrabResult
+                if (
+                    isPdfViewerRunning &&
+                    window.getSelection().toString().length === 0
+                ) {
+                    const pdfViewer = globalThis as any
+                    screenshotGrabResult = await promptPdfScreenshot(
+                        document,
+                        pdfViewer,
+                        {
+                            captureScreenshot,
+                            htmlElToCanvasEl: params.htmlElToCanvasEl,
+                        },
+                    )
+
+                    if (
+                        screenshotGrabResult == null ||
+                        screenshotGrabResult.anchor == null
+                    ) {
+                        highlightCreateState = 'success'
+                        return
+                    }
+
+                    const result = await saveHighlight(
+                        shouldShare,
+                        shouldCopyShareLink,
+                        screenshotGrabResult.anchor,
+                        screenshotGrabResult.screenshot,
+                        imageSupportBG,
+                        highlightColor,
+                        selection,
+                        anchor,
+                    )
+
+                    const annotationId = result.annotationId
+                    const createPromise = result.createPromise
+                    await inPageUI.showSidebar(
+                        annotationId
+                            ? {
+                                  annotationCacheId: annotationId.toString(),
+                                  action: showSpacePicker
+                                      ? 'edit_annotation_spaces'
+                                      : 'edit_annotation',
+                              }
+                            : {
+                                  action: 'comment',
+                                  commentText: commentText ?? '',
+                              },
+                    )
+                    await createPromise
+                } else if (
+                    selection &&
+                    window.getSelection().toString().length > 0
+                ) {
+                    const result = await saveHighlight(
+                        shouldShare,
+                        shouldCopyShareLink,
+                        null,
+                        null,
+                        imageSupportBG,
+                        highlightColor,
+                        selection,
+                        anchor,
+                    )
+
+                    const annotationId = result.annotationId
+                    const createPromise = result.createPromise
+                    await inPageUI.showSidebar(
+                        annotationId
+                            ? {
+                                  annotationCacheId: annotationId.toString(),
+                                  action: showSpacePicker
+                                      ? 'edit_annotation_spaces'
+                                      : 'edit_annotation',
+                              }
+                            : {
+                                  action: 'comment',
+                                  commentText: commentText ?? '',
+                              },
+                    )
+                    await createPromise
+                } else if (window.location.href.includes('youtube.com')) {
+                    await inPageUI.showSidebar({
+                        action: 'youtube_timestamp',
+                        commentText: commentText,
+                    })
+                }
+
+                // await inPageUI.hideTooltip()
+                if (analyticsBG) {
+                    // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
+                    try {
+                        await trackAnnotationCreate(analyticsBG, {
+                            annotationType: 'highlight',
+                        })
+                    } catch (error) {
+                        console.error(
+                            `Error tracking space create event', ${error}`,
+                        )
+                    }
+                }
                 highlightCreateState = 'success'
-                return
-            }
-
-            const highlightColorSettingStorage = await getHighlightColorSettings()
-            const highlightColor = color ?? highlightColorSettingStorage[0].id
-
-            if (inPageUI.componentsShown.sidebar) {
+            },
+        askAI:
+            () =>
+            (
+                highlightedText: string,
+                prompt: string,
+                instaExecutePrompt?: boolean,
+            ) => {
                 inPageUI.showSidebar({
-                    action: 'show_annotation',
+                    action: 'show_page_summary',
+                    highlightedText,
+                    prompt,
+                    instaExecutePrompt,
                 })
-            }
-            let screenshotGrabResult: PdfScreenshot
-            let annotationId = null
-            if (isPdfViewerRunning && drawRectangle) {
-                const pdfViewer = globalThis as any
-                screenshotGrabResult = await promptPdfScreenshot(
-                    document,
-                    pdfViewer,
-                    {
-                        captureScreenshot,
-                        htmlElToCanvasEl: params.htmlElToCanvasEl,
-                    },
-                )
-
-                if (
-                    screenshotGrabResult == null ||
-                    screenshotGrabResult.anchor == null
-                ) {
-                    highlightCreateState = 'success'
-                    return
-                }
-
-                const results = await saveHighlight(
-                    shouldShare,
-                    shouldCopyShareLink,
-                    screenshotGrabResult.anchor,
-                    screenshotGrabResult.screenshot,
-                    imageSupportBG,
-                    highlightColor,
-                    selection,
-                    anchor,
-                )
-                annotationId = results.annotationId
-                await results.createPromise
-            } else if (quote.length > 0) {
-                const results = await saveHighlight(
-                    shouldShare,
-                    shouldCopyShareLink,
-                    null,
-                    null,
-                    null,
-                    highlightColor,
-                    selection,
-                    anchor,
-                )
-                annotationId = results.annotationId
-                await results.createPromise
-            }
-
-            // await inPageUI.hideTooltip()
-
-            if (preventHideTooltip) {
-                const styleSheet = document.createElement('style')
-                styleSheet.type = 'text/css'
-                styleSheet.innerText = `
-                    @keyframes slideAndFade {
-                        0% { transform: translateY(-5px); opacity: 0; }
-                        10% { transform: translateY(10px); opacity: 1; }
-                        90% { transform: translateY(10px); opacity: 1; }
-                        100% { transform: translateY(-5px); opacity: 0; }
-                    }`
-                document.head.appendChild(styleSheet)
-
-                const notification = document.createElement('div')
-                notification.textContent = '🔗 Link copied to clipboard'
-                notification.style.position = 'fixed'
-                notification.style.top = '5px'
-                notification.style.left = '50%'
-                notification.style.transform = 'translateX(-50%)'
-                notification.style.backgroundColor = '#12131B95'
-                ;(notification.style as any).backdropFilter = 'blur(10px)'
-                notification.style.color = 'white'
-                notification.style.padding = '10px'
-                notification.style.borderRadius = '5px'
-                notification.style.zIndex = '1000'
-                notification.style.textAlign = 'center'
-                notification.style.animation = 'slideAndFade 4s ease-in-out'
-                document.body.appendChild(notification)
-                setTimeout(() => {
-                    document.body.removeChild(notification)
-                }, 2000)
-            }
-            if (analyticsBG) {
-                try {
-                    await trackAnnotationCreate(analyticsBG, {
-                        annotationType: 'highlight',
-                    })
-                } catch (error) {
-                    console.error(
-                        `Error tracking space create event', ${error}`,
-                    )
-                }
-            }
-
-            highlightCreateState = 'success'
-            return annotationId
-        },
-        // TODO: Simplify and move this logic away from here
-        createAnnotation: (
-            analyticsEvent?: AnalyticsEvent<'Annotations'>,
-        ) => async (
-            selection: PseudoSelection,
-            shouldShare: boolean,
-            shouldCopyShareLink: boolean,
-            showSpacePicker?: boolean,
-            commentText?: string,
-            color?: HighlightColor['id'],
-        ) => {
-            highlightCreateState = 'running'
-            const selectionEmpty = !selection?.toString().length
-            if (selectionEmpty) {
-                highlightCreateState = 'success'
-                return
-            }
-
-            let anchor: Anchor
-            const quote = getSelectionHtml(selection)
-            const descriptor = await anchoring.selectionToDescriptor({
-                _document: this.document,
-                _window: this.window,
-                isPdf: this.pdfViewer != null,
-                selection,
-            })
-            anchor = { quote, descriptor }
-
-            if (
-                !(await pageActionAllowed(
-                    browser,
-                    analyticsBG,
-                    collectionsBG,
-                    window.location.href,
-                ))
-            ) {
-                sidebarEvents.emit('showPowerUpModal', {
-                    limitReachedNotif: 'Bookmarks',
+                inPageUI.hideTooltip()
+            },
+        askAIwithMediaRange:
+            () =>
+            (
+                range: { from: number; to: number },
+                prompt: string,
+                instaExecutePrompt?: boolean,
+            ) => {
+                inPageUI.showSidebar({
+                    action: 'add_media_range_to_ai_context',
+                    range,
+                    prompt,
+                    instaExecutePrompt: instaExecutePrompt ?? false,
                 })
-                highlightCreateState = 'error'
-                return
-            }
-
-            const highlightColorSettingStorage = await getHighlightColorSettings()
-            const highlightColor = color ?? highlightColorSettingStorage[0].id
-
-            let screenshotGrabResult
-            if (
-                isPdfViewerRunning &&
-                window.getSelection().toString().length === 0
-            ) {
-                const pdfViewer = globalThis as any
-                screenshotGrabResult = await promptPdfScreenshot(
-                    document,
-                    pdfViewer,
-                    {
-                        captureScreenshot,
-                        htmlElToCanvasEl: params.htmlElToCanvasEl,
-                    },
-                )
-
-                if (
-                    screenshotGrabResult == null ||
-                    screenshotGrabResult.anchor == null
-                ) {
-                    highlightCreateState = 'success'
-                    return
-                }
-
-                const result = await saveHighlight(
-                    shouldShare,
-                    shouldCopyShareLink,
-                    screenshotGrabResult.anchor,
-                    screenshotGrabResult.screenshot,
-                    imageSupportBG,
-                    highlightColor,
-                    selection,
-                    anchor,
-                )
-
-                const annotationId = result.annotationId
-                const createPromise = result.createPromise
-                await inPageUI.showSidebar(
-                    annotationId
-                        ? {
-                              annotationCacheId: annotationId.toString(),
-                              action: showSpacePicker
-                                  ? 'edit_annotation_spaces'
-                                  : 'edit_annotation',
-                          }
-                        : {
-                              action: 'comment',
-                              commentText: commentText ?? '',
-                          },
-                )
-                await createPromise
-            } else if (
-                selection &&
-                window.getSelection().toString().length > 0
-            ) {
-                const result = await saveHighlight(
-                    shouldShare,
-                    shouldCopyShareLink,
-                    null,
-                    null,
-                    imageSupportBG,
-                    highlightColor,
-                    selection,
-                    anchor,
-                )
-
-                const annotationId = result.annotationId
-                const createPromise = result.createPromise
-                await inPageUI.showSidebar(
-                    annotationId
-                        ? {
-                              annotationCacheId: annotationId.toString(),
-                              action: showSpacePicker
-                                  ? 'edit_annotation_spaces'
-                                  : 'edit_annotation',
-                          }
-                        : {
-                              action: 'comment',
-                              commentText: commentText ?? '',
-                          },
-                )
-                await createPromise
-            } else if (window.location.href.includes('youtube.com')) {
-                await inPageUI.showSidebar({
-                    action: 'youtube_timestamp',
-                    commentText: commentText,
-                })
-            }
-
-            // await inPageUI.hideTooltip()
-            if (analyticsBG) {
-                // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
-                try {
-                    await trackAnnotationCreate(analyticsBG, {
-                        annotationType: 'highlight',
-                    })
-                } catch (error) {
-                    console.error(
-                        `Error tracking space create event', ${error}`,
-                    )
-                }
-            }
-            highlightCreateState = 'success'
-        },
-        askAI: () => (
-            highlightedText: string,
-            prompt: string,
-            instaExecutePrompt?: boolean,
-        ) => {
-            inPageUI.showSidebar({
-                action: 'show_page_summary',
-                highlightedText,
-                prompt,
-                instaExecutePrompt,
-            })
-            inPageUI.hideTooltip()
-        },
-        askAIwithMediaRange: () => (
-            range: { from: number; to: number },
-            prompt: string,
-            instaExecutePrompt?: boolean,
-        ) => {
-            inPageUI.showSidebar({
-                action: 'add_media_range_to_ai_context',
-                range,
-                prompt,
-                instaExecutePrompt: instaExecutePrompt ?? false,
-            })
-        },
+            },
         deleteAnnotation: async (annotationId: string) => {
             await deleteAnnotation(annotationId)
         },
@@ -978,9 +982,8 @@ export async function main(
             )[0] as HTMLElement
 
             if (screenshotTarget) {
-                const dataURL = await captureScreenshotFromHTMLVideo(
-                    screenshotTarget,
-                )
+                const dataURL =
+                    await captureScreenshotFromHTMLVideo(screenshotTarget)
                 inPageUI.showSidebar({
                     action: 'create_youtube_timestamp_with_screenshot',
                     imageData: dataURL,
@@ -1101,9 +1104,8 @@ export async function main(
                     ) {
                         const url = new URL(urlToOpen)
                         const uploadId = url.searchParams.get('upload_id')
-                        urlToOpen = await pdfViewerBG.getTempPdfAccessUrl(
-                            uploadId,
-                        )
+                        urlToOpen =
+                            await pdfViewerBG.getTempPdfAccessUrl(uploadId)
                     }
                     if (
                         urlToOpen.includes('https://arxiv.org/pdf/') &&
@@ -1119,7 +1121,7 @@ export async function main(
                 },
 
                 events: sidebarEvents,
-                browserAPIs: browser,
+                browserAPIs: chrome,
             })
             components.ribbon?.resolve()
         },
@@ -1134,8 +1136,8 @@ export async function main(
         },
         async registerSidebarScript(execute) {
             await execute({
-                runtimeAPI: browser.runtime,
-                storageAPI: browser.storage,
+                runtimeAPI: chrome.runtime,
+                storageAPI: chrome.storage,
                 events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
                     ? 'visible'
@@ -1146,7 +1148,7 @@ export async function main(
                 // inPageMode: true,
                 highlighter: highlightRenderer,
                 analyticsBG,
-                browserAPIs: browser,
+                browserAPIs: chrome,
                 authBG,
                 annotationsBG,
                 bgScriptBG,
@@ -1206,7 +1208,7 @@ export async function main(
                 bgScriptsBG: bgScriptBG,
                 analyticsBG,
                 pageActivityIndicatorBG,
-                localStorageAPI: browser.storage.local,
+                localStorageAPI: chrome.storage.local,
                 syncSettingsBG: syncSettingsBG,
                 toggleTooltipState: async (state: boolean) => {
                     tooltipUtils.setTooltipState(state)
@@ -1244,10 +1246,10 @@ export async function main(
                     history,
                     annotationsCache,
                     copyToClipboard,
-                    tabsAPI: browser.tabs,
-                    runtimeAPI: browser.runtime,
-                    browserAPIs: browser,
-                    localStorage: browser.storage.local,
+                    tabsAPI: chrome.tabs,
+                    runtimeAPI: chrome.runtime,
+                    browserAPIs: chrome,
+                    localStorage: chrome.storage.local,
                     services: createUIServices(),
                     bgScriptBG,
                     openPDFinViewer: async (originalPageURL) => {
@@ -1259,9 +1261,8 @@ export async function main(
                         ) {
                             const url = new URL(urlToOpen)
                             const uploadId = url.searchParams.get('upload_id')
-                            urlToOpen = await pdfViewerBG.getTempPdfAccessUrl(
-                                uploadId,
-                            )
+                            urlToOpen =
+                                await pdfViewerBG.getTempPdfAccessUrl(uploadId)
                         }
                         if (
                             urlToOpen.includes('https://arxiv.org/pdf/') &&
@@ -1279,7 +1280,7 @@ export async function main(
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
                     authBG: authBG,
                     limitReachedNotif: null,
-                    browserAPIs: browser,
+                    browserAPIs: chrome,
                 },
                 annotationsFunctions,
                 transcriptFunctions,
@@ -1308,7 +1309,7 @@ export async function main(
     // TODO:(remote-functions) Move these to the inPageUI class too
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         extractRawPageContent: async (doc = document, url = location.href) => {
-            if (isUrlPDFViewerUrl(url, { runtimeAPI: browser.runtime })) {
+            if (isUrlPDFViewerUrl(url, { runtimeAPI: chrome.runtime })) {
                 return extractRawPDFContent(doc, url)
             }
             return extractRawPageContent(doc, url)
@@ -1463,9 +1464,8 @@ export async function main(
 
     // 9. Check for page activity status
 
-    const {
-        status: pageActivityStatus,
-    } = await pageActivityIndicatorBG.getPageActivityStatus(fullPageUrl)
+    const { status: pageActivityStatus } =
+        await pageActivityIndicatorBG.getPageActivityStatus(fullPageUrl)
 
     const hasActivity =
         pageActivityStatus === 'no-annotations' ||
@@ -1618,9 +1618,8 @@ export async function main(
         })
     }
 
-    const betaFeatureSetting = await syncSettings.betaFeatures.get(
-        'imageOverlay',
-    )
+    const betaFeatureSetting =
+        await syncSettings.betaFeatures.get('imageOverlay')
 
     let imageInjectionEnabled = null
     if (betaFeatureSetting != null) {
@@ -1672,9 +1671,8 @@ export async function main(
             let retries = 0
             const maxRetries = 60
             while (!hasSubscriptionUpdated && retries < maxRetries) {
-                const subscriptionBefore = await browser.storage.local.get(
-                    COUNTER_STORAGE_KEY,
-                )
+                const subscriptionBefore =
+                    await chrome.storage.local.get(COUNTER_STORAGE_KEY)
 
                 const subscriptionDataBefore =
                     subscriptionBefore[COUNTER_STORAGE_KEY]
@@ -1684,9 +1682,10 @@ export async function main(
                     DEFAULT_COUNTER_STORAGE_VALUE.pU
 
                 await sleepPromise(1000)
-                const status = await runInBackground<
-                    InPageUIInterface<'caller'>
-                >().checkStripePlan(email)
+                const status =
+                    await runInBackground<
+                        InPageUIInterface<'caller'>
+                    >().checkStripePlan(email)
 
                 let subscriptionHasChanged = false
 
@@ -1767,7 +1766,7 @@ export async function main(
         if (scrollPosition > 0.3 * pageHeight && activeTabTime > 30000) {
             const shouldShow = await updateNudgesCounter(
                 'bookmarksCount',
-                browser,
+                chrome,
             )
             removeScrollListener()
             if (shouldShow) {
@@ -1852,7 +1851,7 @@ class PageInfo {
         public options?: { getContentFingerprints?: GetContentFingerprints },
     ) {
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
-            runtimeAPI: browser.runtime,
+            runtimeAPI: chrome.runtime,
         })
     }
 
@@ -1880,7 +1879,7 @@ class PageInfo {
         }
 
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
-            runtimeAPI: browser.runtime,
+            runtimeAPI: chrome.runtime,
         })
 
         this._identifier = await runInBackground<
@@ -2013,12 +2012,10 @@ export function setupWebUIActions(args: {
                         'openPageInSelectedListModeTriggerElement',
                     ) // replace "specificID" with your actual ID
                     if (addedElement) {
-                        const fullPageUrl = addedElement.getAttribute(
-                            'sourceurl',
-                        )
-                        const sharedListId = addedElement.getAttribute(
-                            'sharedlistid',
-                        )
+                        const fullPageUrl =
+                            addedElement.getAttribute('sourceurl')
+                        const sharedListId =
+                            addedElement.getAttribute('sharedlistid')
                         const manuallyPullLocalListData =
                             addedElement.getAttribute('iscollaboratorlink') ===
                                 'true' ||
@@ -2107,9 +2104,9 @@ export async function injectCustomUIperPage(
 
         injectSubstackButtons(
             pkmSyncBG,
-            browser.storage,
+            chrome.storage,
             openSidebarInRabbitHole,
-            browser.runtime,
+            chrome.runtime,
         )
     }
 

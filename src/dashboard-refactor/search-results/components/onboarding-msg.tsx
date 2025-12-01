@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
+import Button from '@worldbrain/memex-common/ts/common-ui/components/button'
 
 interface Props {
     goToImportRoute: () => void

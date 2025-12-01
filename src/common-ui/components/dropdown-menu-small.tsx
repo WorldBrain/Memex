@@ -1,10 +1,10 @@
 import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { AImodels } from '@worldbrain/memex-common/lib/summarization/types'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import { ClickAway } from '@worldbrain/memex-common/ts/common-ui/components/click-away-wrapper'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { AImodels } from '@worldbrain/memex-common/ts/summarization/types'
 
 export interface MenuItemProps {
     name: string
@@ -87,20 +87,19 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
         }
     }
 
-    private handleItemClick: (
-        item: MenuItemProps,
-    ) => React.MouseEventHandler = (item) => (e) => {
-        if (item.isDisabled) {
-            e.preventDefault()
-            return
+    private handleItemClick: (item: MenuItemProps) => React.MouseEventHandler =
+        (item) => (e) => {
+            if (item.isDisabled) {
+                e.preventDefault()
+                return
+            }
+            this.setState({
+                isOpen: this.props.keepSelectedState,
+                selected: item,
+                isOpened: false,
+            })
+            this.props.onMenuItemClick(item)
         }
-        this.setState({
-            isOpen: this.props.keepSelectedState,
-            selected: item,
-            isOpened: false,
-        })
-        this.props.onMenuItemClick(item)
-    }
 
     private renderMenuItems() {
         // if (this.props.selectedState === 1) {

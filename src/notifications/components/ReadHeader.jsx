@@ -2,15 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
-import styles from './ReadHeader.css'
-
-const isExpanded = expanded =>
-    classNames(styles.expIcon, {
-        [styles.expanded]: expanded,
-    })
-
-const ReadHeader = props => (
-    <div className={styles.readHeader} onClick={props.toggleReadExpand}>
+const ReadHeader = (props) => (
+    <div onClick={props.toggleReadExpand}>
         <span>
             {!props.isReadExpanded ? (
                 <span>See Previous</span>
@@ -18,9 +11,7 @@ const ReadHeader = props => (
                 <span>Hide Previous</span>
             )}
         </span>
-        <span
-            className={isExpanded(props.isReadExpanded)}
-        />
+        <span />
     </div>
 )
 

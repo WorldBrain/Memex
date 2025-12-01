@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 import Mousetrap from 'mousetrap'
@@ -13,10 +13,10 @@ import {
     PRIVATIZE_ANNOT_NEGATIVE_LABEL,
 } from 'src/overview/sharing/constants'
 
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 
 export interface Props {
     isShared?: boolean
@@ -91,11 +91,12 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         }
     }
 
-    private saveWithShareIntent = (
-        shouldShare: boolean,
-        keepListsIfUnsharing?: boolean,
-    ) => (isProtected?: boolean) =>
-        this.props.onSave(shouldShare, isProtected, { keepListsIfUnsharing })
+    private saveWithShareIntent =
+        (shouldShare: boolean, keepListsIfUnsharing?: boolean) =>
+        (isProtected?: boolean) =>
+            this.props.onSave(shouldShare, isProtected, {
+                keepListsIfUnsharing,
+            })
 
     private renderConfirmationMode() {
         const { confirmationMode } = this.state

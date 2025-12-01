@@ -1,17 +1,16 @@
-import { createMemexReconciliationProcessor } from '@worldbrain/memex-common/lib/sync/reconciliation'
+import { createMemexReconciliationProcessor } from '@worldbrain/memex-common/ts/sync/reconciliation'
 import {
     SPECIAL_LIST_IDS,
     SPECIAL_LIST_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { OperationBatch } from '@worldbrain/storex'
+} from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
+import { OperationBatch } from '@worldbrain/storex/ts'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 async function setupTest() {
     const { storageManager } = await setupBackgroundIntegrationTest()
 
-    const reconcilationProcessor = createMemexReconciliationProcessor(
-        storageManager,
-    )
+    const reconcilationProcessor =
+        createMemexReconciliationProcessor(storageManager)
 
     return { storageManager, reconcilationProcessor }
 }

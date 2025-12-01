@@ -1,4 +1,3 @@
-import browser, { Runtime } from 'webextension-polyfill'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 
 /**
@@ -8,8 +7,8 @@ import { isUrlPDFViewerUrl } from 'src/pdf/util'
  */
 export const getUnderlyingResourceUrl = (
     url: string,
-    browserAPIs: { runtimeAPI: Pick<Runtime.Static, 'getURL'> } = {
-        runtimeAPI: browser.runtime,
+    browserAPIs: { runtimeAPI: typeof chrome.runtime } = {
+        runtimeAPI: chrome.runtime,
     },
 ) => {
     if (isUrlPDFViewerUrl(url, browserAPIs)) {

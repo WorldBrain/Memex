@@ -1,21 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import styles from './InboxButton.css'
 
-const showInboxClass = showInbox =>
-    classNames(styles.inbox, {
-        [styles.activeInbox]: showInbox,
-    })
-
-const InboxButton = props => (
-    <div
-        className={showInboxClass(props.showInbox)}
-        onClick={props.toggleInbox}
-    >
-        {props.showUnreadCount && (
-            <span className={styles.inboxCount}>{props.unreadNotifCount}</span>
-        )}
+const InboxButton = (props) => (
+    <div onClick={props.toggleInbox}>
+        {props.showUnreadCount && <span>{props.unreadNotifCount}</span>}
     </div>
 )
 

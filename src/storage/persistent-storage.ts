@@ -1,8 +1,8 @@
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import {
     DexieStorageBackend,
     IndexedDbImplementation,
-} from '@worldbrain/storex-backend-dexie'
+} from '@worldbrain/storex-backend-dexie/ts'
 
 export function createPersistentStorageManager(options: {
     idbImplementation: IndexedDbImplementation

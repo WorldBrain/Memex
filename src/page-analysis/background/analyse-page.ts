@@ -1,12 +1,12 @@
-import type { PageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
+import type { PageContent } from '@worldbrain/memex-common/ts/page-indexing/content-extraction/types'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
-import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexing/types'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/ts/transform-page-html.service-worker'
+import type { ExtractedPDFData } from '@worldbrain/memex-common/ts/page-indexing/types'
 import type TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/ts/content-sharing/storage/constants'
 import { fetchYoutubeTranscript } from 'src/util/fetch-youtube-transcript'
-import { extractIdFromUrl } from '@worldbrain/memex-common/lib/utils/youtube-url'
+import { extractIdFromUrl } from '@worldbrain/memex-common/ts/utils/youtube-url'
 
 export interface PageAnalysis extends Partial<ExtractedPDFData> {
     content: PageContent
@@ -52,9 +52,10 @@ const analysePage: PageAnalyzer = async (options) => {
 
     let content: PageContent | ExtractedPDFData
     if (rawContent.type === 'pdf') {
-        const pdfContent = await runInTab<
-            InPDFPageUIContentScriptRemoteInterface
-        >(options.tabId).extractPDFContents()
+        const pdfContent =
+            await runInTab<InPDFPageUIContentScriptRemoteInterface>(
+                options.tabId,
+            ).extractPDFContents()
         pdfMetadata = pdfContent.pdfMetadata
         pdfPageTexts = pdfContent.pdfPageTexts
         delete pdfContent.pdfMetadata

@@ -1,9 +1,9 @@
 import flatten from 'lodash/flatten'
 import expect from 'expect'
-import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discord/event-processor'
-import { DiscordChannelManager } from '@worldbrain/memex-common/lib/discord/channel-manager'
+import { createDiscordEventProcessor } from '@worldbrain/memex-common/ts/discord/event-processor'
+import { DiscordChannelManager } from '@worldbrain/memex-common/ts/discord/channel-manager'
 import { createMemoryServerStorage } from 'src/storage/server.tests'
-import type { DiscordMessageCreateInfo } from '@worldbrain/memex-common/lib/discord/types'
+import type { DiscordMessageCreateInfo } from '@worldbrain/memex-common/ts/discord/types'
 import { extractListShareUrlParts } from 'src/content-sharing/utils'
 
 export const makeId = (
@@ -211,12 +211,13 @@ export async function setupDiscordTestContext(options: {
                 }),
             )
 
-            const storedAnnotationEntries = await serverStorage.manager.operation(
-                'findObjects',
-                'sharedAnnotationListEntry',
-                {},
-                { sort: [['createdWhen', 'asc']] },
-            )
+            const storedAnnotationEntries =
+                await serverStorage.manager.operation(
+                    'findObjects',
+                    'sharedAnnotationListEntry',
+                    {},
+                    { sort: [['createdWhen', 'asc']] },
+                )
             let annotationCounter = 0
             expect(storedAnnotationEntries).toEqual(
                 flatten(

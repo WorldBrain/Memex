@@ -1,9 +1,9 @@
 import * as React from 'react'
 import styled, { ThemeProps, css } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { ColorThemeKeys } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 export type CheckboxToggle = (event: React.MouseEvent<HTMLInputElement>) => void
 
@@ -172,7 +172,7 @@ const LabelCheck = styled.span<{
     background: ${(props) =>
         props.isChecked
             ? props.theme.colors.white
-            : props.theme.colors[props.checkBoxColor] ?? 'greyScale2'};
+            : (props.theme.colors[props.checkBoxColor] ?? 'greyScale2')};
     vertical-align: middle;
     width: ${(props) => (props.size ? props.size + 'px' : '24px')};
     height: ${(props) => (props.size ? props.size + 'px' : '24px')};

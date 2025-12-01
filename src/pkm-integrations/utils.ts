@@ -1,5 +1,4 @@
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
-import type { Storage } from 'webextension-polyfill'
 
 export async function getPkmSyncKey(deps: { storageAPI: Storage.Static }) {
     let data = await deps.storageAPI.local.get('PKMSYNCpkmSyncKey')

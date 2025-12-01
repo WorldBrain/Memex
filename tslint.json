@@ -42,10 +42,10 @@
                 "@worldbrain/storex-backend-dexie",
                 "@worldbrain/storex-backend-firestore",
                 "@worldbrain/storex-backend-typeorm",
-                "@worldbrain/storex-pattern-modules",
+                "@worldbrain/storex-pattern-modules/ts",
                 "@worldbrain/storex-middleware-change-watcher",
                 "@worldbrain/storex-hub",
-                "@worldbrain/memex-stemmer",
+                "@worldbrain/memex-stemmer/ts",
                 "@worldbrain/memex-storage",
                 "@worldbrain/memex-common",
                 "src"

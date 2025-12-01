@@ -1,11 +1,11 @@
 import {
     StorageModule,
     StorageModuleConfig,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/event-log/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/event-log/constants'
 
 import { NOTIF_TYPE_EVENT_IDS, EVENT_TYPES } from '../constants'
 

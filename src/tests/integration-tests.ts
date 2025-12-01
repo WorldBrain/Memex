@@ -1,4 +1,4 @@
-import type StorageManager from '@worldbrain/storex'
+import type StorageManager from '@worldbrain/storex/ts'
 import type { BackgroundModules } from 'src/background-script/setup'
 import type {
     StorageCollectionDiff,
@@ -12,11 +12,9 @@ import {
     BackgroundIntegrationTestSetupOpts,
 } from './background-integration-tests'
 import type MemoryBrowserStorage from 'src/util/tests/browser-storage'
-import type { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import type { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
+import type { MemoryAuthService } from '@worldbrain/memex-common/ts/authentication/memory'
+import type { MemorySubscriptionsService } from '@worldbrain/memex-common/ts/subscriptions/memory'
 import type { ServerStorage } from 'src/storage/types'
-import type { Browser } from 'webextension-polyfill'
-import type fetchMock from 'fetch-mock'
 import type { Services } from 'src/services/types'
 import type { MockPushMessagingService } from './push-messaging'
 
@@ -25,8 +23,9 @@ export interface IntegrationTestSuite<StepContext> {
     tests: Array<IntegrationTest<StepContext>>
 }
 
-export interface IntegrationTest<StepContext>
-    extends BackgroundIntegrationTestOptions {
+export interface IntegrationTest<
+    StepContext,
+> extends BackgroundIntegrationTestOptions {
     description: string
     instantiate: (options: {
         isSyncTest?: boolean
@@ -63,7 +62,7 @@ export interface BackgroundIntegrationTestSetup {
     getSqlStorageMananager?(): Promise<StorageManager>
     persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     services: Services
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
@@ -76,20 +75,17 @@ export interface BackgroundIntegrationTestSetup {
     injectCallFirebaseFunction: (
         f: <Returns>(name: string, ...args: any[]) => Promise<Returns>,
     ) => void
-    fetch: fetchMock.FetchMockSandbox
+    fetch: typeof fetch
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup
 }
-export type BackgroundIntegrationTest = IntegrationTest<
-    BackgroundIntegrationTestContext
->
-export type BackgroundIntegrationTestInstance = IntegrationTestInstance<
-    BackgroundIntegrationTestContext
->
-export type BackgroundIntegrationTestSuite = IntegrationTestSuite<
-    BackgroundIntegrationTestContext
->
+export type BackgroundIntegrationTest =
+    IntegrationTest<BackgroundIntegrationTestContext>
+export type BackgroundIntegrationTestInstance =
+    IntegrationTestInstance<BackgroundIntegrationTestContext>
+export type BackgroundIntegrationTestSuite =
+    IntegrationTestSuite<BackgroundIntegrationTestContext>
 
 export function backgroundIntegrationTestSuite(
     description: string,

@@ -1,5 +1,5 @@
-import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { SharedCollectionType } from '@worldbrain/memex-common/ts/content-sharing/storage/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 
 export interface FollowedList {
     name: string
@@ -49,9 +49,7 @@ export interface RemotePageActivityIndicatorInterface {
     ) => Promise<{
         [followedListId: string]: FollowedListEntry[]
     }>
-    getPageActivityStatus: (
-        fullPageUrl: string,
-    ) => Promise<{
+    getPageActivityStatus: (fullPageUrl: string) => Promise<{
         status: PageActivityStatus
         remoteListIds: AutoPk[]
     }>

@@ -1,5 +1,5 @@
 import { MemexUser } from 'src/authentication/background/types'
-import { SubscriptionStatus } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { SubscriptionStatus } from '@worldbrain/memex-common/ts/subscriptions/types'
 
 export function userAuthorizedForReadwise(
     user: Pick<MemexUser, 'subscriptionStatus'> | undefined,

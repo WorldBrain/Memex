@@ -1,7 +1,7 @@
 import React from 'react'
 import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -12,7 +12,7 @@ import TagPickerLogic, {
 } from 'src/tags/ui/TagPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow, {
     IconStyleWrapper,
@@ -22,10 +22,10 @@ import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
-import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/ts/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 export type { TagPickerDependencies }
 

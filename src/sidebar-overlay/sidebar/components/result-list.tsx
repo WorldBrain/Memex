@@ -1,7 +1,4 @@
 import React, { ReactChild, PureComponent } from 'react'
-import cx from 'classnames'
-
-const styles = require('./result-list.css')
 
 export interface Props {
     scrollDisabled?: boolean
@@ -25,16 +22,8 @@ class ResultList extends PureComponent<Props> {
         }
     }
 
-    get mainClass() {
-        return cx(styles.root, { [styles.noScroll]: this.props.scrollDisabled })
-    }
-
     render() {
-        return (
-            <ul className={this.mainClass} style={this.listHeightStyles}>
-                {this.props.children}
-            </ul>
-        )
+        return <ul style={this.listHeightStyles}>{this.props.children}</ul>
     }
 }
 

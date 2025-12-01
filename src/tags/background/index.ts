@@ -1,5 +1,4 @@
-import Storex from '@worldbrain/storex'
-import { Tabs, Storage } from 'webextension-polyfill'
+import Storex from '@worldbrain/storex/ts'
 
 import TagStorage from './storage'
 import { maybeIndexTabs } from 'src/page-indexing/utils'
@@ -26,9 +25,9 @@ export default class TagsBackground {
             pages: PageIndexingBackground
             analytics: Analytics
             tabManagement: TabManagementBackground
-            queryTabs?: Tabs.Static['query']
+            queryTabs?: typeof chrome.tabs.query
             searchBackgroundModule: SearchBackground
-            localBrowserStorage: Storage.LocalStorageArea
+            localBrowserStorage: typeof chrome.storage.local
         },
     ) {
         this.storage = new TagStorage({
@@ -62,12 +61,13 @@ export default class TagsBackground {
     }
 
     addTagsToOpenTabs = async (params: { name: string; time?: number }) => {
-        const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
+        const tabs =
+            await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
             createPage: this.options.pages.indexPage,
-            waitForContentIdentifier: this.options.pages
-                .waitForContentIdentifier,
+            waitForContentIdentifier:
+                this.options.pages.waitForContentIdentifier,
             time: params.time || '$now',
         })
 
@@ -80,7 +80,8 @@ export default class TagsBackground {
     }
 
     delTagsFromOpenTabs = async ({ name }: { name: string }) => {
-        const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
+        const tabs =
+            await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         return this.storage.delTags({
             name,

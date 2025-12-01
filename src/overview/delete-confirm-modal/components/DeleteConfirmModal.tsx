@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ConfirmModal, {
     Props as ConfirmModalProps,

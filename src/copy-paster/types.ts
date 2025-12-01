@@ -1,7 +1,7 @@
 import type {
     PageEntity,
     PageMetadata,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 
 export interface Template {
     id: number

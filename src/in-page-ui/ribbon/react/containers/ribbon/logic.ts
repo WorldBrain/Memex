@@ -1,9 +1,9 @@
-import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core/ts'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import type { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
 import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import type { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/ts/types'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import {
     generateAnnotationUrl,
@@ -13,16 +13,15 @@ import { resolvablePromise } from 'src/util/resolvable'
 import type { FocusableComponent } from 'src/annotations/components/types'
 import type { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
-import browser, { Browser, Storage } from 'webextension-polyfill'
 import {
     enforceTrialPeriod,
     pageActionAllowed,
-} from '@worldbrain/memex-common/lib/subscriptions/storage'
+} from '@worldbrain/memex-common/ts/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/ts/telegram/utils'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/ts/authentication/types'
 import { disableNudgeType } from 'src/util/nudges-utils'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
@@ -45,7 +44,7 @@ type HandlersOf<Props> = {
         : null
 }
 type SubcomponentHandlers<
-    Subcomponent extends keyof componentTypes.RibbonSubcomponentProps
+    Subcomponent extends keyof componentTypes.RibbonSubcomponentProps,
 > = HandlersOf<componentTypes.RibbonSubcomponentProps[Subcomponent]>
 
 export interface RibbonContainerState {
@@ -122,12 +121,11 @@ export interface RibbonLogicOptions extends RibbonContainerOptions {
     focusCreateForm: FocusableComponent['focus']
     analytics: Analytics
     analyticsBG: AnalyticsCoreInterface
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
-type EventHandler<
-    EventName extends keyof RibbonContainerEvents
-> = UIEventHandler<RibbonContainerState, RibbonContainerEvents, EventName>
+type EventHandler<EventName extends keyof RibbonContainerEvents> =
+    UIEventHandler<RibbonContainerState, RibbonContainerEvents, EventName>
 
 export const INITIAL_RIBBON_COMMENT_BOX_STATE = {
     commentText: '',
@@ -241,18 +239,18 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     async initThemeVariant() {
-        const variantStorage = await browser.storage.local.get('themeVariant')
+        const variantStorage = await chrome.storage.local.get('themeVariant')
         const variant = variantStorage['themeVariant']
         return variant ?? 'dark'
     }
 
     async initReadingViewListeners() {
-        const readingViewState = await browser.storage.local.get(
+        const readingViewState = await chrome.storage.local.get(
             '@Sidebar-reading_view',
         )
 
         if (readingViewState['@Sidebar-reading_view'] === undefined) {
-            await browser.storage.local.set({
+            await chrome.storage.local.set({
                 '@Sidebar-reading_view': true,
             })
             this.emitMutation({
@@ -269,7 +267,7 @@ export class RibbonContainerLogic extends UILogic<
         }
 
         // init listeners to local storage flag for reading view
-        await browser.storage.onChanged.addListener((changes) => {
+        await chrome.storage.onChanged.addListener((changes) => {
             this.setReadingWidthOnListener(changes)
         })
     }
@@ -299,18 +297,20 @@ export class RibbonContainerLogic extends UILogic<
                 lists.push(list.id)
             })
 
-        let fullListEntries = await this.dependencies.customLists.fetchPageListEntriesByUrl(
-            { url: url },
-        )
+        let fullListEntries =
+            await this.dependencies.customLists.fetchPageListEntriesByUrl({
+                url: url,
+            })
 
         fullListEntries.map((entry) => {
             let date = Math.floor(new Date(entry.createdAt).getTime() / 1000)
             interActionTimestamps.push(date)
         })
 
-        const annotationsByURL = await this.dependencies.annotations.listAnnotationsByPageUrl(
-            { pageUrl: normalizeUrl(url) },
-        )
+        const annotationsByURL =
+            await this.dependencies.annotations.listAnnotationsByPageUrl({
+                pageUrl: normalizeUrl(url),
+            })
 
         // this section is there because sometimes when switching pages in web apps, the cache is still the old one when trying to see if the page has annotations
         annotationsByURL.map((annotation) => {
@@ -348,9 +348,10 @@ export class RibbonContainerLogic extends UILogic<
             },
         })
 
-        const activityStatus = await this.dependencies.syncSettings.activityIndicator.get(
-            'feedHasActivity',
-        )
+        const activityStatus =
+            await this.dependencies.syncSettings.activityIndicator.get(
+                'feedHasActivity',
+            )
 
         // set general settings that are not important for first load
         this.emitMutation({
@@ -443,7 +444,7 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
-        await browser.storage.local.set({
+        await chrome.storage.local.set({
             themeVariant:
                 previousState.themeVariant === 'dark' ? 'light' : 'dark',
         })
@@ -497,7 +498,7 @@ export class RibbonContainerLogic extends UILogic<
         this.emitMutation({
             isWidthLocked: { $set: true },
         })
-        await browser.storage.local.set({ '@Sidebar-reading_view': true })
+        await chrome.storage.local.set({ '@Sidebar-reading_view': true })
     }
     resetReadingWidth = async () => {
         // set member variable for internal logic use
@@ -510,10 +511,10 @@ export class RibbonContainerLogic extends UILogic<
 
         // remove listeners and values
         this.tearDownListeners()
-        await browser.storage.local.set({ '@Sidebar-reading_view': false })
+        await chrome.storage.local.set({ '@Sidebar-reading_view': false })
     }
 
-    setReadingWidthOnListener = (changes: Storage.StorageChange) => {
+    setReadingWidthOnListener = (changes: chrome.storage.StorageChange) => {
         if (Object.entries(changes)[0][0] === '@Sidebar-reading_view') {
             this.emitMutation({
                 isWidthLocked: { $set: Object.entries(changes)[0][1].newValue },
@@ -535,7 +536,7 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     tearDownListeners() {
-        browser.storage.onChanged.removeListener((changes) => {
+        chrome.storage.onChanged.removeListener((changes) => {
             this.setReadingWidthOnListener(changes)
         })
         // this.resizeObserver.disconnect()
@@ -694,9 +695,8 @@ export class RibbonContainerLogic extends UILogic<
             this,
             (state) => ({ bookmark: { loadState: { $set: state } } }),
             async () => {
-                const postInitState = await this.waitForPostInitState(
-                    previousState,
-                )
+                const postInitState =
+                    await this.waitForPostInitState(previousState)
 
                 const updateState = (isBookmarked: boolean) =>
                     this.emitMutation({

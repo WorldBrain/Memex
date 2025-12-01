@@ -9,7 +9,7 @@ import * as DATA from '../logic.test.data'
 import * as utils from './util'
 import { ResultHoverState } from './types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
@@ -520,11 +520,13 @@ describe('Dashboard search results logic', () => {
                 const pageId = DATA.PAGE_1.normalizedUrl
                 const day = PAGE_SEARCH_DUMMY_DAY
 
-                const noteIds = searchResults.state.searchResults.noteData.allIds.filter(
-                    (noteId) =>
-                        searchResults.state.searchResults.noteData.byId[noteId]
-                            .pageUrl === pageId,
-                )
+                const noteIds =
+                    searchResults.state.searchResults.noteData.allIds.filter(
+                        (noteId) =>
+                            searchResults.state.searchResults.noteData.byId[
+                                noteId
+                            ].pageUrl === pageId,
+                    )
                 const notesById = noteIds.reduce(
                     (acc, noteId) => ({
                         ...acc,
@@ -1414,15 +1416,13 @@ describe('Dashboard search results logic', () => {
                 it(
                     'should be able to remove a page from the search filtered list, removing results from all days it occurs under',
                     async ({ device }) => {
-                        const {
-                            searchResults,
-                            annotationsCache,
-                        } = await setupTest(device, {
-                            runInitLogic: true,
-                            seedData: setNoteSearchResult(
-                                DATA.ANNOT_SEARCH_RESULT_2,
-                            ),
-                        })
+                        const { searchResults, annotationsCache } =
+                            await setupTest(device, {
+                                runInitLogic: true,
+                                seedData: setNoteSearchResult(
+                                    DATA.ANNOT_SEARCH_RESULT_2,
+                                ),
+                            })
                         const listDataA = annotationsCache.getListByLocalId(
                             DATA.LISTS_1[0].id,
                         )

@@ -1,13 +1,11 @@
-import type { Alarms } from 'webextension-polyfill'
-
 export type AlarmJob = {
     /** Can be null if the alarm job is to be scheduled dynamically. */
-    alarmDefinition: Alarms.CreateAlarmInfoType | null
+    alarmDefinition: typeof chrome.alarms | null
     job: () => Promise<void>
 }
 
 export function setupAlarms(
-    alarmsAPI: Alarms.Static,
+    alarmsAPI: typeof chrome.alarms,
     jobs: { [name: string]: AlarmJob },
 ) {
     for (let [name, { alarmDefinition }] of Object.entries(jobs)) {

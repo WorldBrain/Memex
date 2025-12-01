@@ -1,6 +1,5 @@
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import React, { PureComponent, MouseEventHandler } from 'react'
-const pageStyles = require('./result-item.css')
 
 export interface Props {
     crossIconSrc?: string
@@ -15,8 +14,8 @@ class SemiCircularRibbon extends PureComponent<Props> {
                 tooltipText="Remove from collection"
                 placement="bottom"
             >
-                <div className={pageStyles.button} onClick={this.props.onClick}>
-                    <img src={'/img/removing.svg'} className={pageStyles.img} />
+                <div className="button" onClick={this.props.onClick}>
+                    <img src={'/img/removing.svg'} className="img" />
                 </div>
             </TooltipBox>
         )

@@ -35,7 +35,7 @@ describe('remoteFunction', () => {
     //     })
     // })
 
-    // it('should call the browser.tabs function when tabId is given', async () => {
+    // it('should call the chrome.tabs function when tabId is given', async () => {
     //     const remoteFunc = remoteFunction('remoteFunc', { tabId: 1 })
     //     try {
     //         await remoteFunc()
@@ -46,7 +46,7 @@ describe('remoteFunction', () => {
     //     expect(window['browser'].runtime.sendMessage).toHaveBeenCalledTimes(0)
     // })
     //
-    // it('should call the browser.runtime function when tabId is undefined', async () => {
+    // it('should call the chrome.runtime function when tabId is undefined', async () => {
     //     const remoteFunc = remoteFunction('remoteFunc')
     //     try {
     //         await remoteFunc()

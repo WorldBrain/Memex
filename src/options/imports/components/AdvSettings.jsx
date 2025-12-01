@@ -6,13 +6,11 @@ import styled from 'styled-components'
 
 import Concurrency from './Concurrency'
 
-import styles from './AdvSettings.css'
-
 const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
     <Container>
         <SectionTitleSmall>Import Settings</SectionTitleSmall>
-        <div className={styles.advFunctionality}>
-            <ul className={styles.settingsList}>
+        <div>
+            <ul>
                 <SettingsListItem onClick={() => props.onIndexTitleToggle()}>
                     <Checkbox
                         id="index-imports"

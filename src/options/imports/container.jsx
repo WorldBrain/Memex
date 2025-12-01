@@ -16,11 +16,11 @@ import StatusReport from './components/StatusReport'
 import { acts as searchBarActs } from 'src/overview/search-bar'
 import { OPTIONS_URL } from 'src/constants'
 import AdvSettings from '../imports/components/AdvSettingsContainer'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -137,12 +137,8 @@ class ImportContainer extends Component {
     }
 
     renderImportButton() {
-        const {
-            boundActions,
-            blobUrl,
-            allowTypes,
-            isStartBtnDisabled,
-        } = this.props
+        const { boundActions, blobUrl, allowTypes, isStartBtnDisabled } =
+            this.props
 
         const isDisabled =
             allowTypes[constants.IMPORT_TYPE.OTHERS] ===

@@ -1,15 +1,9 @@
 import React, { PureComponent } from 'react'
-
-import OutLink from 'src/common-ui/containers/OutLink'
-import Button from './Button'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-
-const styles = require('./Button.css')
-const LinkButtonStyles = require('src/popup/collections-button/components/CollectionsButton.css')
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
 
 interface Props {
     goToDashboard: () => void
@@ -26,10 +20,8 @@ class LinkButton extends PureComponent<Props> {
     }
 
     private async getKeyboardShortcutText() {
-        const {
-            shortcutsEnabled,
-            openDashboard,
-        } = await getKeyboardShortcutsState()
+        const { shortcutsEnabled, openDashboard } =
+            await getKeyboardShortcutsState()
 
         if (!shortcutsEnabled || !openDashboard.enabled) {
             this.setState({

@@ -6,9 +6,9 @@ import type {
 import type { Annotation } from 'src/annotations/types'
 import type { AnnotSearchParams } from 'src/search/background/types'
 import type { Anchor } from 'src/highlighting/types'
-import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/ts/content-sharing/types'
 import type { SharedAnnotationWithRefs } from '../types'
-import { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAllAnnotationsByUrl: RemotePositionalFunction<

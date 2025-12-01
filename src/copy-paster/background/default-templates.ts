@@ -1,12 +1,10 @@
-import { Storage } from 'webextension-polyfill'
-
 import { Template } from '../types'
 import CopyPasterBackground from '.'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import {
     DEFAULT_SPACE_BETWEEN,
     DEFAULT_KEY,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
 
 export const PERFORMED_STORAGE_FLAG = '@TextExport-default_templates_inserted_1'
 
@@ -238,7 +236,8 @@ export default async function insertDefaultTemplates({
     templates = DEFAULT_TEMPLATES,
 }: {
     copyPaster: CopyPasterBackground
-    localStorage: Storage.LocalStorageArea
+    localStorage: typeof chrome.storage.local.get &
+        typeof chrome.storage.local.set
     templates?: Template[]
     imageSupport?: ImageSupportInterface<'caller'>
 }) {

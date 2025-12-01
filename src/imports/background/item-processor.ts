@@ -7,7 +7,6 @@ import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import checkBrowser from 'src/util/check-browser'
-import browser from 'webextension-polyfill'
 
 type BookmarkNode = {
     id: string

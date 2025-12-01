@@ -9,11 +9,11 @@ import {
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 import { createServices } from 'src/services'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
-import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import inMemory from '@worldbrain/storex-backend-dexie/ts/in-memory'
 import DeprecatedStorageModules from 'src/background-script/deprecated-storage-modules'
 import { createAuthServices } from 'src/services/local-services'
-import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
-import type { ExceptionCapturer } from '@worldbrain/memex-common/lib/firebase-backend/types'
+import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/ts/image-support/backend'
+import type { ExceptionCapturer } from '@worldbrain/memex-common/ts/firebase-backend/types'
 
 type CommandLineArguments =
     | { command: 'list-collections' }

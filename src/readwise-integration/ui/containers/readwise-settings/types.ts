@@ -1,5 +1,5 @@
-import { UIEvent } from 'ui-logic-core'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { UIEvent } from 'ui-logic-core/ts'
+import { TaskState } from 'ui-logic-core/ts/types'
 import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
 
 export interface ReadwiseSettingsState {

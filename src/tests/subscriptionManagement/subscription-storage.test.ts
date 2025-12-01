@@ -1,7 +1,7 @@
 import {
     checkStripePlan,
     pageActionAllowed,
-} from '@worldbrain/memex-common/lib/subscriptions/storage'
+} from '@worldbrain/memex-common/ts/subscriptions/storage'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
@@ -15,12 +15,12 @@ import {
     DEFAULT_TESTING_EMAIL,
     DEFAULT_TRIAL_PERIOD,
     SIGNUP_TIMESTAMP_STORAGE_KEY,
-} from '@worldbrain/memex-common/lib/subscriptions/constants'
+} from '@worldbrain/memex-common/ts/subscriptions/constants'
 import { AI_PROMPT_DEFAULTS } from 'src/sidebar/annotations-sidebar/constants'
 import {
     AIActionAllowed,
     enforceTrialPeriod,
-} from '@worldbrain/memex-common/lib/subscriptions/storage'
+} from '@worldbrain/memex-common/ts/subscriptions/storage'
 
 describe('Ribbon logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -46,7 +46,7 @@ describe('Ribbon logic', () => {
 
         return {
             analytics,
-            browserAPIs: browserAPIs,
+            browserAPIs: typeof chromeAPIs,
             collectionsBG: backgroundModules.customLists,
             syncSettings,
             pageIndexingBG: backgroundModules.pages,
@@ -57,12 +57,8 @@ describe('Ribbon logic', () => {
         it('should allow action if person is still in trial', async ({
             device,
         }) => {
-            const {
-                browserAPIs,
-                analytics,
-                collectionsBG,
-                pageIndexingBG,
-            } = await setupTest(device)
+            const { browserAPIs, analytics, collectionsBG, pageIndexingBG } =
+                await setupTest(device)
 
             const trialStartDate = giveTimeStampFromXdaysAgo(10)
             await browserAPIs.storage.local.set({
@@ -77,12 +73,8 @@ describe('Ribbon logic', () => {
         it('should allow action if page is already saved', async ({
             device,
         }) => {
-            const {
-                browserAPIs,
-                analytics,
-                collectionsBG,
-                pageIndexingBG,
-            } = await setupTest(device)
+            const { browserAPIs, analytics, collectionsBG, pageIndexingBG } =
+                await setupTest(device)
             await pageIndexingBG.indexPage({
                 fullUrl: 'http://example.com',
             })
@@ -98,9 +90,8 @@ describe('Ribbon logic', () => {
         it('should allow action if user has bookmarking powerup AND page not saved previously AND NOT in trial', async ({
             device,
         }) => {
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -126,9 +117,8 @@ describe('Ribbon logic', () => {
         it('should allow action if user has NO bookmarking powerup AND out of trial AND page limit not hit AND current page not saved previously', async ({
             device,
         }) => {
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -152,11 +142,8 @@ describe('Ribbon logic', () => {
         it(
             'should prevent action if user has NO bookmarking powerup AND out of trial AND page limit is hit AND current page not saved previously',
             async ({ device }) => {
-                const {
-                    browserAPIs,
-                    analytics,
-                    collectionsBG,
-                } = await setupTest(device)
+                const { browserAPIs, analytics, collectionsBG } =
+                    await setupTest(device)
 
                 const fakeStorageEntry = {
                     ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -184,11 +171,8 @@ describe('Ribbon logic', () => {
         it(
             'should allow action if user in in trial time',
             async ({ device }) => {
-                const {
-                    browserAPIs,
-                    analytics,
-                    collectionsBG,
-                } = await setupTest(device)
+                const { browserAPIs, analytics, collectionsBG } =
+                    await setupTest(device)
 
                 await giveAndSaveTimeStampFromXdaysAgo(10, browserAPIs)
 
@@ -214,9 +198,8 @@ describe('Ribbon logic', () => {
         it('should allow action if user is out of trial time and below the sessionlimit', async ({
             device,
         }) => {
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -239,9 +222,8 @@ describe('Ribbon logic', () => {
         it('should allow action if user has lifetime plan, set a key and is over the daily limit (theoretically)', async ({
             device,
         }) => {
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -271,9 +253,8 @@ describe('Ribbon logic', () => {
         it('should allow action if user has AI own key powerup and key', async ({
             device,
         }) => {
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -299,9 +280,8 @@ describe('Ribbon logic', () => {
         it('should allow action if user has AIpowerupOwnKey powerup AND NO key AND NOT hit free quota', async ({
             device,
         }) => {
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -331,9 +311,8 @@ describe('Ribbon logic', () => {
             device,
         }) => {
             return
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -361,9 +340,8 @@ describe('Ribbon logic', () => {
         it('should allow action if user has AIpowerupOwnKey powerup AND has key AND using GPT-3 but over free tier limit', async ({
             device,
         }) => {
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -393,9 +371,8 @@ describe('Ribbon logic', () => {
         it('should prevent action if user has NO AI powerup AND no Key AND hit the limit', async ({
             device,
         }) => {
-            const { browserAPIs, analytics, collectionsBG } = await setupTest(
-                device,
-            )
+            const { browserAPIs, analytics, collectionsBG } =
+                await setupTest(device)
 
             const fakeStorageEntry = {
                 ...DEFAULT_COUNTER_STORAGE_VALUE,
@@ -407,9 +384,8 @@ describe('Ribbon logic', () => {
                 [COUNTER_STORAGE_KEY]: fakeStorageEntry,
             })
 
-            const local = await browserAPIs.storage.local.get(
-                COUNTER_STORAGE_KEY,
-            )
+            const local =
+                await browserAPIs.storage.local.get(COUNTER_STORAGE_KEY)
             const localDAta = local[COUNTER_STORAGE_KEY]
 
             const result = await AIActionAllowed(

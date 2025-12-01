@@ -4,8 +4,6 @@ import Tooltip from 'src/common-ui/components/tooltip'
 import ToggleSwitch from './toggle-switch'
 import cx from 'classnames'
 
-const styles = require('./content-types.css')
-
 interface OwnProps {
     env: 'overview' | 'inpage'
     tooltipPosition: string
@@ -41,10 +39,10 @@ class ContentTypes extends PureComponent<Props, State> {
             <Tooltip
                 position={this.props.tooltipPosition}
                 itemClass={cx({
-                    [styles.typeTooltip]: this.props.env === 'overview',
+                    typeTooltip: this.props.env === 'overview',
                 })}
             >
-                <div className={styles.typeBox}>{this.renderAnnotsTypes()}</div>
+                <div>{this.renderAnnotsTypes()}</div>
             </Tooltip>
         )
     }

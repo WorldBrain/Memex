@@ -8,7 +8,7 @@ import {
 } from 'src/common-ui/components/design-library/ModalBox'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { colorError } from 'src/common-ui/components/design-library/colors'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import {
     TypographyHeadingPage,
     TypographyBodyBlock,

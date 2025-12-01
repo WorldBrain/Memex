@@ -1,7 +1,7 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 import {
     loadThemeVariant,
     theme,
@@ -9,7 +9,7 @@ import {
 import {
     ErrorNotification,
     ErrorNotificationProps,
-} from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
+} from '@worldbrain/memex-common/ts/common-ui/components/error-notification'
 import { createInPageUI } from 'src/in-page-ui/utils'
 
 type RootProps = Pick<
@@ -25,13 +25,11 @@ interface RootState {
 }
 
 class Root extends React.PureComponent<RootProps, RootState> {
-    static defaultProps: Pick<
-        RootProps,
-        'blockedBackground' | 'positioning'
-    > = {
-        positioning: 'centerCenter',
-        blockedBackground: true,
-    }
+    static defaultProps: Pick<RootProps, 'blockedBackground' | 'positioning'> =
+        {
+            positioning: 'centerCenter',
+            blockedBackground: true,
+        }
 
     state: RootState = { themeVariant: null }
 
@@ -73,7 +71,8 @@ export type ErrorDisplayProps = Omit<RootProps, 'rootEl' | 'shadowRoot'>
 
 export const renderErrorDisplay = (props: ErrorDisplayProps): void => {
     const { rootElement, shadowRoot } = createInPageUI('error-display')
-    ReactDOM.render(
+    const root = createRoot(rootElement)
+    root.render(
         <Root rootEl={rootElement} shadowRoot={shadowRoot} {...props} />,
         rootElement,
     )

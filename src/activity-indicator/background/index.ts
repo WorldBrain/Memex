@@ -1,5 +1,5 @@
-import ActivityIndicatorService from '@worldbrain/memex-common/lib/activity-streams/services/activity-indicator'
-import type { ActivityStreamsStorage } from '@worldbrain/memex-common/lib/activity-streams/storage/types'
+import ActivityIndicatorService from '@worldbrain/memex-common/ts/activity-streams/services/activity-indicator'
+import type { ActivityStreamsStorage } from '@worldbrain/memex-common/ts/activity-streams/storage/types'
 import * as Raven from 'src/util/raven'
 
 import type { AuthServices, Services } from 'src/services/types'
@@ -53,9 +53,10 @@ export default class ActivityIndicatorBackground {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    checkActivityStatus: ActivityIndicatorInterface['checkActivityStatus'] = async () => {
-        return this.service.checkActivityStatus()
-    }
+    checkActivityStatus: ActivityIndicatorInterface['checkActivityStatus'] =
+        async () => {
+            return this.service.checkActivityStatus()
+        }
 
     markActivitiesAsSeen = async () => {
         await this.service.markActivitiesAsSeen()

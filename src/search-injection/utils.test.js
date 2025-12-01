@@ -10,8 +10,7 @@ describe('URL', () => {
                 'https://www.google.co.in/search?q=test+with+space&sourceid=chrome&ie=UTF-8',
             nomatch: 'https://www.google.com/ie=UTF-8&&sourceid=chrome',
             image: 'https://www.google.co.in/search?q=test&tbm=isch',
-            maps:
-                'https://www.google.co.in/search?q=chennai+hotels&sa=X&ved=0ahUKEwi9rqGEtbLaAhWJpI8KHVJvAyEQri4I1wEwFw&tbm=lcl',
+            maps: 'https://www.google.co.in/search?q=chennai+hotels&sa=X&ved=0ahUKEwi9rqGEtbLaAhWJpI8KHVJvAyEQri4I1wEwFw&tbm=lcl',
         },
         ddg: {
             simple: 'https://duckduckgo.com/?q=test&t=canonical&ia=web',
@@ -60,7 +59,7 @@ describe('Browser Storage Local', () => {
         const key = 'randomkey1'
         await utils.setLocalStorage(key, true)
 
-        expect(browser.storage.local.set).toHaveBeenCalledWith({
+        expect(chrome.storage.local.set).toHaveBeenCalledWith({
             [key]: true,
         })
     })
@@ -75,8 +74,8 @@ describe('Browser Storage Local', () => {
         }
         const defaultValue = 10
 
-        // Stub browser.storage.local.get with fake return values
-        const stub = sinon.stub(browser.storage.local, 'get')
+        // Stub chrome.storage.local.get with fake return values
+        const stub = sinon.stub(chrome.storage.local, 'get')
         stub.withArgs(keys.notstored).resolves({})
         stub.withArgs(keys.twoargs).resolves({})
         stub.withArgs(keys.stored).resolves({
@@ -93,7 +92,7 @@ describe('Browser Storage Local', () => {
 
         // Pass key, default value as parameter
         const value3 = await utils.getLocalStorage(keys.twoargs, defaultValue)
-        expect(browser.storage.local.set).toHaveBeenCalled()
+        expect(chrome.storage.local.set).toHaveBeenCalled()
         expect(value3).toBe(defaultValue)
     })
 })

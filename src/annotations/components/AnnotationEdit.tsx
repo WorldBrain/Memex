@@ -1,15 +1,15 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
     SpaceSearchSuggestion,
-} from '@worldbrain/memex-common/lib/editor'
+} from '@worldbrain/memex-common/ts/editor'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { YoutubePlayer } from '@worldbrain/memex-common/ts/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { TaskState } from 'ui-logic-core/ts/types'
 
 interface State {
     editorHeight: string
@@ -19,9 +19,7 @@ interface State {
 }
 
 export interface AnnotationEditEventProps {
-    onEditConfirm: (
-        showExternalConfirmations?: boolean,
-    ) => (
+    onEditConfirm: (showExternalConfirmations?: boolean) => (
         shouldShare: boolean,
         isProtected: boolean,
         opts?: {
@@ -58,8 +56,7 @@ export interface AnnotationEditGeneralProps {
 }
 
 export interface Props
-    extends AnnotationEditEventProps,
-        AnnotationEditGeneralProps {
+    extends AnnotationEditEventProps, AnnotationEditGeneralProps {
     rows: number
 }
 

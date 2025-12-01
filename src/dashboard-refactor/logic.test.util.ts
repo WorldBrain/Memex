@@ -1,4 +1,4 @@
-import { TestLogicContainer } from 'ui-logic-core/lib/testing'
+import { TestLogicContainer } from 'ui-logic-core/ts/testing'
 
 import {
     UILogicTestDevice,
@@ -10,15 +10,15 @@ import * as DATA from './logic.test.data'
 import { StandardSearchResponse } from 'src/search/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
 import { createUIServices } from 'src/services/ui'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { initNormalizedState } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -26,101 +26,101 @@ type DataSeeder = (
 ) => Promise<void>
 type DataSeederCreator<T = StandardSearchResponse> = (data?: T) => DataSeeder
 
-export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
-    result = DATA.PAGE_SEARCH_RESULT_1,
-) => async (logic, { storageManager }) => {
-    let idCounter = 0
-    for (const list of DATA.LISTS_1) {
-        await storageManager.collection('customLists').createObject({
-            id: list.id,
-            name: list.name,
-            searchableName: list.name,
-            createdAt: new Date(),
-            isNestable: true,
-            isDeletable: true,
-        })
-    }
-
-    for (const page of result.docs) {
-        await storageManager.collection('pages').createObject({
-            url: page.url,
-            title: page.fullTitle,
-        })
-        await storageManager.collection('visits').createObject({
-            url: page.url,
-            time: Date.now(),
-        })
-
-        for (const annot of page.annotations) {
-            await storageManager.collection('annotations').createObject({
-                ...annot,
+export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> =
+    (result = DATA.PAGE_SEARCH_RESULT_1) =>
+    async (logic, { storageManager }) => {
+        let idCounter = 0
+        for (const list of DATA.LISTS_1) {
+            await storageManager.collection('customLists').createObject({
+                id: list.id,
+                name: list.name,
+                searchableName: list.name,
+                createdAt: new Date(),
+                isNestable: true,
+                isDeletable: true,
             })
-            if (annot['isShared']) {
-                await storageManager
-                    .collection('sharedAnnotationMetadata')
-                    .createObject({
-                        localId: annot.url,
-                        remoteId: annot.url,
-                        excludeFromLists: false,
-                    })
-                await storageManager
-                    .collection('annotationPrivacyLevels')
-                    .createObject({
-                        id: idCounter++,
-                        annotation: annot.url,
-                        createdWhen: new Date(),
-                        privacyLevel: annot['isBulkShareProtected']
-                            ? AnnotationPrivacyLevels.SHARED_PROTECTED
-                            : AnnotationPrivacyLevels.SHARED,
-                    })
+        }
+
+        for (const page of result.docs) {
+            await storageManager.collection('pages').createObject({
+                url: page.url,
+                title: page.fullTitle,
+            })
+            await storageManager.collection('visits').createObject({
+                url: page.url,
+                time: Date.now(),
+            })
+
+            for (const annot of page.annotations) {
+                await storageManager.collection('annotations').createObject({
+                    ...annot,
+                })
+                if (annot['isShared']) {
+                    await storageManager
+                        .collection('sharedAnnotationMetadata')
+                        .createObject({
+                            localId: annot.url,
+                            remoteId: annot.url,
+                            excludeFromLists: false,
+                        })
+                    await storageManager
+                        .collection('annotationPrivacyLevels')
+                        .createObject({
+                            id: idCounter++,
+                            annotation: annot.url,
+                            createdWhen: new Date(),
+                            privacyLevel: annot['isBulkShareProtected']
+                                ? AnnotationPrivacyLevels.SHARED_PROTECTED
+                                : AnnotationPrivacyLevels.SHARED,
+                        })
+                }
             }
+
+            // if (page.hasBookmark) {
+            //     await storageManager.collection('bookmarks').createObject({
+            //         url: page.url,
+            //         time: Date.now(),
+            //     })
+            // }
         }
-
-        // if (page.hasBookmark) {
-        //     await storageManager.collection('bookmarks').createObject({
-        //         url: page.url,
-        //         time: Date.now(),
-        //     })
-        // }
-    }
-    await logic.processEvent('setPageSearchResult', { result })
-}
-
-export const setNoteSearchResult: DataSeederCreator = (
-    result = DATA.ANNOT_SEARCH_RESULT_2,
-) => async (logic, { storageManager }) => {
-    for (const list of DATA.LISTS_1) {
-        await storageManager.collection('customLists').createObject({
-            id: list.id,
-            name: list.name,
-            searchableName: list.name,
-            createdAt: new Date(),
-            isNestable: true,
-            isDeletable: true,
-        })
+        await logic.processEvent('setPageSearchResult', { result })
     }
 
-    for (const page of result.docs) {
-        await storageManager.collection('pages').createObject({
-            url: page.url,
-            title: page.fullTitle,
-        })
-
-        for (const annot of page.annotations) {
-            await storageManager.collection('annotations').createObject({
-                ...annot,
+export const setNoteSearchResult: DataSeederCreator =
+    (result = DATA.ANNOT_SEARCH_RESULT_2) =>
+    async (logic, { storageManager }) => {
+        for (const list of DATA.LISTS_1) {
+            await storageManager.collection('customLists').createObject({
+                id: list.id,
+                name: list.name,
+                searchableName: list.name,
+                createdAt: new Date(),
+                isNestable: true,
+                isDeletable: true,
             })
         }
 
-        // if (page.hasBookmark) {
-        //     await storageManager.collection('bookmarks').createObject({
-        //         url: page.url,
-        //         time: Date.now(),
-        //     })
-        // }
+        for (const page of result.docs) {
+            await storageManager.collection('pages').createObject({
+                url: page.url,
+                title: page.fullTitle,
+            })
+
+            for (const annot of page.annotations) {
+                await storageManager.collection('annotations').createObject({
+                    ...annot,
+                })
+            }
+
+            // if (page.hasBookmark) {
+            //     await storageManager.collection('bookmarks').createObject({
+            //         url: page.url,
+            //         time: Date.now(),
+            //     })
+            // }
+        }
+        // logic.processEvent('setAnnotationSearchResult', { result })
     }
-    // logic.processEvent('setAnnotationSearchResult', { result })
-}
 
 const defaultTestSetupDeps = {
     copyToClipboard: () => undefined,

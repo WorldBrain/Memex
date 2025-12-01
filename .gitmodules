@@ -4,11 +4,11 @@
 [submodule "external/@worldbrain/storex-backend-dexie"]
 	path = external/@worldbrain/storex-backend-dexie
 	url = https://github.com/WorldBrain/storex-backend-dexie.git
-[submodule "external/@worldbrain/memex-stemmer"]
-	path = external/@worldbrain/memex-stemmer
+[submodule "external/@worldbrain/memex-stemmer/ts"]
+	path = external/@worldbrain/memex-stemmer/ts
 	url = https://github.com/WorldBrain/memex-stemmer.git
-[submodule "external/@worldbrain/storex-pattern-modules"]
-	path = external/@worldbrain/storex-pattern-modules
+[submodule "external/@worldbrain/storex-pattern-modules/ts"]
+	path = external/@worldbrain/storex-pattern-modules/ts
 	url = https://github.com/WorldBrain/storex-pattern-modules
 [submodule "external/user-logic"]
 	path = external/user-logic

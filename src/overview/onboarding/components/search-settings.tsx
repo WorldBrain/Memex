@@ -4,8 +4,6 @@ import Checkbox, { CheckboxToggle } from 'src/common-ui/components/Checkbox'
 import { VISIT_DELAY_RANGE } from 'src/options/settings/constants'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
-const styles = require('./search-settings.css')
-
 export interface Props {
     stubs: boolean
     visits: boolean
@@ -91,7 +89,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
     private renderDisabledSettings() {
         return (
             <>
-                <div className={styles.settingsText}>
+                <div className="settingsText">
                     <strong>Current Settings: </strong>
                     {this.renderIndexingMessage()}
                 </div>
@@ -109,9 +107,9 @@ export default class SearchSettings extends React.PureComponent<Props> {
         }
 
         return (
-            <div className={styles.container}>
-                <div className={styles.settingsHeader}>General settings</div>
-                <div className={styles.settingsHeader}>
+            <div className="container">
+                <div className="settingsHeader">General settings</div>
+                <div className="settingsHeader">
                     Full-text search websites and PDFs
                 </div>
                 <Checkbox
@@ -129,7 +127,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     Visited for how many seconds?{' '}
                     <input
                         type="number"
-                        className={styles.number}
+                        className="number"
                         value={this.props.visitDelay}
                         onChange={this.props.setVisitDelayChange}
                         min={this.props.visitDelayMin}
@@ -151,7 +149,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     Made notes or annotations on
                 </Checkbox>
                 <a
-                    className={styles.settingsButton}
+                    className="settingsButton"
                     onClick={this.props.toggleShowSearchSettings}
                 >
                     Back

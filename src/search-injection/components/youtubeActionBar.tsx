@@ -1,27 +1,25 @@
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
-import VideoRangeSelector from '@worldbrain/memex-common/lib/common-ui/components/video-range-selector'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import IconBox from '@worldbrain/memex-common/ts/common-ui/components/icon-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/ts/common-ui/components/keyboard-shortcuts'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import TextArea from '@worldbrain/memex-common/ts/common-ui/components/text-area'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
+import VideoRangeSelector from '@worldbrain/memex-common/ts/common-ui/components/video-range-selector'
 import getYoutubeVideoDuration, {
     getYoutubeVideoElement,
-} from '@worldbrain/memex-common/lib/common-ui/utils/youtube-video-duration'
+} from '@worldbrain/memex-common/ts/common-ui/utils/youtube-video-duration'
 import {
     constructVideoURLwithTimeStamp,
     getHTML5VideoTimestamp,
-} from '@worldbrain/memex-common/lib/editor/utils'
+} from '@worldbrain/memex-common/ts/editor/utils'
 import {
     extractIdFromUrl,
     isUrlYTVideo,
-} from '@worldbrain/memex-common/lib/utils/youtube-url'
-import { index } from 'cheerio/lib/api/traversing'
-import { number } from 'prop-types'
+} from '@worldbrain/memex-common/ts/utils/youtube-url'
 import React, { Component } from 'react'
 import {
     ONBOARDING_NUDGES_DEFAULT,
@@ -46,8 +44,7 @@ import {
 import { renderNudgeTooltip, updateNudgesCounter } from 'src/util/nudges-utils'
 import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
-import { TaskState } from 'ui-logic-core/lib/types'
-import browser, { Browser } from 'webextension-polyfill'
+import { TaskState } from 'ui-logic-core/ts/types'
 
 interface Props {
     runtime: any
@@ -55,7 +52,7 @@ interface Props {
     getRootElement: (() => HTMLElement) | null
     syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<'openAI'>
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     shortcutsData: ShortcutElData[]
     transcriptFunctions: any
     removeYoutubeBar: () => void
@@ -199,7 +196,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         if (this.parentContainerRef.current) {
             resizeObserver.observe(this.parentContainerRef.current)
         }
-        browser.runtime.onMessage.addListener((message) => {
+        chrome.runtime.onMessage.addListener((message) => {
             if (message.type === 'URL_CHANGE') {
                 this.getYoutubeVideoDuration()
             }
@@ -228,7 +225,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     private getHotKey(
         name: string,
         size: 'small' | 'medium',
-    ): JSX.Element | string {
+    ): React.ReactNode | string {
         const elData = this.shortcutsData.get(name)
         const short: Shortcut = this.keyboardShortcuts[name]
 
@@ -606,7 +603,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             onboardingNudgesStorage[ONBOARDING_NUDGES_STORAGE] ??
             ONBOARDING_NUDGES_DEFAULT
 
-        onboardingNudgesValues.youtubeSummaryCount = null
+        onboardingNudgesValues['youtubeSummaryCount'] = null
 
         await this.props.browserAPIs.storage.local.set({
             [ONBOARDING_NUDGES_STORAGE]: onboardingNudgesValues,
@@ -931,7 +928,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         )} */}
                         <TopArea>
                             <Icon
-                                filePath={runtime.getURL('/img/memexLogo.svg')}
+                                filePath={chrome.runtime.getURL(
+                                    '/img/memexLogo.svg',
+                                )}
                                 height={'24px'}
                                 color={'prime1'}
                                 padding={'0 10px'}
@@ -952,7 +951,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     onClick={this.handleScreenshotButtonClick}
                                 >
                                     <Icon
-                                        filePath={runtime.getURL(
+                                        filePath={chrome.runtime.getURL(
                                             '/img/cameraIcon.svg',
                                         )}
                                         heightAndWidth="20px"
@@ -980,7 +979,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     onClick={this.handleAnnotateButtonClick}
                                 >
                                     <Icon
-                                        filePath={runtime.getURL(
+                                        filePath={chrome.runtime.getURL(
                                             '/img/clockForYoutubeInjection.svg',
                                         )}
                                         heightAndWidth="20px"
@@ -1032,7 +1031,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     ref={this.AIButtonRef}
                                 >
                                     <Icon
-                                        filePath={runtime.getURL(
+                                        filePath={chrome.runtime.getURL(
                                             '/img/starsYoutube.svg',
                                         )}
                                         heightAndWidth="20px"
@@ -1068,7 +1067,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     ref={this.summarizeButtonRef}
                                 >
                                     <Icon
-                                        filePath={runtime.getURL(
+                                        filePath={chrome.runtime.getURL(
                                             '/img/summarizeIconForYoutubeInjection.svg',
                                         )}
                                         heightAndWidth="20px"
@@ -1105,7 +1104,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     }
                                 >
                                     <Icon
-                                        filePath={runtime.getURL(
+                                        filePath={chrome.runtime.getURL(
                                             '/img/chatWithUs.svg',
                                         )}
                                         heightAndWidth="20px"
@@ -1274,7 +1273,12 @@ const YTPMenuItem = styled.div<{ active?: boolean }>`
 `
 
 const YTPMenuItemLabel = styled.div`
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on;
     font-family: Satoshi, sans-serif;
     font-size: 12px;
     padding: 0px 12px 0 6px;

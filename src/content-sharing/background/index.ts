@@ -1,15 +1,15 @@
 import pick from 'lodash/pick'
-import type StorageManager from '@worldbrain/storex'
-import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import type StorageManager from '@worldbrain/storex/ts'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/ts/types'
+import type { ContentSharingBackend } from '@worldbrain/memex-common/ts/content-sharing/backend'
 import {
     getAnnotationPrivacyState,
     createPageLinkListTitle,
     getListShareUrl,
     makeAnnotationPrivacyLevel,
-} from '@worldbrain/memex-common/lib/content-sharing/utils'
+} from '@worldbrain/memex-common/ts/content-sharing/utils'
 import type { Analytics } from 'src/analytics/types'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
 import {
     makeRemotelyCallable,
@@ -26,26 +26,26 @@ import type {
 } from './types'
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import AnnotationSharingService from '@worldbrain/memex-common/lib/content-sharing/service/annotation-sharing'
-import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/service/list-sharing'
+import { SharedListRoleID } from '@worldbrain/memex-common/ts/content-sharing/types'
+import AnnotationSharingService from '@worldbrain/memex-common/ts/content-sharing/service/annotation-sharing'
+import ListSharingService from '@worldbrain/memex-common/ts/content-sharing/service/list-sharing'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { BackgroundModules } from 'src/background-script/setup'
-import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
-import { deleteListTreeAndAllAssociatedData } from '@worldbrain/memex-common/lib/content-sharing/storage/delete-tree'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { SharedCollectionType } from '@worldbrain/memex-common/ts/content-sharing/storage/types'
+import { deleteListTreeAndAllAssociatedData } from '@worldbrain/memex-common/ts/content-sharing/storage/delete-tree'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import {
     trackPageLinkCreate,
     trackSharedAnnotation,
     trackSpaceCreate,
     trackUnSharedAnnotation,
-} from '@worldbrain/memex-common/lib/analytics/events'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
+} from '@worldbrain/memex-common/ts/analytics/events'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
+import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
+import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/ts/content-sharing/storage/list-tree-middleware'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
-import type { SharedListKeyLink } from '@worldbrain/memex-common/lib/content-sharing/service/types'
+import type { SharedListKeyLink } from '@worldbrain/memex-common/ts/content-sharing/service/types'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -86,9 +86,7 @@ export default class ContentSharingBackground {
             analyticsBG: AnalyticsCoreInterface
             services: Pick<Services, 'contentSharing'>
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
-            contentSharingSettingsStore: BrowserSettingsStore<
-                LocalContentSharingSettings
-            >
+            contentSharingSettingsStore: BrowserSettingsStore<LocalContentSharingSettings>
             getBgModules: () => Pick<
                 BackgroundModules,
                 | 'auth'
@@ -266,9 +264,8 @@ export default class ContentSharingBackground {
             unshareAnnotationFromList: this.unshareAnnotationFromList,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
-            findAnnotationPrivacyLevels: this.findAnnotationPrivacyLevels.bind(
-                this,
-            ),
+            findAnnotationPrivacyLevels:
+                this.findAnnotationPrivacyLevels.bind(this),
             setAnnotationPrivacyLevel: this.setAnnotationPrivacyLevel,
             generateRemoteAnnotationId: async () =>
                 this.generateRemoteAnnotationId(),
@@ -332,115 +329,111 @@ export default class ContentSharingBackground {
 
     async executePendingActions() {}
 
-    getExistingKeyLinksForList: ContentSharingInterface['getExistingKeyLinksForList'] = async (
-        params,
-    ) => {
-        let { contentSharing } = this.options.services
-        let { links } = await contentSharing.getExistingKeyLinksForList(params)
+    getExistingKeyLinksForList: ContentSharingInterface['getExistingKeyLinksForList'] =
+        async (params) => {
+            let { contentSharing } = this.options.services
+            let { links } =
+                await contentSharing.getExistingKeyLinksForList(params)
 
-        // Generate collab key on-demand if it's not there (can happen if user was offline when list created)
-        if (
-            links.length === 1 &&
-            links[0].roleID !== SharedListRoleID.ReadWrite
-        ) {
-            let collabKey = await contentSharing.generateKeyLink({
-                key: { roleID: SharedListRoleID.ReadWrite },
-                listReference: params.listReference,
-            })
-            links.push(collabKey)
+            // Generate collab key on-demand if it's not there (can happen if user was offline when list created)
+            if (
+                links.length === 1 &&
+                links[0].roleID !== SharedListRoleID.ReadWrite
+            ) {
+                let collabKey = await contentSharing.generateKeyLink({
+                    key: { roleID: SharedListRoleID.ReadWrite },
+                    listReference: params.listReference,
+                })
+                links.push(collabKey)
+            }
+
+            return { links }
         }
-
-        return { links }
-    }
 
     private generateRemoteAnnotationId = (): string =>
         this.options.generateServerId('sharedAnnotation').toString()
 
-    private getRemoteAnnotationLink: ContentSharingInterface['getRemoteAnnotationLink'] = async ({
-        annotationUrl,
-    }) => {
-        const remoteIds = await this.storage.getRemoteAnnotationIds({
-            localIds: [annotationUrl],
-        })
-        const remoteAnnotationId = remoteIds[annotationUrl]?.toString()
+    private getRemoteAnnotationLink: ContentSharingInterface['getRemoteAnnotationLink'] =
+        async ({ annotationUrl }) => {
+            const remoteIds = await this.storage.getRemoteAnnotationIds({
+                localIds: [annotationUrl],
+            })
+            const remoteAnnotationId = remoteIds[annotationUrl]?.toString()
 
-        if (remoteAnnotationId == null) {
-            return null
+            if (remoteAnnotationId == null) {
+                return null
+            }
+
+            return getNoteShareUrl({ remoteAnnotationId })
         }
 
-        return getNoteShareUrl({ remoteAnnotationId })
-    }
+    getAllRemoteLists: __DeprecatedContentSharingInterface['getAllRemoteLists'] =
+        async () => {
+            const remoteListIdsDict = await this.storage.getAllRemoteListIds()
+            const remoteListData: Array<{
+                localId: number
+                remoteId: string
+                name: string
+            }> = []
 
-    getAllRemoteLists: __DeprecatedContentSharingInterface['getAllRemoteLists'] = async () => {
-        const remoteListIdsDict = await this.storage.getAllRemoteListIds()
-        const remoteListData: Array<{
-            localId: number
-            remoteId: string
-            name: string
-        }> = []
-
-        for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
-            const list = await this.options
-                .getBgModules()
-                .customLists.storage.fetchListById(localId)
-            remoteListData.push({
-                localId,
-                remoteId: remoteListIdsDict[localId],
-                name: list.name,
-            })
-        }
-
-        return remoteListData
-    }
-
-    fetchLocalListDataByRemoteId: ContentSharingInterface['fetchLocalListDataByRemoteId'] = async ({
-        remoteListId,
-    }) => {
-        const sharedListMetaData = (
-            await this.storage.getRemoteListShareMetadata({
-                remoteListId: remoteListId,
-            })
-        )?.localId
-
-        return sharedListMetaData
-    }
-
-    deleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
-        localListId,
-    }) => {
-        // This will get caught by the ListTreeMiddleware
-        await this.options.storageManager.operation(
-            LIST_TREE_OPERATION_ALIASES.deleteTree,
-            LIST_COLL_NAMES.listTrees,
-            { localListId },
-        )
-    }
-
-    performDeleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
-        localListId,
-    }) => {
-        const { customLists } = this.options.getBgModules()
-
-        await deleteListTreeAndAllAssociatedData({
-            storageManager: this.options.storageManager,
-            getAllNodesInTree: async () => {
-                const listTrees = await customLists.storage.getAllNodesInTreeByList(
-                    {
-                        rootLocalListId: localListId,
-                    },
-                )
-                const remoteListIds = await this.storage.getRemoteListIds({
-                    localIds: listTrees
-                        .filter((tree) => tree.listId != null)
-                        .map((tree) => tree.listId!),
+            for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
+                const list = await this.options
+                    .getBgModules()
+                    .customLists.storage.fetchListById(localId)
+                remoteListData.push({
+                    localId,
+                    remoteId: remoteListIdsDict[localId],
+                    name: list.name,
                 })
-                return listTrees.map((tree) => ({
-                    ...tree,
-                    remoteListId: remoteListIds[tree.listId!] ?? null,
-                }))
-            },
-        })
-    }
+            }
+
+            return remoteListData
+        }
+
+    fetchLocalListDataByRemoteId: ContentSharingInterface['fetchLocalListDataByRemoteId'] =
+        async ({ remoteListId }) => {
+            const sharedListMetaData = (
+                await this.storage.getRemoteListShareMetadata({
+                    remoteListId: remoteListId,
+                })
+            )?.localId
+
+            return sharedListMetaData
+        }
+
+    deleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] =
+        async ({ localListId }) => {
+            // This will get caught by the ListTreeMiddleware
+            await this.options.storageManager.operation(
+                LIST_TREE_OPERATION_ALIASES.deleteTree,
+                LIST_COLL_NAMES.listTrees,
+                { localListId },
+            )
+        }
+
+    performDeleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] =
+        async ({ localListId }) => {
+            const { customLists } = this.options.getBgModules()
+
+            await deleteListTreeAndAllAssociatedData({
+                storageManager: this.options.storageManager,
+                getAllNodesInTree: async () => {
+                    const listTrees =
+                        await customLists.storage.getAllNodesInTreeByList({
+                            rootLocalListId: localListId,
+                        })
+                    const remoteListIds = await this.storage.getRemoteListIds({
+                        localIds: listTrees
+                            .filter((tree) => tree.listId != null)
+                            .map((tree) => tree.listId!),
+                    })
+                    return listTrees.map((tree) => ({
+                        ...tree,
+                        remoteListId: remoteListIds[tree.listId!] ?? null,
+                    }))
+                },
+            })
+        }
 
     scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({
         isPrivate,
@@ -460,9 +453,10 @@ export default class ContentSharingBackground {
             preGeneratedIds.collabKey ??
             this.options.generateServerId('sharedListKey').toString()
 
-        const annotationLocalToRemoteIdsDict = await this.listSharingService.ensureRemoteAnnotationIdsExistForList(
-            localListId,
-        )
+        const annotationLocalToRemoteIdsDict =
+            await this.listSharingService.ensureRemoteAnnotationIdsExistForList(
+                localListId,
+            )
 
         await this.performListShare({
             collabKey,
@@ -495,13 +489,12 @@ export default class ContentSharingBackground {
         }
     }
 
-    waitForListShareSideEffects: ContentSharingInterface['waitForListShareSideEffects'] = async ({
-        localListId,
-    }) => {
-        const promise = this.listShareSideEffectPromises[localListId]
-        delete this.listShareSideEffectPromises[localListId]
-        await promise
-    }
+    waitForListShareSideEffects: ContentSharingInterface['waitForListShareSideEffects'] =
+        async ({ localListId }) => {
+            const promise = this.listShareSideEffectPromises[localListId]
+            delete this.listShareSideEffectPromises[localListId]
+            await promise
+        }
 
     private async performListShare(options: {
         remoteListId: string
@@ -511,10 +504,8 @@ export default class ContentSharingBackground {
         isPrivate?: boolean
         annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
     }): Promise<void> {
-        const {
-            linksPromise,
-            annotationSharingStatesPromise,
-        } = await this.listSharingService.shareList(options)
+        const { linksPromise, annotationSharingStatesPromise } =
+            await this.listSharingService.shareList(options)
 
         // NOTE: Currently we don't wait for the annotationsSharingStatesPromise, letting list annotations
         //  get shared asyncronously. If we wanted some UI loading state, we'd need to set up another remote
@@ -550,9 +541,10 @@ export default class ContentSharingBackground {
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })
-        const annotPrivacyLevels = await this.storage.getPrivacyLevelsByAnnotation(
-            { annotations: options.annotationUrls },
-        )
+        const annotPrivacyLevels =
+            await this.storage.getPrivacyLevelsByAnnotation({
+                annotations: options.annotationUrls,
+            })
         const nonProtectedAnnotations = options.annotationUrls.filter(
             (url) =>
                 ![
@@ -591,45 +583,47 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
-    shareAnnotationsToAllLists: __DeprecatedContentSharingInterface['shareAnnotationsToAllLists'] = async (
-        options,
-    ) => {
-        const allMetadata = await this.storage.getRemoteAnnotationMetadata({
-            localIds: options.annotationUrls,
-        })
-        const nonPublicAnnotations = options.annotationUrls.filter(
-            (url) => allMetadata[url]?.excludeFromLists,
-        )
-        await this.storage.setAnnotationsExcludedFromLists({
-            localIds: nonPublicAnnotations,
-            excludeFromLists: false,
-        })
-        await this.storage.setAnnotationPrivacyLevelBulk({
-            annotations: nonPublicAnnotations,
-            privacyLevel: AnnotationPrivacyLevels.SHARED,
-        })
+    shareAnnotationsToAllLists: __DeprecatedContentSharingInterface['shareAnnotationsToAllLists'] =
+        async (options) => {
+            const allMetadata = await this.storage.getRemoteAnnotationMetadata({
+                localIds: options.annotationUrls,
+            })
+            const nonPublicAnnotations = options.annotationUrls.filter(
+                (url) => allMetadata[url]?.excludeFromLists,
+            )
+            await this.storage.setAnnotationsExcludedFromLists({
+                localIds: nonPublicAnnotations,
+                excludeFromLists: false,
+            })
+            await this.storage.setAnnotationPrivacyLevelBulk({
+                annotations: nonPublicAnnotations,
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+            })
 
-        if (this.options.analyticsBG) {
-            try {
-                await trackSharedAnnotation(this.options.analyticsBG, {
-                    type: 'autoShared',
-                })
-            } catch (error) {
-                console.error(
-                    `Error tracking autoshare annotation event'', ${error}`,
-                )
+            if (this.options.analyticsBG) {
+                try {
+                    await trackSharedAnnotation(this.options.analyticsBG, {
+                        type: 'autoShared',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking autoshare annotation event'', ${error}`,
+                    )
+                }
+            }
+
+            return {
+                sharingStates: await this.getAnnotationSharingStates(options),
             }
         }
-
-        return { sharingStates: await this.getAnnotationSharingStates(options) }
-    }
 
     private async getRemotePageIdLookupCache(): Promise<
         LocalContentSharingSettings['remotePageIdLookup']
     > {
-        const lookupCache = await this.options.contentSharingSettingsStore.get(
-            'remotePageIdLookup',
-        )
+        const lookupCache =
+            await this.options.contentSharingSettingsStore.get(
+                'remotePageIdLookup',
+            )
         return lookupCache ?? {}
     }
 
@@ -675,9 +669,8 @@ export default class ContentSharingBackground {
             )
         }
 
-        let remotePageId = await this.lookupRemotePageIdInCache(
-            normalizedPageUrl,
-        )
+        let remotePageId =
+            await this.lookupRemotePageIdInCache(normalizedPageUrl)
         if (remotePageId != null) {
             return remotePageId
         }
@@ -704,216 +697,214 @@ export default class ContentSharingBackground {
         return remotePageId
     }
 
-    unshareAnnotationsFromAllLists: __DeprecatedContentSharingInterface['unshareAnnotationsFromAllLists'] = async (
-        options,
-    ) => {
-        const sharingState = await this.annotationSharingService.removeAnnotationFromAllLists(
-            {
-                annotationUrl: options.annotationUrls[0],
-                setBulkShareProtected: options.setBulkShareProtected,
-            },
-        )
-
-        if (this.options.analyticsBG) {
-            try {
-                await trackUnSharedAnnotation(this.options.analyticsBG, {
-                    type: 'autoShared',
-                })
-            } catch (error) {
-                console.error(
-                    `Error tracking unshare autoshared annotation event', ${error}`,
+    unshareAnnotationsFromAllLists: __DeprecatedContentSharingInterface['unshareAnnotationsFromAllLists'] =
+        async (options) => {
+            const sharingState =
+                await this.annotationSharingService.removeAnnotationFromAllLists(
+                    {
+                        annotationUrl: options.annotationUrls[0],
+                        setBulkShareProtected: options.setBulkShareProtected,
+                    },
                 )
-            }
-        }
-        return { sharingStates: { [options.annotationUrls[0]]: sharingState } }
-    }
 
-    shareAnnotationToSomeLists: ContentSharingInterface['shareAnnotationToSomeLists'] = async (
-        options,
-    ) => {
-        const sharingState = await this.annotationSharingService.addAnnotationToLists(
-            {
-                annotationUrl: options.annotationUrl,
-                listIds: options.localListIds,
-                protectAnnotation: options.protectAnnotation,
-                skipListExistenceCheck: options.skipListExistenceCheck,
-            },
-        )
-        if (this.options.analyticsBG) {
-            try {
-                await trackSharedAnnotation(this.options.analyticsBG, {
-                    type: 'shared',
-                })
-            } catch (error) {
-                console.error(
-                    `Error tracking nshare annotation to some lists event', ${error}`,
-                )
-            }
-        }
-        return { sharingState }
-    }
-
-    unshareAnnotationFromList: ContentSharingInterface['unshareAnnotationFromList'] = async (
-        options,
-    ) => {
-        const sharingState = await this.annotationSharingService.removeAnnotationFromList(
-            {
-                annotationUrl: options.annotationUrl,
-                listId: options.localListId,
-            },
-        )
-        if (this.options.analyticsBG) {
-            try {
-                await trackUnSharedAnnotation(this.options.analyticsBG, {
-                    type: 'shared',
-                })
-            } catch (error) {
-                console.error(
-                    `Error tracking unshare annotation to some lists event', ${error}`,
-                )
-            }
-        }
-        return { sharingState }
-    }
-
-    unshareAnnotation: __DeprecatedContentSharingInterface['unshareAnnotation'] = async (
-        options,
-    ) => {
-        const privacyLevelObject = await this.storage.findAnnotationPrivacyLevel(
-            { annotation: options.annotationUrl },
-        )
-        let privacyLevel =
-            privacyLevelObject?.privacyLevel ?? AnnotationPrivacyLevels.PRIVATE
-        const privacyState = getAnnotationPrivacyState(privacyLevel)
-        await this.storage.deleteAnnotationMetadata({
-            localIds: [options.annotationUrl],
-        })
-        if (privacyState.public) {
-            privacyLevel = AnnotationPrivacyLevels.PRIVATE
-            await this.storage.setAnnotationPrivacyLevel({
-                annotation: options.annotationUrl,
-                privacyLevel,
-            })
-        }
-        return {
-            sharingState: {
-                hasLink: false,
-                privateListIds: [],
-                sharedListIds: [],
-                privacyLevel,
-            },
-        }
-    }
-
-    getListShareMetadata: ContentSharingInterface['getListShareMetadata'] = async (
-        params,
-    ) => {
-        return this.storage.getListShareMetadata({
-            localIds: params.localListIds,
-        })
-    }
-
-    // OLD direct linking method
-    deleteAnnotationShare: __DeprecatedContentSharingInterface['deleteAnnotationShare'] = async (
-        options,
-    ) => {
-        await this.storage.deleteAnnotationMetadata({
-            localIds: [options.annotationUrl],
-        })
-        await this.storage.deleteAnnotationPrivacyLevel({
-            annotation: options.annotationUrl,
-        })
-    }
-
-    findAnnotationPrivacyLevels: ContentSharingInterface['findAnnotationPrivacyLevels'] = async (
-        params,
-    ) => {
-        const storedLevels = await this.storage.getPrivacyLevelsByAnnotation({
-            annotations: params.annotationUrls,
-        })
-
-        const privacyLevels = {}
-        for (const annotationUrl of params.annotationUrls) {
-            privacyLevels[annotationUrl] =
-                storedLevels[annotationUrl]?.privacyLevel ??
-                AnnotationPrivacyLevels.PRIVATE
-        }
-        return privacyLevels
-    }
-
-    setAnnotationPrivacyLevel: ContentSharingInterface['setAnnotationPrivacyLevel'] = async (
-        params,
-    ) => {
-        if (
-            params.privacyLevel === AnnotationPrivacyLevels.SHARED ||
-            params.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
-        ) {
             if (this.options.analyticsBG) {
                 try {
-                    await trackSharedAnnotation(this.options.analyticsBG, {
+                    await trackUnSharedAnnotation(this.options.analyticsBG, {
                         type: 'autoShared',
                     })
                 } catch (error) {
                     console.error(
-                        `Error tracking space create event', ${error}`,
+                        `Error tracking unshare autoshared annotation event', ${error}`,
                     )
                 }
             }
-        }
-
-        return this.annotationSharingService.setAnnotationPrivacyLevel(params)
-    }
-
-    deleteAnnotationPrivacyLevel: __DeprecatedContentSharingInterface['deleteAnnotationPrivacyLevel'] = async (
-        params,
-    ) => {
-        await this.storage.deleteAnnotationPrivacyLevel(params)
-    }
-
-    getAnnotationSharingState: ContentSharingInterface['getAnnotationSharingState'] = async (
-        params,
-    ) => {
-        return this.annotationSharingService.getAnnotationSharingState(params)
-    }
-
-    getAnnotationSharingStates: ContentSharingInterface['getAnnotationSharingStates'] = async (
-        params,
-    ) => {
-        return this.annotationSharingService.getAnnotationSharingStates(params)
-    }
-
-    suggestSharedLists: __DeprecatedContentSharingInterface['suggestSharedLists'] = async (
-        params,
-    ) => {
-        const loweredPrefix = params.prefix.toLowerCase()
-        const lists = await this.options
-            .getBgModules()
-            .customLists.storage.fetchAllLists({
-                limit: 10000,
-                skip: 0,
-            })
-        const remoteIds = await this.storage.getAllRemoteListIds()
-        const suggestions: Array<{
-            localId: number
-            name: string
-            remoteId: string
-            createdAt: number
-        }> = []
-        for (const list of lists) {
-            if (
-                remoteIds[list.id] &&
-                list.name.toLowerCase().startsWith(loweredPrefix)
-            ) {
-                suggestions.push({
-                    localId: list.id,
-                    name: list.name,
-                    remoteId: remoteIds[list.id],
-                    createdAt: list.createdAt.getTime(),
-                })
+            return {
+                sharingStates: { [options.annotationUrls[0]]: sharingState },
             }
         }
-        return suggestions
-    }
+
+    shareAnnotationToSomeLists: ContentSharingInterface['shareAnnotationToSomeLists'] =
+        async (options) => {
+            const sharingState =
+                await this.annotationSharingService.addAnnotationToLists({
+                    annotationUrl: options.annotationUrl,
+                    listIds: options.localListIds,
+                    protectAnnotation: options.protectAnnotation,
+                    skipListExistenceCheck: options.skipListExistenceCheck,
+                })
+            if (this.options.analyticsBG) {
+                try {
+                    await trackSharedAnnotation(this.options.analyticsBG, {
+                        type: 'shared',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking nshare annotation to some lists event', ${error}`,
+                    )
+                }
+            }
+            return { sharingState }
+        }
+
+    unshareAnnotationFromList: ContentSharingInterface['unshareAnnotationFromList'] =
+        async (options) => {
+            const sharingState =
+                await this.annotationSharingService.removeAnnotationFromList({
+                    annotationUrl: options.annotationUrl,
+                    listId: options.localListId,
+                })
+            if (this.options.analyticsBG) {
+                try {
+                    await trackUnSharedAnnotation(this.options.analyticsBG, {
+                        type: 'shared',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking unshare annotation to some lists event', ${error}`,
+                    )
+                }
+            }
+            return { sharingState }
+        }
+
+    unshareAnnotation: __DeprecatedContentSharingInterface['unshareAnnotation'] =
+        async (options) => {
+            const privacyLevelObject =
+                await this.storage.findAnnotationPrivacyLevel({
+                    annotation: options.annotationUrl,
+                })
+            let privacyLevel =
+                privacyLevelObject?.privacyLevel ??
+                AnnotationPrivacyLevels.PRIVATE
+            const privacyState = getAnnotationPrivacyState(privacyLevel)
+            await this.storage.deleteAnnotationMetadata({
+                localIds: [options.annotationUrl],
+            })
+            if (privacyState.public) {
+                privacyLevel = AnnotationPrivacyLevels.PRIVATE
+                await this.storage.setAnnotationPrivacyLevel({
+                    annotation: options.annotationUrl,
+                    privacyLevel,
+                })
+            }
+            return {
+                sharingState: {
+                    hasLink: false,
+                    privateListIds: [],
+                    sharedListIds: [],
+                    privacyLevel,
+                },
+            }
+        }
+
+    getListShareMetadata: ContentSharingInterface['getListShareMetadata'] =
+        async (params) => {
+            return this.storage.getListShareMetadata({
+                localIds: params.localListIds,
+            })
+        }
+
+    // OLD direct linking method
+    deleteAnnotationShare: __DeprecatedContentSharingInterface['deleteAnnotationShare'] =
+        async (options) => {
+            await this.storage.deleteAnnotationMetadata({
+                localIds: [options.annotationUrl],
+            })
+            await this.storage.deleteAnnotationPrivacyLevel({
+                annotation: options.annotationUrl,
+            })
+        }
+
+    findAnnotationPrivacyLevels: ContentSharingInterface['findAnnotationPrivacyLevels'] =
+        async (params) => {
+            const storedLevels =
+                await this.storage.getPrivacyLevelsByAnnotation({
+                    annotations: params.annotationUrls,
+                })
+
+            const privacyLevels = {}
+            for (const annotationUrl of params.annotationUrls) {
+                privacyLevels[annotationUrl] =
+                    storedLevels[annotationUrl]?.privacyLevel ??
+                    AnnotationPrivacyLevels.PRIVATE
+            }
+            return privacyLevels
+        }
+
+    setAnnotationPrivacyLevel: ContentSharingInterface['setAnnotationPrivacyLevel'] =
+        async (params) => {
+            if (
+                params.privacyLevel === AnnotationPrivacyLevels.SHARED ||
+                params.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
+            ) {
+                if (this.options.analyticsBG) {
+                    try {
+                        await trackSharedAnnotation(this.options.analyticsBG, {
+                            type: 'autoShared',
+                        })
+                    } catch (error) {
+                        console.error(
+                            `Error tracking space create event', ${error}`,
+                        )
+                    }
+                }
+            }
+
+            return this.annotationSharingService.setAnnotationPrivacyLevel(
+                params,
+            )
+        }
+
+    deleteAnnotationPrivacyLevel: __DeprecatedContentSharingInterface['deleteAnnotationPrivacyLevel'] =
+        async (params) => {
+            await this.storage.deleteAnnotationPrivacyLevel(params)
+        }
+
+    getAnnotationSharingState: ContentSharingInterface['getAnnotationSharingState'] =
+        async (params) => {
+            return this.annotationSharingService.getAnnotationSharingState(
+                params,
+            )
+        }
+
+    getAnnotationSharingStates: ContentSharingInterface['getAnnotationSharingStates'] =
+        async (params) => {
+            return this.annotationSharingService.getAnnotationSharingStates(
+                params,
+            )
+        }
+
+    suggestSharedLists: __DeprecatedContentSharingInterface['suggestSharedLists'] =
+        async (params) => {
+            const loweredPrefix = params.prefix.toLowerCase()
+            const lists = await this.options
+                .getBgModules()
+                .customLists.storage.fetchAllLists({
+                    limit: 10000,
+                    skip: 0,
+                })
+            const remoteIds = await this.storage.getAllRemoteListIds()
+            const suggestions: Array<{
+                localId: number
+                name: string
+                remoteId: string
+                createdAt: number
+            }> = []
+            for (const list of lists) {
+                if (
+                    remoteIds[list.id] &&
+                    list.name.toLowerCase().startsWith(loweredPrefix)
+                ) {
+                    suggestions.push({
+                        localId: list.id,
+                        name: list.name,
+                        remoteId: remoteIds[list.id],
+                        createdAt: list.createdAt.getTime(),
+                    })
+                }
+            }
+            return suggestions
+        }
 
     async handlePostStorageChange(
         event: StorageOperationEvent<'post'>,
@@ -922,11 +913,10 @@ export default class ContentSharingBackground {
         },
     ) {}
 
-    waitForPageLinkCreation: ContentSharingInterface['waitForPageLinkCreation'] = async ({
-        fullPageUrl,
-    }) => {
-        await this.pageLinkCreationProgress[fullPageUrl]?.resolvable
-    }
+    waitForPageLinkCreation: ContentSharingInterface['waitForPageLinkCreation'] =
+        async ({ fullPageUrl }) => {
+            await this.pageLinkCreationProgress[fullPageUrl]?.resolvable
+        }
 
     scheduleManyPageLinkCreations = async (params: {
         fullPageUrls: Set<string>
@@ -997,76 +987,81 @@ export default class ContentSharingBackground {
         return pageLinks
     }
 
-    schedulePageLinkCreation: RemoteContentSharingByTabsInterface<
-        'provider'
-    >['schedulePageLinkCreation'] = async (
-        { tab },
-        { fullPageUrl, now = Date.now(), customPageTitle, skipPageIndexing },
-    ) => {
-        let progress = this.pageLinkCreationProgress[fullPageUrl]
-        if (progress) {
-            return progress.details
-        }
+    schedulePageLinkCreation: RemoteContentSharingByTabsInterface<'provider'>['schedulePageLinkCreation'] =
+        async (
+            { tab },
+            {
+                fullPageUrl,
+                now = Date.now(),
+                customPageTitle,
+                skipPageIndexing,
+            },
+        ) => {
+            let progress = this.pageLinkCreationProgress[fullPageUrl]
+            if (progress) {
+                return progress.details
+            }
 
-        const bgModules = this.options.getBgModules()
-        const currentUser = await bgModules.auth.authService.getCurrentUser()
-        if (!currentUser) {
-            throw new Error('Page links cannot be created when logged out')
-        }
+            const bgModules = this.options.getBgModules()
+            const currentUser =
+                await bgModules.auth.authService.getCurrentUser()
+            if (!currentUser) {
+                throw new Error('Page links cannot be created when logged out')
+            }
 
-        const localListId = now
-        const listTitle = createPageLinkListTitle(new Date(now))
-        const remoteListId = this.options
-            .generateServerId('sharedList')
-            .toString()
-        const remoteListEntryId = this.options
-            .generateServerId('sharedListEntry')
-            .toString()
-        const collabKey = this.options
-            .generateServerId('sharedListKey')
-            .toString()
-        const pageTitle = customPageTitle
+            const localListId = now
+            const listTitle = createPageLinkListTitle(new Date(now))
+            const remoteListId = this.options
+                .generateServerId('sharedList')
+                .toString()
+            const remoteListEntryId = this.options
+                .generateServerId('sharedListEntry')
+                .toString()
+            const collabKey = this.options
+                .generateServerId('sharedListKey')
+                .toString()
+            const pageTitle = customPageTitle
 
-        progress = {
-            resolvable: resolvablePromise(),
-            details: {
-                pageTitle,
-                collabKey,
-                listTitle,
-                localListId,
+            progress = {
+                resolvable: resolvablePromise(),
+                details: {
+                    pageTitle,
+                    collabKey,
+                    listTitle,
+                    localListId,
+                    remoteListId,
+                    remoteListEntryId,
+                },
+            }
+            this.pageLinkCreationProgress[fullPageUrl] = progress
+
+            // Start but don't wait for the storage logic
+            this.performPageLinkCreation({
+                creator: currentUser.id,
+                tabId: tab?.id,
+                skipPageIndexing,
+                fullPageUrl,
+                now,
+                ...progress.details,
+            })
+                .then(() => {
+                    progress.resolvable.resolve()
+                    this.pageLinkCreationProgress[fullPageUrl] = null
+                })
+                .catch((err) => {
+                    progress.resolvable.reject(err)
+                    this.pageLinkCreationProgress[fullPageUrl] = null
+                })
+
+            return {
                 remoteListId,
                 remoteListEntryId,
-            },
+                listTitle,
+                localListId,
+                collabKey,
+                pageTitle,
+            }
         }
-        this.pageLinkCreationProgress[fullPageUrl] = progress
-
-        // Start but don't wait for the storage logic
-        this.performPageLinkCreation({
-            creator: currentUser.id,
-            tabId: tab?.id,
-            skipPageIndexing,
-            fullPageUrl,
-            now,
-            ...progress.details,
-        })
-            .then(() => {
-                progress.resolvable.resolve()
-                this.pageLinkCreationProgress[fullPageUrl] = null
-            })
-            .catch((err) => {
-                progress.resolvable.reject(err)
-                this.pageLinkCreationProgress[fullPageUrl] = null
-            })
-
-        return {
-            remoteListId,
-            remoteListEntryId,
-            listTitle,
-            localListId,
-            collabKey,
-            pageTitle,
-        }
-    }
 
     private async performPageLinkCreation({
         remoteListEntryId,
@@ -1082,9 +1077,7 @@ export default class ContentSharingBackground {
         skipPageIndexing,
     }: Awaited<
         ReturnType<
-            RemoteContentSharingByTabsInterface<
-                'provider'
-            >['schedulePageLinkCreation']
+            RemoteContentSharingByTabsInterface<'provider'>['schedulePageLinkCreation']
         >
     > & {
         fullPageUrl: string

@@ -2,8 +2,8 @@ import * as React from 'react'
 import {
     SubscriptionCheckoutOptions,
     UserPlan,
-} from '@worldbrain/memex-common/lib/subscriptions/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+} from '@worldbrain/memex-common/ts/subscriptions/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import {
     SubscriptionOptionsContainer,
     PricingGrid,

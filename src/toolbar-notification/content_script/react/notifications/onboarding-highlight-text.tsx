@@ -2,11 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
 
-const styles = require('./notifications.css')
-
 export default function OnboardingHighlightText({ onCloseRequested }) {
     return (
-        <div className={styles.title}>
+        <div>
             <NotificationLayout
                 title={'STEP 1: Highlight some text'}
                 onCloseRequested={onCloseRequested}

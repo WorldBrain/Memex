@@ -1,12 +1,12 @@
 import type {
     ContentLocator,
     ContentIdentifier,
-} from '@worldbrain/memex-common/lib/page-indexing/types'
-import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+} from '@worldbrain/memex-common/ts/page-indexing/types'
+import type { ContentFingerprint } from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import type {
     PageEntity,
     PageMetadata,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 import type {
     RemoteFunctionRole,
     RemoteFunctionWithExtraArgs,

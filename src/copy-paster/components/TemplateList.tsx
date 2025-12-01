@@ -1,20 +1,20 @@
 import React, { PureComponent } from 'react'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 import styled from 'styled-components'
 import type { Template } from '../types'
 import ReactDOM from 'react-dom'
 import TemplateRow from './TemplateRow'
 import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import {
     DragDropContext,
     Droppable,
     Draggable,
     OnDragEndResponder,
-} from 'react-beautiful-dnd'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+} from '@hello-pangea/dnd'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 
 const Header = styled.div`
     display: flex;
@@ -43,7 +43,12 @@ const SectionTitle = styled.div`
 const NoResultsBox = styled.div`
     text-align: center;
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     font-style: normal;
     font-size: 12px;
@@ -329,56 +334,57 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                                 >
                                                     {(provided, snapshot) => {
                                                         // Use a portal for the dragging item
-                                                        const draggableContent = (
-                                                            <div
-                                                                ref={
-                                                                    provided.innerRef
-                                                                }
-                                                                {...provided.draggableProps}
-                                                                {...provided.dragHandleProps}
-                                                                style={{
-                                                                    ...provided
-                                                                        .draggableProps
-                                                                        .style,
-                                                                    zIndex: 30000000000000,
-                                                                    // Additional styles if needed
-                                                                }}
-                                                            >
-                                                                <TemplateRow
-                                                                    templateTitle={
-                                                                        template.title
+                                                        const draggableContent =
+                                                            (
+                                                                <div
+                                                                    ref={
+                                                                        provided.innerRef
                                                                     }
-                                                                    onClick={() => {
-                                                                        this.props.onClickCopy(
-                                                                            template.id,
-                                                                        )
+                                                                    {...provided.draggableProps}
+                                                                    {...provided.dragHandleProps}
+                                                                    style={{
+                                                                        ...provided
+                                                                            .draggableProps
+                                                                            .style,
+                                                                        zIndex: 30000000000000,
+                                                                        // Additional styles if needed
                                                                     }}
-                                                                    isDefault={
-                                                                        index ===
-                                                                        0
-                                                                    }
-                                                                    onClickEdit={() =>
-                                                                        this.props.onClickEdit(
-                                                                            template.id,
-                                                                        )
-                                                                    }
-                                                                    inFocus={
-                                                                        this
-                                                                            .props
-                                                                            .focusIndex ===
-                                                                        index
-                                                                    }
-                                                                    focusOnElement={
-                                                                        this
-                                                                            .props
-                                                                            .focusOnElement
-                                                                    }
-                                                                    itemIndex={
-                                                                        index
-                                                                    }
-                                                                />
-                                                            </div>
-                                                        )
+                                                                >
+                                                                    <TemplateRow
+                                                                        templateTitle={
+                                                                            template.title
+                                                                        }
+                                                                        onClick={() => {
+                                                                            this.props.onClickCopy(
+                                                                                template.id,
+                                                                            )
+                                                                        }}
+                                                                        isDefault={
+                                                                            index ===
+                                                                            0
+                                                                        }
+                                                                        onClickEdit={() =>
+                                                                            this.props.onClickEdit(
+                                                                                template.id,
+                                                                            )
+                                                                        }
+                                                                        inFocus={
+                                                                            this
+                                                                                .props
+                                                                                .focusIndex ===
+                                                                            index
+                                                                        }
+                                                                        focusOnElement={
+                                                                            this
+                                                                                .props
+                                                                                .focusOnElement
+                                                                        }
+                                                                        itemIndex={
+                                                                            index
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                            )
 
                                                         const portalRoot =
                                                             this.props.getRootElement?.() ??

@@ -1,4 +1,4 @@
-import Storex from '@worldbrain/storex'
+import Storex from '@worldbrain/storex/ts'
 
 import AbstractModel from './abstract-model'
 

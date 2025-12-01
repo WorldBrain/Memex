@@ -1,4 +1,4 @@
-import { UILogic, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEventHandler } from 'ui-logic-core/ts'
 import {
     BetaFeaturesSettingsState,
     BetaFeaturesSettingsEvent,
@@ -16,13 +16,12 @@ export const INITIAL_STATE: BetaFeaturesSettingsState = {
     betaFeaturesSetting: {},
 }
 
-type EventHandler<
-    EventName extends keyof BetaFeaturesSettingsEvent
-> = UIEventHandler<
-    BetaFeaturesSettingsState,
-    BetaFeaturesSettingsEvent,
-    EventName
->
+type EventHandler<EventName extends keyof BetaFeaturesSettingsEvent> =
+    UIEventHandler<
+        BetaFeaturesSettingsState,
+        BetaFeaturesSettingsEvent,
+        EventName
+    >
 
 export default class BetaFeaturesSettingsLogic extends UILogic<
     BetaFeaturesSettingsState,
@@ -46,9 +45,8 @@ export default class BetaFeaturesSettingsLogic extends UILogic<
 
     init = async () => {
         // Load feature settings
-        const imageOverlaySetting = await this.syncSettings.betaFeatures.get(
-            'imageOverlay',
-        )
+        const imageOverlaySetting =
+            await this.syncSettings.betaFeatures.get('imageOverlay')
 
         let betaFeaturesSetting = {
             imageOverlay: imageOverlaySetting,

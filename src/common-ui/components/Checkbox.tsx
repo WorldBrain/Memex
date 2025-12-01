@@ -2,11 +2,10 @@ import * as React from 'react'
 import cx from 'classnames'
 import styled, { ThemeProps, css } from 'styled-components'
 
-const styles = require('./Checkbox.css')
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { ColorThemeKeys } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 export type CheckboxToggle = (
     event: React.SyntheticEvent<HTMLInputElement>,
@@ -38,15 +37,15 @@ export interface Props {
 
 class Checkbox extends React.PureComponent<Props> {
     private get labelClass() {
-        return cx(styles.label, this.props.labelClass, {
-            [styles.disabledLabel]: !!this.props.isDisabled,
+        return cx('label', this.props.labelClass, {
+            ['disabledLabel']: !!this.props.isDisabled,
         })
     }
 
     private get iconClass() {
-        return cx(styles.icon, {
-            [styles.checkedIcon]: !!this.props.isChecked,
-            [styles.disabledIcon]: !!this.props.isDisabled,
+        return cx('icon', {
+            ['checkedIcon']: !!this.props.isChecked,
+            ['disabledIcon']: !!this.props.isDisabled,
         })
     }
 
@@ -223,7 +222,7 @@ const LabelCheck = styled.span<{
     background: ${(props) =>
         props.isChecked
             ? props.theme.colors.white
-            : props.theme.colors[props.checkBoxColor] ?? 'greyScale2'};
+            : (props.theme.colors[props.checkBoxColor] ?? 'greyScale2')};
     vertical-align: middle;
     width: ${(props) => (props.size ? props.size + 'px' : '24px')};
     height: ${(props) => (props.size ? props.size + 'px' : '24px')};

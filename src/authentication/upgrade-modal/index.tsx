@@ -8,10 +8,10 @@ import {
 } from './types'
 import styled, { css, keyframes } from 'styled-components'
 import { OverlayModals } from '../../../external/@worldbrain/memex-common/ts/common-ui/components/overlay-modals'
-import { UIElement } from 'ui-logic-react'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import { UIElement } from 'ui-logic-react/ts'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { PremiumPlans } from '@worldbrain/memex-common/ts/subscriptions/availablePowerups'
 
 const powerUps = [
     {
@@ -733,7 +733,9 @@ const CheckOutFooter = styled.div<{
     width: fill-available;
     width: -moz-available;
     transform: translateY(-20px);
-    transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+    transition:
+        opacity 200ms ease-in-out,
+        transform 200ms ease-in-out;
     animation: ${fadeInUp} 0.2s ease-in-out forwards;
     padding: 20px 30px;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale3};

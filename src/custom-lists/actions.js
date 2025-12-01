@@ -7,7 +7,7 @@ import { selectors as filters } from 'src/search-filters'
 import analytics from 'src/analytics'
 import * as Raven from 'src/util/raven' // eslint-disable-line
 import { collections } from 'src/util/remote-functions-background'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 
 export const setInboxUnreadCount = createAction(
     'custom-lists/setInboxUnreadCount',
@@ -91,48 +91,45 @@ export const showEditBox = (index) => (dispatch, getState) => {
     }
 }
 
-export const delPageFromList = (url, isSocialPost) => async (
-    dispatch,
-    getState,
-) => {
-    try {
-        const state = getState()
-        const listId = filters.listIdFilter(state)
-        const delPageFromListRPC = isSocialPost
-            ? 'delPostFromList'
-            : 'removePageFromList'
+export const delPageFromList =
+    (url, isSocialPost) => async (dispatch, getState) => {
+        try {
+            const state = getState()
+            const listId = filters.listIdFilter(state)
+            const delPageFromListRPC = isSocialPost
+                ? 'delPostFromList'
+                : 'removePageFromList'
 
-        if (listId === SPECIAL_LIST_IDS.INBOX) {
-            analytics.trackEvent({
-                category: 'Inbox',
-                action: 'removeFromInbox',
+            if (listId === SPECIAL_LIST_IDS.INBOX) {
+                analytics.trackEvent({
+                    category: 'Inbox',
+                    action: 'removeFromInbox',
+                })
+                dispatch(decInboxUnreadCount())
+            }
+
+            await remoteFunction(delPageFromListRPC)({
+                id: Number(listId),
+                url,
             })
-            dispatch(decInboxUnreadCount())
+        } catch (err) {
+            Raven.captureException(err)
         }
-
-        await remoteFunction(delPageFromListRPC)({
-            id: Number(listId),
-            url,
-        })
-    } catch (err) {
-        Raven.captureException(err)
     }
-}
 
-export const getListFromDB = ({ skipMobileList } = {}) => async (
-    dispatch,
-    getState,
-) => {
-    try {
-        const lists = await remoteFunction('fetchAllLists')({
-            limit: 1000,
-            skipMobileList,
-        })
-        dispatch(fetchAllLists(lists || []))
-    } catch (err) {
-        Raven.captureException(err)
+export const getListFromDB =
+    ({ skipMobileList } = {}) =>
+    async (dispatch, getState) => {
+        try {
+            const lists = await remoteFunction('fetchAllLists')({
+                limit: 1000,
+                skipMobileList,
+            })
+            dispatch(fetchAllLists(lists || []))
+        } catch (err) {
+            Raven.captureException(err)
+        }
     }
-}
 
 export const createPageList = (name, cb) => async (dispatch, getState) => {
     // gets id from DB after it is added
@@ -167,27 +164,26 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
     }
 }
 
-export const updateList = ([oldName, newName], id) => async (
-    dispatch,
-    getState,
-) => {
-    dispatch(resetActiveListIndex())
-    const lists = selectors.allLists(getState())
-    const index = lists.findIndex((list) => list.name === oldName)
+export const updateList =
+    ([oldName, newName], id) =>
+    async (dispatch, getState) => {
+        dispatch(resetActiveListIndex())
+        const lists = selectors.allLists(getState())
+        const index = lists.findIndex((list) => list.name === oldName)
 
-    if (index === -1) {
-        return
+        if (index === -1) {
+            return
+        }
+
+        try {
+            await remoteFunction('updateListName')({ id, newName, oldName })
+
+            dispatch(updateListName(newName, index))
+            dispatch(resultActs.updateListName([oldName, newName]))
+        } catch (err) {
+            Raven.captureException(err)
+        }
     }
-
-    try {
-        await remoteFunction('updateListName')({ id, newName, oldName })
-
-        dispatch(updateListName(newName, index))
-        dispatch(resultActs.updateListName([oldName, newName]))
-    } catch (err) {
-        Raven.captureException(err)
-    }
-}
 
 export const deletePageList = () => async (dispatch, getState) => {
     const { id } = selectors.deleteConfirmProps(getState())
@@ -203,16 +199,17 @@ export const deletePageList = () => async (dispatch, getState) => {
     }
 }
 
-export const addUrltoList = (url, isSocialPost, index, id) => async (
-    dispatch,
-) => {
-    const addPagetoListRPC = isSocialPost ? 'addPostToList' : 'insertPageToList'
+export const addUrltoList =
+    (url, isSocialPost, index, id) => async (dispatch) => {
+        const addPagetoListRPC = isSocialPost
+            ? 'addPostToList'
+            : 'insertPageToList'
 
-    try {
-        await remoteFunction(addPagetoListRPC)({ id, url })
-    } catch (err) {
-        Raven.captureException(err)
-    } finally {
-        dispatch(addPagetoList(url, index))
+        try {
+            await remoteFunction(addPagetoListRPC)({ id, url })
+        } catch (err) {
+            Raven.captureException(err)
+        } finally {
+            dispatch(addPagetoList(url, index))
+        }
     }
-}

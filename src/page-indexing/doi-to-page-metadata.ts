@@ -1,7 +1,7 @@
 import type {
     PageEntity as _PageEntity,
     PageMetadata as _PageMetadata,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 
 const CROSS_REF_API_URL = 'https://api.crossref.org/works/'
 

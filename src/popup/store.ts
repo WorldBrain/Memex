@@ -1,5 +1,5 @@
 import { createStore, combineReducers, compose, applyMiddleware } from 'redux'
-import thunk from 'redux-thunk'
+import * as thunk from 'redux-thunk'
 
 import initSentry from '../util/raven'
 import { reducer as collectionsBtn } from './collections-button'

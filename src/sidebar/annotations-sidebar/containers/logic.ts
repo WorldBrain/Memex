@@ -1,23 +1,23 @@
 import fromPairs from 'lodash/fromPairs'
 import clone from 'lodash/cloneDeep'
-import browser from 'webextension-polyfill'
+
 import {
     UILogic,
     UIEventHandler,
     UIMutation,
     loadInitial,
     executeUITask,
-} from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+} from '@worldbrain/memex-common/ts/main-ui/classes/logic'
 import {
     normalizeUrl,
     isFullUrl,
-} from '@worldbrain/memex-common/lib/url-utils/normalize'
+} from '@worldbrain/memex-common/ts/url-utils/normalize'
 import {
     annotationConversationInitialState,
     annotationConversationEventHandlers,
     detectAnnotationConversationThreads,
-} from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
-import type { ConversationIdBuilder } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
+} from '@worldbrain/memex-common/ts/content-conversations/ui/logic'
+import type { ConversationIdBuilder } from '@worldbrain/memex-common/ts/content-conversations/ui/types'
 import type { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,
@@ -38,7 +38,7 @@ import {
     NormalizedState,
     initNormalizedState,
     normalizedStateToArray,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
@@ -48,8 +48,8 @@ import { AI_PROMPT_DEFAULTS } from '../constants'
 import {
     getInitialAnnotationConversationState,
     getInitialAnnotationConversationStates,
-} from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+} from '@worldbrain/memex-common/ts/content-conversations/ui/utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import type {
     PageAnnotationsCacheEvents,
     RGBAColor,
@@ -68,56 +68,56 @@ import {
     initListInstance,
 } from './utils'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
-import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
-import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { YoutubePlayer } from '@worldbrain/memex-common/ts/services/youtube/types'
+import type { YoutubeService } from '@worldbrain/memex-common/ts/services/youtube'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/ts/content-sharing/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
-import type { Storage } from 'webextension-polyfill'
+
 import throttle from 'lodash/throttle'
 import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import { downloadMemexDesktop } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { downloadMemexDesktop } from '@worldbrain/memex-common/ts/subscriptions/storage'
 import { getListShareUrl, getPageLinkUrl } from 'src/content-sharing/utils'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
 import {
     convertMemexURLintoTelegramURL,
     getTelegramUserDisplayName,
-} from '@worldbrain/memex-common/lib/telegram/utils'
-import { enforceTrialPeriod } from '@worldbrain/memex-common/lib/subscriptions/storage'
+} from '@worldbrain/memex-common/ts/telegram/utils'
+import { enforceTrialPeriod } from '@worldbrain/memex-common/ts/subscriptions/storage'
 import {
     SpacePickerDependencies,
     SpacePickerEvent,
 } from 'src/custom-lists/ui/CollectionPicker/types'
-import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import { sleepPromise } from '@worldbrain/memex-common/lib/common-ui/utils/promises'
-import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
-import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import { validateSpaceName } from '@worldbrain/memex-common/ts/utils/space-name-validation'
+import { sleepPromise } from '@worldbrain/memex-common/ts/common-ui/utils/promises'
+import sanitizeHTMLhelper from '@worldbrain/memex-common/ts/utils/sanitize-html-helper'
+import { processCommentForImageUpload } from '@worldbrain/memex-common/ts/annotations/processCommentForImageUpload'
 import { marked } from 'marked'
-import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
-import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
-import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/ts/editor/utils'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/constants'
+import { RGBAobjectToString } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/utils'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
-import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
-import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { extractDataFromPDFDocument } from '@worldbrain/memex-common/ts/page-indexing/content-extraction/extract-pdf-content'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/ts/utils/item-ordering'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { captureException } from 'src/util/raven'
 import analytics from 'src/analytics'
 
 import MarkdownIt from 'markdown-it'
-import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
-import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
-import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/ts/annotations/replaceImgSrcWithCloudAddressBrowser'
+import { PromptData } from '@worldbrain/memex-common/ts/summarization/types'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/ts/content-sharing/storage/constants'
+import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/constants'
+import type { HighlightColor } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/types'
 
-import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat/utils'
-import { DEFAULT_AI_MODEL } from '@worldbrain/memex-common/lib/ai-chat/constants'
-import { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import { convertLinksInAIResponse } from '@worldbrain/memex-common/ts/ai-chat/utils'
+import { DEFAULT_AI_MODEL } from '@worldbrain/memex-common/ts/ai-chat/constants'
+import { HighlightRendererInterface } from '@worldbrain/memex-common/ts/in-page-ui/highlighting/types'
 import { PromptTemplate } from 'src/common-ui/components/prompt-templates/types'
-import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/lib/subscriptions/constants'
+import { COUNTER_STORAGE_KEY } from '@worldbrain/memex-common/ts/subscriptions/constants'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -668,9 +668,8 @@ export class SidebarContainerLogic extends UILogic<
         }
 
     private async fetchHighlightColors() {
-        let highlightColors = await this.syncSettings.highlightColors.get(
-            'highlightColors',
-        )
+        let highlightColors =
+            await this.syncSettings.highlightColors.get('highlightColors')
 
         if (!highlightColors) {
             highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
@@ -816,9 +815,8 @@ export class SidebarContainerLogic extends UILogic<
             const openAIKey = await this.syncSettings.openAI?.get('apiKey')
             const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
-            const selectedModel = await this.syncSettings.openAI.get(
-                'selectedModel',
-            )
+            const selectedModel =
+                await this.syncSettings.openAI.get('selectedModel')
 
             this.emitMutation({
                 hasKey: { $set: hasAPIKey },
@@ -829,7 +827,7 @@ export class SidebarContainerLogic extends UILogic<
                 .getElementById('memex-sidebar-container')
                 ?.shadowRoot.getElementById('annotationSidebarContainer')
             this.readingViewState =
-                (await browser.storage.local.get('@Sidebar-reading_view')) ??
+                (await chrome.storage.local.get('@Sidebar-reading_view')) ??
                 true
 
             if (initialState === 'visible') {
@@ -1363,7 +1361,7 @@ export class SidebarContainerLogic extends UILogic<
     show: EventHandler<'show'> = async ({ event }) => {
         this.showState = 'visible'
         this.readingViewState =
-            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
+            (await chrome.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
 
         let width =
@@ -1389,7 +1387,7 @@ export class SidebarContainerLogic extends UILogic<
         this.showState = 'hidden'
         document.body.style.position = 'initial'
         this.readingViewState =
-            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
+            (await chrome.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(false)
         this.emitMutation({
             showState: { $set: 'hidden' },
@@ -1649,9 +1647,8 @@ export class SidebarContainerLogic extends UILogic<
                     return
                 }
                 let response
-                response = await this.options.pkmSyncBG.checkFeedSource(
-                    inputFeedUrl,
-                )
+                response =
+                    await this.options.pkmSyncBG.checkFeedSource(inputFeedUrl)
 
                 let title = response?.feedTitle ?? null
                 let feedUrl = response?.feedUrl
@@ -1843,7 +1840,7 @@ export class SidebarContainerLogic extends UILogic<
                         $set: 'onboarded',
                     },
                 })
-                await browser.storage.local.set({
+                await chrome.storage.local.set({
                     rabbitHoleBetaFeatureAccessOnboardingDone: true,
                 })
             }
@@ -3555,9 +3552,8 @@ export class SidebarContainerLogic extends UILogic<
             let prompt = event.prompt
 
             if (event.prompt == null) {
-                let savedPrompts = await this.syncSettings.openAI?.get(
-                    'promptSuggestions',
-                )
+                let savedPrompts =
+                    await this.syncSettings.openAI?.get('promptSuggestions')
                 if (!savedPrompts) {
                     savedPrompts = AI_PROMPT_DEFAULTS.map((text) => ({
                         text,
@@ -5231,12 +5227,12 @@ export class SidebarContainerLogic extends UILogic<
         }
 
     async showSharingTutorial() {
-        const hasEverSharedPageLink = await browser.storage.local.get(
+        const hasEverSharedPageLink = await chrome.storage.local.get(
             'hasEverSharedPageLink',
         )
 
         if (!hasEverSharedPageLink.hasEverSharedPageLink) {
-            await browser.storage.local.set({ hasEverSharedPageLink: true })
+            await chrome.storage.local.set({ hasEverSharedPageLink: true })
             this.emitMutation({
                 firstTimeSharingPageLink: { $set: true },
             })

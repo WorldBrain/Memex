@@ -1,17 +1,14 @@
 import React from 'react'
 import styled from 'styled-components'
 import { remoteFunction } from 'src/util/webextensionRPC'
-const localStyles = require('./running-process.css')
 import ProgressBar from 'src/common-ui/components/ProgressBar'
 import { FailedOverlay } from '../components/overlays'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from 'src/backup-restore/background/types'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-
-const settingsStyle = require('src/options/settings/components/settings.css')
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 interface Props {
     functionNames: {
@@ -158,7 +155,7 @@ export default class RunningProcess extends React.Component<Props> {
 
         return (
             <div>
-                <div className={localStyles.steps}>
+                <div className="steps">
                     {/* {this.renderSteps(info)} */}
                     <ProgressBar progress={progressPercentage} />
                 </div>
@@ -172,41 +169,37 @@ export default class RunningProcess extends React.Component<Props> {
     renderSteps(info) {
         return (
             <React.Fragment>
-                <div className={localStyles.step}>
-                    <div className={localStyles.stepLabel}>
-                        <span className={localStyles.stepNumber}>Step 1:</span>
-                        <span className={settingsStyle.infoText}>
+                <div className="step">
+                    <div className="stepLabel">
+                        <span className="stepNumber">Step 1:</span>
+                        <span className="infoText">
                             {this.props.preparingStepLabel}
                         </span>
                     </div>
-                    <div className={localStyles.stepStatus}>
+                    <div className="stepStatus">
                         {info.state === 'preparing' && (
-                            <span className={localStyles.statusMessageActive}>
-                                running
-                            </span>
+                            <span className="statusMessageActive">running</span>
                         )}
                         {info.state !== 'preparing' && (
                             <img src="/img/checkmarkGreen.svg" />
                         )}
                     </div>
                 </div>
-                <div className={localStyles.step}>
-                    <div className={localStyles.stepLabel}>
-                        <span className={localStyles.stepNumber}>Step 2:</span>
-                        <span className={settingsStyle.infoText}>
+                <div className="step">
+                    <div className="stepLabel">
+                        <span className="stepNumber">Step 2:</span>
+                        <span className="infoText">
                             {this.props.synchingStepLabel}
                         </span>
                     </div>
-                    <div className={localStyles.stepStatus}>
+                    <div className="stepStatus">
                         {info.state === 'preparing' && (
-                            <span className={localStyles.statusMessageWaiting}>
+                            <span className="statusMessageWaiting">
                                 up next
                             </span>
                         )}
                         {status === 'running' && info.state !== 'preparing' && (
-                            <span className={localStyles.statusMessageActive}>
-                                running
-                            </span>
+                            <span className="statusMessageActive">running</span>
                         )}
                         {status === 'success' && (
                             <img src="/img/checkmarkGreen.svg" />
@@ -219,7 +212,7 @@ export default class RunningProcess extends React.Component<Props> {
 
     renderActions(info) {
         return (
-            <div className={localStyles.actions}>
+            <div className="actions">
                 {info.state !== 'paused' && info.state !== 'pausing' && (
                     <PrimaryAction
                         label={!this.state.canceling ? 'Cancel' : 'Sure?'}
@@ -253,8 +246,8 @@ export default class RunningProcess extends React.Component<Props> {
 
     renderFail() {
         return (
-            <div className={localStyles.fail}>
-                <div className={settingsStyle.buttonArea}>
+            <div className="fail">
+                <div className="buttonArea">
                     <div />
                     <PrimaryAction
                         onClick={() => {

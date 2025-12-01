@@ -1,8 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const styles = require('./layout.css')
-
 export default function NotificationLayout({
     title,
     children,
@@ -10,19 +8,14 @@ export default function NotificationLayout({
     thirdRowImage,
 }) {
     return (
-        <div className={styles.container}>
-            <div className={styles.middle}>
-                <div className={styles.title}>{title}</div>
-                <div className={styles.body}>{children}</div>
+        <div>
+            <div>
+                <div>{title}</div>
+                <div>{children}</div>
             </div>
-            <div className={styles.right}>
-                {thirdRowImage && (
-                    <img src={thirdRowImage} className={styles.thirdRowImage}/>
-                )}
-                <span
-                    className={styles.close}
-                    onClick={() => onCloseRequested()}
-                />
+            <div>
+                {thirdRowImage && <img src={thirdRowImage} />}
+                <span onClick={() => onCloseRequested()} />
             </div>
         </div>
     )

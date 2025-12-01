@@ -3,7 +3,7 @@ import React from 'react'
 import CopyPaster, { Props as CopyPasterProps } from './CopyPaster'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { Template } from './types'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 
 export interface Props extends Omit<CopyPasterProps, 'renderTemplate'> {
     normalizedPageUrls: string[]

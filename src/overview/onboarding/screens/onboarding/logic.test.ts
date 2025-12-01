@@ -1,4 +1,4 @@
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import {
     insertBackgroundFunctionTab,
     makeSingleDeviceUILogicTestFactory,
@@ -32,7 +32,7 @@ async function setupTest(
             ({
                 open: () => {},
                 close: () => {},
-            } as any),
+            }) as any,
     })
 
     const logic = createElement(_logic)

@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
 import { getExtURL } from '../utils.js'
 
-const styles = require('./ribbon-first-close.css')
-
 const images = {
     arrowUp: getExtURL('/img/arrowUp.svg'),
 }
@@ -18,9 +16,7 @@ export default function TooltipFirstCloseNotification({ onCloseRequested }) {
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={images.arrowUp}
             >
-                Via the little{' '}
-                <span className={styles.logo}/> icon in
-                the browser menu
+                Via the little <span /> icon in the browser menu
             </NotificationLayout>
         </div>
     )

@@ -3,13 +3,13 @@ import {
     StorageModule,
     StorageModuleConfig,
     StorageModuleConstructorArgs,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+} from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
 import type { SuggestResult } from 'src/search/types'
@@ -20,30 +20,29 @@ import type {
     ListTree,
 } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
+import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/ts/constants'
 import {
     trackSpaceCreate,
     trackSpaceEntryCreate,
-} from '@worldbrain/memex-common/lib/analytics/events'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+} from '@worldbrain/memex-common/ts/analytics/events'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import {
     defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
 import { sharePageWithPKM } from 'src/pkm-integrations/background/backend/utils'
 import { isPkmSyncEnabled } from 'src/pkm-integrations/utils'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import {
     buildMaterializedPath,
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
-import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/ts/content-sharing/tree-utils'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import type { OperationBatch } from '@worldbrain/storex'
-import { moveTree } from '@worldbrain/memex-common/lib/content-sharing/storage/move-tree'
-import type { Storage } from 'webextension-polyfill'
+import type { OperationBatch } from '@worldbrain/storex/ts'
+import { moveTree } from '@worldbrain/memex-common/ts/content-sharing/storage/move-tree'
 
 const cleanListTree = (listTree: ListTree) => ({
     ...listTree,

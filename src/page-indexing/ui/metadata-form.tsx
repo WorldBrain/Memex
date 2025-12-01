@@ -1,35 +1,35 @@
 import React from 'react'
 import type { PageIndexingInterface } from '../background/types'
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 import type {
     PageEntity,
     PageMetadata,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 import styled from 'styled-components'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import {
     DragDropContext,
     Draggable,
     Droppable,
     OnDragEndResponder,
-} from 'react-beautiful-dnd'
+} from '@hello-pangea/dnd'
 import ReactDOM from 'react-dom'
 import {
     defaultOrderableSorter,
     pushOrderedItem,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
 import {
     NormalizedState,
     initNormalizedState,
     mergeNormalizedStates,
     normalizedStateToArray,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+} from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 import { PDF_VIEWER_HTML } from 'src/pdf/constants'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import type { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import type { IconKeys } from '@worldbrain/memex-common/ts/common-ui/styles/types'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 export interface Props {
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -39,13 +39,9 @@ export interface Props {
     getRootElement?: () => HTMLElement
 }
 
-export interface State
-    extends Required<
-        Omit<
-            PageMetadata,
-            'normalizedPageUrl' | 'description' | 'previewImageUrl'
-        >
-    > {
+export interface State extends Required<
+    Omit<PageMetadata, 'normalizedPageUrl' | 'description' | 'previewImageUrl'>
+> {
     newEntityName: string
     newEntityIsPrimary: boolean
     newEntityAdditionalName: string
@@ -104,9 +100,10 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             normalizedPageUrl: this.normalizedPageUrl,
         })
         if (!metadata) {
-            const firstAccessTime = await pageIndexingBG.getFirstAccessTimeForPage(
-                { normalizedPageUrl: this.normalizedPageUrl },
-            )
+            const firstAccessTime =
+                await pageIndexingBG.getFirstAccessTimeForPage({
+                    normalizedPageUrl: this.normalizedPageUrl,
+                })
             metadata = {
                 entities: [],
                 accessDate: firstAccessTime ?? Date.now(),
@@ -185,47 +182,53 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         this.props.onSave?.()
     }
 
-    private handleTextInputChange = (
-        stateKey: keyof State,
-    ): React.ChangeEventHandler<HTMLInputElement> => (e) => {
-        e.stopPropagation()
-        this.setState({ [stateKey]: e.target.value, formChanged: true } as any)
+    private handleTextInputChange =
+        (stateKey: keyof State): React.ChangeEventHandler<HTMLInputElement> =>
+        (e) => {
+            e.stopPropagation()
+            this.setState({
+                [stateKey]: e.target.value,
+                formChanged: true,
+            } as any)
 
-        // Reset autofill state on DOI change to allow for re-autofill attempts
-        if (stateKey === 'doi') {
-            this.setState({ autoFillState: 'pristine' })
+            // Reset autofill state on DOI change to allow for re-autofill attempts
+            if (stateKey === 'doi') {
+                this.setState({ autoFillState: 'pristine' })
+            }
         }
-    }
 
-    private handleEntityTextInputChange = (
-        stateKey: keyof Pick<PageEntity, 'name' | 'additionalName'>,
-        entityId: number,
-    ): React.ChangeEventHandler<HTMLInputElement> => (e) => {
-        e.stopPropagation()
+    private handleEntityTextInputChange =
+        (
+            stateKey: keyof Pick<PageEntity, 'name' | 'additionalName'>,
+            entityId: number,
+        ): React.ChangeEventHandler<HTMLInputElement> =>
+        (e) => {
+            e.stopPropagation()
 
-        this.setState((state) => ({
-            entities: {
-                ...state.entities,
-                byId: {
-                    ...state.entities.byId,
-                    [entityId]: {
-                        ...state.entities.byId[entityId],
-                        [stateKey]: e.target.value,
+            this.setState((state) => ({
+                entities: {
+                    ...state.entities,
+                    byId: {
+                        ...state.entities.byId,
+                        [entityId]: {
+                            ...state.entities.byId[entityId],
+                            [stateKey]: e.target.value,
+                        },
                     },
                 },
-            },
-            formChanged: true,
-        }))
-    }
+                formChanged: true,
+            }))
+        }
 
     private handleAutoFill = async () => {
         if (!this.state.doi.trim().length) {
             return
         }
         this.setState({ autoFillState: 'running' })
-        const fetchedPageMetadata = await this.props.pageIndexingBG.fetchPageMetadataByDOI(
-            { doi: this.state.doi },
-        )
+        const fetchedPageMetadata =
+            await this.props.pageIndexingBG.fetchPageMetadataByDOI({
+                doi: this.state.doi,
+            })
         if (!fetchedPageMetadata) {
             this.setState({ autoFillState: 'error' })
             return
@@ -412,64 +415,65 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                                 >
                                                     {(provided, snapshot) => {
                                                         // Use a portal for the dragging item
-                                                        const draggableContent = (
-                                                            <div
-                                                                ref={
-                                                                    provided.innerRef
-                                                                }
-                                                                {...provided.draggableProps}
-                                                                {...provided.dragHandleProps}
-                                                                style={{
-                                                                    ...provided
-                                                                        .draggableProps
-                                                                        .style,
-                                                                    zIndex: 30000000000000,
-                                                                    // Additional styles if needed
-                                                                }}
-                                                            >
-                                                                <EntitiesItem>
-                                                                    <TextField
-                                                                        onKeyDown={(
-                                                                            e,
-                                                                        ) => {
-                                                                            e.stopPropagation()
-                                                                        }}
-                                                                        placeholder="Last Name or Org"
-                                                                        value={
-                                                                            entity.name
-                                                                        }
-                                                                        onChange={this.handleEntityTextInputChange(
-                                                                            'name',
-                                                                            entity.id,
-                                                                        )}
-                                                                    />
-                                                                    <TextField
-                                                                        onKeyDown={(
-                                                                            e,
-                                                                        ) => {
-                                                                            e.stopPropagation()
-                                                                        }}
-                                                                        placeholder="First Name"
-                                                                        value={
-                                                                            entity.additionalName
-                                                                        }
-                                                                        onChange={this.handleEntityTextInputChange(
-                                                                            'additionalName',
-                                                                            entity.id,
-                                                                        )}
-                                                                    />
-                                                                    <Icon
-                                                                        filePath="removeX"
-                                                                        onClick={() => {
-                                                                            this.handleDeleteEntity(
+                                                        const draggableContent =
+                                                            (
+                                                                <div
+                                                                    ref={
+                                                                        provided.innerRef
+                                                                    }
+                                                                    {...provided.draggableProps}
+                                                                    {...provided.dragHandleProps}
+                                                                    style={{
+                                                                        ...provided
+                                                                            .draggableProps
+                                                                            .style,
+                                                                        zIndex: 30000000000000,
+                                                                        // Additional styles if needed
+                                                                    }}
+                                                                >
+                                                                    <EntitiesItem>
+                                                                        <TextField
+                                                                            onKeyDown={(
+                                                                                e,
+                                                                            ) => {
+                                                                                e.stopPropagation()
+                                                                            }}
+                                                                            placeholder="Last Name or Org"
+                                                                            value={
+                                                                                entity.name
+                                                                            }
+                                                                            onChange={this.handleEntityTextInputChange(
+                                                                                'name',
                                                                                 entity.id,
-                                                                            )
-                                                                        }}
-                                                                        heightAndWidth="20px"
-                                                                    />
-                                                                </EntitiesItem>
-                                                            </div>
-                                                        )
+                                                                            )}
+                                                                        />
+                                                                        <TextField
+                                                                            onKeyDown={(
+                                                                                e,
+                                                                            ) => {
+                                                                                e.stopPropagation()
+                                                                            }}
+                                                                            placeholder="First Name"
+                                                                            value={
+                                                                                entity.additionalName
+                                                                            }
+                                                                            onChange={this.handleEntityTextInputChange(
+                                                                                'additionalName',
+                                                                                entity.id,
+                                                                            )}
+                                                                        />
+                                                                        <Icon
+                                                                            filePath="removeX"
+                                                                            onClick={() => {
+                                                                                this.handleDeleteEntity(
+                                                                                    entity.id,
+                                                                                )
+                                                                            }}
+                                                                            heightAndWidth="20px"
+                                                                        />
+                                                                    </EntitiesItem>
+                                                                </div>
+                                                            )
 
                                                         const portalRoot =
                                                             this.props.getRootElement?.() ??

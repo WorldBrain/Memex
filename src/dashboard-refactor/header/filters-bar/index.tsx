@@ -16,9 +16,9 @@ import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
+import { IconKeys } from '@worldbrain/memex-common/ts/common-ui/styles/types'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -311,10 +311,9 @@ const Container = styled.div<{ hidden: boolean }>`
     z-index: 29;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 
-    ${(props) =>
-        css`
-            display: ${props.hidden ? 'none' : 'flex'};
-        `};
+    ${(props) => css`
+        display: ${props.hidden ? 'none' : 'flex'};
+    `};
 `
 
 const FilterBtnsContainer = styled.div<{ spaceSidebarLocked }>`

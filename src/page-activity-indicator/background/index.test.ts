@@ -1,5 +1,5 @@
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import * as DATA from './index.test.data'
 import {
@@ -35,15 +35,16 @@ const calcExpectedListEntries = (
                           },
                           {
                               id: expect.any(Number),
-                              hasAnnotationsFromOthers: DATA.annotationListEntries[
-                                  sharedList
-                              ]?.reduce(
-                                  (acc, curr) =>
-                                      acc ||
-                                      curr.normalizedPageUrl ===
-                                          entry.normalizedUrl,
-                                  false,
-                              ),
+                              hasAnnotationsFromOthers:
+                                  DATA.annotationListEntries[
+                                      sharedList
+                                  ]?.reduce(
+                                      (acc, curr) =>
+                                          acc ||
+                                          curr.normalizedPageUrl ===
+                                              entry.normalizedUrl,
+                                      false,
+                                  ),
                           },
                       ),
                   )
@@ -463,13 +464,10 @@ describe('Page activity indicator background module tests', () => {
         })
 
         it('should create followedListEntries based on sharedListEntries created after lastSync time', async () => {
-            const {
-                backgroundModules,
-                storageManager,
-                serverStorage,
-            } = await setupTest({
-                testData: { ownLists: true },
-            })
+            const { backgroundModules, storageManager, serverStorage } =
+                await setupTest({
+                    testData: { ownLists: true },
+                })
 
             const ownListIds = new Set(
                 DATA.sharedLists
@@ -577,13 +575,10 @@ describe('Page activity indicator background module tests', () => {
         })
 
         it('should set hasAnnotations flag on existing followedListEntry if new annotation from another user exists on resync', async () => {
-            const {
-                backgroundModules,
-                storageManager,
-                serverStorage,
-            } = await setupTest({
-                testData: { ownLists: true },
-            })
+            const { backgroundModules, storageManager, serverStorage } =
+                await setupTest({
+                    testData: { ownLists: true },
+                })
 
             const ownListIds = new Set(
                 DATA.sharedLists
@@ -800,13 +795,10 @@ describe('Page activity indicator background module tests', () => {
         })
 
         it('should NOT set hasAnnotations flag on existing followedListEntry if new annotation from CURRENT user exists on resync', async () => {
-            const {
-                backgroundModules,
-                storageManager,
-                serverStorage,
-            } = await setupTest({
-                testData: { ownLists: true },
-            })
+            const { backgroundModules, storageManager, serverStorage } =
+                await setupTest({
+                    testData: { ownLists: true },
+                })
 
             const ownListIds = new Set(
                 DATA.sharedLists
@@ -924,13 +916,10 @@ describe('Page activity indicator background module tests', () => {
         })
 
         it('should delete followedList and followedListEntries when a sharedList no longer exists', async () => {
-            const {
-                backgroundModules,
-                storageManager,
-                serverStorage,
-            } = await setupTest({
-                testData: { ownLists: true },
-            })
+            const { backgroundModules, storageManager, serverStorage } =
+                await setupTest({
+                    testData: { ownLists: true },
+                })
 
             const ownListIds = new Set(
                 DATA.sharedLists
@@ -1048,13 +1037,10 @@ describe('Page activity indicator background module tests', () => {
         })
 
         it('should delete followedList and followedListEntries when a sharedList is no longer followed', async () => {
-            const {
-                backgroundModules,
-                storageManager,
-                serverStorage,
-            } = await setupTest({
-                testData: { follows: true },
-            })
+            const { backgroundModules, storageManager, serverStorage } =
+                await setupTest({
+                    testData: { follows: true },
+                })
 
             const followedListIds = new Set<AutoPk>(
                 DATA.activityFollows.map((follow) => Number(follow.objectId)),
@@ -1210,13 +1196,10 @@ describe('Page activity indicator background module tests', () => {
         })
 
         it('should delete followedList and followedListEntries when a sharedList is no longer followed and another sharedList no longer exists', async () => {
-            const {
-                backgroundModules,
-                storageManager,
-                serverStorage,
-            } = await setupTest({
-                testData: { follows: true, ownLists: true },
-            })
+            const { backgroundModules, storageManager, serverStorage } =
+                await setupTest({
+                    testData: { follows: true, ownLists: true },
+                })
 
             const expectedListIds = new Set([
                 DATA.sharedLists[0].id,
@@ -1306,14 +1289,10 @@ describe('Page activity indicator background module tests', () => {
         })
 
         it('should be able to sync new entries of only those followed lists which have had activity since last sync', async () => {
-            const {
-                backgroundModules,
-                storageManager,
-                serverStorage,
-                fetch,
-            } = await setupTest({
-                testData: { ownLists: true },
-            })
+            const { backgroundModules, storageManager, serverStorage, fetch } =
+                await setupTest({
+                    testData: { ownLists: true },
+                })
 
             const expectedListIds = new Set([
                 DATA.sharedLists[0].id,

@@ -1,30 +1,29 @@
 import createResolvable, { Resolvable } from '@josephg/resolvable'
-import StorageManager from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex/ts'
 import {
     normalizeUrl,
     isFileUrl,
-} from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { isTermsField } from '@worldbrain/memex-common/lib/storage/utils'
+} from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { isTermsField } from '@worldbrain/memex-common/ts/storage/utils'
 import {
     ContentFingerprint,
     ContentLocatorFormat,
     ContentLocatorType,
     LocationSchemeType,
     FingerprintSchemeType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import {
     ContentIdentifier,
     ContentLocator,
     ExtractedPDFData,
     PageDoc,
-} from '@worldbrain/memex-common/lib/page-indexing/types'
+} from '@worldbrain/memex-common/ts/page-indexing/types'
 import {
     buildBaseLocatorUrl,
     fingerprintsEqual,
     isMemexPageAPdf,
     pickBestLocator,
-} from '@worldbrain/memex-common/lib/page-indexing/utils'
-import type { Browser } from 'webextension-polyfill'
+} from '@worldbrain/memex-common/ts/page-indexing/utils'
 import PageStorage from './storage'
 import {
     PageAddRequest,
@@ -32,10 +31,10 @@ import {
     VisitInteraction,
     PipelineRes,
 } from 'src/search/types'
-import { extractUrlParts } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
+import { extractUrlParts } from '@worldbrain/memex-common/ts/url-utils/extract-parts'
 import pagePipeline, {
     extractTerms,
-} from '@worldbrain/memex-common/lib/page-indexing/pipeline'
+} from '@worldbrain/memex-common/ts/page-indexing/pipeline'
 import { initErrHandler } from 'src/search/storage'
 import { Page, PageCreationProps, PageCreationOpts } from 'src/search'
 import { DexieUtilsPlugin } from 'src/search/plugins'
@@ -58,19 +57,19 @@ import {
 } from '../../util/webextensionRPC'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
-import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
-import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import type { PageDataResult } from '@worldbrain/memex-common/ts/page-indexing/fetch-page-data/types'
+import { doesUrlPointToPdf } from '@worldbrain/memex-common/ts/page-indexing/utils'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { AuthBackground } from 'src/authentication/background'
 import { doiToPageMetadata } from '../doi-to-page-metadata'
 import {
     DEFAULT_KEY,
     DEFAULT_SPACE_BETWEEN,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
 import { analytics } from 'firebase-functions/v1'
 import { analyticsBG } from 'src/util/remote-functions-background'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
-import { pageActionAllowed } from '@worldbrain/memex-common/lib/subscriptions/storage'
+import { pageActionAllowed } from '@worldbrain/memex-common/ts/subscriptions/storage'
 import CustomListBackground from 'src/custom-lists/background'
 
 interface ContentInfo {
@@ -112,11 +111,9 @@ export class PageIndexingBackground {
             collectionsBG?: CustomListBackground
             tabManagement: TabManagementBackground
             storageManager: StorageManager
-            browserAPIs: Browser
+            browserAPIs: typeof chrome
             persistentStorageManager: StorageManager
-            pageIndexingSettingsStore: BrowserSettingsStore<
-                LocalPageIndexingSettings
-            >
+            pageIndexingSettingsStore: BrowserSettingsStore<LocalPageIndexingSettings>
             fetchPageData: (fullPageUrl: string) => Promise<PageDataResult>
             fetchPdfData: (fullPageUrl: string) => Promise<ExtractedPDFData>
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
@@ -179,49 +176,45 @@ export class PageIndexingBackground {
         registerRemoteFunctions(this.remoteFunctions)
     }
 
-    getFirstAccessTimeForPage: PageIndexingInterface<
-        'provider'
-    >['getFirstAccessTimeForPage']['function'] = async ({
-        normalizedPageUrl,
-    }) => {
-        const accessTime = await this.storage.getFirstVisitOrBookmarkTime(
-            normalizedPageUrl,
-        )
-        return accessTime
-    }
-
-    getTitleForPage: PageIndexingInterface<
-        'provider'
-    >['getTitleForPage']['function'] = async ({ fullPageUrl }) => {
-        const pageData = await this.storage.getPage(fullPageUrl)
-        return pageData?.fullTitle ?? null
-    }
-
-    getOriginalUrlForPdfPage: PageIndexingInterface<
-        'provider'
-    >['getOriginalUrlForPdfPage']['function'] = async ({
-        normalizedPageUrl,
-    }) => {
-        const locators = await this.storage.findLocatorsByNormalizedUrl(
-            normalizedPageUrl,
-        )
-        const mainLocator = pickBestLocator(locators, {
-            ignoreUploadLocators: true,
-            priority: ContentLocatorType.Remote,
-        })
-        return mainLocator?.originalLocation ?? null
-    }
-
-    getPageMetadata: PageIndexingInterface<
-        'provider'
-    >['getPageMetadata']['function'] = async ({ normalizedPageUrl }) => {
-        const metadata = await this.storage.getPageMetadata(normalizedPageUrl)
-        if (!metadata) {
-            return null
+    getFirstAccessTimeForPage: PageIndexingInterface<'provider'>['getFirstAccessTimeForPage']['function'] =
+        async ({ normalizedPageUrl }) => {
+            const accessTime =
+                await this.storage.getFirstVisitOrBookmarkTime(
+                    normalizedPageUrl,
+                )
+            return accessTime
         }
-        const entities = await this.storage.getPageEntities(normalizedPageUrl)
-        return { ...metadata, entities }
-    }
+
+    getTitleForPage: PageIndexingInterface<'provider'>['getTitleForPage']['function'] =
+        async ({ fullPageUrl }) => {
+            const pageData = await this.storage.getPage(fullPageUrl)
+            return pageData?.fullTitle ?? null
+        }
+
+    getOriginalUrlForPdfPage: PageIndexingInterface<'provider'>['getOriginalUrlForPdfPage']['function'] =
+        async ({ normalizedPageUrl }) => {
+            const locators =
+                await this.storage.findLocatorsByNormalizedUrl(
+                    normalizedPageUrl,
+                )
+            const mainLocator = pickBestLocator(locators, {
+                ignoreUploadLocators: true,
+                priority: ContentLocatorType.Remote,
+            })
+            return mainLocator?.originalLocation ?? null
+        }
+
+    getPageMetadata: PageIndexingInterface<'provider'>['getPageMetadata']['function'] =
+        async ({ normalizedPageUrl }) => {
+            const metadata =
+                await this.storage.getPageMetadata(normalizedPageUrl)
+            if (!metadata) {
+                return null
+            }
+            const entities =
+                await this.storage.getPageEntities(normalizedPageUrl)
+            return { ...metadata, entities }
+        }
 
     /**
      * Fills in (hopefully) unique IDs and orders for remotely fetched entities. This could be improved
@@ -231,28 +224,24 @@ export class PageIndexingBackground {
         order: DEFAULT_KEY + idOffset * DEFAULT_SPACE_BETWEEN - idBase,
     })
 
-    fetchPageMetadataByDOI: PageIndexingInterface<
-        'provider'
-    >['fetchPageMetadataByDOI']['function'] = async ({
-        doi,
-        now = Date.now(),
-    }) => {
-        try {
-            const metadata = await doiToPageMetadata({
-                doi,
-                fetch: this.options.fetch,
-            })
-            return {
-                ...metadata,
-                entities: metadata.entities.map((e, i) => ({
-                    ...e,
-                    ...this.assignEntityData(now, i),
-                })),
+    fetchPageMetadataByDOI: PageIndexingInterface<'provider'>['fetchPageMetadataByDOI']['function'] =
+        async ({ doi, now = Date.now() }) => {
+            try {
+                const metadata = await doiToPageMetadata({
+                    doi,
+                    fetch: this.options.fetch,
+                })
+                return {
+                    ...metadata,
+                    entities: metadata.entities.map((e, i) => ({
+                        ...e,
+                        ...this.assignEntityData(now, i),
+                    })),
+                }
+            } catch (err) {
+                return null
             }
-        } catch (err) {
-            return null
         }
-    }
 
     async initContentIdentifier(
         params: InitContentIdentifierParams,
@@ -325,9 +314,8 @@ export class PageIndexingBackground {
         }
 
         pageContentInfo[regularNormalizedUrl] = contentInfo
-        pageContentInfo[
-            contentInfo.primaryIdentifier.normalizedUrl
-        ] = contentInfo
+        pageContentInfo[contentInfo.primaryIdentifier.normalizedUrl] =
+            contentInfo
 
         // Keep track of the orig ID passed into this function, as an alias ID of the main content info
         if (
@@ -850,7 +838,8 @@ export class PageIndexingBackground {
         }
         // Else try to extract from first page's text
         if (!doi && pdfPageTexts?.length) {
-            const doiRegex = /\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/(?:(?!["&\'<>])[\x21-\x7E])+)\b/i
+            const doiRegex =
+                /\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/(?:(?!["&\'<>])[\x21-\x7E])+)\b/i
             const matchRes = pdfPageTexts[0].match(doiRegex)
             if (matchRes?.length) {
                 doi = matchRes[0]
@@ -930,9 +919,8 @@ export class PageIndexingBackground {
     }
 
     private async _findTabId(fullUrl: string) {
-        let foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
-            fullUrl,
-        )
+        let foundTabId =
+            await this.options.tabManagement.findTabIdByFullUrl(fullUrl)
         if (foundTabId) {
             return foundTabId
         }
@@ -1032,21 +1020,16 @@ export class PageIndexingBackground {
         return time !== '$now' ? time : this.options.getNow()
     }
 
-    setEntityOrder: PageIndexingInterface<
-        'provider'
-    >['setEntityOrder']['function'] = async ({ id, order }) => {
-        await this.storage.setEntityOrder(id, order)
-    }
+    setEntityOrder: PageIndexingInterface<'provider'>['setEntityOrder']['function'] =
+        async ({ id, order }) => {
+            await this.storage.setEntityOrder(id, order)
+        }
 
-    updatePageMetadata: PageIndexingInterface<
-        'provider'
-    >['updatePageMetadata']['function'] = async ({
-        normalizedPageUrl,
-        ...metadata
-    }) => {
-        await this.storage.updatePageMetadata({
-            normalizedPageUrl,
-            ...metadata,
-        })
-    }
+    updatePageMetadata: PageIndexingInterface<'provider'>['updatePageMetadata']['function'] =
+        async ({ normalizedPageUrl, ...metadata }) => {
+            await this.storage.updatePageMetadata({
+                normalizedPageUrl,
+                ...metadata,
+            })
+        }
 }

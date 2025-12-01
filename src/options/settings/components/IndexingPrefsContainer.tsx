@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import browser, { Storage } from 'webextension-polyfill'
 
 import * as acts from '../actions'
 import * as selectors from '../selectors'
@@ -16,7 +15,7 @@ const trackIndexingSettingChange = () =>
     })
 
 export interface Props {
-    storage: Storage.LocalStorageArea
+    storage: chrome.storage.local
     initLinks: (val: boolean) => void
     initStubs: (val: boolean) => void
     initVisits: (val: boolean) => void
@@ -27,7 +26,7 @@ export interface Props {
 
 class IndexingPrefsContainer extends React.PureComponent<Props> {
     static defaultProps: Partial<Props> = {
-        storage: browser.storage.local,
+        storage: chrome.storage.local,
     }
 
     componentDidMount() {
@@ -74,7 +73,7 @@ const mapDispatchToProps = (
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleBookmarks())
-            return browser.storage.local.set({
+            return chrome.storage.local.set({
                 [KEYS.BOOKMARKS]: !selectors.bookmarks(state),
             })
         })
@@ -85,7 +84,7 @@ const mapDispatchToProps = (
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleLinks())
-            return browser.storage.local.set({
+            return chrome.storage.local.set({
                 [KEYS.LINKS]: !selectors.memexLinks(state),
             })
         })
@@ -96,7 +95,7 @@ const mapDispatchToProps = (
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleStubs())
-            return browser.storage.local.set({
+            return chrome.storage.local.set({
                 [KEYS.STUBS]: !selectors.stubs(state),
             })
         })
@@ -105,7 +104,7 @@ const mapDispatchToProps = (
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleScreenshots())
-            return browser.storage.local.set({
+            return chrome.storage.local.set({
                 [KEYS.SCREENSHOTS]: !selectors.screenshots(state),
             })
         }),
@@ -115,7 +114,7 @@ const mapDispatchToProps = (
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleVisits())
-            return browser.storage.local.set({
+            return chrome.storage.local.set({
                 [KEYS.VISITS]: !selectors.visits(state),
             })
         })
@@ -125,7 +124,7 @@ const mapDispatchToProps = (
 
         const el = ev.target as HTMLInputElement
         dispatch(acts.changeVisitDelay(+el.value))
-        return browser.storage.local.set({
+        return chrome.storage.local.set({
             [KEYS.VISIT_DELAY]: +el.value,
         })
     },

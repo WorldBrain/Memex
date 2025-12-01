@@ -2,10 +2,10 @@ import StorageManager, {
     isChildOfRelationship,
     getChildOfRelationshipTarget,
     FindManyOptions,
-} from '@worldbrain/storex'
-import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
+} from '@worldbrain/storex/ts'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/ts/types'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
+import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/ts/storage/hooks'
 import { setupSyncBackgroundTest } from '../../index.tests'
 import {
     LOCAL_TEST_DATA_V24,
@@ -19,48 +19,48 @@ import {
     FingerprintSchemeType,
     LocationSchemeType,
     PersonalDeviceType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import {
     PersonalCloudUpdateBatch,
     PersonalCloudUpdateType,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/types'
+import { downloadClientUpdates } from '@worldbrain/memex-common/ts/personal-cloud/backend/translation-layer'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import {
     cloudDataToReadwiseHighlight,
     formatReadwiseHighlightTag,
-} from '@worldbrain/memex-common/lib/readwise-integration/utils'
-import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
-import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
+} from '@worldbrain/memex-common/ts/readwise-integration/utils'
+import type { ReadwiseHighlight } from '@worldbrain/memex-common/ts/readwise-integration/api/types'
+import { preprocessPulledObject } from '@worldbrain/memex-common/ts/personal-cloud/utils'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
 import {
     initSqlUsage,
     InitSqlUsageParams,
-} from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
+} from '@worldbrain/memex-common/ts/personal-cloud/backend/translation-layer/utils'
 import type { MockPushMessagingService } from 'src/tests/push-messaging'
 import {
     SharedListRoleID,
     SharedListTree,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher/lib/index'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
+import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher/ts/index'
 import {
     buildMaterializedPath,
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import cloneDeep from 'lodash/cloneDeep'
 import omit from 'lodash/omit'
-import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/ts/content-sharing/tree-utils'
 import type { ListTree } from 'src/custom-lists/background/types'
 import delay from 'src/util/delay'
-import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { mergeTermFields } from '@worldbrain/memex-common/ts/page-indexing/utils'
 import type { PipelineRes } from 'src/search'
-import { extractTerms } from '@worldbrain/memex-common/lib/page-indexing/pipeline'
-import type { ExceptionCapturer } from '@worldbrain/memex-common/lib/firebase-backend/types'
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
-import { SHARED_LIST_TIMESTAMP_SET_ROUTE } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/constants'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { extractTerms } from '@worldbrain/memex-common/ts/page-indexing/pipeline'
+import type { ExceptionCapturer } from '@worldbrain/memex-common/ts/firebase-backend/types'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/ts/content-sharing/storage/constants'
+import { SHARED_LIST_TIMESTAMP_SET_ROUTE } from '@worldbrain/memex-common/ts/page-activity-indicator/backend/constants'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
 
 const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
 
@@ -148,14 +148,13 @@ class IdCapturer {
                     createdWhen: expect.any(Number),
                     updatedWhen: expect.any(Number),
                 }
-                const collectionDefinition = this.storageManager!.registry
-                    .collections[collection]
+                const collectionDefinition =
+                    this.storageManager!.registry.collections[collection]
                 for (const relationship of collectionDefinition.relationships ??
                     []) {
                     if (isChildOfRelationship(relationship)) {
-                        const targetCollection = getChildOfRelationshipTarget(
-                            relationship,
-                        )
+                        const targetCollection =
+                            getChildOfRelationshipTarget(relationship)
                         const index = mergedObject[relationship.alias] - 1
                         const targetId = opts?.anyId
                             ? expect.anything()
@@ -338,26 +337,23 @@ async function setup(options?: {
         ]),
     )
 
-    const serverChangeWatchSettings: ChangeWatchMiddlewareSettings[] = options?.withStorageHooks
-        ? [...storageHooksChangeWatchers.values()]
-        : [...deviceUsersSet].map(() => ({
-              shouldWatchCollection: (collection) =>
-                  collection.startsWith('personal'),
-              postprocessOperation: async (context) => {
-                  await serverIdCapturer.handlePostStorageChange(context)
-              },
-          }))
+    const serverChangeWatchSettings: ChangeWatchMiddlewareSettings[] =
+        options?.withStorageHooks
+            ? [...storageHooksChangeWatchers.values()]
+            : [...deviceUsersSet].map(() => ({
+                  shouldWatchCollection: (collection) =>
+                      collection.startsWith('personal'),
+                  postprocessOperation: async (context) => {
+                      await serverIdCapturer.handlePostStorageChange(context)
+                  },
+              }))
 
-    const {
-        setups,
-        serverStorage,
-        getSqlStorageMananager,
-        getNow,
-    } = await setupSyncBackgroundTest({
-        deviceCount: deviceUsers.length,
-        serverChangeWatchSettings,
-        fakeFetch,
-    })
+    const { setups, serverStorage, getSqlStorageMananager, getNow } =
+        await setupSyncBackgroundTest({
+            deviceCount: deviceUsers.length,
+            serverChangeWatchSettings,
+            fakeFetch,
+        })
 
     for (let deviceIndex = 0; deviceIndex < deviceUsers.length; deviceIndex++) {
         await setups[deviceIndex].authService.loginWithEmailAndPassword(
@@ -516,7 +512,8 @@ async function setup(options?: {
                             highlights: [
                                 {
                                     ...highlight,
-                                    highlighted_at: highlight.highlighted_at.toISOString(),
+                                    highlighted_at:
+                                        highlight.highlighted_at.toISOString(),
                                 },
                             ],
                         }),
@@ -2149,9 +2146,8 @@ describe('Personal cloud translation layer', () => {
                 .collection('annotationPrivacyLevels')
                 .updateOneObject(
                     {
-                        id:
-                            LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
-                                .id,
+                        id: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
+                            .id,
                     },
                     { privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED },
                 )
@@ -2239,9 +2235,8 @@ describe('Personal cloud translation layer', () => {
                 .collection('annotationPrivacyLevels')
                 .updateOneObject(
                     {
-                        id:
-                            LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
-                                .id,
+                        id: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
+                            .id,
                     },
                     { privacyLevel: AnnotationPrivacyLevels.PRIVATE },
                 )
@@ -2250,9 +2245,8 @@ describe('Personal cloud translation layer', () => {
                 .collection('annotationPrivacyLevels')
                 .updateOneObject(
                     {
-                        id:
-                            LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
-                                .id,
+                        id: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
+                            .id,
                     },
                     { privacyLevel: AnnotationPrivacyLevels.SHARED },
                 )
@@ -3822,9 +3816,8 @@ describe('Personal cloud translation layer', () => {
                 .collection('customListDescriptions')
                 .updateOneObject(
                     {
-                        listId:
-                            LOCAL_TEST_DATA_V24.customListDescriptions.first
-                                .listId,
+                        listId: LOCAL_TEST_DATA_V24.customListDescriptions.first
+                            .listId,
                     },
                     { description: updatedDescription },
                 )
@@ -3857,9 +3850,8 @@ describe('Personal cloud translation layer', () => {
                         type: PersonalCloudUpdateType.Overwrite,
                         collection: 'customListDescriptions',
                         object: {
-                            listId:
-                                LOCAL_TEST_DATA_V24.customListDescriptions.first
-                                    .listId,
+                            listId: LOCAL_TEST_DATA_V24.customListDescriptions
+                                .first.listId,
                             description: updatedDescription,
                         },
                     },
@@ -3901,9 +3893,8 @@ describe('Personal cloud translation layer', () => {
                 .collection('customListDescriptions')
                 .updateOneObject(
                     {
-                        listId:
-                            LOCAL_TEST_DATA_V24.customListDescriptions.first
-                                .listId,
+                        listId: LOCAL_TEST_DATA_V24.customListDescriptions.first
+                            .listId,
                     },
                     { description: updatedDescription },
                 )
@@ -4436,8 +4427,9 @@ describe('Personal cloud translation layer', () => {
                 )
             await setups[0].backgroundModules.personalCloud.waitForSync()
             const changeInfo = {
-                excludeFromLists: !LOCAL_TEST_DATA_V24.sharedAnnotationMetadata
-                    .second.excludeFromLists,
+                excludeFromLists:
+                    !LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.second
+                        .excludeFromLists,
             }
             await setups[0].storageManager
                 .collection('sharedAnnotationMetadata')
@@ -5520,9 +5512,8 @@ describe('Personal cloud translation layer', () => {
                     .createObject(LOCAL_TEST_DATA_V24.pages.twitter_b)
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
-                const remoteData = serverIdCapturer.mergeIds(
-                    REMOTE_TEST_DATA_V24,
-                )
+                const remoteData =
+                    serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
                 const testTwitterActions = remoteData.personalTwitterAction
@@ -5575,9 +5566,8 @@ describe('Personal cloud translation layer', () => {
                     })
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
-                const remoteData = serverIdCapturer.mergeIds(
-                    REMOTE_TEST_DATA_V24,
-                )
+                const remoteData =
+                    serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
 
@@ -5624,9 +5614,8 @@ describe('Personal cloud translation layer', () => {
                     })
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
-                const remoteData = serverIdCapturer.mergeIds(
-                    REMOTE_TEST_DATA_V24,
-                )
+                const remoteData =
+                    serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
                 const testTwitterActions = remoteData.personalTwitterAction
@@ -5679,9 +5668,8 @@ describe('Personal cloud translation layer', () => {
                     .createObject(LOCAL_TEST_DATA_V24.annotations.second)
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
-                const remoteData = serverIdCapturer.mergeIds(
-                    REMOTE_TEST_DATA_V24,
-                )
+                const remoteData =
+                    serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
                 const testAnnotations = remoteData.personalAnnotation
@@ -5747,9 +5735,8 @@ describe('Personal cloud translation layer', () => {
                     )
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
-                const remoteData = serverIdCapturer.mergeIds(
-                    REMOTE_TEST_DATA_V24,
-                )
+                const remoteData =
+                    serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
                 const testAnnotations = remoteData.personalAnnotation
@@ -5984,9 +5971,8 @@ describe('Personal cloud translation layer', () => {
                     )
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
-                const remoteData = serverIdCapturer.mergeIds(
-                    REMOTE_TEST_DATA_V24,
-                )
+                const remoteData =
+                    serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
                 const testLists = remoteData.personalList
@@ -6083,9 +6069,8 @@ describe('Personal cloud translation layer', () => {
                     )
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
-                const remoteData = serverIdCapturer.mergeIds(
-                    REMOTE_TEST_DATA_V24,
-                )
+                const remoteData =
+                    serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
                 const testLists = remoteData.personalList
@@ -6579,12 +6564,10 @@ describe('Personal cloud translation layer', () => {
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 const testTagWithSpaces = 'test tag spaces'
                 const testListWithSpaces = 'test list spaces'
-                const testTagWithHypens = formatReadwiseHighlightTag(
-                    testTagWithSpaces,
-                )
-                const testListWithHypens = formatReadwiseHighlightTag(
-                    testListWithSpaces,
-                )
+                const testTagWithHypens =
+                    formatReadwiseHighlightTag(testTagWithSpaces)
+                const testListWithHypens =
+                    formatReadwiseHighlightTag(testListWithSpaces)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -6670,10 +6653,8 @@ describe('Personal cloud translation layer', () => {
                     withStorageHooks: true,
                 })
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
-                const {
-                    fullTitle,
-                    ...titlelessPage
-                } = LOCAL_TEST_DATA_V24.pages.first
+                const { fullTitle, ...titlelessPage } =
+                    LOCAL_TEST_DATA_V24.pages.first
 
                 await setups[0].storageManager
                     .collection('pages')
@@ -7419,9 +7400,8 @@ describe('Personal cloud translation layer', () => {
                     .collection('annotationPrivacyLevels')
                     .updateOneObject(
                         {
-                            id:
-                                LOCAL_TEST_DATA_V24.annotationPrivacyLevels
-                                    .first_private.id,
+                            id: LOCAL_TEST_DATA_V24.annotationPrivacyLevels
+                                .first_private.id,
                         },
                         {
                             privacyLevel: AnnotationPrivacyLevels.SHARED,
@@ -7724,8 +7704,8 @@ describe('Personal cloud translation layer', () => {
             await setups[1].backgroundModules.contentSharing.options.backend.processListKey(
                 {
                     keyString: sharedListKeyId as any,
-                    listId:
-                        LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                    listId: LOCAL_TEST_DATA_V24.sharedListMetadata.first
+                        .remoteId,
                 },
             )
 
@@ -8305,8 +8285,8 @@ describe('Personal cloud translation layer', () => {
             await setups[1].backgroundModules.contentSharing.options.backend.processListKey(
                 {
                     keyString: sharedListKeyId as any,
-                    listId:
-                        LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                    listId: LOCAL_TEST_DATA_V24.sharedListMetadata.first
+                        .remoteId,
                 },
             )
 
@@ -8336,7 +8316,8 @@ describe('Personal cloud translation layer', () => {
                     return {}
                 } }
             )
-            const sharedListTrees = sharedData.sharedListTree as SharedListTree[]
+            const sharedListTrees =
+                sharedData.sharedListTree as SharedListTree[]
 
             // prettier-ignore
             expect(sharedData).toEqual({

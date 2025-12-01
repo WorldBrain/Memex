@@ -1,9 +1,9 @@
 import React, { HTMLProps } from 'react'
 import styled from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tags: string[]
@@ -117,7 +117,12 @@ const TagPill = styled.div`
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
 `
 

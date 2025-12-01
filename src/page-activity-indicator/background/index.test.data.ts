@@ -2,11 +2,11 @@ import type {
     SharedAnnotationListEntry,
     SharedList,
     SharedListEntry,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import type { ActivityFollow } from '@worldbrain/memex-common/lib/activity-follows/storage/types'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
+import type { ActivityFollow } from '@worldbrain/memex-common/ts/activity-follows/storage/types'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
 
 export const userReferenceA: UserReference = {
     type: 'user-reference',
@@ -21,40 +21,39 @@ export const users: UserReference[] = [
     userReferenceC,
 ]
 
-export const sharedLists: Array<
-    SharedList & { id: AutoPk; creator: AutoPk }
-> = [
-    {
-        id: 1,
-        creator: users[0].id,
-        title: 'test a',
-        createdWhen: 1,
-        updatedWhen: 1,
-    },
-    {
-        id: 2,
-        creator: users[0].id,
-        title: 'test b',
-        createdWhen: 2,
-        updatedWhen: 2,
-    },
-    {
-        id: 3,
-        creator: users[1].id,
-        title: 'test c',
-        description: 'great list',
-        createdWhen: 3,
-        updatedWhen: 3,
-    },
-    {
-        id: 4,
-        creator: users[2].id,
-        title: 'test discord channel a',
-        createdWhen: 4,
-        updatedWhen: 4,
-        platform: 'discord',
-    },
-]
+export const sharedLists: Array<SharedList & { id: AutoPk; creator: AutoPk }> =
+    [
+        {
+            id: 1,
+            creator: users[0].id,
+            title: 'test a',
+            createdWhen: 1,
+            updatedWhen: 1,
+        },
+        {
+            id: 2,
+            creator: users[0].id,
+            title: 'test b',
+            createdWhen: 2,
+            updatedWhen: 2,
+        },
+        {
+            id: 3,
+            creator: users[1].id,
+            title: 'test c',
+            description: 'great list',
+            createdWhen: 3,
+            updatedWhen: 3,
+        },
+        {
+            id: 4,
+            creator: users[2].id,
+            title: 'test discord channel a',
+            createdWhen: 4,
+            updatedWhen: 4,
+            platform: 'discord',
+        },
+    ]
 
 export const listEntries: {
     [sharedListId: number]: Array<

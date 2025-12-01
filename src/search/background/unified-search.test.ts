@@ -1,16 +1,16 @@
 import omit from 'lodash/omit'
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 import * as DATA from './unified-search.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import type {
     UnifiedSearchPaginationParams,
     IntermediarySearchResult,
     UnifiedSearchParams,
-} from '@worldbrain/memex-common/lib/search/types'
+} from '@worldbrain/memex-common/ts/search/types'
 import type { BackgroundModules } from 'src/background-script/setup'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { sortSearchResult } from '@worldbrain/memex-common/lib/search/utils'
-import { splitQueryIntoTerms } from '@worldbrain/memex-common/lib/search/terms-search'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { sortSearchResult } from '@worldbrain/memex-common/ts/search/utils'
+import { splitQueryIntoTerms } from '@worldbrain/memex-common/ts/search/terms-search'
 
 async function insertTestData(storageManager: Storex) {
     for (const doc of Object.values(DATA.LISTS)) {
@@ -367,9 +367,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_2][1].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_2][0].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_2
-                        ][2].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_2
+                            ][2].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -381,9 +382,10 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_5][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_5][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_5
-                        ][0].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_5
+                            ][0].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -393,9 +395,10 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_12,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_12
-                        ][0].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_12
+                            ][0].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -425,9 +428,10 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_4
-                        ][0].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_4
+                            ][0].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -447,9 +451,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url, // This will be in the next results page
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_7
-                        ][3].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_7
+                            ][3].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -483,9 +488,10 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_4
-                        ][9].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_4
+                            ][9].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -538,9 +544,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_3][1].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_3][0].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_3
-                        ][3].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_3
+                            ][3].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -652,9 +659,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_2][1].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_2][0].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_2
-                        ][2].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_2
+                            ][2].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -666,9 +674,10 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_5][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_5][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_5
-                        ][0].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_5
+                            ][0].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -678,9 +687,10 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_12,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_12
-                        ][0].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_12
+                            ][0].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -710,9 +720,10 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_4
-                        ][0].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_4
+                            ][0].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -732,9 +743,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url, // This will be in the next results page
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_7
-                        ][3].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_7
+                            ][3].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -768,9 +780,10 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_4
-                        ][9].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_4
+                            ][9].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -810,9 +823,10 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_4,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_4
-                        ][1].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_4
+                            ][1].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -984,9 +998,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_9
-                        ][1].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_9
+                            ][1].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -1142,9 +1157,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_9
-                        ][1].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_9
+                            ][1].lastEdited.valueOf(),
                     },
                 ],
                 [
@@ -1248,9 +1264,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_4
-                        ][4].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_4
+                            ][4].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -1264,9 +1281,10 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_4
-                        ][2].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_4
+                            ][2].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -1360,9 +1378,10 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_4,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_4
-                        ][2].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_4
+                            ][2].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -1557,9 +1576,10 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_2,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_2][2].url],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_2
-                        ][2].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_2
+                            ][2].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -1713,9 +1733,10 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_7
-                        ][3].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_7
+                            ][3].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -1813,9 +1834,10 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_5][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_5][1].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_5
-                        ][0].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_5
+                            ][0].lastEdited.valueOf(),
                     },
                 ],
             ])
@@ -1888,9 +1910,10 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_3,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_3][1].url],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_3
-                        ][1].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.ANNOTATIONS[
+                                DATA.PAGE_ID_3
+                            ][1].lastEdited.valueOf(),
                     },
                 ],
             ])

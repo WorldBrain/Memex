@@ -1,20 +1,19 @@
 import type {
     SharedAnnotationReference,
     SharedListReference,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
+} from '@worldbrain/memex-common/ts/content-sharing/types'
 import type {
     PreparedAnnotationReply,
     PreparedThread,
-} from '@worldbrain/memex-common/lib/content-conversations/storage/types'
-import type { ConversationThreadReference } from '@worldbrain/memex-common/lib/content-conversations/types'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { ContentConversationsServiceInterface } from '@worldbrain/memex-common/lib/content-conversations/service/types'
+} from '@worldbrain/memex-common/ts/content-conversations/storage/types'
+import type { ConversationThreadReference } from '@worldbrain/memex-common/ts/content-conversations/types'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
+import type { ContentConversationsServiceInterface } from '@worldbrain/memex-common/ts/content-conversations/service/types'
 
-export interface ContentConversationsInterface
-    extends Pick<
-        ContentConversationsServiceInterface,
-        'submitReply' | 'editReply' | 'deleteReply'
-    > {
+export interface ContentConversationsInterface extends Pick<
+    ContentConversationsServiceInterface,
+    'submitReply' | 'editReply' | 'deleteReply'
+> {
     getRepliesBySharedAnnotation(params: {
         sharedAnnotationReference: SharedAnnotationReference
         sharedListReference: SharedListReference | null

@@ -5,7 +5,7 @@ import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getPageShareUrl } from 'src/content-sharing/utils'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
-import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/ts/utils/os-specific-key-names'
 
 interface State extends ShareMenuCommonState {}
 
@@ -38,9 +38,10 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             async () => {
                 await this.setRemoteLink()
 
-                const annotations = await annotationsBG.listAnnotationsByPageUrl(
-                    { pageUrl: normalizedPageUrl },
-                )
+                const annotations =
+                    await annotationsBG.listAnnotationsByPageUrl({
+                        pageUrl: normalizedPageUrl,
+                    })
                 this.annotationUrls = annotations.map((a) => a.url)
             },
         )
@@ -49,9 +50,10 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
     private setRemoteLink = async () => {
-        const remotePageInfoId = await this.props.contentSharingBG.ensureRemotePageId(
-            this.props.normalizedPageUrl,
-        )
+        const remotePageInfoId =
+            await this.props.contentSharingBG.ensureRemotePageId(
+                this.props.normalizedPageUrl,
+            )
         this.setState({ link: getPageShareUrl({ remotePageInfoId }) })
     }
 

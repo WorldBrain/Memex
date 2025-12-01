@@ -1,15 +1,15 @@
-import type Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex/ts'
 import { getNoteShareUrl, getPageLinkUrl } from 'src/content-sharing/utils'
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { TemplateDataFetchers, UrlMappedData } from '../types'
 import fromPairs from 'lodash/fromPairs'
 import groupBy from 'lodash/groupBy'
 import flatten from 'lodash/flatten'
-import type { ContentLocator } from '@worldbrain/memex-common/lib/page-indexing/types'
+import type { ContentLocator } from '@worldbrain/memex-common/ts/page-indexing/types'
 import {
     isMemexPageAPdf,
     pickBestLocator,
-} from '@worldbrain/memex-common/lib/page-indexing/utils'
+} from '@worldbrain/memex-common/ts/page-indexing/utils'
 import type { PageListEntry } from 'src/custom-lists/background/types'
 import type { AnnotListEntry, Annotation } from 'src/annotations/types'
 import type {
@@ -17,17 +17,17 @@ import type {
     SharedListMetadata,
 } from 'src/content-sharing/background/types'
 import type { Visit, Bookmark, Tag, Page } from 'src/search'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 import type {
     CustomList,
     PageEntity,
     PageMetadata,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+} from '@worldbrain/memex-common/ts/types/core-data-types/client'
 import type { FollowedListEntry } from 'src/page-activity-indicator/background/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-src-with-cloud-address.service-worker'
+import type { AutoPk } from '@worldbrain/memex-common/ts/storage/types'
+import { ContentLocatorType } from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
+import resolveImgSrc from '@worldbrain/memex-common/ts/annotations/replace-img-src-with-cloud-address.service-worker'
 import { htmlToMarkdown } from 'src/background-script/html-to-markdown'
 
 export function getTemplateDataFetchers({
@@ -59,46 +59,48 @@ export function getTemplateDataFetchers({
         return tagsForUrls
     }
 
-    const getSpacesForUrls = (
-        getEntries: (
-            urls: string[],
-        ) => Promise<Array<{ listId: number; url: string }>>,
-    ) => async (urls: string[]): Promise<UrlMappedData<string[]>> => {
-        const spacesForUrls: UrlMappedData<string[]> = {}
-        const entries = await getEntries(urls)
+    const getSpacesForUrls =
+        (
+            getEntries: (
+                urls: string[],
+            ) => Promise<Array<{ listId: number; url: string }>>,
+        ) =>
+        async (urls: string[]): Promise<UrlMappedData<string[]>> => {
+            const spacesForUrls: UrlMappedData<string[]> = {}
+            const entries = await getEntries(urls)
 
-        const uniqueListIds = new Set<number>()
-        entries.forEach((entry) => uniqueListIds.add(entry.listId))
+            const uniqueListIds = new Set<number>()
+            entries.forEach((entry) => uniqueListIds.add(entry.listId))
 
-        if (!uniqueListIds.size) {
+            if (!uniqueListIds.size) {
+                return spacesForUrls
+            }
+
+            const lists: {
+                id: number
+                name: string
+            }[] = await storageManager
+                .collection('customLists')
+                .findObjects({ id: { $in: [...uniqueListIds] } })
+
+            const listNamesById = new Map<number, string>()
+            lists.forEach((list) => listNamesById.set(list.id, list.name))
+
+            entries.forEach((entry) => {
+                const listName = listNamesById.get(entry.listId)
+                if (
+                    listName != null &&
+                    !spacesForUrls[entry.url]?.includes(listName)
+                ) {
+                    spacesForUrls[entry.url] = [
+                        ...(spacesForUrls[entry.url] ?? []),
+                        listName,
+                    ]
+                }
+            })
+
             return spacesForUrls
         }
-
-        const lists: {
-            id: number
-            name: string
-        }[] = await storageManager
-            .collection('customLists')
-            .findObjects({ id: { $in: [...uniqueListIds] } })
-
-        const listNamesById = new Map<number, string>()
-        lists.forEach((list) => listNamesById.set(list.id, list.name))
-
-        entries.forEach((entry) => {
-            const listName = listNamesById.get(entry.listId)
-            if (
-                listName != null &&
-                !spacesForUrls[entry.url]?.includes(listName)
-            ) {
-                spacesForUrls[entry.url] = [
-                    ...(spacesForUrls[entry.url] ?? []),
-                    listName,
-                ]
-            }
-        })
-
-        return spacesForUrls
-    }
 
     return {
         getPages: async (normalizedPageUrls) => {
@@ -189,11 +191,10 @@ export function getTemplateDataFetchers({
                 shareToParentPageLists: true,
                 skipAnalytics: true,
             })
-            const remoteIds = await contentSharing.storage.getRemoteAnnotationIds(
-                {
+            const remoteIds =
+                await contentSharing.storage.getRemoteAnnotationIds({
                     localIds: annotationUrls,
-                },
-            )
+                })
             const noteLinks: UrlMappedData<string> = {}
             for (const [annotationUrl, remoteId] of Object.entries(remoteIds)) {
                 noteLinks[annotationUrl] = getNoteShareUrl({
@@ -236,12 +237,13 @@ export function getTemplateDataFetchers({
             const pages: Page[] = await storageManager
                 .collection('pages')
                 .findObjects({ url: { $in: normalizedPageUrls } })
-            const followedListEntries: FollowedListEntry[] = await storageManager
-                .collection('followedListEntry')
-                .findObjects(
-                    { normalizedPageUrl: { $in: normalizedPageUrls } },
-                    { order: [['createdWhen', 'asc']] },
-                )
+            const followedListEntries: FollowedListEntry[] =
+                await storageManager
+                    .collection('followedListEntry')
+                    .findObjects(
+                        { normalizedPageUrl: { $in: normalizedPageUrls } },
+                        { order: [['createdWhen', 'asc']] },
+                    )
             const listMetadata: SharedListMetadata[] = await storageManager
                 .collection('sharedListMetadata')
                 .findObjects({
@@ -285,12 +287,11 @@ export function getTemplateDataFetchers({
                     )
                     .filter((url) => url != null),
             )
-            const pageLinks = await contentSharing.scheduleManyPageLinkCreations(
-                {
+            const pageLinks =
+                await contentSharing.scheduleManyPageLinkCreations({
                     fullPageUrls: fullPageUrlsWithoutLinks,
                     now,
-                },
-            )
+                })
             for (const { url: normalizedPageUrl, fullUrl } of pages) {
                 const pageLink = pageLinks[fullUrl]
                 if (!pageLink) {
@@ -304,9 +305,8 @@ export function getTemplateDataFetchers({
 
             return fromPairs(
                 normalizedPageUrls.map((normalizedPageUrl) => {
-                    const linkParams = pageUrlToLinkParams.get(
-                        normalizedPageUrl,
-                    )
+                    const linkParams =
+                        pageUrlToLinkParams.get(normalizedPageUrl)
                     if (!linkParams) {
                         throw new Error(
                             `Could not get page link for page with normalized URL: ${normalizedPageUrl}`,
@@ -410,13 +410,14 @@ export function getTemplateDataFetchers({
                     .collection('pageListEntries')
                     .findObjects({ pageUrl: annotation.pageUrl })
 
-                const sharedListMetadata: SharedListMetadata[] = await storageManager
-                    .collection('sharedListMetadata')
-                    .findObjects({
-                        localId: {
-                            $in: parentPageEntries.map((e) => e.listId),
-                        },
-                    })
+                const sharedListMetadata: SharedListMetadata[] =
+                    await storageManager
+                        .collection('sharedListMetadata')
+                        .findObjects({
+                            localId: {
+                                $in: parentPageEntries.map((e) => e.listId),
+                            },
+                        })
 
                 const sharedListIds = new Set([
                     ...sharedListMetadata.map((d) => d.localId),

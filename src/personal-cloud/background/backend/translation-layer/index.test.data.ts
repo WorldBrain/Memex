@@ -1,20 +1,20 @@
-import type StorageManager from '@worldbrain/storex'
-import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
+import type StorageManager from '@worldbrain/storex/ts'
+import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/ts/personal-cloud/backend/translation-layer/utils'
+import { TEST_USER } from '@worldbrain/memex-common/ts/authentication/dev'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/ts/annotations/types'
+import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/ts/synced-settings/constants'
 import {
     ContentLocatorType,
     LocationSchemeType,
     ContentLocatorFormat,
     FingerprintSchemeType,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { buildMaterializedPath } from '@worldbrain/memex-common/lib/content-sharing/utils'
-import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+} from '@worldbrain/memex-common/ts/personal-cloud/storage/types'
+import { buildMaterializedPath } from '@worldbrain/memex-common/ts/content-sharing/utils'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/ts/content-sharing/tree-utils'
 import {
     DEFAULT_KEY,
     DEFAULT_SPACE_BETWEEN,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -911,8 +911,10 @@ const REMOTE_ANNOTATIONS_V24 = {
         ),
         body: LOCAL_TEST_DATA_V24.annotations.first.body,
         comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
-        createdWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
-        updatedWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
+        createdWhen:
+            LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
+        updatedWhen:
+            LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
         color: LOCAL_TEST_DATA_V24.annotations.first.color,
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
@@ -924,8 +926,10 @@ const REMOTE_ANNOTATIONS_V24 = {
             LOCAL_TEST_DATA_V24.annotations.second.url,
         ),
         comment: LOCAL_TEST_DATA_V24.annotations.second.comment,
-        createdWhen: LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
-        updatedWhen: LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
+        createdWhen:
+            LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
+        updatedWhen:
+            LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
     },
@@ -936,8 +940,10 @@ const REMOTE_ANNOTATIONS_V24 = {
             LOCAL_TEST_DATA_V24.annotations.third.url,
         ),
         comment: LOCAL_TEST_DATA_V24.annotations.third.comment,
-        createdWhen: LOCAL_TEST_DATA_V24.annotations.third.createdWhen.getTime(),
-        updatedWhen: LOCAL_TEST_DATA_V24.annotations.third.createdWhen.getTime(),
+        createdWhen:
+            LOCAL_TEST_DATA_V24.annotations.third.createdWhen.getTime(),
+        updatedWhen:
+            LOCAL_TEST_DATA_V24.annotations.third.createdWhen.getTime(),
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
     },
@@ -948,8 +954,10 @@ const REMOTE_ANNOTATIONS_V24 = {
             LOCAL_TEST_DATA_V24.annotations.fifth.url,
         ),
         comment: LOCAL_TEST_DATA_V24.annotations.fifth.comment,
-        createdWhen: LOCAL_TEST_DATA_V24.annotations.fifth.createdWhen.getTime(),
-        updatedWhen: LOCAL_TEST_DATA_V24.annotations.fifth.createdWhen.getTime(),
+        createdWhen:
+            LOCAL_TEST_DATA_V24.annotations.fifth.createdWhen.getTime(),
+        updatedWhen:
+            LOCAL_TEST_DATA_V24.annotations.fifth.createdWhen.getTime(),
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
     },
@@ -1173,8 +1181,10 @@ export const REMOTE_TEST_DATA_V24 = {
             personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
-            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
+            createdWhen:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
+            updatedWhen:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
         },
         second: {
             id: 2,
@@ -1184,8 +1194,10 @@ export const REMOTE_TEST_DATA_V24 = {
             personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
-            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
+            createdWhen:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
+            updatedWhen:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
         },
         third: {
             id: 1,
@@ -1195,8 +1207,10 @@ export const REMOTE_TEST_DATA_V24 = {
             personalAnnotation: REMOTE_ANNOTATIONS_V24.third.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
-            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.createdWhen.getTime(),
+            createdWhen:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.createdWhen.getTime(),
+            updatedWhen:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.createdWhen.getTime(),
         },
         fifth: {
             id: 1,
@@ -1206,8 +1220,10 @@ export const REMOTE_TEST_DATA_V24 = {
             personalAnnotation: REMOTE_ANNOTATIONS_V24.fifth.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
-            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth.createdWhen.getTime(),
+            createdWhen:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth.createdWhen.getTime(),
+            updatedWhen:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth.createdWhen.getTime(),
         },
     },
     personalAnnotationShare: {

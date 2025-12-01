@@ -1,27 +1,23 @@
 import * as React from 'react'
 import styled, { css } from 'styled-components'
-
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
 import { auth } from 'src/util/remote-functions-background'
 import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
 import UpdateEmail from 'src/overview/sharing/components/UpdateEmail'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import Logic from './UserScreen/logic'
 import type { State, Event, Dependencies } from './UserScreen/types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import SettingSection from '@worldbrain/memex-common/ts/common-ui/components/setting-section'
 import QRCanvas from 'src/common-ui/components/qr-canvas'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { PopoutBox } from '@worldbrain/memex-common/ts/common-ui/components/popout-box'
+import TextField from '@worldbrain/memex-common/ts/common-ui/components/text-field'
 import UpgradeModal from '../upgrade-modal'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import type { Browser } from 'webextension-polyfill'
-
-const styles = require('./styles.css')
 
 const DisplayNameBox = styled.div`
     width: fill-available;
@@ -31,7 +27,7 @@ export interface Props extends Dependencies {
     setAuthMode: (mode) => void
     getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface<'caller'>
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 export default class UserScreen extends StatefulUIElement<Props, State, Event> {
@@ -141,7 +137,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                             'https://apps.apple.com/app/id1471860331',
                                         )
                                     }}
-                                    className={styles.downloadImg}
                                     src={'img/appStore.png'}
                                 />
                                 <StoreImage
@@ -150,7 +145,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                             'https://play.google.com/store/apps/details?id=io.worldbrain',
                                         )
                                     }}
-                                    className={styles.downloadImg}
                                     src={'img/googlePlay.png'}
                                 />
                             </StoreSection>

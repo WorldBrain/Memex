@@ -1,1 +1,1 @@
-export * from '@worldbrain/memex-common/lib/annotations/sorting'
+export * from '@worldbrain/memex-common/ts/annotations/sorting'

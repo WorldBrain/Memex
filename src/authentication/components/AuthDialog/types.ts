@@ -1,8 +1,7 @@
-import type { UIEvent } from 'ui-logic-core'
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { UIEvent } from 'ui-logic-core/ts'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import type { AuthProviderType } from '@worldbrain/memex-common/lib/authentication/types'
-import { Browser } from 'webextension-polyfill'
+import type { AuthProviderType } from '@worldbrain/memex-common/ts/authentication/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -11,7 +10,7 @@ export interface Dependencies {
         setSaveState?: UITaskState
     }): void
     onAuth?(event: { reason: 'login' | 'register' }): void
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 export type AuthDialogMode =

@@ -1,12 +1,11 @@
-import type { UIEvent } from 'ui-logic-core'
-import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { UIEvent } from 'ui-logic-core/ts'
+import type { UITaskState } from '@worldbrain/memex-common/ts/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import type { Browser } from 'webextension-polyfill'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -16,7 +15,7 @@ export interface Dependencies {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     analyticsBG?: AnalyticsCoreInterface
     bgScriptsBG: RemoteBGScriptInterface<'caller'>
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
     getRootElement: () => HTMLElement
     getWindow: () => Window
 }

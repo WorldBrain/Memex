@@ -1,7 +1,5 @@
 import React from 'react'
 
-const styles = require('./onboarding-tooltip.css')
-
 export interface Props {
     imgSrc?: string
     CTAText?: string
@@ -16,10 +14,7 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
         }
 
         return (
-            <button
-                className={styles.ctaButton}
-                onClick={this.props.onCTAClick}
-            >
+            <button className="ctaButton" onClick={this.props.onCTAClick}>
                 {this.props.CTAText}
             </button>
         )
@@ -30,16 +25,16 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
             return
         }
 
-        return <img className={styles.img} src={this.props.imgSrc} />
+        return <img className="img" src={this.props.imgSrc} />
     }
 
     render() {
         return (
             <>
                 {this.renderImg()}
-                <div className={styles.textContainer}>
-                    <p className={styles.containerTitle}></p>
-                    <p className={styles.descriptionText}>
+                <div className="textContainer">
+                    <p className="containerTitle"></p>
+                    <p className="descriptionText">
                         {this.props.descriptionText}
                     </p>
                 </div>

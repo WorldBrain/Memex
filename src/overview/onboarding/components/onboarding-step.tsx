@@ -1,8 +1,6 @@
 import React from 'react'
 import ProgressStepContainer from 'src/common-ui/components/progress-step-container'
 
-const styles = require('./onboarding-box.css')
-
 export interface Props {
     isInitStep?: boolean
     privacyStep?: boolean
@@ -23,26 +21,26 @@ export default class OnboardingStep extends React.PureComponent<Props> {
     }
 
     private get headerClassName() {
-        return this.props.isInitStep ? styles.heading1 : styles.heading2
+        return this.props.isInitStep ? 'heading1' : 'heading2'
     }
 
     render() {
         if (this.props.isInitStep) {
             return (
-                <div className={styles.startingPage}>
-                    <div className={styles.stepContainer}>
-                        <div className={styles.featureImageArea}>
+                <div className="startingPage">
+                    <div className="stepContainer">
+                        <div className="featureImageArea">
                             {this.props.renderImage()}
                         </div>
                         <h1 className={this.headerClassName}>
                             {this.props.titleText}
                         </h1>
-                        <div className={styles.subTitle}>
+                        <div className="subTitle">
                             {this.props.subtitleText}
                         </div>
-                        <div className={styles.whiteSpace30} />
+                        <div className="whiteSpace30" />
                     </div>
-                    <div className={styles.navigation}>
+                    <div className="navigation">
                         {this.props.renderButton()}
                     </div>
                 </div>
@@ -50,50 +48,46 @@ export default class OnboardingStep extends React.PureComponent<Props> {
         }
         if (this.props.privacyStep) {
             return (
-                <div className={styles.startingPage}>
-                    <div className={styles.stepContainer}>
+                <div className="startingPage">
+                    <div className="stepContainer">
                         <h1 className={this.headerClassName}>
                             {this.props.titleText}
                         </h1>
-                        <div className={styles.subTitle}>
+                        <div className="subTitle">
                             {this.props.subtitleText}
                         </div>
-                        <div className={styles.subTitle2}>
+                        <div className="subTitle2">
                             {this.props.subtitleText2}
                         </div>
-                        <div className={styles.whiteSpace30} />
+                        <div className="whiteSpace30" />
                         <div>{this.props.children}</div>
                     </div>
-                    <div className={styles.whiteSpace30} />
-                    <div className={styles.whiteSpace30} />
-                    <div className={styles.navigation}>
+                    <div className="whiteSpace30" />
+                    <div className="whiteSpace30" />
+                    <div className="navigation">
                         {this.props.renderButton()}
                     </div>
                 </div>
             )
         }
         return (
-            <div className={styles.featuresContainer}>
-                <div className={styles.titleContainer}>
-                    <div className={styles.title}>{this.props.titleText}</div>
-                    <div className={styles.subTitle}>
-                        {this.props.subtitleText}
-                    </div>
-                    <div className={styles.subTitle2}>
-                        {this.props.subtitleText2}
-                    </div>
-                    <div className={styles.settingsContainer}>
-                        <div className={styles.settingsAction}>
+            <div className="featuresContainer">
+                <div className="titleContainer">
+                    <div className="title">{this.props.titleText}</div>
+                    <div className="subTitle">{this.props.subtitleText}</div>
+                    <div className="subTitle2">{this.props.subtitleText2}</div>
+                    <div className="settingsContainer">
+                        <div className="settingsAction">
                             {this.props.children}
                         </div>
                     </div>
                 </div>
-                <div className={styles.bottomContainer}>
-                    <div className={styles.backButtonArea} />
-                    <div className={styles.featureImageArea}>
+                <div className="bottomContainer">
+                    <div className="backButtonArea" />
+                    <div className="featureImageArea">
                         {this.props.renderImage()}
                     </div>
-                    <div className={styles.nextButtonArea}>
+                    <div className="nextButtonArea">
                         {this.props.renderButton()}
                         <ProgressStepContainer
                             onStepClick={this.props.goToStep}
@@ -101,7 +95,7 @@ export default class OnboardingStep extends React.PureComponent<Props> {
                             currentStep={this.props.currentStep}
                         />
                         <div
-                            className={styles.skipButton}
+                            className="skipButton"
                             onClick={this.props.navToOverview}
                         >
                             skip

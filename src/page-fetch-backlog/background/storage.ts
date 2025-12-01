@@ -1,7 +1,7 @@
 import {
     StorageModule,
     StorageModuleConfig,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 export class PageFetchBacklogStorage extends StorageModule {

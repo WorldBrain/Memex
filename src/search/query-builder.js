@@ -1,6 +1,6 @@
-import { HASH_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
-import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
-import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
+import { HASH_TAG_PATTERN } from '@worldbrain/memex-common/ts/storage/constants'
+import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/ts/constants'
+import { transformPageText } from '@worldbrain/memex-stemmer/ts/transform-page-text'
 import * as constants from '../overview/search-bar/constants'
 import { splitInputIntoTerms } from '../overview/search-bar/utils'
 
@@ -103,13 +103,15 @@ class QueryBuilder {
         return this
     }
 
-    _filterGen = (filterName) => (dataToAdd = []) => {
-        for (const data of dataToAdd) {
-            this[filterName].add(data)
-        }
+    _filterGen =
+        (filterName) =>
+        (dataToAdd = []) => {
+            for (const data of dataToAdd) {
+                this[filterName].add(data)
+            }
 
-        return this
-    }
+            return this
+        }
 
     filterTags = this._filterGen('tags')
     filterDomains = this._filterGen('domain')

@@ -1,17 +1,17 @@
-import type { UIEvent } from 'ui-logic-core'
-import type { TaskState } from 'ui-logic-core/lib/types'
-import type { Storage } from 'webextension-polyfill'
+import type { UIEvent } from 'ui-logic-core/ts'
+import type { TaskState } from 'ui-logic-core/ts/types'
+
 import type {
     UnifiedList,
     PageAnnotationsCacheInterface,
 } from 'src/annotations/cache/types'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/ts/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { NormalizedState } from '@worldbrain/memex-common/ts/common-ui/utils/normalized-state'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 type SpacePickerTab = 'user-lists' | 'page-links'
@@ -69,7 +69,7 @@ export type SpacePickerEvent = UIEvent<{
 }>
 
 export interface SpacePickerDependencies {
-    localStorageAPI: Storage.LocalStorageArea
+    localStorageAPI: chrome.storage.local
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface
     onSpaceCreate?: (args: {

@@ -1,4 +1,4 @@
-import uuid from 'uuid/v1'
+import { v4 as uuidv4 } from 'uuid'
 import type { RPCRequest, RPCRequestHeaders, RpcSideName } from './types'
 
 export const createRPCRequestObject = <T>(
@@ -10,7 +10,7 @@ export const createRPCRequestObject = <T>(
 ): RPCRequest<T> => ({
     headers: {
         type: 'RPC_REQUEST',
-        id: uuid(),
+        id: uuidv4(),
         name: headers.name,
         tabId: headers.tabId,
         proxy: headers.proxy,

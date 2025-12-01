@@ -1,13 +1,12 @@
-import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core/ts'
 import type { RibbonContainerDependencies } from '../ribbon/types'
 import type {
     SharedInPageUIInterface,
     InPageUIComponentShowState,
     ShouldSetUpOptions,
 } from 'src/in-page-ui/shared-state/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/ts/analytics/types'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { Browser } from 'webextension-polyfill'
 
 export interface RibbonHolderState {
     state: 'visible' | 'hidden'
@@ -30,7 +29,7 @@ export interface RibbonHolderDependencies {
     containerDependencies: RibbonContainerDependencies
     analyticsBG: AnalyticsCoreInterface
     events: AnnotationsSidebarInPageEventEmitter
-    browserAPIs: Browser
+    browserAPIs: typeof chrome
 }
 
 type EventHandler<EventName extends keyof RibbonHolderEvents> = UIEventHandler<
@@ -64,9 +63,10 @@ export class RibbonHolderLogic extends UILogic<
             this._handleUIStateChange,
         )
 
-        const ribbonPosition = await this.dependencies.containerDependencies.syncSettings.inPageUI.get(
-            'ribbonPosition',
-        )
+        const ribbonPosition =
+            await this.dependencies.containerDependencies.syncSettings.inPageUI.get(
+                'ribbonPosition',
+            )
 
         this.emitMutation({
             ribbonPosition: {
@@ -93,24 +93,24 @@ export class RibbonHolderLogic extends UILogic<
         )
     }
 
-    selectRibbonPositionOption: EventHandler<
-        'selectRibbonPositionOption'
-    > = async ({ event }) => {
-        const ribbonPosition = await this.dependencies.containerDependencies.syncSettings.inPageUI.set(
-            'ribbonPosition',
-            event,
-        )
+    selectRibbonPositionOption: EventHandler<'selectRibbonPositionOption'> =
+        async ({ event }) => {
+            const ribbonPosition =
+                await this.dependencies.containerDependencies.syncSettings.inPageUI.set(
+                    'ribbonPosition',
+                    event,
+                )
 
-        this.emitMutation({
-            ribbonPosition: {
-                $set: event,
-            },
-        })
+            this.emitMutation({
+                ribbonPosition: {
+                    $set: event,
+                },
+            })
 
-        // return this.dependencies.customLists.addOpenTabsToList({
-        //     listId: event?.value,
-        // })
-    }
+            // return this.dependencies.customLists.addOpenTabsToList({
+            //     listId: event?.value,
+            // })
+        }
 
     show: EventHandler<'show'> = () => {
         return { state: { $set: 'visible' } }
@@ -120,16 +120,15 @@ export class RibbonHolderLogic extends UILogic<
         return { state: { $set: 'hidden' } }
     }
 
-    openSidebarToSharedSpaces: EventHandler<
-        'openSidebarToSharedSpaces'
-    > = async ({}) => {
-        this.emitMutation({
-            keepPageActivityIndicatorHidden: { $set: true },
-        })
-        await this.dependencies.inPageUI.showSidebar({
-            action: 'show_shared_spaces',
-        })
-    }
+    openSidebarToSharedSpaces: EventHandler<'openSidebarToSharedSpaces'> =
+        async ({}) => {
+            this.emitMutation({
+                keepPageActivityIndicatorHidden: { $set: true },
+            })
+            await this.dependencies.inPageUI.showSidebar({
+                action: 'show_shared_spaces',
+            })
+        }
 
     _handleUIStateChange = (event: {
         newState: InPageUIComponentShowState

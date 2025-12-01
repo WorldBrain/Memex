@@ -1,5 +1,5 @@
 import { StemmerSelector } from '@worldbrain/storex-backend-dexie'
-import textStemmer, { listNameStemmer } from '@worldbrain/memex-stemmer'
+import textStemmer, { listNameStemmer } from '@worldbrain/memex-stemmer/ts'
 
 import urlStemmer from './url-stemmer'
 

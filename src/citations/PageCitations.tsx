@@ -6,17 +6,17 @@ import type { Template } from 'src/copy-paster/types'
 import PageLinkShareMenuContainer, {
     Props as PageLinkProps,
 } from 'src/custom-lists/ui/page-link-share-menu'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { normalizeUrl } from '@worldbrain/memex-common/ts/url-utils/normalize'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import styled, { css } from 'styled-components'
-import { TaskState } from 'ui-logic-core/lib/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { TaskState } from 'ui-logic-core/ts/types'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import { TooltipBox } from '@worldbrain/memex-common/ts/common-ui/components/tooltip-box'
 import ShareAnnotationMenu from 'src/overview/sharing/components/ShareAnnotationMenu'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { AnnotationSharingState } from 'src/content-sharing/background/types'
 import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import TutorialBox from '@worldbrain/memex-common/ts/common-ui/components/tutorial-box'
 
 export interface Props {
     copyPasterProps: Omit<CopyPasterProps, 'renderTemplate' | 'renderPreview'>
@@ -207,7 +207,11 @@ const PageCitationContainer = styled.div`
 
     * {
         font-family: 'Satoshi', sans-serif;
-        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+        font-feature-settings:
+            'pnum' on,
+            'lnum' on,
+            'case' on,
+            'ss03' on,
             'ss04' on;
     }
 `

@@ -4,18 +4,18 @@ import styled from 'styled-components'
 import {
     AuthError,
     AuthProviderType,
-} from '@worldbrain/memex-common/lib/authentication/types'
-import SimpleTextInput from '@worldbrain/memex-common/lib/common-ui/components/simple-text-input'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+} from '@worldbrain/memex-common/ts/authentication/types'
+import SimpleTextInput from '@worldbrain/memex-common/ts/common-ui/components/simple-text-input'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/ts/common-ui/components/PrimaryAction'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { runInBackground } from 'src/util/webextensionRPC'
 
 import Logic from './logic'
 import type { State, Event, Dependencies, AuthDialogMode } from './types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 export interface Props extends Dependencies {}
 
@@ -152,9 +152,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                     this.processEvent(
                                                         'editPassword',
                                                         {
-                                                            value:
-                                                                event.target
-                                                                    .value,
+                                                            value: event.target
+                                                                .value,
                                                         },
                                                     )
                                                 }
@@ -182,9 +181,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                     this.processEvent(
                                                         'editPasswordConfirm',
                                                         {
-                                                            value:
-                                                                event.target
-                                                                    .value,
+                                                            value: event.target
+                                                                .value,
                                                         },
                                                     )
                                                     this.checkPasswordMatch(
@@ -216,9 +214,9 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                         this.processEvent(
                                                             'editDisplayName',
                                                             {
-                                                                value:
-                                                                    event.target
-                                                                        .value,
+                                                                value: event
+                                                                    .target
+                                                                    .value,
                                                             },
                                                         )
                                                     }
@@ -348,9 +346,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                         this.processEvent(
                                                             'editPassword',
                                                             {
-                                                                value:
-                                                                    e.target
-                                                                        .value,
+                                                                value: e.target
+                                                                    .value,
                                                             },
                                                         )
                                                     }
@@ -870,7 +867,12 @@ const TitleSmall = styled.div`
 
 const StyledAuthDialog = styled.div`
     font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+    font-feature-settings:
+        'pnum' on,
+        'lnum' on,
+        'case' on,
+        'ss03' on,
+        'ss04' on,
         'liga' off;
     display: flex;
     justify-content: center;

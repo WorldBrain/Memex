@@ -2,8 +2,6 @@ import React, { PureComponent } from 'react'
 
 import ProgressStep from './progress-step'
 
-const styles = require('./progress-step.css')
-
 interface Props {
     totalSteps: number
     onStepClick: (step: number) => () => void
@@ -13,7 +11,7 @@ interface Props {
 export default class ProgressWrapper extends PureComponent<Props> {
     render() {
         return (
-            <div className={styles.progressContainer}>
+            <div>
                 {[...Array(this.props.totalSteps).keys()].map((data, i) => (
                     <ProgressStep
                         isSeen={i <= this.props.currentStep}

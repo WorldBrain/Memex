@@ -1,5 +1,5 @@
 import React from 'react'
-import browser from 'webextension-polyfill'
+
 import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './Results'
 import strictUriEncode from 'strict-uri-encode'
@@ -16,12 +16,12 @@ import type { SearchEngineName, ResultItemProps } from '../types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { OVERVIEW_URL } from 'src/constants'
 import styled from 'styled-components'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import LoadingIndicator from '@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
+import Icon from '@worldbrain/memex-common/ts/common-ui/components/icon'
+import IconBox from '@worldbrain/memex-common/ts/common-ui/components/icon-box'
 import type { RemoteSearchInterface } from 'src/search/background/types'
 
-const search = browser.runtime.getURL('/img/search.svg')
+const search = chrome.runtime.getURL('/img/search.svg')
 
 export interface Props {
     // results: ResultItemProps[]
@@ -338,7 +338,7 @@ class Container extends React.Component<Props, State> {
     }
 
     async openDashboard() {
-        await browser.tabs.create({ url: OVERVIEW_URL })
+        await chrome.tabs.create({ url: OVERVIEW_URL })
     }
 
     private handleSubBannerDismiss: React.MouseEventHandler = async (e) => {

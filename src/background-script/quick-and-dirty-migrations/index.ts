@@ -1,12 +1,12 @@
 import type Dexie from 'dexie'
-import type Storex from '@worldbrain/storex'
-import type { Storage } from 'webextension-polyfill'
-import type { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
+import type Storex from '@worldbrain/storex/ts'
+
+import type { URLNormalizer } from '@worldbrain/memex-common/ts/url-utils/normalize/types'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import textStemmer from '@worldbrain/memex-stemmer'
+} from '@worldbrain/memex-common/ts/storage/modules/lists/constants'
+import textStemmer from '@worldbrain/memex-stemmer/ts'
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
 import type { BackgroundModules } from '../setup'
 import {
@@ -20,20 +20,20 @@ import type { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 import { migrateTagsToSpaces } from './tags-migration'
 import { PersonalCloudActionType } from 'src/personal-cloud/background/types'
-import { PersonalCloudUpdateType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { PersonalCloudUpdateType } from '@worldbrain/memex-common/ts/personal-cloud/backend/types'
 import type { SharedListMetadata } from 'src/content-sharing/background/types'
-import type { BatchOperation, OperationBatch } from '@worldbrain/storex'
-import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import type { BatchOperation, OperationBatch } from '@worldbrain/storex/ts'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/ts/content-sharing/tree-utils'
 import {
     DEFAULT_KEY,
     DEFAULT_SPACE_BETWEEN,
     recalculateOrders,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+} from '@worldbrain/memex-common/ts/utils/item-ordering'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
-import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/ts/annotations/constants'
 import type { SyncSettingsByFeature } from 'src/sync-settings/background/types'
-import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
-import type { CustomListTree } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/ts/common-ui/components/highlightColorPicker/constants'
+import type { CustomListTree } from '@worldbrain/memex-common/ts/types/core-data-types/client'
 import type { Template } from 'src/copy-paster/types'
 import { ensureDataLossFlagSet } from '../db-data-loss-check'
 import type { captureException } from 'src/util/raven'
@@ -43,7 +43,7 @@ export interface MigrationProps {
     storex: Storex
     captureException: typeof captureException
     normalizeUrl: URLNormalizer
-    localStorage: Storage.LocalStorageArea
+    localStorage: chrome.storage.local
     bgModules: Pick<
         BackgroundModules,
         | 'readwise'
@@ -187,11 +187,10 @@ export const migrations: Migrations = {
         bgModules,
         localStorage,
     }) => {
-        const {
-            [HIGHLIGHT_COLOR_KEY]: defaultHighlightColor,
-        } = await localStorage.get({
-            [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
-        })
+        const { [HIGHLIGHT_COLOR_KEY]: defaultHighlightColor } =
+            await localStorage.get({
+                [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
+            })
 
         let syncedHighlightColors = (
             await bgModules.syncSettings.get(
@@ -211,8 +210,8 @@ export const migrations: Migrations = {
         }
 
         await bgModules.syncSettings.set({
-            [SETTING_NAMES.highlightColors
-                .highlightColors]: syncedHighlightColors,
+            [SETTING_NAMES.highlightColors.highlightColors]:
+                syncedHighlightColors,
         })
     },
     /*
@@ -288,24 +287,22 @@ export const migrations: Migrations = {
         let batchCount = 0
         const batch: OperationBatch = []
         while (true) {
-            const listResults = await bgModules.customLists.storage.fetchAllLists(
-                {
+            const listResults =
+                await bgModules.customLists.storage.fetchAllLists({
                     limit: PAGE_SIZE,
                     skip: page * PAGE_SIZE,
                     skipSpecialLists: false,
                     includeDescriptions: false,
-                },
-            )
+                })
             const listsToProcess = listResults.filter(
                 (list) =>
                     !Object.values(SPECIAL_LIST_IDS).includes(list.id) &&
                     list.name !== SPECIAL_LIST_NAMES.MOBILE,
             )
-            const treeData = await bgModules.customLists.storage.getTreeDataForLists(
-                {
+            const treeData =
+                await bgModules.customLists.storage.getTreeDataForLists({
                     localListIds: listsToProcess.map((list) => list.id),
-                },
-            )
+                })
 
             batch.push(
                 ...listsToProcess
@@ -327,7 +324,7 @@ export const migrations: Migrations = {
                                     createdWhen: now,
                                     updatedWhen: now,
                                 },
-                            } as BatchOperation),
+                            }) as BatchOperation,
                     ),
             )
 
@@ -404,9 +401,8 @@ export const migrations: Migrations = {
         syncSettingsStore,
         db,
     }) => {
-        const alreadyMigratedOnAnotherDevice = await syncSettingsStore.extension.get(
-            'areTagsMigratedToSpaces',
-        )
+        const alreadyMigratedOnAnotherDevice =
+            await syncSettingsStore.extension.get('areTagsMigratedToSpaces')
         if (alreadyMigratedOnAnotherDevice) {
             return
         }
@@ -422,7 +418,8 @@ export const migrations: Migrations = {
                                 collection,
                                 deviceId: personalCloud.deviceId!,
                                 type: PersonalCloudUpdateType.Overwrite,
-                                schemaVersion: personalCloud.currentSchemaVersion!,
+                                schemaVersion:
+                                    personalCloud.currentSchemaVersion!,
                                 object: personalCloud.preprocessObjectForPush({
                                     collection,
                                     object,
@@ -461,9 +458,9 @@ export const migrations: Migrations = {
         await migrateInstallTime({
             storageManager,
             getOldInstallTime: () =>
-                (localExtSettingStore as BrowserSettingsStore<any>).__rawGet(
-                    __OLD_INSTALL_TIME_KEY,
-                ),
+                (
+                    localExtSettingStore as typeof chromeSettingsStore<any>
+                ).__rawGet(__OLD_INSTALL_TIME_KEY),
             setInstallTime: (time) =>
                 localExtSettingStore.set('installTimestamp', time),
         })
@@ -478,9 +475,8 @@ export const migrations: Migrations = {
         localStorage,
     }) => {
         // Note I'm using the constant for the synced settings here because the name is the same as the old local storage key name
-        const {
-            [SETTING_NAMES.readwise.apiKey]: oldKey,
-        } = await localStorage.get(SETTING_NAMES.readwise.apiKey)
+        const { [SETTING_NAMES.readwise.apiKey]: oldKey } =
+            await localStorage.get(SETTING_NAMES.readwise.apiKey)
 
         const cloudReleaseDate = new Date('2021-10-13T04:00:00.000+00:00')
 

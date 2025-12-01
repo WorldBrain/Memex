@@ -1,4 +1,4 @@
-import { UIEvent } from 'ui-logic-core'
+import { UIEvent } from 'ui-logic-core/ts'
 import {
     RemoteSyncSettingsInterface,
     SyncSettingsByFeature,

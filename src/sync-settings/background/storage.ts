@@ -1,7 +1,7 @@
 import {
     StorageModule,
     StorageModuleConfig,
-} from '@worldbrain/storex-pattern-modules'
+} from '@worldbrain/storex-pattern-modules/ts'
 import type { SyncSettingValue, SyncSetting } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { COLLECTION_NAMES } from './constants'
