@@ -1242,7 +1242,7 @@ export async function main(
                     personalCloudBG: runInBackground(),
                     analytics,
                     document,
-                    location,
+                    location: window.location,
                     history,
                     annotationsCache,
                     copyToClipboard,

@@ -87,6 +87,11 @@ export interface Props extends SidebarContainerOptions {
 export class AnnotationsSidebarContainer<
     P extends Props = Props,
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
+    render() {
+        console.log('runs')
+        return null
+    }
+
     protected sidebarRef = React.createRef<AnnotationsSidebarComponent>()
     private annotationInstanceRefs: {
         [instanceId: string]: AnnotationInstanceRefs
@@ -120,7 +125,7 @@ export class AnnotationsSidebarContainer<
             }),
         )
 
-        window['_getState'] = () => ({ ...this.state })
+        // window['_getState'] = () => ({ ...this.state })
 
         window.addEventListener('beforeunload', this.handleBeforeUnload)
         window.addEventListener('resize', this.handleWindowResize)
@@ -971,7 +976,6 @@ export class AnnotationsSidebarContainer<
             left: 'unset',
             zIndex: 3,
         } as const
-
 
         return (
             <ThemeProvider theme={this.props.theme}>

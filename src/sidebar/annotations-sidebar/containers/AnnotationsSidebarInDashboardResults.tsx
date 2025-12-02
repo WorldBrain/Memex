@@ -44,14 +44,18 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<Props>
     render() {
         const { refSidebar, ...props } = this.props
 
+        console.log('sidebarEvents', this.sidebarEvents)
+        console.log('refSidebar', refSidebar)
+        console.log('props', props)
+
         return (
             <SlideInWrapper id="memex-annotations-sidebar">
-                <AnnotationsSidebarContainer
+                {/* <AnnotationsSidebarContainer
                     {...props}
                     theme={props.theme}
                     ref={refSidebar}
                     events={this.sidebarEvents}
-                />
+                /> */}
             </SlideInWrapper>
         )
     }

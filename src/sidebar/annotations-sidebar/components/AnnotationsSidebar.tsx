@@ -2384,7 +2384,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderAnnotationsEditable(annotations: UnifiedAnnotation[]) {
-        const annots: JSX.Element[] = []
+        const annots: React.ReactNode[] = []
 
         if (this.props.noteCreateState === 'running') {
             annots.push(

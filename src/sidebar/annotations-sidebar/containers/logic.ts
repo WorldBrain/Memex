@@ -1287,17 +1287,6 @@ export class SidebarContainerLogic extends UILogic<
 
         const user = await authBG.getCurrentUser()
         if (user != null) {
-            // if (!user.displayName?.length) {
-            //     const userProfile = await authBG.getUserProfile()
-            //     if (!userProfile?.displayName?.length) {
-            //         setDisplayNameModalShown?.(true)
-            //         this.emitMutation({
-            //             showDisplayNameSetupModal: { $set: true },
-            //         })
-            //         return false
-            //     }
-            // }
-
             // setDisplayNameModalShown?.(false)
             this.emitMutation({
                 annotationSharingAccess: { $set: 'sharing-allowed' },
@@ -1312,14 +1301,6 @@ export class SidebarContainerLogic extends UILogic<
 
     adjustSidebarWidth: EventHandler<'adjustSidebarWidth'> = ({ event }) => {
         this.emitMutation({ sidebarWidth: { $set: event.newWidth } })
-
-        // if (event.isWidthLocked) {
-        //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
-        //     let windowWidth = this.options.windowAPI.innerWidth
-        //     let width = (windowWidth - sidebarWidth).toString()
-        //     width = width + 'px'
-        //     document.body.style.width = width
-        // }
     }
 
     adjustRighPositionBasedOnRibbonPosition: EventHandler<'adjustRighPositionBasedOnRibbonPosition'> =
@@ -1327,14 +1308,6 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 sidebarRightBorderPosition: { $set: event.position },
             })
-
-            // if (event.isWidthLocked) {
-            //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
-            //     let windowWidth = this.options.windowAPI.innerWidth
-            //     let width = (windowWidth - sidebarWidth).toString()
-            //     width = width + 'px'
-            //     document.body.style.width = width
-            // }
         }
 
     openImageInPreview: EventHandler<'openImageInPreview'> = async ({

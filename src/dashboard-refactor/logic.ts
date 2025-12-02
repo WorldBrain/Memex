@@ -712,7 +712,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     // TODO: Make better to check for in -page pro
-    islikelyInPage = this.options.location.href.startsWith('http')
+    islikelyInPage = this.options?.location?.href?.startsWith('http') ?? false
 
     /* START - Misc helper methods */
     private async hydrateStateFromLocalStorage(
