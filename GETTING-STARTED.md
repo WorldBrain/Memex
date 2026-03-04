@@ -222,7 +222,7 @@ provides support for the `WebExtension/BrowserExt API` in order to make the same
 
 This API is available in Chrome/Chromium by default (under `window.chrome`) but is meant to be developed and standardized as it's own thing.
 
-**For more info please see [Anatomy of a WebExtension](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Anatomy_of_a_WebExtension)**
+**For more info please see [Anatomy of a WebExtension](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Anatomy_of_a_WebExtension)**
 
 ## Application Structure
 
@@ -323,7 +323,7 @@ This just wraps the content scripts of activity-logger and page analysis for use
 
 Allows a user to type `w` + `space_bar` to search through worldbrain without leaving the search bar.
 
-See [Mozilla Omnibox Docs](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/omnibox) for more details
+See [Mozilla Omnibox Docs](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/omnibox) for more details
 
 #### **[src/pouchdb.js](./src/omnibar.js)**: Our Persistent Browser Database
 

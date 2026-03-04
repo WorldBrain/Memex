@@ -24,7 +24,7 @@ to handle deriving new import items from given `DataSource` instance (wraps the 
 
 An instance of `ConnectionHandler` will be created whenever the UI script creates a connection
 (user first installs or goes to imports page). This will handle a number of special commands that
-are sent over a [`runtime.connect()` connection](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/runtime/connect) to afford control over
+are sent over a [`runtime.connect()` connection](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/connect) to afford control over
 imports progress and various options.
 
 `ConnectionHandler` delegates control to its `ProgressManager` instance to handle the
