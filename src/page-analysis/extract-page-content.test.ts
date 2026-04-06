@@ -7,7 +7,7 @@ import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-
 describe('Extract page content', () => {
     // beforeAll(() => {
     //     browser.extension = {
-    //         getURL: rel => path.resolve('extension/lib', rel.substr(1)),
+    //         getURL: rel => path.resolve('extension/lib', rel.slice(1)),
     //     }
     // })
 

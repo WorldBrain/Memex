@@ -45,7 +45,7 @@ export function uninsertTab({ el, tabStr = '  ' }: InsertTabProps) {
 export function insertIndentedNewLine({ el }: InsertTabProps) {
     const { value, selectionStart, selectionEnd } = el
 
-    let lineNo = value.substr(0, selectionStart).split(/\r?\n|\r/).length
+    let lineNo = value.slice(0, selectionStart).split(/\r?\n|\r/).length
     let lineText = el.value.split(/\r?\n|\r/)[lineNo - 1]
     let indentationCount = 0
     let indentationString = ''
