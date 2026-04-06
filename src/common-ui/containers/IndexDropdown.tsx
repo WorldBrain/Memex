@@ -205,7 +205,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         const { hover, source } = this.props
 
         // Make first letter capital
-        const sourceType = source.charAt(0).toUpperCase() + source.substr(1)
+        const sourceType = source.charAt(0).toUpperCase() + source.slice(1)
     }
     /**
      * Selector for derived display tags state

@@ -429,9 +429,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             const formatTimestamp = (seconds) => {
                 const date = new Date(0)
                 date.setSeconds(seconds)
-                const timeString = date.toISOString().substr(11, 8)
+                const timeString = date.toISOString().slice(11, 19)
                 return timeString.startsWith('00:')
-                    ? timeString.substr(3)
+                    ? timeString.slice(3)
                     : timeString
             }
 
